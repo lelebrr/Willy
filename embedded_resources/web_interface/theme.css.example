@@ -1,0 +1,183 @@
+/*
+ * Bruce WebUI - Custom Theme Example
+ * 
+ * Copy this file to theme.css and customize the colors
+ * to create your own theme for Bruce WebUI.
+ * 
+ * The theme will be automatically loaded by the interface.
+ */
+
+:root {
+  /* Primary Colors - Main accent color */
+  --primary: #00ff88;           /* Main accent color (buttons, highlights) */
+  --primary-dark: #00cc6a;      /* Darker shade for gradients */
+  --primary-light: #33ff9f;     /* Lighter shade */
+  
+  /* Status Colors */
+  --success: #28a745;           /* Success/Online status */
+  --warning: #ffc107;           /* Warning/Attention */
+  --danger: #dc3545;            /* Danger/Error/Delete */
+  --info: #17a2b8;              /* Info/Help */
+  
+  /* Background Colors */
+  --bg-dark: #0a0a0f;           /* Main background */
+  --bg-darker: #050508;         /* Darker background (inputs, code) */
+  --bg-card: #12121a;           /* Card background */
+  --bg-card-hover: #1a1a25;     /* Card hover state */
+  --bg-sidebar: #0d0d14;        /* Sidebar background */
+  
+  /* Border Colors */
+  --border-color: #2a2a3a;      /* Main border color */
+  --border-light: #3a3a4a;      /* Lighter border */
+  
+  /* Text Colors */
+  --text-primary: #ffffff;      /* Primary text */
+  --text-secondary: #a0a0b0;    /* Secondary text (labels, descriptions) */
+  --text-muted: #606070;        /* Muted text (hints, placeholders) */
+  
+  /* Shadows */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.3);
+  
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 70px;
+  --header-height: 60px;
+  
+  /* Border Radius */
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --border-radius-lg: 16px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* ===========================================
+   ALTERNATIVE THEMES
+   =========================================== */
+
+/*
+ * CYBERPUNK THEME
+ * Uncomment to use
+ */
+/*
+:root {
+  --primary: #ff00ff;
+  --primary-dark: #cc00cc;
+  --primary-light: #ff33ff;
+  --bg-dark: #0a0008;
+  --bg-darker: #050004;
+  --bg-card: #1a0015;
+  --bg-card-hover: #25001e;
+  --bg-sidebar: #0d000a;
+  --border-color: #3a0030;
+  --shadow-glow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+*/
+
+/*
+ * OCEAN THEME
+ * Uncomment to use
+ */
+/*
+:root {
+  --primary: #00bcd4;
+  --primary-dark: #0097a7;
+  --primary-light: #33c9dc;
+  --bg-dark: #001015;
+  --bg-darker: #000a0d;
+  --bg-card: #001a22;
+  --bg-card-hover: #002530;
+  --bg-sidebar: #001418;
+  --border-color: #003040;
+  --shadow-glow: 0 0 20px rgba(0, 188, 212, 0.3);
+}
+*/
+
+/*
+ * SUNSET THEME
+ * Uncomment to use
+ */
+/*
+:root {
+  --primary: #ff6b35;
+  --primary-dark: #e55a2b;
+  --primary-light: #ff8a5c;
+  --bg-dark: #0f0a05;
+  --bg-darker: #080502;
+  --bg-card: #1a120a;
+  --bg-card-hover: #251a10;
+  --bg-sidebar: #140e08;
+  --border-color: #3a2a1a;
+  --shadow-glow: 0 0 20px rgba(255, 107, 53, 0.3);
+}
+*/
+
+/*
+ * MATRIX THEME
+ * Uncomment to use
+ */
+/*
+:root {
+  --primary: #00ff00;
+  --primary-dark: #00cc00;
+  --primary-light: #33ff33;
+  --bg-dark: #000a00;
+  --bg-darker: #000500;
+  --bg-card: #001500;
+  --bg-card-hover: #002000;
+  --bg-sidebar: #000d00;
+  --border-color: #003000;
+  --text-primary: #00ff00;
+  --text-secondary: #00cc00;
+  --text-muted: #006600;
+  --shadow-glow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
+*/
+
+/*
+ * PURPLE HAZE THEME
+ * Uncomment to use
+ */
+/*
+:root {
+  --primary: #a855f7;
+  --primary-dark: #9333ea;
+  --primary-light: #c084fc;
+  --bg-dark: #0a0510;
+  --bg-darker: #050208;
+  --bg-card: #150a20;
+  --bg-card-hover: #200d30;
+  --bg-sidebar: #0d0615;
+  --border-color: #2a1540;
+  --shadow-glow: 0 0 20px rgba(168, 85, 247, 0.3);
+}
+*/
+
+/*
+ * LIGHT THEME
+ * Uncomment to use (warning: may cause eye strain in dark environments)
+ */
+/*
+:root {
+  --primary: #00aa55;
+  --primary-dark: #008844;
+  --primary-light: #00cc66;
+  --bg-dark: #f0f0f5;
+  --bg-darker: #e0e0e5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f5fa;
+  --bg-sidebar: #e8e8ed;
+  --border-color: #d0d0d5;
+  --text-primary: #1a1a1f;
+  --text-secondary: #4a4a55;
+  --text-muted: #8a8a95;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 20px rgba(0, 170, 85, 0.2);
+}
+*/

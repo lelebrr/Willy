@@ -1,0 +1,8 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+STRING Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.MessageBox]::Show("Your system has been compromised!`n`nPlease contact IT Security immediately.", "Security Alert", "OK", "Warning")
+ENTER
