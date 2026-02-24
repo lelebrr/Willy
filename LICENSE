@@ -1,20 +1,92 @@
-MIT License
+# LICENÇA PROPRIETÁRIA RESTRITA - WILLY FIRMWARE
 
-Copyright (c) 2026 Projeto Willy
+**AVISO IMPORTANTE**: Este software é protegido por direitos autorais e leis de propriedade intelectual. O acesso, uso, modificação, distribuição ou reprodução não autorizada é estritamente proibido e pode resultar em ações legais.
 
-Permissão é concedida, gratuitamente, a qualquer pessoa que obtenha uma cópia
-deste software e arquivos de documentação associados (o "Software"), para lidar
-no Software sem restrição, incluindo sem limitação os direitos
-de usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou vender
-cópias do Software, e permitir que as pessoas a quem o Software é
-fornecido façam isso, sujeito às seguintes condições:
+## ACORDO DE LICENÇA
 
-O aviso de direitos autorais acima e este aviso de permissão devem ser incluídos em todas
-as cópias ou partes substanciais do Software.
+Este Contrato de Licença de Usuário Final (EULA) é um acordo legal entre você (individual ou entidade) e os detentores dos direitos autorais do Willy Firmware.
 
-O SOFTWARE É FORNECIDO "COMO ESTÁ", SEM GARANTIA DE QUALQUER TIPO, EXPRESSA OU
-IMPLÍCITA, INCLUINDO, MAS NÃO SE LIMITANDO ÀS GARANTIAS DE COMERCIALIZAÇÃO,
-APTIDÃO PARA UM PROPÓSITO PARTICULAR E NÃO VIOLAÇÃO. EM NENHUM CASO OS
-AUTORES OU DETENTORES DOS DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUALQUER REIVINDICAÇÃO, DANO OU OUTRA
-RESPONSABILIDADE, SEJA EM UMA AÇÃO DE CONTRATO, ATO ILÍCITO OU DE OUTRA FORMA, DECORRENTE DE,
-FORA OU EM CONEXÃO COM O SOFTWARE OU O USO OU OUTRAS NEGOCIAÇÕES NO SOFTWARE.
+### 1. CONCESSÃO DE LICENÇA
+
+Os detentores dos direitos autorais concedem a você uma licença não exclusiva, não transferível e revogável para usar o Willy Firmware apenas nos seguintes termos e condições:
+
+1.1. **Uso Pessoal**: Você pode usar o software para fins pessoais e internos.
+1.2. **Ambientes Autorizados**: O uso é limitado a ambientes onde você possui autorização explícita.
+1.3. **Uso Comercial**: Licenças comerciais devem ser adquiridas separadamente.
+
+### 2. RESTRIÇÕES
+
+É estritamente proibido:
+
+2.1. **Engenharia Reversa**: Descompilar, desmontar, fazer engenharia reversa ou tentar descobrir o código fonte.
+2.2. **Modificação**: Alterar, adaptar ou modificar o software de qualquer forma.
+2.3. **Distribuição**: Distribuir, sublicenciar, alugar, leasing ou transferir o software a terceiros.
+2.4. **Cópia**: Fazer cópias do software, exceto para backup pessoal.
+2.5. **Derivados**: Criar trabalhos derivados baseados no software.
+2.6. **Publicidade**: Usar o software para fins promocionais ou publicitários sem autorização.
+
+### 3. GARANTIAS E RESPONSABILIDADE
+
+3.1. **"COMO ESTÁ"**: O software é fornecido "como está", sem garantias de qualquer tipo.
+3.2. **SEM GARANTIAS EXPRESSAS OU IMPLÍCITAS**: Os detentores dos direitos autorais não garantem:
+   - Que o software atenderá às suas necessidades
+   - Que o software é livre de erros ou falhas
+   - Que o uso do software será ininterrupto ou livre de falhas
+   - A qualidade, precisão ou confiabilidade do software
+
+3.3. **LIMITAÇÃO DE RESPONSABILIDADE**: EM NENHUMA CIRCUNSTÂNCIA, OS DESENVOLVEDORES, DETENTORES DE DIREITOS AUTORAIS, FORNECEDORES OU DISTRIBUIDORES SERÃO RESPONSÁVEIS POR:
+
+   - DANOS DIRETOS, INDIRETOS, INCIDENTAIS, ESPECIAIS, EXEMPLARES OU CONSEQUENTES
+   - PERDA DE DADOS, LUCROS, NEGÓCIOS OU OPORTUNIDADES
+   - CUSTOS DE SUBSTITUIÇÃO DE BENS OU SERVIÇOS
+   - FALHAS NO DESEMPENHO OU INTERrupÇÃO DE ATIVIDADES
+   - QUALQUER OUTRO PREJUÍZO RESULTANTE DO USO OU IMPOSSIBILIDADE DE USO DO SOFTWARE
+
+3.4. **LIMITAÇÃO MONETÁRIA**: A responsabilidade total máxima sob este acordo será limitada ao valor pago, se algum, por licenças do software.
+
+### 4. TERMOS DE USO
+
+4.1. **Uso Responsável**: Você é responsável por usar o software de forma legal e ética.
+4.2. **Segurança**: Você deve implementar medidas adequadas de segurança para proteger o software.
+4.3. **Monitoramento**: Os detentores dos direitos autorais podem monitorar o uso do software para garantir conformidade.
+4.4. **Auditoria**: Você deve permitir auditorias para verificar o cumprimento deste acordo.
+
+### 5. PROPRIEDADE INTELECTUAL
+
+5.1. **Direitos Autorais**: Todo o software, código, documentação e materiais relacionados são propriedade exclusiva dos detentores dos direitos autorais.
+5.2. **Marcas Registradas**: Willy Firmware e todos os logotipos e marcas associadas são marcas registradas.
+5.3. **Patentes**: Qualquer tecnologia ou algoritmo contido no software pode estar protegido por patentes.
+
+### 6. CONFIDENCIALIDADE
+
+6.1. **Informações Confidenciais**: Você concorda em manter confidenciais todas as informações técnicas e operacionais relacionadas ao software.
+6.2. **Não Divulgação**: Não divulgará informações sobre o software a terceiros sem autorização prévia.
+
+### 7. VIGÊNCIA E RESCISÃO
+
+7.1. **Duração**: Este acordo entra em vigor na data de aceitação e continua até rescindido.
+7.2. **Rescisão**: Os detentores dos direitos autorais podem rescindir este acordo imediatamente se você violar qualquer termo.
+7.3. **Efeitos da Rescisão**: Após rescisão, você deve parar de usar o software e destruir todas as cópias.
+
+### 8. DISPOSIÇÕES GERAIS
+
+8.1. **Lei Aplicável**: Este acordo é regido pelas leis do país onde os detentores dos direitos autorais estão estabelecidos.
+8.2. **Jurisdição**: Qualquer disputa será resolvida nos tribunais competentes da jurisdição dos detentores dos direitos autorais.
+8.3. **Modificações**: Os detentores dos direitos autorais podem modificar este acordo a qualquer momento.
+8.4. **Notificação**: As notificações devem ser enviadas por escrito para os contatos oficiais do projeto.
+
+### 9. CONTATO
+
+Para informações sobre licenciamento comercial, suporte técnico ou violações deste acordo, entre em contato através dos canais oficiais do Willy Firmware.
+
+---
+
+**© 2024 Willy Firmware. Todos os direitos reservados.**
+
+**Última Atualização**: 24 de fevereiro de 2024
+
+**Versão**: 1.0
+
+---
+
+**AVISO LEGAL**: Este software é fornecido exclusivamente para fins educacionais e de pesquisa em segurança. O uso não autorizado pode violar leis locais, estaduais e federais. Os desenvolvedores não se responsabilizam por qualquer uso indevido ou danos causados por este software.

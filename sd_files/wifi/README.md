@@ -1,6 +1,19 @@
 # 📶 WiFi Resources
 
-Recursos para análise e testes de segurança WiFi.
+![ESP32](https://img.shields.io/badge/ESP32-WROOM--32-red.svg)
+![Arduino](https://img.shields.io/badge/Arduino-IDE-blue.svg)
+![C++](https://img.shields.io/badge/C++-17-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.9+-yellow.svg)
+![WiFi](https://img.shields.io/badge/WiFi-802.11%20a/b/g/n/ac/ax-green.svg)
+![Security](https://img.shields.io/badge/Security-Pentest-red.svg)
+![Hacking](https://img.shields.io/badge/Hacking-Tools-red.svg)
+![Red Team](https://img.shields.io/badge/Red%20Team-Offensive-red.svg)
+![Blue Team](https://img.shields.io/badge/Blue%20Team-Defensive-blue.svg)
+![Forensics](https://img.shields.io/badge/Forensics-Forensic-blue.svg)
+![Wardriving](https://img.shields.io/badge/Wardriving-Map-green.svg)
+![CVE](https://img.shields.io/badge/CVE-Vulnerabilities-orange.svg)
+
+Recursos para análise e testes de segurança WiFi - Proprietário
 
 ---
 
@@ -38,6 +51,7 @@ Arquivos JSON com bancos de dados de vulnerabilidades organizados por tipo de di
 #### Como Usar
 
 1. **Consulta Manual**
+
    ```bash
    cat router_exploits.json | jq '.exploits[] | select(.vendor=="TP-Link")'
    ```
@@ -148,17 +162,20 @@ nmap --script vuln <target>
 ## 🛡️ Mitigação
 
 ### Para Roteadores
+
 - Atualizar firmware regularmente
 - Desabilitar WPS
 - Usar WPA3
 - Alterar credenciais padrão
 
 ### Para IoT
+
 - Segmentar rede IoT
 - Atualizar dispositivos
 - Usar firewall
 
 ### Para NAS
+
 - Não expor à internet
 - Atualizar DSM/QTS
 - Usar VPN para acesso remoto
@@ -174,4 +191,38 @@ nmap --script vuln <target>
 
 ---
 
+## 📜 Licença
+
+**⚠️ SOFTWARE PROPRIETÁRIO - TODOS OS DIREITOS RESERVADOS**
+
+Estes recursos de segurança WiFi são propriedade exclusiva da Willy Firmware e são fornecidos sob licença estritamente controlada.
+
+### Termos de Uso
+
+- **Uso Exclusivo**: Estes recursos podem ser utilizados apenas pelo proprietário autorizado
+- **Modificação Proibida**: Qualquer modificação ou distribuição é estritamente proibida
+- **Responsabilidade**: O usuário é o único responsável pelo uso dos recursos
+- **Restrições**: Uso permitido apenas em redes autorizadas por escrito
+
+### Limitações de Responsabilidade
+
+A Willy Firmware não se responsabiliza por:
+
+- Qualquer dano resultante do uso não autorizado dos recursos
+- Consequências legais de atividades realizadas com segurança WiFi
+- Uso indevido ou violação dos termos de licença
+
+### Direitos Autorais
+
+© 2026 Willy Firmware. Todos os direitos reservados.
+
+### Contato
+
+Para informações sobre licenciamento ou suporte, entre em contato através dos canais oficiais da Willy Firmware.
+
+---
+
+**⚠️ AVISO LEGAL**: O uso destes recursos implica concordância total com os termos de licença proprietária. Qualquer violação resultará em ações legais cabíveis.
+
+---
 *Use com responsabilidade! 🛡️*

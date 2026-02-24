@@ -775,9 +775,8 @@ void addMifareKeyMenu() {
 **  Handles Menu to set timezone to NTP
 **********************************************************************/
 const char *ntpServer = "pool.ntp.org";
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, ntpServer, 0, 0);
+WiFiUDP *ntpUDP = nullptr;
+NTPClient *timeClient = nullptr;
 
 void setClock() {
 #if defined(HAS_RTC)
@@ -789,6 +788,10 @@ void setClock() {
     _rtc.GetPcf85063Time();
 #endif
 #endif
+    if (!timeClient) {
+        ntpUDP = new WiFiUDP();
+        timeClient = new NTPClient(*ntpUDP, ntpServer, 0, 0);
+    }
 
     options = {
         {"Via NTP Definir Fuso",                                                 [&]() { bruceConfig.setAutomaticTimeUpdateViaNTP(true); } },

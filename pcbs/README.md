@@ -50,7 +50,7 @@ Este diretório contém designs de PCB open-source criados pela comunidade Willy
 
 <div align="center">
 
-[![Willy PCB v2](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/smoochie/Willy_PCB_full.png)](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html)
+[![Willy PCB v2](https://raw.githubusercontent.com/lelebrr/Willy/refs/heads/main/media/pcbs/smoochie/Willy_PCB_full.png)](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html)
 
 </div>
 
@@ -72,7 +72,7 @@ Este diretório contém designs de PCB open-source criados pela comunidade Willy
 
 | Frente | Verso |
 |:------:|:-----:|
-| ![Frente](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/smoochie/front.png) | ![Verso](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/smoochie/back.png) |
+| ![Frente](https://raw.githubusercontent.com/lelebrr/Willy/refs/heads/main/media/pcbs/smoochie/front.png) | ![Verso](https://raw.githubusercontent.com/lelebrr/Willy/refs/heads/main/media/pcbs/smoochie/back.png) |
 
 </div>
 
@@ -106,7 +106,7 @@ Silkscreen: Branco
 
 <div align="center">
 
-![StickCPlus PCB](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/Pirata/front.png)
+![StickCPlus PCB](https://raw.githubusercontent.com/lelebrr/Willy/refs/heads/main/media/pcbs/Pirata/front.png)
 
 </div>
 
@@ -126,7 +126,7 @@ Silkscreen: Branco
 
 | Frente | Verso |
 |:------:|:-----:|
-| ![Frente](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/Pirata/front.png) | ![Verso](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/Pirata/back.png) |
+| ![Frente](https://raw.githubusercontent.com/lelebrr/Willy/refs/heads/main/media/pcbs/Pirata/front.png) | ![Verso](https://raw.githubusercontent.com/lelebrr/Willy/refs/heads/main/media/pcbs/Pirata/back.png) |
 
 </div>
 

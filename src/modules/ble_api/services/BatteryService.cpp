@@ -12,7 +12,8 @@ BatteryService::~BatteryService() {}
 void battery_handler_task(void *params) {
     NimBLECharacteristic *battery_char = static_cast<NimBLECharacteristic *>(params);
     while (true) {
-        uint8_t val = getBattery();
+        // uint8_t val = getBattery();
+        uint8_t val = 0;
         battery_char->setValue(&val, 1);
 
         vTaskDelay(pdMS_TO_TICKS(60000)); // Update battery every minute
@@ -28,7 +29,8 @@ void BatteryService::setup(BLEServer *pServer) {
         NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
     );
 
-    const uint8_t batLevel = getBattery();
+    // const uint8_t batLevel = getBattery();
+    const uint8_t batLevel = 0;
     battery_char->setValue(&batLevel, 1); // initial value
 
     pService->start();

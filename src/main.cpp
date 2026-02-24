@@ -446,7 +446,9 @@ void setup() {
 #else
     tft.begin();
 #endif
+    Serial.println("Starting begin_storage()...");
     begin_storage();
+    Serial.println("begin_storage() completed successfully.");
     begin_tft();
     initLVGL(); // Initialize LVGL
 
@@ -472,13 +474,13 @@ void setup() {
 
     init_clock();
     init_led();
-    
+
     // Inicializa sistema de logging centralizado Willy
     if (sdcardMounted) {
         willyLogger.begin();
         willyLogger.logSystemStatus();
         willyLogger.info(COMP_SYSTEM, "Willy iniciado - versao " BRUCE_VERSION);
-        
+
         // Mostra aviso de log ativo
         willyLogger.showLogWarning();
     }

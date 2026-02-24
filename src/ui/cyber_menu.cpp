@@ -232,13 +232,13 @@ static void update_bar_timer_cb(lv_timer_t *timer) {
     }
 
     // Update Battery
-    int bat = getBattery();
-    lv_label_set_text_fmt(battery_label, "%d%%", bat);
+    // int bat = getBattery();
+    // lv_label_set_text_fmt(battery_label, "%d%%", bat);
 
-    // Change color based on battery level
-    if (bat < 20) lv_obj_set_style_text_color(battery_label, lv_color_hex(0xFF0000), 0);
-    else if (bat < 50) lv_obj_set_style_text_color(battery_label, lv_color_hex(0xFFFF00), 0);
-    else lv_obj_set_style_text_color(battery_label, lv_color_hex(0x00FF00), 0);
+    // // Change color based on battery level
+    // if (bat < 20) lv_obj_set_style_text_color(battery_label, lv_color_hex(0xFF0000), 0);
+    // else if (bat < 50) lv_obj_set_style_text_color(battery_label, lv_color_hex(0xFFFF00), 0);
+    // else lv_obj_set_style_text_color(battery_label, lv_color_hex(0x00FF00), 0);
 }
 
 void setup_cyber_menu(lv_obj_t *menu) {

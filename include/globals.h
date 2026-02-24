@@ -83,7 +83,7 @@ extern bool clock_set;
 extern time_t localTime;
 extern struct tm *timeInfo;
 extern ESP32Time rtc;
-extern NTPClient timeClient;
+extern NTPClient *timeClient;
 
 extern int prog_handler; // 0 - Flash, 1 - LittleFS, 2 - Download
 

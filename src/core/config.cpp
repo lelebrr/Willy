@@ -113,10 +113,12 @@ void BruceConfig::fromFile(bool checkFS) {
 
     // Deserialize the JSON document
     JsonDocument jsonDoc;
+    Serial.println("Starting deserializeJson in BruceConfig...");
     if (deserializeJson(jsonDoc, file)) {
         Serial.println("Failed to read config file, using default configuration");
         return;
     }
+    Serial.println("deserializeJson completed successfully.");
     file.close();
 
     JsonObject setting = jsonDoc.as<JsonObject>();

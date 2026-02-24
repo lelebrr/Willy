@@ -2,9 +2,24 @@
 
 # 📚 Willy Firmware - Documentação Completa
 
-[![Documentation](https://img.shields.io/badge/Documentation-Complete-green.svg)](https://github.com/pr3y/Willy)
-[![Language](https://img.shields.io/badge/Language-Português-blue.svg)]()
-[![Last Update](https://img.shields.io/badge/Updated-2026-orange.svg)]()
+[![ESP32](https://img.shields.io/badge/ESP32-WROOM--32-red.svg)](https://www.espressif.com/products/socs/esp32)
+[![Arduino](https://img.shields.io/badge/Arduino-C%2B%2B-blue.svg)](https://www.arduino.cc/)
+[![C++](https://img.shields.io/badge/C%2B%2B-17-yellow.svg)](https://isocpp.org/)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![WiFi](https://img.shields.io/badge/WiFi-802.11%20a/b/g/n/ac/ax-orange.svg)](https://en.wikipedia.org/wiki/IEEE_802.11)
+[![Bluetooth](https://img.shields.io/badge/Bluetooth-5.0+-blue.svg)](https://www.bluetooth.com/)
+[![NFC](https://img.shields.io/badge/NFC-ISO%2014443-green.svg)](https://www.nfc-forum.org/)
+[![RFID](https://img.shields.io/badge/RFID-13.56%20MHz-purple.svg)](https://www.rfidjournal.com/)
+[![Infravermelho](https://img.shields.io/badge/IR-38-40%20kHz-red.svg)](https://learn.adafruit.com/ir-sensor/overview)
+[![Sub-GHz](https://img.shields.io/badge/Sub-GHz-315-915%20MHz-indigo.svg)](https://www.semtech.com/wireless-rf/sub-ghz)
+[![GPS](https://img.shields.io/badge/GPS-NEO-6M-teal.svg)](https://www.u-blox.com/)
+[![Hacking](https://img.shields.io/badge/Hacking-Espionagem-red.svg)](https://owasp.org/)
+[![Red Team](https://img.shields.io/badge/Red%20Team-Penetration%20Testing-red.svg)](https://www.offensive-security.com/)
+[![Blue Team](https://img.shields.io/badge/Blue%20Team-SOC%20Analysis-blue.svg)](https://www.sans.org/)
+[![Pentest](https://img.shields.io/badge/Pentest-Ethical%20Hacking-orange.svg)](https://www.pentest-standard.org/)
+[![Segurança](https://img.shields.io/badge/Segurança-Cybersecurity-green.svg)](https://www.cisa.gov/)
+[![Forense](https://img.shields.io/badge/Forense-Digital%20Forensics-purple.svg)](https://www.dfrws.org/)
+[![Wardriving](https://img.shields.io/badge/Wardriving-WiFi%20Scanning-cyan.svg)](https://www.wigle.net/)
 
 <img src="../media/pictures/Willy_banner.jpg" alt="Willy Banner" width="500"/>
 
@@ -21,11 +36,13 @@
 ## 📑 Índice Completo
 
 ### 🚀 Primeiros Passos
+
 - [Introdução](#-introdução)
 - [Hardware Suportado](#-hardware-suportado)
 - [Instalação](#-instalação)
 
 ### 📡 Módulos de Ataque
+
 - [WiFi](#-wifi)
 - [Bluetooth](#-bluetooth)
 - [Infravermelho](#-infravermelho)
@@ -36,6 +53,7 @@
 - [GPS](#-gps)
 
 ### 📖 Guias Avançados
+
 - [Configuração](#-configuração)
 - [Desenvolvimento](#-desenvolvimento)
 - [Troubleshooting](#-troubleshooting)
@@ -47,7 +65,7 @@
 
 ### O que é o Willy Firmware?
 
-**Willy** é um firmware open-source multifuncional para ESP32 que transforma seu dispositivo em uma ferramenta completa de pesquisa em segurança. Inspirado em projetos como [Flipper Zero](https://flipperzero.one) e [Pwnagotchi](https://pwnagotchi.ai), o Willy oferece capacidades profissionais de segurança a um preço acessível.
+**Willy** é um firmware proprietário multifuncional para ESP32 que transforma seu dispositivo em uma ferramenta completa de pesquisa em segurança. Inspirado em projetos como [Flipper Zero](https://flipperzero.one) e [Pwnagotchi](https://pwnagotchi.ai), o Willy oferece capacidades profissionais de segurança a um preço acessível.
 
 ### 🎯 Principais Características
 
@@ -76,7 +94,7 @@
 | NFC/RFID | ✅ | ✅ | ❌ |
 | BadUSB | ✅ | ✅ | ❌ |
 | Touch Display | ✅ | ✅ | ❌ |
-| Open Source | ✅ | ✅ | ✅ |
+| Proprietário | ✅ | ✅ | ❌ |
 | Preço Estimado | $15-50 | $169 | $80+ |
 | Customização | ✅ Total | ⚠️ Limitada | ✅ Total |
 
@@ -165,6 +183,7 @@ RX     →    GPIO 17 (TX)
 ```
 
 📖 **Guias detalhados:**
+
 - [Wiring CC1101 e NRF24](cc1101_nrf24_wiring.md)
 - [Hardware Externo Completo](hardware_externo.md)
 - [GPS NEO-6M](gps_neo6m.md)
@@ -177,6 +196,7 @@ RX     →    GPIO 17 (TX)
 ### 🛡️ Funcionalidades de Reconhecimento
 
 #### Channel Analyzer
+
 Analisa todos os canais WiFi (1-14) em tempo real:
 
 | Informação | Descrição |
@@ -193,6 +213,7 @@ Canal 11: ██████████ 10 APs
 ```
 
 #### Packet Counter
+
 Contagem em tempo real de pacotes:
 
 | Tipo | Descrição |
@@ -205,6 +226,7 @@ Contagem em tempo real de pacotes:
 | **Control** | Quadros de controle |
 
 #### Scan All Networks
+
 Escaneamento completo de redes:
 
 ```
@@ -220,12 +242,15 @@ Escaneamento completo de redes:
 ```
 
 #### Detect Pwnagotchi
+
 Identifica dispositivos Pwnagotchi:
+
 - MAC address patterns
 - Comportamento de advertising
 - Identificação de handshake
 
 #### Ping Scan / ARP Scan
+
 Descoberta de hosts na rede:
 
 ```bash
@@ -241,6 +266,7 @@ Found 15 devices
 ```
 
 #### Port Scan
+
 Varredura de portas comuns:
 
 | Porta | Serviço | Descrição |
@@ -264,13 +290,17 @@ Varredura de portas comuns:
 ### ⚔️ Ataques WiFi
 
 #### Probe Request Flood
+
 Envia probe requests com SSIDs aleatórios:
+
 - Descobre redes ocultas
 - Testa capacidade de processamento
 - Mapeia dispositivos próximos
 
 #### AP Clone Spam
+
 Clona SSIDs de redes existentes:
+
 ```
 Clonando redes:
 [✓] Home_Network
@@ -280,19 +310,25 @@ Enviando beacons em 3 canais...
 ```
 
 #### Karma Attack
+
 Responde automaticamente a probe requests:
+
 - Usa SSIDs atrativos
 - "Free WiFi", "Starbucks", "xfinitywifi"
 - Atrai dispositivos a conectar automaticamente
 
 #### Deauth Attack
+
 Desconecta clientes de redes:
+
 - Envia frames de deautenticação
 - Força reautenticação
 - Captura handshakes
 
 #### Evil Portal
+
 Cria portal captivo falso:
+
 ```
 ┌──────────────────────────────┐
 │    ⚠️ ATENÇÃO ⚠️             │
@@ -332,7 +368,9 @@ Cria portal captivo falso:
 ### 🔍 Descoberta e Análise
 
 #### Bluetooth Scanner
+
 Escaneia dispositivos Bluetooth/BLE:
+
 ```
 ┌─────────────────────────────────────────┐
 │ Nome              MAC           RSSI    │
@@ -345,7 +383,9 @@ Escaneia dispositivos Bluetooth/BLE:
 ```
 
 #### Bluetooth Analyzer
+
 Análise detalhada de pacotes:
+
 - Advertising data
 - Scan response
 - Service UUIDs
@@ -353,14 +393,18 @@ Análise detalhada de pacotes:
 - TX Power level
 
 #### Airtag Monitor
+
 Monitora AirTags Apple:
+
 - Public key tracking
 - Location beacons
 - Battery level
 - Alertas de proximidade
 
 #### Card Skimmer Detector
+
 Detecta skimmers Bluetooth:
+
 ```
 ⚠️ ALERTA: Possível skimmer detectado!
 MAC: AA:BB:CC:DD:EE:FF
@@ -374,7 +418,9 @@ Skimmers comuns usam:
 ```
 
 #### BT Wardrive
+
 Wardriving Bluetooth com GPS:
+
 - Log automático
 - Coordenadas GPS
 - Export para Wigle.net
@@ -382,6 +428,7 @@ Wardriving Bluetooth com GPS:
 ### 💥 Ataques BLE
 
 #### BLE Spam
+
 Spam de notificações para dispositivos:
 
 | Tipo | Alvo |
@@ -393,7 +440,9 @@ Spam de notificações para dispositivos:
 | **BLE Spam All** | Todos os tipos combinados |
 
 #### BlueDucky
+
 Ataques HID via Bluetooth:
+
 - Injeção de teclas remotas
 - Ducky Script via BLE
 - Não requer conexão USB
@@ -422,13 +471,17 @@ Ataques HID via Bluetooth:
 ### 🎮 Funcionalidades
 
 #### TV-B-Gone
+
 Desliga TVs universalmente:
+
 - 230+ códigos de desligamento
 - Marcas: LG, Samsung, Sony, TCL, etc.
 - Varredura automática
 
 #### IR Custom
+
 Envia códigos personalizados:
+
 ```
 Protocolo: NEC
 Endereço: 0x07
@@ -437,7 +490,9 @@ Raw: 9000,4500,560,560,...
 ```
 
 #### IR Reader
+
 Captura códigos IR:
+
 ```
 Detectado: NEC
 Address: 0x07
@@ -494,6 +549,7 @@ O firmware Willy oferece configurações avançadas para otimizar a transmissão
 #### Filtro de Ruído
 
 Filtre interferências em ambientes claros ou ruidosos:
+
 - **Leve/Médio/Agressivo** - Ajustável
 
 📖 **Guia completo:** [IR Advanced Attacks](ir_advanced_attacks.md)
@@ -530,6 +586,7 @@ Filtre interferências em ambientes claros ou ruidosos:
 ### Rolling Code Analysis
 
 Análise de códigos rolling (garagem):
+
 ```
 Capturando códigos...
 ─────────────────────────────
@@ -577,7 +634,9 @@ Padrão detectado:
 | **Device Fingerprint** | Identifica dispositivos |
 
 #### Mousejack Attack
+
 Explora vulnerabilidades em dispositivos sem fio:
+
 ```
 Escaneando dispositivos vulneráveis...
 ─────────────────────────────────────
@@ -766,6 +825,7 @@ O firmware Willy oferece configurações avançadas para otimizar o módulo GPS 
 #### Filtro de Satélites
 
 Filtre sinais fracos para melhor precisão em ambientes urbanos:
+
 - **25-40 dB-Hz** - Ajustável
 
 📖 **Guia completo:** [GPS NEO-6M Configuração Avançada](gps_neo6m.md)
@@ -811,7 +871,7 @@ Filtre sinais fracos para melhor precisão em ambientes urbanos:
 pip install platformio
 
 # Clone o repositório
-git clone https://github.com/pr3y/Willy
+git clone https://github.com/lelebrr/Willy
 cd Willy
 
 # Compile para seu dispositivo
@@ -902,24 +962,27 @@ pio device monitor -b 115200 --filter esp32_exception_decoder
 
 ## 📜 Licença
 
-Este projeto é licenciado sob **MIT License**. Consulte o arquivo LICENSE para detalhes.
+**Willy Firmware** é protegido por uma licença proprietária restrita. O uso, modificação, distribuição ou reprodução não autorizada é estritamente proibido e pode resultar em ações legais.
 
----
+### Termos de Uso
 
-## 🙏 Créditos
+1. **Licenciamento**: Este software é fornecido "como está", sem garantias de qualquer tipo.
+2. **Uso Restrito**: O uso deste software é limitado a ambientes controlados e autorizados.
+3. **Responsabilidade**: Os desenvolvedores não se responsabilizam por quaisquer danos resultantes do uso deste software.
+4. **Modificação**: Qualquer modificação no código fonte requer aprovação prévia por escrito.
+5. **Distribuição**: A distribuição deste software é estritamente proibida sem autorização explícita.
 
-### Projetos que Inspiraram
+### Limitações de Responsabilidade
 
-- [Flipper Zero](https://flipperzero.one) - Interface e conceito
-- [Pwnagotchi](https://pwnagotchi.ai) - WiFi hacking
-- [ESP32 Marauder](https://github.com/justcallmekoko/ESP32Marauder) - WiFi attacks
+EM NENHUMA CIRCUNSTÂNCIA, OS DESENVOLVEDORES OU DETENTORES DE DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUAISQUER DANOS DIRETOS, INDIRETOS, INCIDENTAIS, ESPECIAIS, EXEMPLARES OU CONSEQUENTES, CAUSADOS POR OU RELACIONADOS AO SOFTWARE OU AO USO OU OUTRAS NEGOCIAÇÕES NO SOFTWARE.
 
-### Bibliotecas Utilizadas
+### Direitos Autorais
 
-- [IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266) - IR
-- [NimBLE-Arduino](https://github.com/h2zero/NimBLE-Arduino) - BLE
-- [RadioLib](https://github.com/jgromes/RadioLib) - RF
-- [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) - Display
+© 2024 Willy Firmware. Todos os direitos reservados.
+
+### Contato
+
+Para informações sobre licenciamento comercial ou autorizações especiais, entre em contato através dos canais oficiais do projeto.
 
 ---
 
@@ -929,6 +992,6 @@ Este projeto é licenciado sob **MIT License**. Consulte o arquivo LICENSE para 
 
 **[⬆ Voltar ao Topo](#-Willy-firmware---documentação-completa)**
 
-*Documentação mantida pela comunidade Willy*
+*Desenvolvido por equipe especializada em segurança cibernética*
 
 </div>

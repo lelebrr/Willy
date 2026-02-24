@@ -2,10 +2,21 @@
 
 # 🎨 Temas
 
+![ESP32](https://img.shields.io/badge/ESP32-WROOM--32-red.svg)
+![Arduino](https://img.shields.io/badge/Arduino-IDE-blue.svg)
+![C++](https://img.shields.io/badge/C++-17-blue.svg)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)
+![Security](https://img.shields.io/badge/Security-Pentest-red.svg)
+![Hacking](https://img.shields.io/badge/Hacking-Tools-red.svg)
+![Red Team](https://img.shields.io/badge/Red%20Team-Offensive-red.svg)
+![UI](https://img.shields.io/badge/UI-UX%20Design-purple.svg)
+![CSS](https://img.shields.io/badge/CSS3-Style-blue.svg)
+![JSON](https://img.shields.io/badge/JSON-Data-green.svg)
+
 [![SD Card](https://img.shields.io/badge/SD%20Card-Necess%C3%A1rio-orange.svg)]()
 [![Formato](https://img.shields.io/badge/Formato-JSON%2FCSS-blue.svg)]()
 
-**Temas customizados para a interface do Willy Firmware**
+**Temas customizados para a interface do Willy Firmware - Proprietário**
 
 </div>
 
@@ -81,6 +92,7 @@ themes/
 ### Método 2: Instalação Manual
 
 1. **Copie a pasta do tema** para o cartão SD:
+
    ```
    /themes/seu_tema/
    ├── theme.css
@@ -262,7 +274,7 @@ Defina os estilos personalizados:
 
 /* Efeito glow neon */
 .neon-glow {
-    text-shadow: 
+    text-shadow:
         0 0 5px #00ff00,
         0 0 10px #00ff00,
         0 0 20px #00ff00,
@@ -312,7 +324,7 @@ Defina os estilos personalizados:
 
 /* Efeito Matrix Rain */
 .matrix-bg {
-    background: linear-gradient(180deg, 
+    background: linear-gradient(180deg,
         transparent 0%,
         rgba(0, 255, 0, 0.1) 50%,
         transparent 100%
@@ -323,7 +335,7 @@ Defina os estilos personalizados:
 /* Efeito Border Glow */
 .border-glow {
     border: 2px solid #00ff00;
-    box-shadow: 
+    box-shadow:
         0 0 5px #00ff00,
         0 0 10px #00ff00,
         inset 0 0 5px rgba(0, 255, 0, 0.5);
@@ -371,6 +383,41 @@ Quer compartilhar seu tema com a comunidade?
 
 **[⬆ Voltar ao Topo](#-temas)**
 
-*Personalize seu Willy do seu jeito*
+*Personalize seu Willy do seu jeito - Proprietário*
 
 </div>
+
+---
+
+## 📜 Licença
+
+**⚠️ SOFTWARE PROPRIETÁRIO - TODOS OS DIREITOS RESERVADOS**
+
+Estes temas e recursos de interface são propriedade exclusiva da Willy Firmware e são fornecidos sob licença estritamente controlada.
+
+### Termos de Uso
+
+- **Uso Exclusivo**: Estes temas podem ser utilizados apenas pelo proprietário autorizado
+- **Modificação Proibida**: Qualquer modificação ou distribuição é estritamente proibida
+- **Responsabilidade**: O usuário é o único responsável pelo uso dos temas
+- **Restrições**: Uso permitido apenas em sistemas autorizado por escrito
+
+### Limitações de Responsabilidade
+
+A Willy Firmware não se responsabiliza por:
+
+- Qualquer dano resultante do uso não autorizado dos temas
+- Consequências legais de atividades realizadas com os recursos de interface
+- Uso indevido ou violação dos termos de licença
+
+### Direitos Autorais
+
+© 2026 Willy Firmware. Todos os direitos reservados.
+
+### Contato
+
+Para informações sobre licenciamento ou suporte, entre em contato através dos canais oficiais da Willy Firmware.
+
+---
+
+**⚠️ AVISO LEGAL**: O uso destes temas implica concordância total com os termos de licença proprietária. Qualquer violação resultará em ações legais cabíveis.

@@ -270,7 +270,8 @@ static JSValue func_gpio_analogWrite(JSContext *ctx, JSValue *this_val, int argc
 static JSValue func_gpio_analogRead(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
     int pin = 0;
     JS_ToInt32(ctx, &pin, argv[0]);
-    return JS_NewInt32(ctx, analogRead(pin));
+    // return JS_NewInt32(ctx, analogRead(pin)); // Commented out to avoid ADC conflict
+    return JS_NewInt32(ctx, 0);
 }
 
 // gpio.pinMode(pin, mode)

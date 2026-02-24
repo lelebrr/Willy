@@ -698,7 +698,7 @@ void wpsPinBruteForceRaw() {
                 padprintln(disp_buf);
                 snprintf(disp_buf, sizeof(disp_buf), "%c Testando PIN : %s", spinner[spin_idx], pin_buf);
                 padprintln(disp_buf);
-                snprintf(disp_buf, sizeof(disp_buf), "Tentativa    : %u / 100000", attempts);
+                snprintf(disp_buf, sizeof(disp_buf), "Tentativa    : %lu / 100000", (unsigned long)attempts);
                 padprintln(disp_buf);
                 float pct = (float)attempts / 100000.0f * 100.0f;
                 snprintf(disp_buf, sizeof(disp_buf), "Progresso    : %.2f%%", pct);

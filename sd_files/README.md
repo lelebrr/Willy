@@ -2,13 +2,31 @@
 
 # 📁 SD Card Files - Willy Firmware
 
+![ESP32](https://img.shields.io/badge/ESP32-WROOM--32-red.svg)
+![Arduino](https://img.shields.io/badge/Arduino-IDE-blue.svg)
+![C++](https://img.shields.io/badge/C++-17-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.9+-yellow.svg)
+![WiFi](https://img.shields.io/badge/WiFi-802.11%20a/b/g/n/ac/ax-green.svg)
+![Bluetooth](https://img.shields.io/badge/Bluetooth-5.0+-blue.svg)
+![NFC](https://img.shields.io/badge/NFC-ISO%2014443-purple.svg)
+![RFID](https://img.shields.io/badge/RFID-Mifare-orange.svg)
+![IR](https://img.shields.io/badge/IR-38--40kHz-red.svg)
+![Sub-GHz](https://img.shields.io/badge/Sub-GHz-315--915MHz-green.svg)
+![GPS](https://img.shields.io/badge/GPS-NEO--6M-blue.svg)
+![Security](https://img.shields.io/badge/Security-Pentest-red.svg)
+![Hacking](https://img.shields.io/badge/Hacking-Tools-red.svg)
+![Red Team](https://img.shields.io/badge/Red%20Team-Offensive-red.svg)
+![Blue Team](https://img.shields.io/badge/Blue%20Team-Defensive-blue.svg)
+![Forensics](https://img.shields.io/badge/Forensics-Forensic-blue.svg)
+![Wardriving](https://img.shields.io/badge/Wardriving-Map-green.svg)
+
 [![SD Card](https://img.shields.io/badge/SD%20Card-Required-orange.svg)]()
 [![Format](https://img.shields.io/badge/Format-FAT32-blue.svg)]()
 [![Size](https://img.shields.io/badge/Min%20Size-4GB-green.svg)]()
 
 <img src="../media/pictures/Willy_hd.png" alt="Willy Logo" width="200"/>
 
-**Arquivos de exemplo e recursos para o cartão SD do Willy**
+**Arquivos de exemplo e recursos para o cartão SD do Willy - Proprietário**
 
 </div>
 
@@ -467,11 +485,11 @@ while(true) {
 
 1. **Configure o portal**:
    - Copie o HTML para `portals/`
-   
+
 2. **Inicie o portal**:
    - Menu → WiFi → Evil Portal
    - Selecione o portal HTML
-   
+
 3. **Aguarde vítimas**:
    - O portal cria um AP falso
    - Vítimas conectam e inserem credenciais
@@ -621,8 +639,43 @@ AA:BB:CC:DD:EE:FF,Home_Network,[WPA2-PSK-CCMP][ESS],2026-02-23 15:30:45,6,-45,-2
 
 ### 🛡️ Willy Firmware
 
-**[⬆ Voltar ao Topo](#-sd-card-files---Willy-firmware)**
+**[⬆ Voltar ao Topo](#-sd-card-files---willy-firmware)**
 
-*Arquivos mantidos pela comunidade Willy*
+*Arquivos proprietários do Willy Firmware - Licença Restrita*
 
 </div>
+
+---
+
+## 📜 Licença
+
+**⚠️ SOFTWARE PROPRIETÁRIO - TODOS OS DIREITOS RESERVADOS**
+
+Este software e seus arquivos associados são propriedade exclusiva da Willy Firmware e são fornecidos sob licença estritamente controlada.
+
+### Termos de Uso
+
+- **Uso Exclusivo**: Este software pode ser utilizado apenas pelo proprietário autorizado
+- **Modificação Proibida**: Qualquer modificação, engenharia reversa ou descompilação é estritamente proibida
+- **Distribuição Restrita**: Não é permitida a distribuição, cópia ou compartilhamento com terceiros
+- **Responsabilidade**: O usuário é o único responsável pelo uso do software
+
+### Limitações de Responsabilidade
+
+A Willy Firmware não se responsabiliza por:
+
+- Qualquer dano direto, indireto, incidental ou consequente resultante do uso do software
+- Uso não autorizado ou violação dos termos de licença
+- Consequências legais de atividades realizadas com o software
+
+### Direitos Autorais
+
+© 2026 Willy Firmware. Todos os direitos reservados.
+
+### Contato
+
+Para informações sobre licenciamento ou suporte, entre em contato através dos canais oficiais da Willy Firmware.
+
+---
+
+**⚠️ AVISO LEGAL**: O uso deste software implica concordância total com os termos de licença proprietária. Qualquer violação resultará em ações legais cabíveis.

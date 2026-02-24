@@ -260,7 +260,10 @@ void BruceConfigPins::loadFile(JsonDocument &jsonDoc, bool checkFS) {
 
     if (deserializeJson(jsonDoc, file)) {
         log_e("Failed to read config pins file, using default configuration");
+        Serial.println("Failed to read config file, using default configuration"); // Debug print
         return;
+    } else {
+        Serial.println("deserializeJson completed successfully in BruceConfigPins."); // Debug print
     }
     file.close();
 

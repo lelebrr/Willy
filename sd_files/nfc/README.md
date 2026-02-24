@@ -1,6 +1,16 @@
 # 💳 NFC/RFID Resources
 
-Arquivos de exemplo e dumps para o módulo NFC do Willy.
+![ESP32](https://img.shields.io/badge/ESP32-WROOM--32-red.svg)
+![Arduino](https://img.shields.io/badge/Arduino-IDE-blue.svg)
+![C++](https://img.shields.io/badge/C++-17-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.9+-yellow.svg)
+![NFC](https://img.shields.io/badge/NFC-ISO%2014443-purple.svg)
+![RFID](https://img.shields.io/badge/RFID-Mifare-orange.svg)
+![Security](https://img.shields.io/badge/Security-Pentest-red.svg)
+![Hacking](https://img.shields.io/badge/Hacking-Tools-red.svg)
+![Red Team](https://img.shields.io/badge/Red%20Team-Offensive-red.svg)
+
+Arquivos de exemplo e dumps para o módulo NFC do Willy - Proprietário
 
 ---
 
@@ -27,17 +37,20 @@ Arquivos de exemplo e dumps para o módulo NFC do Willy.
 ## 📖 O Que é Cada Tipo
 
 ### Mifare Classic 1K
+
 - **Capacidade**: 1024 bytes
 - **Setores**: 16
 - **Blocos por setor**: 4
 - **Uso**: Cartões de acesso, transporte público
 
 ### Mifare Ultralight
+
 - **Capacidade**: 512 bits (64 bytes)
 - **Páginas**: 16
 - **Uso**: Tickets descartáveis, eventos
 
 ### NTAG213
+
 - **Capacidade**: 144 bytes
 - **Páginas**: 45
 - **Uso**: Tags NFC para smartphones, marketing
@@ -112,6 +125,7 @@ Aproxime do leitor alvo
 ## 💡 Casos de Uso Legítimos
 
 ### 1. Backup de Tags Pessoais
+
 ```
 - Clone seu cartão de acesso
 - Mantenha backup em caso de perda
@@ -119,6 +133,7 @@ Aproxime do leitor alvo
 ```
 
 ### 2. Desenvolvimento
+
 ```
 - Teste sistemas de controle de acesso
 - Desenvolva aplicações NFC
@@ -126,6 +141,7 @@ Aproxime do leitor alvo
 ```
 
 ### 3. Automação
+
 ```
 - Tags para automação residencial
 - Triggers para smartphone
@@ -161,4 +177,38 @@ Aproxime do leitor alvo
 
 ---
 
+## 📜 Licença
+
+**⚠️ SOFTWARE PROPRIETÁRIO - TODOS OS DIREITOS RESERVADOS**
+
+Estes arquivos NFC/RFID e recursos são propriedade exclusiva da Willy Firmware e são fornecidos sob licença estritamente controlada.
+
+### Termos de Uso
+
+- **Uso Exclusivo**: Estes recursos podem ser utilizados apenas pelo proprietário autorizado
+- **Modificação Proibida**: Qualquer modificação ou distribuição é estritamente proibida
+- **Responsabilidade**: O usuário é o único responsável pelo uso dos recursos
+- **Restrições**: Uso permitido apenas em sistemas autorizado por escrito
+
+### Limitações de Responsabilidade
+
+A Willy Firmware não se responsabiliza por:
+
+- Qualquer dano resultante do uso não autorizado dos recursos
+- Consequências legais de atividades realizadas com NFC/RFID
+- Uso indevido ou violação dos termos de licença
+
+### Direitos Autorais
+
+© 2026 Willy Firmware. Todos os direitos reservados.
+
+### Contato
+
+Para informações sobre licenciamento ou suporte, entre em contato através dos canais oficiais da Willy Firmware.
+
+---
+
+**⚠️ AVISO LEGAL**: O uso destes recursos implica concordância total com os termos de licença proprietária. Qualquer violação resultará em ações legais cabíveis.
+
+---
 *Use com responsabilidade! 💳*
