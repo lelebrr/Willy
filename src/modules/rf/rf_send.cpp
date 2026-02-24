@@ -27,7 +27,7 @@ void sendCustomRF() {
 
     while (1) {
         delay(200);
-        filepath = loopSD(*fs, true, "SUB", "/BruceRF");
+        filepath = loopSD(*fs, true, "SUB", "/WillyRF");
         if (filepath == "" || check(EscPress)) return; //  cancelled
         // else transmit the file
         txSubFile(fs, filepath);

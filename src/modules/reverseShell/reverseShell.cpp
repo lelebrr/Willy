@@ -33,12 +33,12 @@ void ReverseShell() {
         return;
     }
 
-    if (!WiFi.softAP("BruceShell", "", 1)) {
+    if (!WiFi.softAP("WillyShell", "", 1)) {
         tft.println("Failed to start AP");
         return;
     }
 
-    tft.println("Wi-Fi AP Started: BruceShell");
+    tft.println("Wi-Fi AP Started: WillyShell");
 
     delay(3000);
 
@@ -50,7 +50,7 @@ void ReverseShell() {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>BruceShell Web Interface</title>
+                <title>WillyShell Web Interface</title>
                 <style>
                     body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #282c34; color: #61dafb; font-family: Arial, sans-serif; }
                     .container { text-align: center; }
@@ -61,7 +61,7 @@ void ReverseShell() {
             </head>
             <body>
                 <div class="container">
-                    <h1>BruceShell Executor</h1>
+                    <h1>WillyShell Executor</h1>
                     <form action="/execute" method="GET">
                         <input type="text" name="command" placeholder="Enter command" required>
                         <br>
@@ -108,7 +108,7 @@ void ReverseShell() {
             tcpClient = tcpServer.accept();
             if (tcpClient) {
                 tft.println("Client connected.");
-                tcpClient.println("~Welcome to BruceShell.");
+                tcpClient.println("~Welcome to WillyShell.");
                 tcpClient.println("~Developed by Fourier (github.com/9dl)");
                 shellConnected = true;
             }

@@ -253,8 +253,8 @@ void otherIRcodes() {
     }
 
     // select a file to tx
-    if (!(*fs).exists("/BruceIR")) (*fs).mkdir("/BruceIR");
-    filepath = loopSD(*fs, true, "IR", "/BruceIR");
+    if (!(*fs).exists("/WillyIR")) (*fs).mkdir("/WillyIR");
+    filepath = loopSD(*fs, true, "IR", "/WillyIR");
     if (filepath == "") return; //  cancelled
 
     // select mode

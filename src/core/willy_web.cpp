@@ -10,7 +10,7 @@ extern BruceConfig bruceConfig;
 
 void setupWillyWeb(AsyncWebServer* server) {
     // Serve assets from SD card if they exist
-    server->serveStatic("/Willy/", SD, "/BruceWebUI/");
+    server->serveStatic("/Willy/", SD, "/WillyWebUI/");
 
     // Live device status endpoint (JSON)
     server->on("/api/status", HTTP_GET, [](AsyncWebServerRequest *request) {

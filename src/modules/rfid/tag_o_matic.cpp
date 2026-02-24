@@ -492,15 +492,15 @@ void TagOMatic::save_scan_result() {
 
     String filename = "scan_result";
 
-    if (!(*fs).exists("/BruceRFID")) (*fs).mkdir("/BruceRFID");
-    if (!(*fs).exists("/BruceRFID/Scans")) (*fs).mkdir("/BruceRFID/Scans");
-    if ((*fs).exists("/BruceRFID/Scans/" + filename + ".rfidscan")) {
+    if (!(*fs).exists("/WillyRFID")) (*fs).mkdir("/WillyRFID");
+    if (!(*fs).exists("/WillyRFID/Scans")) (*fs).mkdir("/WillyRFID/Scans");
+    if ((*fs).exists("/WillyRFID/Scans/" + filename + ".rfidscan")) {
         int i = 1;
         filename += "_";
-        while ((*fs).exists("/BruceRFID/Scans/" + filename + String(i) + ".rfidscan")) i++;
+        while ((*fs).exists("/WillyRFID/Scans/" + filename + String(i) + ".rfidscan")) i++;
         filename += String(i);
     }
-    File file = (*fs).open("/BruceRFID/Scans/" + filename + ".rfidscan", FILE_WRITE);
+    File file = (*fs).open("/WillyRFID/Scans/" + filename + ".rfidscan", FILE_WRITE);
 
     if (!file) { return; }
 
@@ -613,7 +613,7 @@ String TagOMatic::save_file_headless(String filename) {
 
     if (result == RFIDInterface::SUCCESS) {
         // Build and return path
-        return "/BruceRFID/" + filename + ".rfid";
+        return "/WillyRFID/" + filename + ".rfid";
     }
 
     return ""; // Error
@@ -627,7 +627,7 @@ int TagOMatic::load_file_headless(String filename) {
 
     if (!filename.endsWith(".rfid")) { filename += ".rfid"; }
 
-    String filepath = "/BruceRFID/" + filename;
+    String filepath = "/WillyRFID/" + filename;
 
     if (!(*fs).exists(filepath)) {
         return RFIDInterface::TAG_NOT_PRESENT; // File not found

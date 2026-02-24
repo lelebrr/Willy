@@ -585,11 +585,11 @@ void SRIXTool::save_file() {
     }
 
     // Create directory if it does not exist
-    if (!(*fs).exists("/BruceRFID")) (*fs).mkdir("/BruceRFID");
-    if (!(*fs).exists("/BruceRFID/SRIX")) (*fs).mkdir("/BruceRFID/SRIX");
+    if (!(*fs).exists("/WillyRFID")) (*fs).mkdir("/WillyRFID");
+    if (!(*fs).exists("/WillyRFID/SRIX")) (*fs).mkdir("/WillyRFID/SRIX");
 
     // Check if the file already exists and add number
-    String filepath = "/BruceRFID/SRIX/" + filename;
+    String filepath = "/WillyRFID/SRIX/" + filename;
     if ((*fs).exists(filepath + ".srix")) {
         int i = 1;
         while ((*fs).exists(filepath + "_" + String(i) + ".srix")) i++;
@@ -653,17 +653,17 @@ void SRIXTool::load_file() {
     }
 
     // Verify that the directory exists
-    if (!(*fs).exists("/BruceRFID/SRIX")) {
+    if (!(*fs).exists("/WillyRFID/SRIX")) {
         displayError("Nenhum dump encontrado!");
         delay(1500);
-        displayError("Pasta /BruceRFID/SRIX faltando");
+        displayError("Pasta /WillyRFID/SRIX faltando");
         delay(2000);
         set_state(IDLE_MODE);
         return;
     }
 
     // List all .srix files in the directory
-    File dir = (*fs).open("/BruceRFID/SRIX");
+    File dir = (*fs).open("/WillyRFID/SRIX");
     if (!dir || !dir.isDirectory()) {
         displayError("Nao abriu pasta SRIX!");
         delay(1500);
@@ -700,7 +700,7 @@ void SRIXTool::load_file() {
 
     options = {};
     for (const String &fname : fileList) {
-        options.emplace_back(fname, [this, fname, fs]() { load_file_data(fs, "/BruceRFID/SRIX/" + fname); });
+        options.emplace_back(fname, [this, fname, fs]() { load_file_data(fs, "/WillyRFID/SRIX/" + fname); });
     }
     options.emplace_back("Cancelar", [this]() { set_state(IDLE_MODE); });
 
@@ -809,7 +809,7 @@ void SRIXTool::load_file_data(FS *fs, String filepath) {
     String filename = filepath;
     int lastSlash = filename.lastIndexOf('/');
     if (lastSlash >= 0) {
-        filename = filename.substring(lastSlash + 1); // Remove "/BruceRFID/SRIX/"
+        filename = filename.substring(lastSlash + 1); // Remove "/WillyRFID/SRIX/"
     }
 
     current_state = LOAD_MODE;
@@ -1059,11 +1059,11 @@ String SRIXTool::save_file_headless(String filename) {
     if (!getFsStorage(fs)) return "";
 
     // Create directories if needed
-    if (!(*fs).exists("/BruceRFID")) (*fs).mkdir("/BruceRFID");
-    if (!(*fs).exists("/BruceRFID/SRIX")) (*fs).mkdir("/BruceRFID/SRIX");
+    if (!(*fs).exists("/WillyRFID")) (*fs).mkdir("/WillyRFID");
+    if (!(*fs).exists("/WillyRFID/SRIX")) (*fs).mkdir("/WillyRFID/SRIX");
 
     // Build filepath
-    String filepath = "/BruceRFID/SRIX/" + filename;
+    String filepath = "/WillyRFID/SRIX/" + filename;
     if (!filename.endsWith(".srix")) filepath += ".srix";
 
     // Handle existing file
@@ -1120,7 +1120,7 @@ int SRIXTool::load_file_headless(String filename) {
     if (!getFsStorage(fs)) return -1;
 
     // Build filepath
-    String filepath = "/BruceRFID/SRIX/" + filename;
+    String filepath = "/WillyRFID/SRIX/" + filename;
     if (!filename.endsWith(".srix")) filepath += ".srix";
 
     if (!(*fs).exists(filepath)) return -2; // File not found

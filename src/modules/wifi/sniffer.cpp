@@ -84,8 +84,8 @@ SemaphoreHandle_t handshakeMutex = nullptr;
 StaticSemaphore_t handshakeMutexBuffer;
 std::set<BeaconList> registeredBeacons;
 std::set<String> SavedHS; // Saves the MAC of beacon HS detected in the session
-String filename = "/BrucePCAP/" + (String)FILENAME + ".pcap";
-String deauthFilename = "/BrucePCAP/deauth_0.pcap";
+String filename = "/WillyPCAP/" + (String)FILENAME + ".pcap";
+String deauthFilename = "/WillyPCAP/deauth_0.pcap";
 int deauthFileIndex = 0;
 int rawFileIndex = 0;
 std::map<uint64_t, String> beaconSsidCache;
@@ -347,7 +347,7 @@ static String macToHex(const uint8_t *mac) {
 static bool handshakeFileExists(const String &path) { return handshakeRecordExists(path); }
 
 static String buildHandshakePath(const uint8_t *mac, const char *ssid) {
-    String path = "/BrucePCAP/handshakes/HS_" + macToHex(mac);
+    String path = "/WillyPCAP/handshakes/HS_" + macToHex(mac);
     if (ssid && ssid[0] != '\0') {
         path += "_";
         path += ssid;
@@ -571,17 +571,17 @@ static void unlockFileMutex() {
 }
 
 static void ensureDirectories(FS &Fs) {
-    if (!Fs.exists("/BrucePCAP")) { Fs.mkdir("/BrucePCAP"); }
-    if (!Fs.exists("/BrucePCAP/handshakes")) { Fs.mkdir("/BrucePCAP/handshakes"); }
+    if (!Fs.exists("/WillyPCAP")) { Fs.mkdir("/WillyPCAP"); }
+    if (!Fs.exists("/WillyPCAP/handshakes")) { Fs.mkdir("/WillyPCAP/handshakes"); }
 }
 
 static void openDeauthFile(FS &Fs) {
     ensureDirectories(Fs);
     closeDeauthFile();
-    deauthFilename = "/BrucePCAP/deauth_" + String(deauthFileIndex) + ".pcap";
+    deauthFilename = "/WillyPCAP/deauth_" + String(deauthFileIndex) + ".pcap";
     while (Fs.exists(deauthFilename)) {
         deauthFileIndex++;
-        deauthFilename = "/BrucePCAP/deauth_" + String(deauthFileIndex) + ".pcap";
+        deauthFilename = "/WillyPCAP/deauth_" + String(deauthFileIndex) + ".pcap";
     }
     if (lockFileMutex(pdMS_TO_TICKS(200))) {
         _deauth_file = Fs.open(deauthFilename, FILE_WRITE);
@@ -867,10 +867,10 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
 void openFile(FS &Fs) {
     ensureDirectories(Fs);
     closeRawFile();
-    filename = "/BrucePCAP/" + (String)FILENAME + String(rawFileIndex) + ".pcap";
+    filename = "/WillyPCAP/" + (String)FILENAME + String(rawFileIndex) + ".pcap";
     while (Fs.exists(filename)) {
         rawFileIndex++;
-        filename = "/BrucePCAP/" + (String)FILENAME + String(rawFileIndex) + ".pcap";
+        filename = "/WillyPCAP/" + (String)FILENAME + String(rawFileIndex) + ".pcap";
     }
     if (lockFileMutex(pdMS_TO_TICKS(200))) {
         _pcap_file = Fs.open(filename, FILE_WRITE);
@@ -995,9 +995,9 @@ void sniffer_setup() {
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 
     wifi_config_t wifi_config;
-    strcpy((char *)wifi_config.ap.ssid, "BruceSniffer");
-    strcpy((char *)wifi_config.ap.password, "brucenet");
-    wifi_config.ap.ssid_len = strlen("BruceSniffer");
+    strcpy((char *)wifi_config.ap.ssid, "WillySniffer");
+    strcpy((char *)wifi_config.ap.password, "WillyNet");
+    wifi_config.ap.ssid_len = strlen("WillySniffer");
     wifi_config.ap.channel = 1;                   // Channel
     wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK; // auth mode
     wifi_config.ap.ssid_hidden = 1;               // 1 to hidden SSID, 0 to visivle

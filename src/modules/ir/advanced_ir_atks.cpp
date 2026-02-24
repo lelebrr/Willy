@@ -455,7 +455,7 @@ void autoPatternMatcherLearner() {
         if (check(SelPress)) {
             // Salva no SD
             if (signals_learned > 0) {
-                String filename = "/BruceIR/learned_" + String(millis()) + ".json";
+                String filename = "/WillyIR/learned_" + String(millis()) + ".json";
                 if (saveLearnedSignal(last_signal, filename)) {
                     displaySuccess("Salvo no SD!");
                 } else {

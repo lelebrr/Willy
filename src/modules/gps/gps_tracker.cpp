@@ -211,9 +211,9 @@ void GPSTracker::add_initial_file_data(File file) {
 void GPSTracker::add_final_file_data() {
     FS *fs;
     if (!getFsStorage(fs)) return;
-    if (filename == "" || !(*fs).exists("/BruceGPS/" + filename)) return;
+    if (filename == "" || !(*fs).exists("/WillyGPS/" + filename)) return;
 
-    File file = (*fs).open("/BruceGPS/" + filename, FILE_APPEND);
+    File file = (*fs).open("/WillyGPS/" + filename, FILE_APPEND);
 
     if (!file) return;
     file.println("    </trkseg>");
@@ -233,11 +233,11 @@ void GPSTracker::add_coord() {
 
     if (filename == "") create_filename();
 
-    if (!(*fs).exists("/BruceGPS")) (*fs).mkdir("/BruceGPS");
+    if (!(*fs).exists("/WillyGPS")) (*fs).mkdir("/WillyGPS");
 
     bool is_new_file = false;
-    if (!(*fs).exists("/BruceGPS/" + filename)) is_new_file = true;
-    String dir = getHierarchicalPath("/BruceGPS");
+    if (!(*fs).exists("/WillyGPS/" + filename)) is_new_file = true;
+    String dir = getHierarchicalPath("/WillyGPS");
     File file = (*fs).open(dir + "/" + filename, FILE_APPEND);
 
     if (!file) {

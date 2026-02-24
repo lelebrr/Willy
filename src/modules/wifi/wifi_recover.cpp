@@ -749,7 +749,7 @@ void wifi_recover_menu() {
     }
 
     // Ensure BrucePCAP folder exists, create if needed
-    const String PCAP_DIR = "/BrucePCAP";
+    const String PCAP_DIR = "/WillyPCAP";
     if (!(*fs).exists(PCAP_DIR)) {
         if ((*fs).mkdir(PCAP_DIR)) {
             padprintf("Created folder: %s\n", PCAP_DIR.c_str());
@@ -759,7 +759,7 @@ void wifi_recover_menu() {
         }
     }
 
-    // Select PCAP (start inside /BrucePCAP)
+    // Select PCAP (start inside /WillyPCAP)
     resetTftDisplay();
     drawMainBorderWithTitle("Quebrador WiFi", true);
     padprintln("");

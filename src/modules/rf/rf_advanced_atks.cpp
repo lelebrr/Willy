@@ -56,7 +56,7 @@ void SensorBatteryDrainFlood() {
     // If an FS was selected, choose the file and process the signal
     if (fs != NULL) {
         delay(200);
-        filepath = loopSD(*fs, true, "SUB", "/BruceRF");
+        filepath = loopSD(*fs, true, "SUB", "/WillyRF");
         if (filepath == "" || check(EscPress)) return;
 
         File databaseFile = fs->open(filepath, FILE_READ);
@@ -232,7 +232,7 @@ void MultiDeviceCoordinatedReplay() {
     if (fs == NULL) return;
 
     while (1) {
-        String filepath = loopSD(*fs, true, "SUB", "/BruceRF");
+        String filepath = loopSD(*fs, true, "SUB", "/WillyRF");
         if (filepath == "" || check(EscPress)) break;
         selectedFiles.push_back(filepath);
         printCenterFootnote("Adicionado! [" + String(selectedFiles.size()) + "]");

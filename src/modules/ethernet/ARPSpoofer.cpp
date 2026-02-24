@@ -51,9 +51,9 @@ bool ARPSpoofer::arpPCAPfile() {
     FS *fs;
     if (setupSdCard()) fs = &SD;
     else { fs = &LittleFS; }
-    if (!fs->exists("/BrucePCAP")) fs->mkdir("/BrucePCAP");
-    while (fs->exists(String("/BrucePCAP/ARP_session_" + String(nf++) + ".pcap").c_str())) yield();
-    pcapFile = fs->open(String("/BrucePCAP/ARP_session_" + String(nf) + ".pcap").c_str(), FILE_APPEND);
+    if (!fs->exists("/WillyPCAP")) fs->mkdir("/WillyPCAP");
+    while (fs->exists(String("/WillyPCAP/ARP_session_" + String(nf++) + ".pcap").c_str())) yield();
+    pcapFile = fs->open(String("/WillyPCAP/ARP_session_" + String(nf) + ".pcap").c_str(), FILE_APPEND);
     if (pcapFile) return true;
     else return false;
 }
@@ -75,7 +75,7 @@ void ARPSpoofer::setup(const Host &host, IPAddress gateway) {
     if (mitm) {
         tft.setTextSize(FP);
         // padprintln("Man in The middle Activated");
-        // padprintln("/BrucePCAP/ARP_session_" + String(nf) + ".pcap");
+        // padprintln("/WillyPCAP/ARP_session_" + String(nf) + ".pcap");
         Serial.println("Still in development");
     }
     padprintln("Tgt:" + host.mac);

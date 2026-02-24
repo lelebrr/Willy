@@ -499,7 +499,7 @@ bool RCSwitch_SaveSignal(float frequency, RfCodes codes, bool raw, char *key, bo
         filename = "raw.sub";
     }
 
-    String filepath = "/BruceRF";
+    String filepath = "/WillyRF";
     if (autoSave) filepath += "/autoSaved";
     File file = createNewFile(fs, filepath, filename);
 

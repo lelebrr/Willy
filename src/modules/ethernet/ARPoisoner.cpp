@@ -41,9 +41,9 @@ bool ARPoisoner::arpPCAPfile() {
     FS *fs;
     if (setupSdCard()) fs = &SD;
     else { fs = &LittleFS; }
-    if (!fs->exists("/BrucePCAP")) fs->mkdir("/BrucePCAP");
-    while (fs->exists(String("/BrucePCAP/ARP_session_" + String(nf++) + ".pcap").c_str())) yield();
-    pcapFile = fs->open(String("/BrucePCAP/ARP_session_" + String(nf) + ".pcap").c_str(), FILE_WRITE);
+    if (!fs->exists("/WillyPCAP")) fs->mkdir("/WillyPCAP");
+    while (fs->exists(String("/WillyPCAP/ARP_session_" + String(nf++) + ".pcap").c_str())) yield();
+    pcapFile = fs->open(String("/WillyPCAP/ARP_session_" + String(nf) + ".pcap").c_str(), FILE_WRITE);
     if (pcapFile) return true;
     else return false;
 }

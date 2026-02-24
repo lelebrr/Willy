@@ -15,8 +15,8 @@
 class MifareKeysManager {
 public:
     // Constants
-    static constexpr const char *KEYS_PATH = "/BruceRFID/keys.conf";
-    static constexpr const char *KEYS_DIR = "/BruceRFID";
+    static constexpr const char *KEYS_PATH = "/WillyRFID/keys.conf";
+    static constexpr const char *KEYS_DIR = "/WillyRFID";
 
     // Core operations (work directly on provided std::set reference)
     static void ensureLoaded(std::set<String> &keys);

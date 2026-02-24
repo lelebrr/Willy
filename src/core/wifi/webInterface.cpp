@@ -248,7 +248,7 @@ void drawWebUiScreen(bool mode_ap) {
     tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, ALCOLOR);
     if (mode_ap) {
         setTftDisplay(0, 0, bruceConfig.bgColor, FM);
-        tft.drawCentreString("BruceNet/brucenet", tftWidth / 2, 7, 1);
+        tft.drawCentreString("WillyNet/WillyNet", tftWidth / 2, 7, 1);
     }
     setTftDisplay(0, 0, ALCOLOR, FM);
     tft.drawCentreString("BRUCE WebUI", tftWidth / 2, 27, 1);
@@ -311,12 +311,12 @@ void serveWebUIFile(
     AsyncWebServerResponse *response = nullptr;
     FS *fs = NULL;
     if (setupSdCard()) {
-        if (SD.exists("/BruceWebUI/" + filename)) fs = &SD;
-    } else if (LittleFS.exists("/BruceWebUI/" + filename)) {
+        if (SD.exists("/WillyWebUI/" + filename)) fs = &SD;
+    } else if (LittleFS.exists("/WillyWebUI/" + filename)) {
         fs = &LittleFS;
     }
     if (fs) {
-        response = request->beginResponse(*fs, "/BruceWebUI/" + filename, contentType);
+        response = request->beginResponse(*fs, "/WillyWebUI/" + filename, contentType);
     } else {
         if (filename == "theme.css") {
             String css = ":root{--color:" + color565ToWebHex(bruceConfig.priColor) +

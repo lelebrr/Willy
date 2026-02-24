@@ -130,10 +130,10 @@ bool setupSdCard() {
         Serial.println("SDCARD mounted successfully");
         sdcardMounted = true;
         // Optimization: Create basic directory structure on mount
-        SD.mkdir("/BrucePCAP");
-        SD.mkdir("/BruceLogs");
-        SD.mkdir("/BruceRFID");
-        SD.mkdir("/BruceGPS");
+        SD.mkdir("/WillyPCAP");
+        SD.mkdir("/WillyLogs");
+        SD.mkdir("/WillyRFID");
+        SD.mkdir("/WillyGPS");
         return true;
     }
 }

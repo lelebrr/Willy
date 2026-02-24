@@ -19,7 +19,7 @@
 #include <globals.h>
 #include <nvs_flash.h>
 
-#define WIFI_ATK_NAME "BruceAttack"
+#define WIFI_ATK_NAME "WillyAttack"
 extern bool showHiddenNetworks;
 
 std::vector<wifi_ap_record_t> ap_records;
@@ -444,7 +444,7 @@ void capture_handshake(String tssid, String mac, uint8_t channel) {
     char hsFileName[128];
     sprintf(
         hsFileName,
-        "/BrucePCAP/handshakes/HS_%02X%02X%02X%02X%02X%02X_%s.pcap",
+        "/WillyPCAP/handshakes/HS_%02X%02X%02X%02X%02X%02X_%s.pcap",
         bssid_array[0],
         bssid_array[1],
         bssid_array[2],
@@ -460,17 +460,17 @@ void capture_handshake(String tssid, String mac, uint8_t channel) {
     if (setupSdCard()) {
         fs = &SD;
         isLittleFS = false;
-        if (!SD.exists("/BrucePCAP/handshakes")) {
-            SD.mkdir("/BrucePCAP");
-            SD.mkdir("/BrucePCAP/handshakes");
+        if (!SD.exists("/WillyPCAP/handshakes")) {
+            SD.mkdir("/WillyPCAP");
+            SD.mkdir("/WillyPCAP/handshakes");
         }
         hsExists = SD.exists(hsFileName);
     } else {
         fs = &LittleFS;
         isLittleFS = true;
-        if (!LittleFS.exists("/BrucePCAP/handshakes")) {
-            LittleFS.mkdir("/BrucePCAP");
-            LittleFS.mkdir("/BrucePCAP/handshakes");
+        if (!LittleFS.exists("/WillyPCAP/handshakes")) {
+            LittleFS.mkdir("/WillyPCAP");
+            LittleFS.mkdir("/WillyPCAP/handshakes");
         }
         hsExists = LittleFS.exists(hsFileName);
     }

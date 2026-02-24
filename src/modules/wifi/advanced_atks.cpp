@@ -101,8 +101,8 @@ bool initAdvancedAttackMode() {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 
-    if (WiFi.softAPSSID() != "BruceAttack") {
-        if (!WiFi.softAP("BruceAttack", emptyString, 1, 1, 4, false)) {
+    if (WiFi.softAPSSID() != "WillyAttack") {
+        if (!WiFi.softAP("WillyAttack", emptyString, 1, 1, 4, false)) {
             displayError("Falha ao iniciar AP", true);
             return false;
         }
@@ -113,7 +113,7 @@ bool initAdvancedAttackMode() {
 }
 
 void deinitAdvancedAttackMode() {
-    if (WiFi.softAPSSID() == "BruceAttack") {
+    if (WiFi.softAPSSID() == "WillyAttack") {
         WiFi.softAPdisconnect();
         vTaskDelay(pdMS_TO_TICKS(100));
     }
