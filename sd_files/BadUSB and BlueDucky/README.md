@@ -20,7 +20,7 @@ BadUSB é uma técnica onde o dispositivo se apresenta como teclado/mouse USB, p
 
 ### 1. Copie o payload para o SD card
 
-### 2. Conecte o Bruce ao computador via USB
+### 2. Conecte o Willy ao computador via USB
 
 ### 3. Execute o payload
 

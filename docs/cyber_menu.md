@@ -1,6 +1,6 @@
 # Cyber Menu UI (Willy v2.1 Evolution)
 
-The Bruce Cyber Menu is an advanced, high-performance UI designed for embedded displays (like the CYD 2.8"). It integrates advanced LVGL animations and real-time system monitoring.
+The Willy Cyber Menu is an advanced, high-performance UI designed for embedded displays (like the CYD 2.8"). It integrates advanced LVGL animations and real-time system monitoring.
 
 ## Features
 
@@ -15,8 +15,8 @@ The Bruce Cyber Menu is an advanced, high-performance UI designed for embedded d
 
 ### 2. Integration & Themes
 
-- **Dynamic Themes**: Uses `bruceConfig.priColor` and `bruceConfig.secColor` to match the system's current theme (Dark, Light, or Cyber).
-- **Core Integration**: Seamlessly calls Bruce's existing module callbacks (Wi-Fi, BLE, IR, etc.).
+- **Dynamic Themes**: Uses `WillyConfig.priColor` and `WillyConfig.secColor` to match the system's current theme (Dark, Light, or Cyber).
+- **Core Integration**: Seamlessly calls Willy's existing module callbacks (Wi-Fi, BLE, IR, etc.).
 
 ### 3. Notification Bar
 

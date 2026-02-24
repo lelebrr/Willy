@@ -1,4 +1,4 @@
-# Guia Completo de Hardware: Bruce (CYD-2432S028R)
+# Guia Completo de Hardware: Willy (CYD-2432S028R)
 
 Este documento detalha a instalação de todos os módulos suportados no projeto, incluindo pinagem, cores dos fios e diagrama de alimentação.
 
@@ -24,7 +24,7 @@ Conectado ao **Port 1 (P1)** da placa CYD (Serial).
 | **TX** | Dados Out | **RX (GPIO 3)** | Azul | Não |
 | **GND** | Terra | **GND** | Preto | Não |
 
-> **Configuração Bruce:** `Core > Pins > GPS`: TX=1, RX=3. Baudrate: 9600.
+> **Configuração Willy:** `Core > Pins > GPS`: TX=1, RX=3. Baudrate: 9600.
 
 ---
 
@@ -40,7 +40,7 @@ Conectado aos pinos I2C nos conectores **P3** e **CN1**.
 | **SDA** | Dados | **IO 27** | Azul | Não |
 | **SCL** | Clock | **P3 IO 22** | Amarelo | Não |
 
-> **Configuração Bruce:** `Core > Pins > I2C`: SDA=27, SCL=22.
+> **Configuração Willy:** `Core > Pins > I2C`: SDA=27, SCL=22.
 
 ---
 

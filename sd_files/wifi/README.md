@@ -68,7 +68,7 @@ Templates HTML para evil twin attacks e captive portals.
 
 #### Como Usar
 
-1. Inicie o Evil Portal no Bruce
+1. Inicie o Evil Portal no Willy
 2. Selecione o template HTML
 3. Aguarde vítimas conectarem
 4. Capture credenciais

@@ -14,12 +14,12 @@
 
 ## 🚀 Ataques Avançados (v2.0)
 
-Esta seção detalha os 12 novos ataques NFC implementados na suíte Bruce para o módulo PN532.
+Esta seção detalha os 12 novos ataques NFC implementados na suíte Willy para o módulo PN532.
 
 ### 1. Real-Time NFC Relay MITM
 **Uso:** Menu RFID → NFC Relay MITM
 - **Descrição:** Intercepta e encaminha comunicações entre uma tag e um leitor em tempo real.
-- **Funcionamento:** O Bruce atua como um "proxy", lendo dados de uma tag legítima e repetindo-os para um leitor, ou vice-versa, permitindo ataques de distância e análise de tráfego (Man-in-the-Middle).
+- **Funcionamento:** O Willy atua como um "proxy", lendo dados de uma tag legítima e repetindo-os para um leitor, ou vice-versa, permitindo ataques de distância e análise de tráfego (Man-in-the-Middle).
 
 ### 2. APDU Command Fuzzer
 **Uso:** Menu RFID → APDU Fuzzer
@@ -44,7 +44,7 @@ Esta seção detalha os 12 novos ataques NFC implementados na suíte Bruce para 
 ### 6. Live Data Injection in Emulation
 **Uso:** Menu RFID → Live Injection
 - **Descrição:** Manipulação de dados durante a emulação.
-- **Funcionamento:** Enquanto emula uma tag conhecida, o Bruce permite injetar ou alterar bytes específicos do dump em tempo real antes que o leitor acesse a informação.
+- **Funcionamento:** Enquanto emula uma tag conhecida, o Willy permite injetar ou alterar bytes específicos do dump em tempo real antes que o leitor acesse a informação.
 
 ### 7. Multi-Slot Chameleon Ultra Mode
 **Uso:** Menu RFID → Chameleon Ultra
@@ -81,7 +81,7 @@ Esta seção detalha os 12 novos ataques NFC implementados na suíte Bruce para 
 ## 🔧 Hardware PN532
 
 ### Configuração Recomendada
-Para o Bruce, recomenda-se o uso do PN532 via **I2C** ou **Serial (HSU)**.
+Para o Willy, recomenda-se o uso do PN532 via **I2C** ou **Serial (HSU)**.
 
 **Pinagem I2C (Padrão):**
 - **SDA:** GPIO 4

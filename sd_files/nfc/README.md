@@ -1,6 +1,6 @@
 # 💳 NFC/RFID Resources
 
-Arquivos de exemplo e dumps para o módulo NFC do Bruce.
+Arquivos de exemplo e dumps para o módulo NFC do Willy.
 
 ---
 
@@ -14,7 +14,7 @@ Arquivos de exemplo e dumps para o módulo NFC do Bruce.
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
-| `bruce_repo.rfid` | Mifare Classic 1K | Dump de demonstração |
+| `Willy_repo.rfid` | Mifare Classic 1K | Dump de demonstração |
 | `rickroll.rfid` | Mifare Classic | Tag de demonstração |
 | `amex_demo.rfid` | Mifare | Demo de cartão |
 | `mifare_classic_1k.rfid` | Mifare Classic 1K | Template vazio |

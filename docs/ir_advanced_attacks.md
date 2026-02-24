@@ -16,7 +16,7 @@
 
 ## 🚀 Introdução
 
-O módulo de Infravermelho do Bruce permite controle e análise de dispositivos IR, incluindo TVs, ar-condicionado, projetores, sistemas de som e muito mais.
+O módulo de Infravermelho do Willy permite controle e análise de dispositivos IR, incluindo TVs, ar-condicionado, projetores, sistemas de som e muito mais.
 
 ### Hardware Necessário
 - LED IR (940nm recomendado)

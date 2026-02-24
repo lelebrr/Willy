@@ -1,6 +1,6 @@
-# Hardware Externo & Conexões no CYD (Bruce Project)
+# Hardware Externo & Conexões no CYD (Willy Project)
 
-Este documento detalha como conectar módulos externos de hardware (RF, IR, CC1101, etc.) à placa **CYD-2432S028R (Variante 2USB)**, conforme suportado pelo firmware Bruce.
+Este documento detalha como conectar módulos externos de hardware (RF, IR, CC1101, etc.) à placa **CYD-2432S028R (Variante 2USB)**, conforme suportado pelo firmware Willy.
 
 ## ⚠️ Aviso Importante sobre a Variante "2USB"
 Nesta variante, o pino **GPIO 21** é usado para o **Backlight do Display**.
@@ -14,7 +14,7 @@ Nesta variante, o pino **GPIO 21** é usado para o **Backlight do Display**.
 ### 1. Transmissor/Receptor RF (433MHz / 315MHz)
 Módulos simples de RF (ASK/OOK) de 1 pino de dados.
 
-| Módulo | Pino Recomendado | Conector CYD | Configuração Bruce |
+| Módulo | Pino Recomendado | Conector CYD | Configuração Willy |
 | :--- | :--- | :--- | :--- |
 | **RF TX (Enviar)** | **GPIO 22** ou **27** | CN1 / P1 | `-DRF_TX_PINS` |
 | **RF RX (Receber)** | **GPIO 22**, **27** ou **35** | CN1 / P1 / P3 | `-DRF_RX_PINS` |
@@ -24,7 +24,7 @@ Módulos simples de RF (ASK/OOK) de 1 pino de dados.
 ### 2. Infravermelho (IR)
 LEDs IR para controle remoto ou receptores IR (ex: VS1838B).
 
-| Componente | Pino Recomendado | Conector CYD | Configuração Bruce |
+| Componente | Pino Recomendado | Conector CYD | Configuração Willy |
 | :--- | :--- | :--- | :--- |
 | **LED IR (TX)** | **GPIO 22** ou **27** | CN1 / P1 | `-DIR_TX_PINS` |
 | **Receptor IR (RX)** | **GPIO 22**, **27** ou **35** | CN1 / P1 / P3 | `-DIR_RX_PINS` |
@@ -47,7 +47,7 @@ Você precisará soldar fios diretamente nos pinos do módulo ESP32 ou nos pads 
 | **GND** | GND | Conector CN1/P1 |
 | **Ataques** | - | Veja o guia de [Ataques NRF24](nrf24_advanced_attacks.md) |
 
-> **Configuração Padrão do Bruce (`CYD-2USB`):**
+> **Configuração Padrão do Willy (`CYD-2USB`):**
 > *   `CC1101_SS_PIN`: 27
 > *   `CC1101_GDO0_PIN`: 22
 

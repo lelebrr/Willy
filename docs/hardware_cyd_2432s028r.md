@@ -96,15 +96,15 @@ A placa possui conectores Micro JST 1.25mm para expansão:
 3. **Liberar GPIO 21**:
     Se precisar de mais um pino de I/O, você pode cortar a trilha do Backlight e ligá-la diretamente ao 3.3V (sempre on), liberando o GPIO 21 no conector P3.
 4. **Speaker Upgrade**:
-    O amplificador onboard suporta speakers de até 2W. Instalar um falante de 4 ohm 3W (com cuidado no volume) provê alertas sonoros muito melhores para o Bruce.
+    O amplificador onboard suporta speakers de até 2W. Instalar um falante de 4 ohm 3W (com cuidado no volume) provê alertas sonoros muito melhores para o Willy.
 
 ---
 
 ## ⚡ Variante "2USB" (CYD2USB)
 
-Esta versão (usada no Bruce) possui:
+Esta versão (usada no Willy) possui:
 
 - **USB-C Principal**: Para programação e alimentação.
 - **Micro USB Secundário**: Para alimentação extra ou serial secundário.
 - **Inversão de Cores**: Obrigatório usar `-DTFT_INVERSION_ON` no PlatformIO.
-- **Configuração no Bruce**: Selecione o ambiente `[env:CYD-2USB]` para aplicar todas as correções automaticamente.
+- **Configuração no Willy**: Selecione o ambiente `[env:CYD-2USB]` para aplicar todas as correções automaticamente.

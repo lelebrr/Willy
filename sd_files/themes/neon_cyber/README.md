@@ -1,6 +1,6 @@
 # 🌃 Neon Cyber Theme
 
-Tema futurista cyberpunk para o Bruce Firmware com efeitos neon e animações.
+Tema futurista cyberpunk para o Willy Firmware com efeitos neon e animações.
 
 ## ✨ Características
 
@@ -110,7 +110,7 @@ O tema é responsivo e se adapta a:
 
 ## 🔧 Requisitos
 
-- Bruce Firmware 1.0+
+- Willy Firmware 1.0+
 - Display TFT ou similar
 - Navegador com suporte a CSS3
 

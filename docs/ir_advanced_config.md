@@ -1,12 +1,12 @@
 # Configurações Avançadas do Módulo IR (Infravermelho)
 
-Este documento detalha as configurações avançadas disponíveis para o módulo de infravermelho no firmware Bruce, permitindo otimizar a transmissão e recepção de sinais IR para diferentes cenários.
+Este documento detalha as configurações avançadas disponíveis para o módulo de infravermelho no firmware Willy, permitindo otimizar a transmissão e recepção de sinais IR para diferentes cenários.
 
 ---
 
 ## 📋 Visão Geral
 
-O módulo IR do Bruce suporta diversas configurações avançadas que permitem:
+O módulo IR do Willy suporta diversas configurações avançadas que permitem:
 - Ajustar a frequência de modulação para melhor compatibilidade
 - Otimizar o duty cycle para maior alcance
 - Configurar preamble para transmissões de longa distância

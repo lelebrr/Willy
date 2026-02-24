@@ -41,10 +41,10 @@ O uso não autorizado destas ferramentas pode:
 ## 1. Espectro (Spectrum Analyzer)
 
 ### O que faz
-Transforma o Bruce em um analisador de espectro para a banda de 2.4GHz, visualizando a atividade de rádio em tempo real.
+Transforma o Willy em um analisador de espectro para a banda de 2.4GHz, visualizando a atividade de rádio em tempo real.
 
 ### Como funciona
-O NRF24L01 possui um detector de portadora (RPD - Received Power Detector). O Bruce varre rapidamente os 126 canais possíveis e desenha um gráfico de barras no TFT representando a intensidade do sinal em cada frequência.
+O NRF24L01 possui um detector de portadora (RPD - Received Power Detector). O Willy varre rapidamente os 126 canais possíveis e desenha um gráfico de barras no TFT representando a intensidade do sinal em cada frequência.
 
 ### Como Usar
 1. **Menu -> NRF24 -> Espectro**
@@ -77,11 +77,11 @@ Coloca o rádio em modo de transmissão contínua sem modulação. Isso causa in
 Injeta teclas (keystrokes) em computadores através de receptores de mouses sem fio vulneráveis.
 
 ### Como funciona
-Explora a falta de criptografia ou falhas na verificação de sequência em protocolos proprietários baseados em NRF24 (Enhanced ShockBurst). O Bruce envia pacotes formatados como se fossem de um teclado legítimo.
+Explora a falta de criptografia ou falhas na verificação de sequência em protocolos proprietários baseados em NRF24 (Enhanced ShockBurst). O Willy envia pacotes formatados como se fossem de um teclado legítimo.
 
 ### Como Usar
 1. **Ataques NRF24 -> MouseJack Inject**
-2. O Bruce varre endereços comuns de fabricantes conhecidos.
+2. O Willy varre endereços comuns de fabricantes conhecidos.
 3. Se um receptor responder, ele tenta injetar um payload (ex: abrir terminal e executar comando).
 
 ---
@@ -112,7 +112,7 @@ Coloca o rádio em modo de monitoramento com largura de endereço curta (2 bytes
 Um jammer inteligente que só ataca quando detecta atividade em um canal específico.
 
 ### Como funciona
-O Bruce monitora silenciosamente os canais. Assim que a energia do sinal (RPD) sobe acima de um limite (indicando transmissão ativa), ele ativa o jammer instantaneamente naquele canal exato por alguns milissegundos, economizando energia e sendo mais difícil de detectar.
+O Willy monitora silenciosamente os canais. Assim que a energia do sinal (RPD) sobe acima de um limite (indicando transmissão ativa), ele ativa o jammer instantaneamente naquele canal exato por alguns milissegundos, economizando energia e sendo mais difícil de detectar.
 
 ---
 
@@ -122,7 +122,7 @@ O Bruce monitora silenciosamente os canais. Assim que a energia do sinal (RPD) s
 Captura uma sequência de comandos (ex: uma senha sendo digitada) e permite reproduzi-la (replay) posteriormente.
 
 ### Como funciona
-Grava os pacotes brutos recebidos em um buffer. Ao acionar o replay, o Bruce retransmite exatamente os mesmos pacotes com os mesmos intervalos de tempo entre eles.
+Grava os pacotes brutos recebidos em um buffer. Ao acionar o replay, o Willy retransmite exatamente os mesmos pacotes com os mesmos intervalos de tempo entre eles.
 
 ---
 
@@ -149,7 +149,7 @@ Explora vulnerabilidades conhecidas (como a falta de criptografia em frames de p
 ## 11. NRF Data Stealth Exfil
 
 ### O que faz
-Exfiltra dados do Bruce para outro dispositivo de forma oculta.
+Exfiltra dados do Willy para outro dispositivo de forma oculta.
 
 ### Como funciona
 Transmite dados em canais de alta frequência raramente usados e com potência de transmissão reduzida, dificultando a detecção por sistemas de monitoramento de rádio (WIDS).

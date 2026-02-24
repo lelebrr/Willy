@@ -1,6 +1,6 @@
-# Ferramentas Customizadas para Offensive Security (CYD & Bruce)
+# Ferramentas Customizadas para Offensive Security (CYD & Willy)
 
-Este guia detalha a integração e uso de módulos externos de GPS e Infravermelho (IR) no firmware Bruce, focando no setup de UART compartilhada via conector P1 do CYD.
+Este guia detalha a integração e uso de módulos externos de GPS e Infravermelho (IR) no firmware Willy, focando no setup de UART compartilhada via conector P1 do CYD.
 
 ---
 
@@ -26,7 +26,7 @@ O NEO-6M é um receptor GPS de alta performance, ideal para geotagging em opera�
 | **Azul** | RX | TX (GPIO 1) | Recebimento de comandos |
 | **Preto** | GND | GND | Ground comum |
 
-![Pinout NEO-6M](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Bruce/media/pictures/neo6m_pinout.png)
+![Pinout NEO-6M](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Willy/media/pictures/neo6m_pinout.png)
 *Diagrama de pinagem do módulo NEO-6M.*
 
 ### Dicas de Uso
@@ -34,7 +34,7 @@ O NEO-6M é um receptor GPS de alta performance, ideal para geotagging em opera�
 - **Céu Aberto**: Requer visibilidade do céu para o primeiro "Fix" (LED PPS pisca quando fixado).
 - **Bateria Backup**: Possui bateria para manter dados de órbita e permitir "Hot Start" rápido (~1s).
 
-![Arquitetura Interna NEO-6M](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Bruce/media/pictures/neo6m_internal.png)
+![Arquitetura Interna NEO-6M](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Willy/media/pictures/neo6m_internal.png)
 
 ---
 
@@ -55,7 +55,7 @@ Para máxima performance em ataques de replay e jamming, recomenda-se substituir
 
 - **Melhoria**: Rejeição de ruído óptico e maior range (até 45m).
 
-![TSOP38238 Pinout](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Bruce/media/pictures/tsop38238_pinout.png)
+![TSOP38238 Pinout](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Willy/media/pictures/tsop38238_pinout.png)
 
 ### Pinagem e Wiring (CYD P1)
 
@@ -66,7 +66,7 @@ Para máxima performance em ataques de replay e jamming, recomenda-se substituir
 | **Azul** | RXD | TX (GPIO 1) | Envia comando IR para transmitir |
 | **Preto** | GND | GND | Ground comum |
 
-![YS-IRTM Close-up](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Bruce/media/pictures/ys_irtm_closeup.jpg)
+![YS-IRTM Close-up](file:///c:/Users/leleb/OneDrive/Documentos/Projetos/Willy/media/pictures/ys_irtm_closeup.jpg)
 
 ---
 
@@ -80,7 +80,7 @@ Como o GPS e o IR compartilham os mesmos pinos de UART (GPIO 1 e 3) no conector 
 
 ---
 
-## 📚 Bibliotecas no Bruce
+## 📚 Bibliotecas no Willy
 
 O firmware já integra suporte para estes módulos via:
 

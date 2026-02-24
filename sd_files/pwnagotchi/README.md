@@ -134,9 +134,9 @@ sudo pwnagotchi plugins enable <plugin>
 3. **Canais**: Configure canais do seu país
 4. **Bateria**: Use power bank de 10.000mAh+
 
-### Integração com Bruce
+### Integração com Willy
 
-O Bruce pode:
+O Willy pode:
 - Detectar Pwnagotchis próximos
 - Analisar handshakes capturados
 - Usar como extensão de captura

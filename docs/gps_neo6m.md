@@ -1,6 +1,6 @@
 # Integração: Módulo GPS u-blox NEO-6M V2
 
-Este documento detalha como conectar e configurar o módulo GPS **NEO-6M V2** com a placa **CYD-2432S028R**, conforme suportado pelo firmware Bruce.
+Este documento detalha como conectar e configurar o módulo GPS **NEO-6M V2** com a placa **CYD-2432S028R**, conforme suportado pelo firmware Willy.
 
 ## ⚙️ Especificações do Módulo
 *   **Modelo**: u-blox NEO-6M (GY-NEO6MV2)
@@ -37,10 +37,10 @@ Este setup permite que o GPS compartilhe os mesmos pinos de dados (1 e 3) com um
 
 ---
 
-## 🛠️ Verificação e Uso no Bruce
+## 🛠️ Verificação e Uso no Willy
 
 1.  Conecte o GPS conforme acima (idealmente em área externa para pegar sinal).
-2.  Ligue o Bruce.
+2.  Ligue o Willy.
 3.  Vá para o menu **GPS**.
 4.  Certifique-se de que a taxa de transmissão (Baud Rate) do GPS seja 9600 (padrão do módulo e do firmware).
 
@@ -51,7 +51,7 @@ Este setup permite que o GPS compartilhe os mesmos pinos de dados (1 e 3) com um
 
 ## 🔧 Configurações Avançadas do GPS
 
-O firmware Bruce oferece configurações avançadas para otimizar o desempenho do módulo GPS NEO-6M para diferentes cenários de uso.
+O firmware Willy oferece configurações avançadas para otimizar o desempenho do módulo GPS NEO-6M para diferentes cenários de uso.
 
 ### Acessando as Configurações
 
@@ -162,12 +162,12 @@ Para voltar às configurações de fábrica:
 O módulo GPS gera os seguintes arquivos no cartão SD ou LittleFS:
 
 ### Wardriving
-- **Local**: `/BruceWardriving/`
+- **Local**: `/WillyWardriving/`
 - **Formato**: CSV (compatível com WiGLE)
 - **Nome**: `AAAMMDD_HHMMSS_wardriving.csv`
 
 ### GPS Tracker
-- **Local**: `/BruceGPS/`
+- **Local**: `/WillyGPS/`
 - **Formato**: GPX
 - **Nome**: `AAAMMDD_HHMMSS_gps_tracker.gpx`
 

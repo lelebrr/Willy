@@ -57,11 +57,11 @@ Executa scripts no formato Ducky Script via USB, simulando um teclado real digit
 ## 2. USB Keyboard
 
 ### O que faz
-Transforma o Bruce em um teclado USB real.
+Transforma o Willy em um teclado USB real.
 
 ### Como usar
 1. Navegue até **Outros -> BadUSB & HID -> Teclado USB**.
-2. O teclado aparecerá na tela do Bruce; o que você digitar será enviado ao computador conectado.
+2. O teclado aparecerá na tela do Willy; o que você digitar será enviado ao computador conectado.
 
 ---
 
@@ -99,7 +99,7 @@ Mantém a sessão do computador ativa realizando micro-movimentos de 1px e press
 
 ### Como usar
 1. Selecione **Mouse Jiggler** no menu avançado.
-2. Deixe o Bruce conectado; ele impedirá que a tela bloqueie sem que o usuário note o cursor se movendo.
+2. Deixe o Willy conectado; ele impedirá que a tela bloqueie sem que o usuário note o cursor se movendo.
 
 ---
 

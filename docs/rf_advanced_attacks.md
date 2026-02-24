@@ -17,7 +17,7 @@
 
 ## 🚀 Introdução
 
-O módulo RF do Bruce utiliza o transceptor CC1101 para operações em frequências Sub-GHz, permitindo análise e transmissão de sinais de controles remotos, sensores, fechaduras e outros dispositivos.
+O módulo RF do Willy utiliza o transceptor CC1101 para operações em frequências Sub-GHz, permitindo análise e transmissão de sinais de controles remotos, sensores, fechaduras e outros dispositivos.
 
 ### Aplicações
 - Controles de garage
@@ -509,7 +509,7 @@ Pico: 433.92 MHz (-42 dBm)
 
 ## 🚀 Novos Ataques Avançados (v2.0)
 
-Esta seção documenta os 10 novos ataques de rádio implementados na suíte Bruce.
+Esta seção documenta os 10 novos ataques de rádio implementados na suíte Willy.
 
 ### 11. Predictive Garage/Portão Brute
 **Uso:** Menu RF → Garage Brute P2262

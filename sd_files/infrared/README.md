@@ -1,6 +1,6 @@
 # IR Attack Files
 
-Este diretório contém arquivos de suporte para os ataques IR avançados do Bruce.
+Este diretório contém arquivos de suporte para os ataques IR avançados do Willy.
 
 ## Estrutura de Diretórios
 

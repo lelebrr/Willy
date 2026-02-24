@@ -1,6 +1,6 @@
 # Integração: Módulo NFC PN532 V3
 
-Este documento detalha como configurar e conectar o módulo **PN532 NFC V3 (Elechouse/Genérico)** na placa CYD-2432S028R rodando Bruce.
+Este documento detalha como configurar e conectar o módulo **PN532 NFC V3 (Elechouse/Genérico)** na placa CYD-2432S028R rodando Willy.
 
 ## ⚠️ Aviso de Conflito de Pinos
 Se você configurou o **GPS nos pinos 22 e 27** (conforme o guia anterior), **você não tem pinos livres nos conectores** para ligar o PN532 simultaneamente.
@@ -15,7 +15,7 @@ Se você configurou o **GPS nos pinos 22 e 27** (conforme o guia anterior), **vo
 ---
 
 ## 1. Configuração dos DIP Switches (Modo de Operação)
-O módulo PN532 V3 possui duas chavinhas brancas (DIP Switches) para selecionar o modo de comunicação. O Bruce suporta **I2C** e **HSU (High Speed UART)**.
+O módulo PN532 V3 possui duas chavinhas brancas (DIP Switches) para selecionar o modo de comunicação. O Willy suporta **I2C** e **HSU (High Speed UART)**.
 
 | Modo | Chave 1 (__1__) | Chave 2 (__2__) | Recomendado? |
 | :--- | :--- | :--- | :--- |
@@ -32,7 +32,7 @@ Use esta opção se for alternar entre GPS e NFC.
 
 **Configuração do Módulo:** Chaves em **HSU (Serial)** (0, 0).
 
-| Pino PN532 | Fio | Pino CYD (CN1/P1) | Configuração no Menu Bruce |
+| Pino PN532 | Fio | Pino CYD (CN1/P1) | Configuração no Menu Willy |
 | :--- | :--- | :--- | :--- |
 | **VCC** | Vermelho | **VCC (5V/3.3V)** | - |
 | **GND** | Preto | **GND** | - |

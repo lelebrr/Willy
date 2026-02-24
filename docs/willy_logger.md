@@ -77,7 +77,7 @@ O logger é inicializado automaticamente no `setup()` do main.cpp:
 if (sdcardMounted) {
     willyLogger.begin();
     willyLogger.logSystemStatus();
-    willyLogger.info(COMP_SYSTEM, "Willy iniciado - versao " BRUCE_VERSION);
+    willyLogger.info(COMP_SYSTEM, "Willy iniciado - versao " Willy_VERSION);
     willyLogger.showLogWarning();  // Mostra aviso no display
 }
 ```

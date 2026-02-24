@@ -5,7 +5,7 @@
 [![SD Card](https://img.shields.io/badge/SD%20Card-Necess%C3%A1rio-orange.svg)]()
 [![Formato](https://img.shields.io/badge/Formato-JSON%2FCSS-blue.svg)]()
 
-**Temas customizados para a interface do Bruce Firmware**
+**Temas customizados para a interface do Willy Firmware**
 
 </div>
 
@@ -24,7 +24,7 @@
 
 ## 🗺️ Visão Geral
 
-Os temas permitem personalizar completamente a aparência do Bruce Firmware, incluindo:
+Os temas permitem personalizar completamente a aparência do Willy Firmware, incluindo:
 
 - 🎨 **Cores** - Fundo, primária, secundária, destaque
 - 🖼️ **Imagens** - Backgrounds, logos, ícones
@@ -122,7 +122,7 @@ Tema futurista estilo cyberpunk com efeitos visuais avançados.
 ```
 ┌──────────────────────────────┐
 │  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │
-│  ██  BRUCE FIRMWARE  ████    │
+│  ██  Willy FIRMWARE  ████    │
 │  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │
 │                              │
 │  > WiFi        [████████]   │
@@ -358,7 +358,7 @@ Defina os estilos personalizados:
 Quer compartilhar seu tema com a comunidade?
 
 1. **Crie seu tema** seguindo as diretrizes acima
-2. **Teste** no Bruce Firmware
+2. **Teste** no Willy Firmware
 3. **Faça um fork** do repositório
 4. **Adicione** na pasta `themes/seu_tema/`
 5. **Envie um Pull Request**
@@ -367,10 +367,10 @@ Quer compartilhar seu tema com a comunidade?
 
 <div align="center">
 
-### 🎨 Bruce Themes
+### 🎨 Willy Themes
 
 **[⬆ Voltar ao Topo](#-temas)**
 
-*Personalize seu Bruce do seu jeito*
+*Personalize seu Willy do seu jeito*
 
 </div>

@@ -1,12 +1,12 @@
 # 🔧 Interpreter Scripts
 
-Scripts JavaScript para o interpretador do Bruce Firmware.
+Scripts JavaScript para o interpretador do Willy Firmware.
 
 ---
 
 ## 📖 O Que é o Interpreter?
 
-O Bruce possui um interpretador JavaScript integrado que permite executar scripts customizados diretamente no dispositivo.
+O Willy possui um interpretador JavaScript integrado que permite executar scripts customizados diretamente no dispositivo.
 
 ---
 
@@ -42,7 +42,7 @@ Menu → Interpreter → Selecione arquivo .js
 
 ```javascript
 // Meu primeiro script
-print("Olá Bruce!");
+print("Olá Willy!");
 
 // Loop
 for(var i = 0; i < 5; i++) {

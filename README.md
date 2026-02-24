@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ Bruce Firmware
+# 🛡️ Willy Firmware
 
 ### *O Kit Definitivo de Segurança para ESP32*
 
@@ -8,14 +8,14 @@
 [![Plataforma](https://img.shields.io/badge/Plataforma-ESP32-green.svg)](https://www.espressif.com/pt/products/socs/esp32)
 [![Framework](https://img.shields.io/badge/Framework-Arduino-orange.svg)](https://www.arduino.cc/)
 [![PlatformIO](https://img.shields.io/badge/PlatformIO-Compat%C3%ADvel-brightgreen.svg)](https://platformio.org/)
-[![Versão](https://img.shields.io/badge/Vers%C3%A3o-Dev-red.svg)](https://github.com/pr3y/Bruce)
-[![Estrelas](https://img.shields.io/github/stars/pr3y/Bruce?style=social)](https://github.com/pr3y/Bruce/stargazers)
-[![Forks](https://img.shields.io/github/forks/pr3y/Bruce?style=social)](https://github.com/pr3y/Bruce/network/members)
-[![Issues](https://img.shields.io/github/issues/pr3y/Bruce)](https://github.com/pr3y/Bruce/issues)
-[![Discord](https://img.shields.io/discord/123456789?color=7289da&label=Discord&logo=discord)](https://discord.gg/Bruce)
-[![Twitter](https://img.shields.io/twitter/follow/BruceFw?style=social)](https://twitter.com/BruceFw)
+[![Versão](https://img.shields.io/badge/Vers%C3%A3o-Dev-red.svg)](https://github.com/pr3y/Willy)
+[![Estrelas](https://img.shields.io/github/stars/pr3y/Willy?style=social)](https://github.com/pr3y/Willy/stargazers)
+[![Forks](https://img.shields.io/github/forks/pr3y/Willy?style=social)](https://github.com/pr3y/Willy/network/members)
+[![Issues](https://img.shields.io/github/issues/pr3y/Willy)](https://github.com/pr3y/Willy/issues)
+[![Discord](https://img.shields.io/discord/123456789?color=7289da&label=Discord&logo=discord)](https://discord.gg/Willy)
+[![Twitter](https://img.shields.io/twitter/follow/WillyFw?style=social)](https://twitter.com/WillyFw)
 
-<img src="media/pictures/bruce_banner.jpg" alt="Bruce Banner" width="600"/>
+<img src="media/pictures/Willy_banner.jpg" alt="Willy Banner" width="600"/>
 
 **Transforme seu ESP32 em uma poderosa ferramenta de pesquisa em segurança**
 
@@ -42,16 +42,16 @@
 
 | Métrica | Status |
 |---------|--------|
-| ![Tamanho do código](https://img.shields.io/github/languages/code-size/pr3y/Bruce) | Tamanho do Código |
-| ![Último commit](https://img.shields.io/github/last-commit/pr3y/Bruce) | Último Commit |
-| ![Contribuidores](https://img.shields.io/github/contributors/pr3y/Bruce) | Contribuidores |
-| ![Atividade de commits](https://img.shields.io/github/commit-activity/m/pr3y/Bruce) | Atividade |
+| ![Tamanho do código](https://img.shields.io/github/languages/code-size/pr3y/Willy) | Tamanho do Código |
+| ![Último commit](https://img.shields.io/github/last-commit/pr3y/Willy) | Último Commit |
+| ![Contribuidores](https://img.shields.io/github/contributors/pr3y/Willy) | Contribuidores |
+| ![Atividade de commits](https://img.shields.io/github/commit-activity/m/pr3y/Willy) | Atividade |
 
 ---
 
 ## 🎯 Visão Geral
 
-Bruce é um **firmware open-source abrangente** para dispositivos baseados em ESP32 que os transforma em poderosas ferramentas de pesquisa em segurança. Inspirado em projetos como Flipper Zero e Pwnagotchi, Bruce traz capacidades profissionais de segurança para hardware acessível.
+Willy é um **firmware open-source abrangente** para dispositivos baseados em ESP32 que os transforma em poderosas ferramentas de pesquisa em segurança. Inspirado em projetos como Flipper Zero e Pwnagotchi, Willy traz capacidades profissionais de segurança para hardware acessível.
 
 <div align="center">
 
@@ -60,9 +60,9 @@ Bruce é um **firmware open-source abrangente** para dispositivos baseados em ES
 
 </div>
 
-### Por que Bruce?
+### Por que Willy?
 
-| Recurso | Bruce | Flipper Zero | Pwnagotchi |
+| Recurso | Willy | Flipper Zero | Pwnagotchi |
 |---------|:-----:|:------------:|:----------:|
 | **Ataques WiFi** | ✅ | ✅ | ✅ |
 | **Ataques Bluetooth** | ✅ | ✅ | ❌ |
@@ -309,21 +309,21 @@ pip install platformio
 
 #### Opção 1: Binário Pré-compilado (Recomendado para iniciantes)
 
-1. Baixe o firmware mais recente em [Releases](https://github.com/pr3y/Bruce/releases)
+1. Baixe o firmware mais recente em [Releases](https://github.com/pr3y/Willy/releases)
 2. Conecte seu dispositivo via USB
-3. Use o web flasher em [bruce.computer](https://bruce.computer)
+3. Use o web flasher em [Willy.computer](https://Willy.computer)
    - OU use esptool:
 
    ```bash
-   esptool.py --port COM3 write_flash 0x0 Bruce-CYD-2USB.bin
+   esptool.py --port COM3 write_flash 0x0 Willy-CYD-2USB.bin
    ```
 
 #### Opção 2: Compilar do Código Fonte
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/pr3y/Bruce
-cd Bruce
+git clone https://github.com/pr3y/Willy
+cd Willy
 
 # Compilar para seu dispositivo (exemplo CYD-2USB)
 pio run -e CYD-2USB
@@ -364,12 +364,12 @@ Agradecemos contribuições! Veja como você pode ajudar:
 
 | Tipo | Descrição |
 |------|-----------|
-| 🐛 **Reportar Bugs** | Reporte problemas via [GitHub Issues](https://github.com/pr3y/Bruce/issues) |
+| 🐛 **Reportar Bugs** | Reporte problemas via [GitHub Issues](https://github.com/pr3y/Willy/issues) |
 | 💡 **Sugerir Recursos** | Proponha novos recursos |
 | 📝 **Documentação** | Melhore docs e traduções |
 | 💻 **Código** | Envie pull requests |
 | 🧪 **Testes** | Teste em diferentes hardwares |
-| 📢 **Divulgar** | Compartilhe o Bruce com outros |
+| 📢 **Divulgar** | Compartilhe o Willy com outros |
 
 ---
 
@@ -377,7 +377,7 @@ Agradecemos contribuições! Veja como você pode ajudar:
 
 <div align="center">
 
-[![Contribuidores](https://contrib.rocks/image?repo=pr3y/Bruce)](https://github.com/pr3y/Bruce/graphs/contributors)
+[![Contribuidores](https://contrib.rocks/image?repo=pr3y/Willy)](https://github.com/pr3y/Willy/graphs/contributors)
 
 **Obrigado a todos os contribuidores!** 🙏
 
@@ -391,10 +391,10 @@ Agradecemos contribuições! Veja como você pode ajudar:
 
 <div align="center">
 
-[![Discord](https://img.shields.io/badge/Discord-Entrar%20no%20Servidor-7289da?style=for-the-badge&logo=discord)](https://discord.gg/Bruce)
-[![Telegram](https://img.shields.io/badge/Telegram-Entrar%20no%20Grupo-0088cc?style=for-the-badge&logo=telegram)](https://t.me/Bruce)
-[![Twitter](https://img.shields.io/badge/Twitter-Seguir-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/BruceFw)
-[![Reddit](https://img.shields.io/badge/Reddit-Entrar%20na%20Comunidade-FF4500?style=for-the-badge&logo=reddit)](https://reddit.com/r/Bruce)
+[![Discord](https://img.shields.io/badge/Discord-Entrar%20no%20Servidor-7289da?style=for-the-badge&logo=discord)](https://discord.gg/Willy)
+[![Telegram](https://img.shields.io/badge/Telegram-Entrar%20no%20Grupo-0088cc?style=for-the-badge&logo=telegram)](https://t.me/Willy)
+[![Twitter](https://img.shields.io/badge/Twitter-Seguir-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/WillyFw)
+[![Reddit](https://img.shields.io/badge/Reddit-Entrar%20na%20Comunidade-FF4500?style=for-the-badge&logo=reddit)](https://reddit.com/r/Willy)
 
 </div>
 
@@ -427,15 +427,15 @@ Este projeto está licenciado sob a **Licença MIT** - veja o arquivo [LICENSE](
 
 ### ⭐ Histórico de Estrelas
 
-[![Gráfico de Histórico de Estrelas](https://api.star-history.com/svg?repos=pr3y/Bruce&type=Date)](https://star-history.com/#pr3y/Bruce&Date)
+[![Gráfico de Histórico de Estrelas](https://api.star-history.com/svg?repos=pr3y/Willy&type=Date)](https://star-history.com/#pr3y/Willy&Date)
 
 ---
 
-### 🛡️ Feito com ❤️ pela Equipe Bruce
+### 🛡️ Feito com ❤️ pela Equipe Willy
 
-**[⬆ Voltar ao Topo](#-bruce-firmware)**
+**[⬆ Voltar ao Topo](#-Willy-firmware)**
 
-<img src="media/pictures/bruce_hd.png" alt="Logo Bruce" width="150"/>
+<img src="media/pictures/Willy_hd.png" alt="Logo Willy" width="150"/>
 
 *Segurança em suas mãos*
 

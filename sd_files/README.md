@@ -1,14 +1,14 @@
 <div align="center">
 
-# 📁 SD Card Files - Bruce Firmware
+# 📁 SD Card Files - Willy Firmware
 
 [![SD Card](https://img.shields.io/badge/SD%20Card-Required-orange.svg)]()
 [![Format](https://img.shields.io/badge/Format-FAT32-blue.svg)]()
 [![Size](https://img.shields.io/badge/Min%20Size-4GB-green.svg)]()
 
-<img src="../media/pictures/bruce_hd.png" alt="Bruce Logo" width="200"/>
+<img src="../media/pictures/Willy_hd.png" alt="Willy Logo" width="200"/>
 
-**Arquivos de exemplo e recursos para o cartão SD do Bruce**
+**Arquivos de exemplo e recursos para o cartão SD do Willy**
 
 </div>
 
@@ -16,7 +16,7 @@
 
 ## 📋 Visão Geral
 
-O cartão SD é essencial para o funcionamento completo do Bruce Firmware. Ele permite:
+O cartão SD é essencial para o funcionamento completo do Willy Firmware. Ele permite:
 
 - 💾 **Salvar capturas** (handshakes, códigos IR, dumps NFC)
 - 📂 **Carregar payloads** (BadUSB, scripts JavaScript)
@@ -66,7 +66,7 @@ O cartão SD é essencial para o funcionamento completo do Bruce Firmware. Ele p
 │   └── ... mais scripts
 │
 ├── 📁 nfc/                       # Arquivos NFC/RFID
-│   ├── 📄 bruce_demo.rfid
+│   ├── 📄 Willy_demo.rfid
 │   ├── 📄 rickroll.rfid
 │   └── ... mais dumps
 │
@@ -142,7 +142,7 @@ O cartão SD é essencial para o funcionamento completo do Bruce Firmware. Ele p
 | Arquivo | Descrição |
 |---------|-----------|
 | `rickroll.txt` | Rickroll clássico |
-| `Bruce_t_Best.txt` | Demonstração do Bruce |
+| `Willy_t_Best.txt` | Demonstração do Willy |
 
 ### 📖 Sintaxe Ducky Script
 
@@ -154,7 +154,7 @@ DELAY 500         // Aguarda meio segundo
 STRING notepad    // Digita "notepad"
 ENTER             // Pressiona Enter
 DELAY 300         // Aguarda
-STRING Hello Bruce! // Digita texto
+STRING Hello Willy! // Digita texto
 ```
 
 #### Comandos Suportados
@@ -311,7 +311,7 @@ tft.fillScreen(TFT_BLACK);
 tft.setTextColor(TFT_WHITE);
 tft.setTextSize(2);
 tft.setCursor(10, 10);
-tft.print("Hello Bruce!");
+tft.print("Hello Willy!");
 ```
 
 #### Input
@@ -371,7 +371,7 @@ while(true) {
 
 | Arquivo | Tipo | Descrição |
 |---------|------|-----------|
-| `bruce_demo.rfid` | Mifare 1K | Dump de demonstração |
+| `Willy_demo.rfid` | Mifare 1K | Dump de demonstração |
 | `rickroll.rfid` | Mifare 1K | Tag com URL Rickroll |
 | `amex_demo.rfid` | Mifare 1K | Cartão demo |
 
@@ -502,7 +502,7 @@ themes/
 ```json
 {
     "name": "Neon Cyber",
-    "author": "Bruce Team",
+    "author": "Willy Team",
     "version": "1.0",
     "colors": {
         "background": "#0a0a0a",
@@ -619,10 +619,10 @@ AA:BB:CC:DD:EE:FF,Home_Network,[WPA2-PSK-CCMP][ESS],2026-02-23 15:30:45,6,-45,-2
 
 <div align="center">
 
-### 🛡️ Bruce Firmware
+### 🛡️ Willy Firmware
 
-**[⬆ Voltar ao Topo](#-sd-card-files---bruce-firmware)**
+**[⬆ Voltar ao Topo](#-sd-card-files---Willy-firmware)**
 
-*Arquivos mantidos pela comunidade Bruce*
+*Arquivos mantidos pela comunidade Willy*
 
 </div>

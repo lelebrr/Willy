@@ -42,7 +42,7 @@ O módulo trabalha com pacotes de dados. Por exemplo, para enviar um código IR,
 - **Exemplo de Envio**: `0xFA` + `Endereço` + `Comando` + `...`
 
 > [!NOTE]
-> O firmware **Bruce** atual utiliza bibliotecas que controlam LEDs IR diretamente via GPIO (toggling). Para usar este módulo YS-IRTM, seria necessário implementar um driver serial específico no firmware. No momento, a conexão física é documentada para uso futuro ou scripts customizados.
+> O firmware **Willy** atual utiliza bibliotecas que controlam LEDs IR diretamente via GPIO (toggling). Para usar este módulo YS-IRTM, seria necessário implementar um driver serial específico no firmware. No momento, a conexão física é documentada para uso futuro ou scripts customizados.
 
 ---
 

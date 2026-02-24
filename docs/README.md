@@ -1,14 +1,14 @@
 <div align="center">
 
-# 📚 Bruce Firmware - Documentação Completa
+# 📚 Willy Firmware - Documentação Completa
 
-[![Documentation](https://img.shields.io/badge/Documentation-Complete-green.svg)](https://github.com/pr3y/Bruce)
+[![Documentation](https://img.shields.io/badge/Documentation-Complete-green.svg)](https://github.com/pr3y/Willy)
 [![Language](https://img.shields.io/badge/Language-Português-blue.svg)]()
 [![Last Update](https://img.shields.io/badge/Updated-2026-orange.svg)]()
 
-<img src="../media/pictures/bruce_banner.jpg" alt="Bruce Banner" width="500"/>
+<img src="../media/pictures/Willy_banner.jpg" alt="Willy Banner" width="500"/>
 
-**Tudo que você precisa saber sobre o Bruce Firmware**
+**Tudo que você precisa saber sobre o Willy Firmware**
 
 </div>
 
@@ -45,9 +45,9 @@
 
 ## 🚀 Introdução
 
-### O que é o Bruce Firmware?
+### O que é o Willy Firmware?
 
-**Bruce** é um firmware open-source multifuncional para ESP32 que transforma seu dispositivo em uma ferramenta completa de pesquisa em segurança. Inspirado em projetos como [Flipper Zero](https://flipperzero.one) e [Pwnagotchi](https://pwnagotchi.ai), o Bruce oferece capacidades profissionais de segurança a um preço acessível.
+**Willy** é um firmware open-source multifuncional para ESP32 que transforma seu dispositivo em uma ferramenta completa de pesquisa em segurança. Inspirado em projetos como [Flipper Zero](https://flipperzero.one) e [Pwnagotchi](https://pwnagotchi.ai), o Willy oferece capacidades profissionais de segurança a um preço acessível.
 
 ### 🎯 Principais Características
 
@@ -67,7 +67,7 @@
 
 ### 📊 Comparativo
 
-| Característica | Bruce | Flipper Zero | Pwnagotchi |
+| Característica | Willy | Flipper Zero | Pwnagotchi |
 |----------------|:-----:|:------------:|:----------:|
 | WiFi Attacks | ✅ | ✅ | ✅ |
 | Bluetooth/BLE | ✅ | ✅ | ❌ |
@@ -458,7 +458,7 @@ Raw data: 0x0207807F
 
 ### ⚙️ Configurações Avançadas do IR
 
-O firmware Bruce oferece configurações avançadas para otimizar a transmissão IR:
+O firmware Willy oferece configurações avançadas para otimizar a transmissão IR:
 
 #### Modos de Operação
 
@@ -737,7 +737,7 @@ AA:BB:CC:DD:EE:FF,Home_Network,[WPA2-PSK-CCMP][ESS],2026-02-23 15:30:45,6,-45,-2
 
 ### ⚙️ Configurações Avançadas do GPS
 
-O firmware Bruce oferece configurações avançadas para otimizar o módulo GPS NEO-6M:
+O firmware Willy oferece configurações avançadas para otimizar o módulo GPS NEO-6M:
 
 #### Modos de Operação
 
@@ -811,8 +811,8 @@ Filtre sinais fracos para melhor precisão em ambientes urbanos:
 pip install platformio
 
 # Clone o repositório
-git clone https://github.com/pr3y/Bruce
-cd Bruce
+git clone https://github.com/pr3y/Willy
+cd Willy
 
 # Compile para seu dispositivo
 pio run -e CYD-2USB
@@ -827,7 +827,7 @@ pio device monitor
 ### Estrutura do Projeto
 
 ```
-Bruce/
+Willy/
 ├── src/
 │   ├── core/           # Núcleo do sistema
 │   │   ├── display.cpp # Gerenciamento de display
@@ -925,10 +925,10 @@ Este projeto é licenciado sob **MIT License**. Consulte o arquivo LICENSE para 
 
 <div align="center">
 
-### 🛡️ Bruce Firmware
+### 🛡️ Willy Firmware
 
-**[⬆ Voltar ao Topo](#-bruce-firmware---documentação-completa)**
+**[⬆ Voltar ao Topo](#-Willy-firmware---documentação-completa)**
 
-*Documentação mantida pela comunidade Bruce*
+*Documentação mantida pela comunidade Willy*
 
 </div>

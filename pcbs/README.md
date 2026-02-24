@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔌 PCBs do Bruce
+# 🔌 PCBs do Willy
 
 [![PCBWAY](https://img.shields.io/badge/PCBWAY-Patrocinador-orange.svg)](https://www.pcbway.com/)
 [![Open Source](https://img.shields.io/badge/Open%20Source-Hardware-green.svg)]()
@@ -8,9 +8,9 @@
 
 <img src="https://www.pcbway.com/project/img/images/frompcbway-1220.png" alt="Banner PCBWay" width="500"/>
 
-**PCBs desenvolvidos pela comunidade para o Bruce Firmware**
+**PCBs desenvolvidos pela comunidade para o Willy Firmware**
 
-[🛒 Pedir no PCBWay](https://www.pcbway.com/project/shareproject/Bruce_PCB_Smoochiee_d6a0284b.html) • [📋 Arquivos de Design](#-arquivos-de-design) • [🔧 Guia de Montagem](#-guia-de-montagem)
+[🛒 Pedir no PCBWay](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html) • [📋 Arquivos de Design](#-arquivos-de-design) • [🔧 Guia de Montagem](#-guia-de-montagem)
 
 </div>
 
@@ -30,13 +30,13 @@
 
 ## 🗺️ Visão Geral
 
-Este diretório contém designs de PCB open-source criados pela comunidade Bruce. Esses PCBs são projetados para funcionar perfeitamente com o Bruce Firmware e aprimorar suas capacidades de pesquisa em segurança.
+Este diretório contém designs de PCB open-source criados pela comunidade Willy. Esses PCBs são projetados para funcionar perfeitamente com o Willy Firmware e aprimorar suas capacidades de pesquisa em segurança.
 
 ### Por que usar nossos PCBs?
 
 | Benefício | Descrição |
 |-----------|-----------|
-| ✅ **Prontos para Uso** | Projetados especificamente para o Bruce Firmware |
+| ✅ **Prontos para Uso** | Projetados especificamente para o Willy Firmware |
 | 📐 **Design Compacto** | Fator de forma otimizado para portabilidade |
 | 💰 **Custo Efetivo** | Fabricação acessível através do PCBWay |
 | 🔧 **Fácil Montagem** | Silkscreen claro e guias de montagem |
@@ -46,11 +46,11 @@ Este diretório contém designs de PCB open-source criados pela comunidade Bruce
 
 ## 🖥️ PCBs Disponíveis
 
-### 1. Bruce PCB v2 por Smoochiee
+### 1. Willy PCB v2 por Smoochiee
 
 <div align="center">
 
-[![Bruce PCB v2](https://raw.githubusercontent.com/pr3y/Bruce/refs/heads/main/media/pcbs/smoochie/Bruce_PCB_full.png)](https://www.pcbway.com/project/shareproject/Bruce_PCB_Smoochiee_d6a0284b.html)
+[![Willy PCB v2](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/smoochie/Willy_PCB_full.png)](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html)
 
 </div>
 
@@ -72,7 +72,7 @@ Este diretório contém designs de PCB open-source criados pela comunidade Bruce
 
 | Frente | Verso |
 |:------:|:-----:|
-| ![Frente](https://raw.githubusercontent.com/pr3y/Bruce/refs/heads/main/media/pcbs/smoochie/front.png) | ![Verso](https://raw.githubusercontent.com/pr3y/Bruce/refs/heads/main/media/pcbs/smoochie/back.png) |
+| ![Frente](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/smoochie/front.png) | ![Verso](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/smoochie/back.png) |
 
 </div>
 
@@ -106,7 +106,7 @@ Silkscreen: Branco
 
 <div align="center">
 
-![StickCPlus PCB](https://raw.githubusercontent.com/pr3y/Bruce/refs/heads/main/media/pcbs/Pirata/front.png)
+![StickCPlus PCB](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/Pirata/front.png)
 
 </div>
 
@@ -126,7 +126,7 @@ Silkscreen: Branco
 
 | Frente | Verso |
 |:------:|:-----:|
-| ![Frente](https://raw.githubusercontent.com/pr3y/Bruce/refs/heads/main/media/pcbs/Pirata/front.png) | ![Verso](https://raw.githubusercontent.com/pr3y/Bruce/refs/heads/main/media/pcbs/Pirata/back.png) |
+| ![Frente](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/Pirata/front.png) | ![Verso](https://raw.githubusercontent.com/pr3y/Willy/refs/heads/main/media/pcbs/Pirata/back.png) |
 
 </div>
 
@@ -146,9 +146,9 @@ Máscara de Solda: Preto
 
 <div align="center">
 
-[![Pedir no PCBWay](https://www.pcbway.com/project/img/images/frompcbway-1220.png)](https://www.pcbway.com/project/shareproject/Bruce_PCB_Smoochiee_d6a0284b.html)
+[![Pedir no PCBWay](https://www.pcbway.com/project/img/images/frompcbway-1220.png)](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html)
 
-### [👉 Clique Aqui para Pedir o Bruce PCB](https://www.pcbway.com/project/shareproject/Bruce_PCB_Smoochiee_d6a0284b.html)
+### [👉 Clique Aqui para Pedir o Willy PCB](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html)
 
 </div>
 
@@ -164,7 +164,7 @@ Máscara de Solda: Preto
 
 ### Processo de Pedido
 
-1. **Visite a página do projeto**: [Bruce PCB no PCBWay](https://www.pcbway.com/project/shareproject/Bruce_PCB_Smoochiee_d6a0284b.html)
+1. **Visite a página do projeto**: [Willy PCB no PCBWay](https://www.pcbway.com/project/shareproject/Willy_PCB_Smoochiee_d6a0284b.html)
 2. **Selecione especificações**:
    - Quantidade (10, 20, 50, 100+)
    - Espessura (1.6mm recomendado)
@@ -181,15 +181,15 @@ Máscara de Solda: Preto
 
 ```
 pcbs/
-├── Bruce_PCB_smoochie/
-│   ├── BOM_Bruce_PCB_v2_Smoochiee.xlsx    # Lista de Materiais
-│   ├── Bruce_PCB_Smoochiee_Pick_and_Plack.xlsx
-│   ├── Bruce_PCB_v2_Schematic.pdf          # Esquemático
+├── Willy_PCB_smoochie/
+│   ├── BOM_Willy_PCB_v2_Smoochiee.xlsx    # Lista de Materiais
+│   ├── Willy_PCB_Smoochiee_Pick_and_Plack.xlsx
+│   ├── Willy_PCB_v2_Schematic.pdf          # Esquemático
 │   ├── gerber/
-│   │   ├── BRUCE_MANUAL_BUILD.zip          # Arquivos Gerber
-│   │   └── Bruce_PCB_v2_Smoochiee.zip      # Arquivos de produção
+│   │   ├── Willy_MANUAL_BUILD.zip          # Arquivos Gerber
+│   │   └── Willy_PCB_v2_Smoochiee.zip      # Arquivos de produção
 │   └── 3d/
-│       ├── Bruce_PCB_V2_3dCase.zip         # Caixa 3D impressa
+│       ├── Willy_PCB_V2_3dCase.zip         # Caixa 3D impressa
 │       └── README.md
 │
 ├── M5Stick_Intermidiate_ultramarines/
@@ -208,7 +208,7 @@ pcbs/
 
 | PCB | Esquemático | Gerber | BOM |
 |-----|-------------|--------|-----|
-| **Smoochiee v2** | [PDF](Bruce_PCB_smoochie/Bruce_PCB_v2_Schematic.pdf) | [ZIP](Bruce_PCB_smoochie/gerber/Bruce_PCB_v2_Smoochiee.zip) | [XLSX](Bruce_PCB_smoochie/BOM_Bruce_PCB_v2_Smoochiee.xlsx) |
+| **Smoochiee v2** | [PDF](Willy_PCB_smoochie/Willy_PCB_v2_Schematic.pdf) | [ZIP](Willy_PCB_smoochie/gerber/Willy_PCB_v2_Smoochiee.zip) | [XLSX](Willy_PCB_smoochie/BOM_Willy_PCB_v2_Smoochiee.xlsx) |
 | **StickCPlus Pirata** | [PDF](StickCPlus_PCB_Pirata/Pirata%20Board%20Schematics.pdf) | [ZIP](StickCPlus_PCB_Pirata/Pirata_StickC_Board.zip) | [XLSX](StickCPlus_PCB_Pirata/BOM%20of%20Pirata%20Board.xlsx) |
 
 ---
@@ -270,7 +270,7 @@ Ordem de montagem (menor para maior):
 □ Verifique curtos com multímetro
 □ Verifique trilho de 3.3V
 □ Conecte USB e verifique LED de energia
-□ Flash do Bruce Firmware
+□ Flash do Willy Firmware
 □ Teste todas as funções
 ```
 
@@ -373,9 +373,9 @@ Sob os seguintes termos:
 
 <div align="center">
 
-### 🔌 Comunidade PCB do Bruce
+### 🔌 Comunidade PCB do Willy
 
-**[⬆ Voltar ao Topo](#-pcbs-do-bruce)**
+**[⬆ Voltar ao Topo](#-pcbs-do-Willy)**
 
 *Hardware Aberto para Segurança Aberta*
 

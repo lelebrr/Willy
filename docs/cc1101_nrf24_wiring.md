@@ -57,7 +57,7 @@ Os pinos SPI (5, 6, 7) são acessados através do **SparkFun MicroSD Sniffer** i
 
 ---
 
-## Configuração no Bruce
+## Configuração no Willy
 
 - **Core → Pins → CC1101**: GDO0=27, CSN=22
 - **Core → Pins → NRF24**: CE=27, CSN=22

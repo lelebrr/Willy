@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔧 Bruce Firmware - Guia de Configuração de Placas
+# 🔧 Willy Firmware - Guia de Configuração de Placas
 
 [![PlatformIO](https://img.shields.io/badge/PlatformIO-Compat%C3%ADvel-brightgreen.svg)](https://platformio.org/)
 [![ESP32](https://img.shields.io/badge/ESP32-Suportado-green.svg)](https://www.espressif.com/)
@@ -25,7 +25,7 @@
 
 ## 🗺️ Visão Geral
 
-Este diretório contém todas as configurações específicas de hardware para as placas suportadas pelo Bruce Firmware. Cada placa possui seus próprios arquivos de configuração que definem:
+Este diretório contém todas as configurações específicas de hardware para as placas suportadas pelo Willy Firmware. Cada placa possui seus próprios arquivos de configuração que definem:
 
 - 📍 **Mapeamento de pinos** (GPIO, SPI, I2C, UART)
 - ⚙️ **Configurações de build** (flags, partições)
@@ -260,7 +260,7 @@ build_flags =
     -DDEVICE_NAME='"Minha Placa"'
     
     # Recursos
-    -DBRUCE_IR_SERIAL=1
+    -DWilly_IR_SERIAL=1
     -DHAS_SCREEN=1
     -DHAS_TOUCH=1
     
@@ -504,10 +504,10 @@ pio run --list-targets
 
 <div align="center">
 
-### 🛡️ Bruce Firmware
+### 🛡️ Willy Firmware
 
-**[⬆ Voltar ao Topo](#-bruce-firmware---guia-de-configuração-de-placas)**
+**[⬆ Voltar ao Topo](#-Willy-firmware---guia-de-configuração-de-placas)**
 
-*Documentação mantida pela comunidade Bruce*
+*Documentação mantida pela comunidade Willy*
 
 </div>
