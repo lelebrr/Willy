@@ -1,5 +1,0 @@
-# FFT
-
-## License
-
-[MIT](LICENSE)
