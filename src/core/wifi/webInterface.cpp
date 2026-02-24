@@ -14,6 +14,8 @@
 #include <esp32-hal-psram.h>
 #include <esp_heap_caps.h>
 #include <globals.h>
+#include "core/willy_web.h"
+#include "willy_logger.h"
 
 File uploadFile;
 FS _webFS = LittleFS;
@@ -364,6 +366,8 @@ void configureWebServer() {
     mdnsRunning = startMdnsResponder();
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     server->onNotFound(notFound);
+    setupWillyWeb(server);
+    willyLogger.info(COMP_WEBUI, "Server configured with Willy endpoints");
 
     // Index
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -385,6 +389,7 @@ void configureWebServer() {
                 response->addHeader("Set-Cookie", "BRUCESESSION=" + token + "; Path=/; HttpOnly");
                 request->send(response);
                 bruceConfig.addWebUISession(token);
+                willyLogger.info(COMP_WEBUI, "User Login successful");
                 return;
             }
         }

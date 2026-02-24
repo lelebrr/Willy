@@ -73,32 +73,36 @@ lv_obj_t *create_cyber_icon(lv_obj_t *parent, const char *icon_text, const lv_po
     lv_anim_set_path_cb(&a_slide, lv_anim_path_ease_in_out);
     lv_anim_start(&a_slide);
 
-    // Animation 3: Neon Pulse
+    // Animation 3: Neon Pulse (Border)
     lv_anim_t a_pulse;
     lv_anim_init(&a_pulse);
     lv_anim_set_var(&a_pulse, btn);
-    lv_anim_set_values(&a_pulse, LV_OPA_50, LV_OPA_100);
-    lv_anim_set_time(&a_pulse, 1800);
+    lv_anim_set_values(&a_pulse, 0, 8); // Shadow thickness pulse
+    lv_anim_set_time(&a_pulse, 1500);
+    lv_anim_set_playback_time(&a_pulse, 1500);
     lv_anim_set_repeat_count(&a_pulse, LV_ANIM_REPEAT_INFINITE);
-    lv_anim_set_exec_cb(&a_pulse, (lv_anim_exec_xcb_t)lv_obj_set_style_border_opa);
-    lv_anim_set_path_cb(&a_pulse, lv_anim_path_ease_in_out);
+    lv_anim_set_exec_cb(&a_pulse, (lv_anim_exec_xcb_t)lv_obj_set_style_shadow_width);
     lv_anim_start(&a_pulse);
 
-    // Hover effect
+    // Hover effect (Modern & Smooth)
     auto hover_cb = [](lv_event_t *e) {
         lv_obj_t *obj = lv_event_get_target(e);
-        lv_obj_set_style_transform_zoom(obj, 330, 0); // ~1.3x approx
-        lv_obj_set_style_shadow_width(obj, 20, 0);
-        lv_obj_set_style_shadow_spread(obj, 8, 0);
-        lv_obj_set_style_shadow_opa(obj, LV_OPA_80, 0);
-        lv_obj_set_style_transform_angle(obj, 80, 0);
+        lv_obj_set_style_transform_zoom(obj, 310, 0); // ~1.2x
+        lv_obj_set_style_shadow_width(obj, 25, 0);
+        lv_obj_set_style_shadow_spread(obj, 10, 0);
+        lv_obj_set_style_shadow_opa(obj, LV_OPA_100, 0);
+        lv_obj_set_style_border_color(obj, lv_color_white(), 0);
+        lv_obj_set_style_border_width(obj, 6, 0);
     };
 
     auto nohover_cb = [](lv_event_t *e) {
         lv_obj_t *obj = lv_event_get_target(e);
         lv_obj_set_style_transform_zoom(obj, 256, 0); // 1x
         lv_obj_set_style_shadow_width(obj, 0, 0);
-        lv_obj_set_style_transform_angle(obj, 0, 0);
+        lv_obj_set_style_border_width(obj, 4, 0);
+        // Reset to theme color
+        lv_color_t sec = lv_color_hex(bruceConfig.secColor);
+        lv_obj_set_style_border_color(obj, sec, 0);
     };
 
     lv_obj_add_event_cb(btn, hover_cb, LV_EVENT_PRESSED, NULL);
@@ -207,13 +211,22 @@ void setup_cyber_menu(lv_obj_t *menu) {
     void (*callbacks[])(lv_event_t *) = {wifi_cb, ble_cb, ir_cb, nfc_cb, sub_cb, nrf_cb, gps_cb, attacks_cb, core_cb, logs_cb, rfid_cb, sd_cb};
 
     // Vector shapes (Simplified SVG-like paths)
+    // Updated shapes for ALL 12 icons
     static const lv_point_t wifi_shape[] = {{20,60}, {40,40}, {60,60}, {80,40}, {100,60}};
     static const lv_point_t ble_shape[] = {{50,10}, {30,40}, {50,70}, {70,40}, {50,10}};
     static const lv_point_t ir_shape[] = {{20,20}, {80,20}, {80,80}, {20,80}, {20,20}};
-    static const lv_point_t nfc_shape[] = {{50,50}, {10,10}, {90,10}, {90,90}, {10,90}, {10,10}};
+    static const lv_point_t nfc_shape[] = {{30,30}, {70,30}, {70,70}, {30,70}, {30,30}};
+    static const lv_point_t sub_shape[] = {{20,50}, {50,20}, {80,50}, {50,80}, {20,50}};
+    static const lv_point_t nrf_shape[] = {{10,10}, {90,10}, {50,90}, {10,10}};
+    static const lv_point_t gps_shape[] = {{50,10}, {80,50}, {50,90}, {20,50}, {50,10}};
+    static const lv_point_t attacks_shape[] = {{20,80}, {50,20}, {80,80}, {20,80}};
+    static const lv_point_t core_shape[] = {{50,50}, {80,20}, {80,80}, {20,80}, {20,20}, {50,50}};
+    static const lv_point_t logs_shape[] = {{20,20}, {80,20}, {80,40}, {20,40}, {20,60}, {80,60}};
+    static const lv_point_t rfid_shape[] = {{50,10}, {90,50}, {50,90}, {10,50}, {50,10}};
+    static const lv_point_t sd_shape[] = {{20,10}, {70,10}, {80,20}, {80,90}, {20,90}, {20,10}};
 
-    const lv_point_t* shapes[] = {wifi_shape, ble_shape, ir_shape, nfc_shape, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-    uint16_t counts[] = {5, 5, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0};
+    const lv_point_t* shapes[] = {wifi_shape, ble_shape, ir_shape, nfc_shape, sub_shape, nrf_shape, gps_shape, attacks_shape, core_shape, logs_shape, rfid_shape, sd_shape};
+    uint16_t counts[] = {5, 5, 5, 5, 5, 4, 5, 4, 6, 6, 5, 6};
 
     for(int i = 0; i < 12; i++) {
         int x = start_x + (i % 3) * (icon_w + spacing_x);

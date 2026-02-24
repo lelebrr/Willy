@@ -230,6 +230,30 @@ ENTER
 
 ---
 
+## 🚀 Willy 2.1 Refinements
+
+A nova versão **Willy 2.1** traz uma experiência de usuário premium e recursos forenses avançados para o repositório oficial.
+
+### 🎨 Cyber Menu 2.1
+
+- **Interface Futurista**: Ícones com arte vetorial moderna e animações 3D de zoom.
+- **Efeitos Neon**: Pulsação de bordas e partículas de brilho (particle glow) ao interagir.
+- **Barra de Notificações**: Status em tempo real de bateria, relógio e conectividade no topo da tela.
+
+### 🕵️ Forensic Logging System
+
+- **Logs Estruturados**: Gravação automática de eventos em `/WILLY_LOGS/` no formato CSV.
+- **Rastreamento Operacional**: Registro detalhado de ataques WiFi, BLE e inicialização de módulos.
+- **Análise Forense**: Ideal para auditorias e estudos pós-operação.
+
+### 🌐 Futuristic Web Dashboard
+
+- **Painel Responsivo**: Controle total do dispositivo via navegador com estética glassmorphism.
+- **Live Stats**: Gráficos e indicadores em tempo real (RSSI, Heap, Uptime).
+- **Log Viewer**: Terminal web integrado para visualização remota dos logs forenses.
+
+---
+
 ## 🖥️ Hardware Suportado
 
 ### 🏆 Dispositivos Recomendados
