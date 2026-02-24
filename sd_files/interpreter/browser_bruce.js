@@ -16,7 +16,7 @@ function drawWindow(title) {
     tftWidth - 10,
     tftHeight - 10,
     5,
-    BRUCE_PRICOLOR
+    WILLY_PRICOLOR
   );
   display.setTextSize(2);
   display.setTextAlign('center', 'top');
@@ -64,7 +64,7 @@ function goToPage(url) {
 
 /// TODO: Use storage.write('browser.js', 'https://newsite.com,\n  ', 'append', '// insert websites here') to add new websites
 var websites = [
-  'https://github.com/pr3y/Bruce/wiki',
+  'https://github.com/lelebrr/Willy/wiki',
   'https://en.cppreference.com/w',
   'https://randomnerdtutorials.com',
   // insert websites here
@@ -161,7 +161,7 @@ function main() {
         }
       } else {
         // Typescript magic. this syntax: choice.match(/\d+/)?.[0] was translated to this:
-        // optional chain is not supported in bruce js (now)
+        // optional chain is not supported in willy js (now)
         var searchTextIndex = request.body.indexOf(
           ' ' +
             ((_a = choice.match(/\d+/)) === null || _a === void 0

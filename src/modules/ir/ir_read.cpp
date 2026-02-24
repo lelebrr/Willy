@@ -9,6 +9,7 @@
 
 #include "ir_read.h"
 #include "core/display.h"
+#include "willy_logger.h"
 #include "core/mykeyboard.h"
 #include "core/sd_functions.h"
 #include "core/serialcmds.h"
@@ -234,6 +235,9 @@ void IrRead::read_signal() {
     ); // Shows the RAW signal on the display
 
     display_btn_options();
+
+    willyLogger.logIR(results.value, results.decode_type, results.bits, raw);
+
     delay(500);
 }
 

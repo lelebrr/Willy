@@ -271,7 +271,7 @@ void Wardriving::scanWiFiBLE() {
         file.println(
             "WigleWifi-1.6,appRelease=v" + String(BRUCE_VERSION) + ",model=M5Stack GPS Unit,release=v" +
             String(BRUCE_VERSION) +
-            ",device=ESP32 M5Stack,display=SPI TFT,board=ESP32 M5Stack,brand=Bruce,star=Sol,body=4,subBody=1"
+            ",device=ESP32 M5Stack,display=SPI TFT,board=ESP32 M5Stack,brand=Willy,star=Sol,body=4,subBody=1"
         );
         file.println(
             "MAC,SSID,AuthMode,FirstSeen,Channel,Frequency,RSSI,CurrentLatitude,CurrentLongitude,"

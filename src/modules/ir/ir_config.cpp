@@ -1,6 +1,6 @@
 /**
  * @file ir_config.cpp
- * @author Bruce Firmware
+ * @author Willy Firmware
  * @brief IR Advanced Configuration Implementation
  * @version 1.0
  */

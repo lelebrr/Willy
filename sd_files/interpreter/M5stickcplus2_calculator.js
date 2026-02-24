@@ -351,7 +351,7 @@ function showHelp() {
     setTextColor(COLOR_WHITE);
     setTextSize(1);
 
-    drawString("Bruce Calculator", 40, 10);
+    drawString("Willy Calculator", 40, 10);
     drawString("Developed by MSI", 40, 25);
 
     drawString("Prev: Down", 50, 50);

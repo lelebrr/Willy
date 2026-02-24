@@ -1,6 +1,6 @@
 /**
  * @file ir_config.h
- * @author Bruce Firmware
+ * @author Willy Firmware
  * @brief IR Advanced Configuration for IR Transmitter/Receiver
  * @version 1.0
  * 

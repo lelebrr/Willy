@@ -91,8 +91,8 @@ public:
 
     std::vector<QrCodeEntry> qrCodes = {
         {"Bruce AP",   "WIFI:T:WPA;S:WillyNet;P:WillyNet;;"},
-        {"Bruce Wiki", "https://github.com/pr3y/Bruce/wiki"},
-        {"Bruce Site", "https://bruce.computer"            },
+        {"Willy Wiki", "https://github.com/lelebrr/Willy/wiki"},
+        {"Willy Site", "https://willy.computer"            },
         {"Rickroll",   "https://youtu.be/dQw4w9WgXcQ"      }
     };
 

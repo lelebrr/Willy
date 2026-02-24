@@ -1,4 +1,4 @@
-REM Bruce BadUSB and BlueDucky Showcase
+REM Willy BadUSB and BlueDucky Showcase
 GUI r
 DELAY 500
 STRINGLN notepad.exe
@@ -11,5 +11,5 @@ STRINGLN | |_) | |  | |_| | (_|  __/
 STRINGLN |_.__/|_|   \__,_|\___\___|
 STRINGLN Follow for more Hacking stuff
 ENTER
-STRINGLN > > > > > ko-fi.com/brucefw
+STRINGLN > > > > > ko-fi.com/willyfw
 STRINGLN > buymeacoffee.com/bmorcelliz

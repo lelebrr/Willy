@@ -1,5 +1,5 @@
 // created by hxd57. V2
-// repository: https://github.com/HawkstoNGriM/m5-bruce-tamagochi-lite
+// repository: https://github.com/HawkstoNGriM/willy-tamagochi-lite
 var dbStore = {fs: "sd", path: "/pet.json"}; // fs can be "sd" or "littlefs"
 var storage = require("storage");
 var display = require('display');
@@ -319,7 +319,7 @@ while (true) {
       ]);
 
       if (confirm === "yes") {
-        serialCmd("storage remove JS-scripts/bruce_0.sub");
+        serialCmd("storage remove JS-scripts/willy_0.sub");
         serialCmd("storage remove pet.json");
 
         // Create a new pet

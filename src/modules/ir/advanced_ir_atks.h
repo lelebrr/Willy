@@ -5,7 +5,7 @@
  * AVISO: Este código é fornecido exclusivamente para fins educacionais e de pesquisa.
  * O uso indevido pode ser ilegal. Use apenas em ambientes controlados e com autorização.
  * 
- * @author Bruce Team
+ * @author Willy Team
  * @date 2026
  */
 

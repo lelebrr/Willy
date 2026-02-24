@@ -679,10 +679,10 @@ void setRFModuleMenu() {
         // else display an error
         displayError("CC1101 nao encontrado", true);
         if (pins_setup == 1)
-            qrcode_display("https://github.com/pr3y/Bruce/blob/main/media/connections/cc1101_stick.jpg");
+            qrcode_display("https://github.com/lelebrr/Willy/blob/main/media/connections/cc1101_stick.jpg");
         if (pins_setup == 2)
             qrcode_display(
-                "https://github.com/pr3y/Bruce/blob/main/media/connections/cc1101_stick_SDCard.jpg"
+                "https://github.com/lelebrr/Willy/blob/main/media/connections/cc1101_stick_SDCard.jpg"
             );
         while (!check(AnyKeyPress)) vTaskDelay(50 / portTICK_PERIOD_MS);
     }

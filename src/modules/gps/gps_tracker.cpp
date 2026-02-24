@@ -8,6 +8,7 @@
 
 #include "gps_tracker.h"
 #include "core/display.h"
+#include "willy_logger.h"
 #include "core/mykeyboard.h"
 #include "core/sd_functions.h"
 #include "current_year.h"
@@ -59,7 +60,7 @@ bool GPSTracker::begin_gps() {
         padprintln("Aplicando config avancada...");
         vTaskDelay(500 / portTICK_PERIOD_MS);
         gpsConfig.applyConfiguration(GPSserial);
-        
+
         // If baudrate was changed, reinitialize serial
         if (gpsConfig.advancedBaudrate != bruceConfigPins.gpsBaudrate && gpsConfig.advancedBaudrate > 0) {
             GPSserial.end();
@@ -188,7 +189,7 @@ void GPSTracker::add_initial_file_data(File file) {
     file.println("<?xml-stylesheet type=\"text/xsl\" href=\"details.xsl\"?>");
     file.println("<gpx");
     file.println("  version=\"1.1\"");
-    file.println("  creator=\"Bruce Firmware\"");
+    file.println("  creator=\"Willy Firmware\"");
     file.println("  xmlns=\"http://www.topografix.com/GPX/1/1\"");
     file.println("  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
     file.println(
@@ -196,15 +197,15 @@ void GPSTracker::add_initial_file_data(File file) {
     );
     file.println(">");
     file.println("  <metadata>");
-    file.println("    <name>Bruce GPS Tracker</name>");
-    file.println("    <desc>GPS Tracker using Bruce Firmware</desc>");
-    file.println("    <link href=\"https://bruce.computer\">");
-    file.println("      <text>Bruce Website</text>");
+    file.println("    <name>Willy GPS Tracker</name>");
+    file.println("    <desc>GPS Tracker using Willy Firmware</desc>");
+    file.println("    <link href=\"https://willy.computer\">");
+    file.println("      <text>Willy Website</text>");
     file.println("    </link>");
     file.println("  </metadata>");
     file.println("  <trk>");
-    file.println("    <name>Bruce Route</name>");
-    file.println("    <desc>GPS route captured by Bruce firmware</desc>");
+    file.println("    <name>Willy Route</name>");
+    file.println("    <desc>GPS route captured by Willy firmware</desc>");
     file.println("    <trkseg>");
 }
 
@@ -259,6 +260,9 @@ void GPSTracker::add_coord() {
 
     file.close();
 
+    willyLogger.logGPS(gps.location.lat(), gps.location.lng(), gps.altitude.meters(),
+                       gps.satellites.value(), gps.location.age(), gps.location.isValid());
+
     padprintf(2, "Coord: %.6f, %.6f\n", gps.location.lat(), gps.location.lng());
 }
 
@@ -308,3 +312,8 @@ void GPSTracker::restorePins() {
         rxPinReleased = false;
     }
 }
+
+
+
+
+

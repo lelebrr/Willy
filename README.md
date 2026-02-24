@@ -13,9 +13,8 @@
 [![Forks](https://img.shields.io/github/forks/pr3y/Willy?style=social)](https://github.com/pr3y/Willy/network/members)
 [![Issues](https://img.shields.io/github/issues/pr3y/Willy)](https://github.com/pr3y/Willy/issues)
 [![Discord](https://img.shields.io/discord/123456789?color=7289da&label=Discord&logo=discord)](https://discord.gg/Willy)
-[![Twitter](https://img.shields.io/twitter/follow/WillyFw?style=social)](https://twitter.com/WillyFw)
 
-<img src="media/pictures/Willy_banner.jpg" alt="Willy Banner" width="600"/>
+<img src="media/pictures/logo_readme.png" alt="Willy Banner" width="600"/>
 
 **Transforme seu ESP32 em uma poderosa ferramenta de pesquisa em segurança**
 
@@ -393,7 +392,6 @@ Agradecemos contribuições! Veja como você pode ajudar:
 
 [![Discord](https://img.shields.io/badge/Discord-Entrar%20no%20Servidor-7289da?style=for-the-badge&logo=discord)](https://discord.gg/Willy)
 [![Telegram](https://img.shields.io/badge/Telegram-Entrar%20no%20Grupo-0088cc?style=for-the-badge&logo=telegram)](https://t.me/Willy)
-[![Twitter](https://img.shields.io/badge/Twitter-Seguir-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/WillyFw)
 [![Reddit](https://img.shields.io/badge/Reddit-Entrar%20na%20Comunidade-FF4500?style=for-the-badge&logo=reddit)](https://reddit.com/r/Willy)
 
 </div>

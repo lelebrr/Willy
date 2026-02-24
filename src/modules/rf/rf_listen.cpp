@@ -1,4 +1,5 @@
 #include "rf_listen.h"
+#include "willy_logger.h"
 
 #include "../others/audio.h"
 
@@ -78,6 +79,9 @@ void rf_listen() {
             pulseActive = true;
             String pulseText = String("Freq: ") + String(___frequency, 2) + String(" Hz");
             displayRedStripe(pulseText, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
+
+            willyLogger.logCC1101(___frequency, ELECHOUSE_cc1101.getRssi(), "Listen");
+
 #if defined(BUZZ_PIN)
             tone(BUZZ_PIN, ___frequency, pulseDuration);
 #elif defined(HAS_NS4168_SPKR)

@@ -14,6 +14,7 @@
 #include "core/i2c_finder.h"
 #include "core/sd_functions.h"
 #include "core/type_convertion.h"
+#include "willy_logger.h"
 
 #ifndef GPIO_NUM_25
 #define GPIO_NUM_25 25
@@ -105,6 +106,9 @@ int PN532::read(int cardBaudRate) {
     }
 
     displayInfo("Reading data blocks...");
+
+    willyLogger.logNFC(printableUID.uid.c_str(), printableUID.picc_type.c_str(), true);
+
     pageReadStatus = read_data_blocks();
     pageReadSuccess = pageReadStatus == SUCCESS;
     return SUCCESS;

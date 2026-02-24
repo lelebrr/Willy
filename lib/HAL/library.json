@@ -2,12 +2,12 @@
   "name": "BruceHAL",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pr3y/Bruce.git"
+    "url": "https://github.com/lelebrr/Willy.git"
   },
   "version": "7.3.1",
   "authors": {
-    "name": "Bruce Firmware",
-    "url": "https://bruce.computer"
+    "name": "Willy Firmware",
+    "url": "https://willy.computer"
   },
   "export": {
     "include": ["io_expander", "sd_card"]
@@ -18,3 +18,4 @@
     "libArchive": false
   }
 }
+

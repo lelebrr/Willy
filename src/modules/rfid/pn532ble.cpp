@@ -198,7 +198,7 @@ void Pn532ble::loadNdefEmulateMenu() {
     String prefix = "";
 
     options = {
-        {"Visitar Bruce", [&]() { prefix = "https://bruce.computer"; }},
+        {"Visitar Willy", [&]() { prefix = "https://willy.computer"; }},
         {"Abrir Url",    [&]() { prefix = "https://"; }              },
         {"Ligacao",  [&]() { prefix = "tel:"; }                  },
         {"Enviar Email",  [&]() { prefix = "mailto:"; }               },

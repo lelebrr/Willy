@@ -1,4 +1,5 @@
 #include "rf_send.h"
+#include "willy_logger.h"
 #include "core/type_convertion.h"
 #include "rf_utils.h"
 #include <RCSwitch.h>
@@ -318,6 +319,8 @@ void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI) {
 
         return;
     }
+
+    willyLogger.logRF(rfcode.key, rfcode.frequency / 1000000.0, (int)rfcode.protocol.toInt(), rfcode.data.c_str());
 
     // digitalWrite(bruceConfigPins.rfTx, LED_OFF);
     deinitRfModule();

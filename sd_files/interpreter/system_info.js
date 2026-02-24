@@ -1,6 +1,6 @@
-// Sistema de Informações do Bruce
+﻿// Sistema de Informações do Willy
 print("=== Informações do Sistema ===");
-print("Bruce Firmware v1.0");
+print("Willy Firmware v1.0");
 print("Placa: " + getBoardName());
 print("CPU: " + ESP.getCpuFreqMHz() + " MHz");
 print("RAM Livre: " + ESP.getFreeHeap() + " bytes");

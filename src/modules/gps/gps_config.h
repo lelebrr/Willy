@@ -1,6 +1,6 @@
 /**
  * @file gps_config.h
- * @author Bruce Firmware
+ * @author Willy Firmware
  * @brief GPS Advanced Configuration for NEO-6M GY-GPS6MV2
  * @version 1.0
  * 

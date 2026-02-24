@@ -183,7 +183,7 @@ static void start_animations(lv_obj_t *parent) {
     lv_anim_set_values(&wiggle, -8, 8);
     lv_anim_set_time(&wiggle, getAnimTime(1200));
     lv_anim_set_exec_cb(&wiggle, wiggle_anim_cb);
-    lv_anim_set_path_cb(&wiggle, lv_anim_path_sine);
+    lv_anim_set_path_cb(&wiggle, lv_anim_path_linear);
     lv_anim_set_playback_time(&wiggle, getAnimTime(1200));
     lv_anim_set_repeat_count(&wiggle, LV_ANIM_REPEAT_INFINITE);
     lv_anim_start(&wiggle);

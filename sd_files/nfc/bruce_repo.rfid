@@ -1,4 +1,4 @@
-Filetype: Bruce RFID File
+Filetype: Willy RFID File
 Version 1
 Device type: NTAG215
 # UID, ATQA and SAK are common for all formats
