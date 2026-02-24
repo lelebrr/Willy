@@ -25,6 +25,7 @@
 
 #include "esp_rom_crc.h"
 #include "mbedtls/md.h"
+#include "mbedtls/pkcs5.h"
 
 #include <string.h>
 #include <string>

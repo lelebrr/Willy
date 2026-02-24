@@ -2,6 +2,9 @@
 #include "nrf_geolocator.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 void nrf_signal_geolocator() {
     NRF24_MODE mode = nrf_setMode();
@@ -29,7 +32,8 @@ void nrf_signal_geolocator() {
     int max_signal = 0;
     int best_channel = 2;
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             NRFradio.setChannel(current_channel);
             delayMicroseconds(130);

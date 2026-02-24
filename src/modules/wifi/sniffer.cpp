@@ -395,9 +395,15 @@ static void registerHandshakeRecord(const String &path) {
     }
     if (xSemaphoreTake(handshakeMutex, pdMS_TO_TICKS(50)) == pdTRUE) {
         SavedHS.insert(path);
+        if (SavedHS.size() > 100) {
+            SavedHS.erase(SavedHS.begin());
+        }
         xSemaphoreGive(handshakeMutex);
     } else {
         SavedHS.insert(path);
+        if (SavedHS.size() > 100) {
+            SavedHS.erase(SavedHS.begin());
+        }
     }
 }
 
@@ -443,6 +449,9 @@ static void registerBeacon(const uint8_t *apAddr) {
     memcpy(beacon.MAC, apAddr, sizeof(beacon.MAC));
     beacon.channel = ch;
     registeredBeacons.insert(beacon);
+    if (registeredBeacons.size() > 500) {
+        registeredBeacons.erase(registeredBeacons.begin());
+    }
 }
 
 static String resolveSsidForFrame(FrameInfo &info, const wifi_promiscuous_pkt_t *packet) {
@@ -1249,8 +1258,11 @@ void sniffer_setup() {
 
         if (deauth && (millis() - deauth_tmp) > DEAUTH_INTERVAL) {
             bool deauth_sent = false;
-            if (registeredBeacons.size() > 40)
-                registeredBeacons.clear(); // Clear registered beacons to restart search and avoid restarts
+            if (registeredBeacons.size() > 100) {
+                registeredBeacons.clear();
+                beaconSsidCache.clear();
+                beaconLastSeen.clear();
+            }
             Serial.println("<<---- Starting Deauthentication Process ---->>");
             for (auto registeredBeacon : registeredBeacons) {
                 if (registeredBeacon.channel == ch) {

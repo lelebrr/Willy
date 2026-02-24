@@ -263,6 +263,7 @@ bool MifareKeysManager::writeToFS(FS *fs, const char *fsName, const std::set<Str
     file.println("//ADD YOUR KEYS ONE PER LINE");
     file.println("//");
     file.println("//STANDARD MIFARE KEYS");
+    file.println("// [WARNING] Use for academic study only. Unauthorized use is illegal.");
 
     for (const auto &key : keys) { file.println(key); }
 

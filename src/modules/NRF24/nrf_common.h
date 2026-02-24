@@ -1,7 +1,9 @@
 #ifndef __NRF_COMMON_H
 #define __NRF_COMMON_H
 #include <RF24.h>
-#include <globals.h>
+#include "globals.h"
+
+namespace nrf_common {
 
 // Define the Macros case it hasn't been declared
 #ifndef NRF24_CE_PIN
@@ -29,4 +31,7 @@ NRF24_MODE nrf_setMode();
 bool nrf_start(NRF24_MODE mode);
 
 void nrf_info();
+
+} // namespace nrf_common
+
 #endif

@@ -8,7 +8,7 @@
 void applyConfiguredMAC() {
     if (bruceConfig.wifiMAC.length() == 17 && validateMACFormat(bruceConfig.wifiMAC)) {
         uint8_t newMAC[6];
-        sscanf(
+        if (sscanf(
             bruceConfig.wifiMAC.c_str(),
             "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
             &newMAC[0],
@@ -17,12 +17,12 @@ void applyConfiguredMAC() {
             &newMAC[3],
             &newMAC[4],
             &newMAC[5]
-        );
-
-        if (esp_wifi_set_mac(WIFI_IF_STA, newMAC) == ESP_OK) {
-            Serial.println("[WiFi] Custom MAC applied: " + bruceConfig.wifiMAC);
-        } else {
-            Serial.println("[WiFi] Failed to apply custom MAC, using default");
+        ) == 6) {
+            if (esp_wifi_set_mac(WIFI_IF_STA, newMAC) == ESP_OK) {
+                Serial.println("[WiFi] Custom MAC applied: " + bruceConfig.wifiMAC);
+            } else {
+                Serial.println("[WiFi] Failed to apply custom MAC, using default");
+            }
         }
     }
 }

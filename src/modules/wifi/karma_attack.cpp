@@ -1,6 +1,3 @@
-/*
-  Not perfect just improve it.
-*/
 #include "FS.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
@@ -16,6 +13,7 @@
 #include "nvs_flash.h"
 #include <set>
 #include <vector>
+#include <WiFi.h>
 
 #include "karma_attack.h"
 #include "sniffer.h" // Channel list
@@ -182,9 +180,14 @@ void probe_sniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
             probe.channel = all_wifi_channels[channl]; // <-- Current channel
 
             probeRequests.push_back(probe);
+
+            // Limit memory usage
+            if (probeRequests.size() > 1000) {
+                probeRequests.erase(probeRequests.begin());
+            }
+
             pkt_counter++;
-            // Print to serial for debugging
-            Serial.printf("[PROBE] MAC: %s, SSID: %s, RSSI: %d\n", mac.c_str(), ssid.c_str(), ctrl.rssi);
+            // Serial.printf removed for performance - can cause lag in sniffer
         }
     }
 }
@@ -213,11 +216,14 @@ void karma_setup() {
         Fs = &SD;
         FileSys = "SD";
         is_LittleFS = false;
-        filen = generateUniqueFilename(SD);
     } else {
         Fs = &LittleFS;
-        filen = generateUniqueFilename(LittleFS);
+        is_LittleFS = true;
     }
+
+    if (!Fs) return; // Crash prevention
+
+    filen = generateUniqueFilename(*Fs);
 
     // Create directories if they don't exist
     if (!Fs->exists("/ProbeData")) Fs->mkdir("/ProbeData");
@@ -457,14 +463,21 @@ void saveProbesToFile(FS &fs) {
     File file = fs.open(filen, FILE_WRITE);
     if (file) {
         file.println("Timestamp,MAC,RSSI,SSID");
+        String buffer = "";
+        buffer.reserve(1024);
         for (const auto &probe : probeRequests) {
-            // Double check we only save probes with SSID (shouldn't be needed but just in case)
             if (probe.ssid.length() > 0) {
-                file.printf(
-                    "%lu,%s,%d,\"%s\"\n", probe.timestamp, probe.mac.c_str(), probe.rssi, probe.ssid.c_str()
-                );
+                char line[128];
+                snprintf(line, sizeof(line), "%lu,%s,%d,\"%s\"\n",
+                         probe.timestamp, probe.mac.c_str(), (int)probe.rssi, probe.ssid.c_str());
+                buffer += line;
+                if (buffer.length() > 800) {
+                    file.print(buffer);
+                    buffer = "";
+                }
             }
         }
+        if (buffer.length() > 0) file.print(buffer);
         file.close();
     }
 }

@@ -14,17 +14,23 @@ void BleMenu::optionsMenu() {
 
     if (BLEConnected) {
         options.push_back({"Desconectar", [=]() {
+                               // Check for active connections if possible before deinit
+                               // In many ESP32 BLE implementations, deinit handles it,
+                               // but it's good to ensure state is consistent.
+                               BLEConnected = false;
 #if defined(CONFIG_IDF_TARGET_ESP32C5)
                                esp_bt_controller_deinit();
 #else
                                BLEDevice::deinit();
 #endif
-                               BLEConnected = false;
-                               delete hid_ble;
-                               hid_ble = nullptr;
+                               if (hid_ble) {
+                                   delete hid_ble;
+                                   hid_ble = nullptr;
+                               }
                                if (_Ask_for_restart == 1) _Ask_for_restart = 2;
                            }});
     }
+
 
     options.push_back({"Comandos Midia", [=]() { MediaCommands(hid_ble, true); }});
 #if !defined(LITE_VERSION)
@@ -162,9 +168,15 @@ void BleMenu::setBleNameMenu() {
          [=]() {
              String newBleName = keyboard(bruceConfigPins.bleName, 30, "Nome Disp BLE:");
              if (newBleName != "\x1B") {
-                 if (!newBleName.isEmpty()) bruceConfigPins.setBleName(newBleName);
-                 else displayError("Nome BLE nao pode ser vazio", true);
+                 if (newBleName.length() > 0 && newBleName.length() <= 30) {
+                     bruceConfigPins.setBleName(newBleName);
+                 } else if (newBleName.isEmpty()) {
+                     displayError("Nome BLE nao pode ser vazio", true);
+                 } else {
+                     displayError("Nome BLE muito longo (max 30)", true);
+                 }
              }
+
          },                                                                !isDefault},
     };
     addOptionToMainMenu();

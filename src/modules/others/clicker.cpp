@@ -880,6 +880,7 @@ void usbClickerSetup() { clicker_setup(); }
  *
  * TODO: Implement Bluetooth HID functionality
  * Will require BLE HID library and pairing logic
+ Serial.println("TODO: implement Bluetooth HID functionality");
  */
 void bleClickerSetup() {
     tft.fillScreen(bruceConfig.bgColor);

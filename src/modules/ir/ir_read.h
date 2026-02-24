@@ -7,7 +7,7 @@
  */
 
 #include <IRrecv.h>
-#include <globals.h>
+#include "globals.h"
 
 class IrRead {
 public:
@@ -74,12 +74,12 @@ private:
                                              "STOP",     "NEXT",    "PREV", "SHUFFLE", "REPEAT"};
     std::vector<String> quickButtonsLED = {
     "ON", "OFF", "BRIGHTNESS+", "BRIGHTNESS-",
-    "RED", "GREEN", "BLUE", "WHITE",           
+    "RED", "GREEN", "BLUE", "WHITE",
     "ORANGE", "PEA_GREEN", "DARK_BLUE",
-    "DARK_YELLOW", "CYAN", "PURPLE",        
-    "YELLOW", "LIGHT_BLUE", "MAGENTA",    
-    "LIGHT_YELLOW", "SKY_BLUE", "ROSE",       
-    "MODE_FLASH", "MODE_STROBE", "MODE_FADE", "MODE_SMOOTH" 
+    "DARK_YELLOW", "CYAN", "PURPLE",
+    "YELLOW", "LIGHT_BLUE", "MAGENTA",
+    "LIGHT_YELLOW", "SKY_BLUE", "ROSE",
+    "MODE_FLASH", "MODE_STROBE", "MODE_FADE", "MODE_SMOOTH"
 };
     std::vector<String> &quickButtons = quickButtonsTV;
 };

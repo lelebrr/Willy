@@ -43,10 +43,11 @@ ssh_channel channel_ssh;
 
 char *stringTochar(String s) {
     if (s.length() == 0) {
-        return nullptr; // or handle the case where the string is empty
+        return nullptr;
     }
 
-    static char arr[14]; // Make sure it's large enough to hold the IP address
+    static char arr[64]; // Enlarged to hold hostnames or IPv6 if needed
+    memset(arr, 0, sizeof(arr));
     s.toCharArray(arr, sizeof(arr));
     return arr;
 }

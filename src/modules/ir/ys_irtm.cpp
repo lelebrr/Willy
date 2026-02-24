@@ -1,5 +1,5 @@
 #include "ys_irtm.h"
-#include <globals.h>
+#include "globals.h"
 
 YS_IRTM::YS_IRTM() {
     _serial = new HardwareSerial(1); // Shared with GPS on Port 1 (GPIO 1/3) but using UART1

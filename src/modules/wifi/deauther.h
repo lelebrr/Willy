@@ -3,6 +3,6 @@
 
 #include "scan_hosts.h"
 
-void stationDeauth(Host host);
+void stationDeauth(ScanHosts::Host host);
 
 #endif

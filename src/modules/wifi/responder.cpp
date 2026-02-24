@@ -13,10 +13,14 @@ https://github.com/7h30th3r0n3/Evil-M5Project
 #include "core/wifi/wifi_common.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include <WiFi.h>
+#include <lwip/sockets.h>
+#include <ESPAsyncWebServer.h>
+#include <SD.h>
 
-String netbiosname_str;
-String netbiosdomain_str;
-String dnsdomain_str;
+char netbiosname_str[32];
+char netbiosdomain_str[32];
+char dnsdomain_str[32];
 const char* netbiosName;
 const char* netbiosDomain;
 const char* dnsDomain;
@@ -196,44 +200,36 @@ String readUTF16(uint8_t* pkt, uint32_t offset, uint16_t len) {
 }
 
 void updateHashUI() {
-  //auto& d = M5Cardputer.Display;
-  //tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(bruceConfig.bgColor);
+    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
 
-  // 1) NTLM count
-  tft.setTextSize(1.0);
-  tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-  tft.setCursor(5, 5);
-  tft.print("NTLM: ");
-  tft.setTextSize(2);
-  tft.print(hashCount);
+    char buf[64];
 
-  // 2) User
-  tft.setTextSize(1.3);
-  tft.setCursor(5, 30);
-  tft.print("User: ");
-  tft.setTextSize(2);
-  tft.print(lastUser);
+    // 1) NTLM count
+    tft.setTextSize(1);
+    tft.setCursor(5, 5);
+    snprintf(buf, sizeof(buf), "NTLM: %d", hashCount);
+    tft.print(buf);
 
-  // 3) Domain
-  tft.setTextSize(1.3);
-  tft.setCursor(5, 55);
-  tft.print("Domain: ");
-  tft.setTextSize(2);
-  tft.print(lastDomain);
+    // 2) User
+    tft.setCursor(5, 30);
+    snprintf(buf, sizeof(buf), "User: %s", lastUser.c_str());
+    tft.print(buf);
 
-  // 4) Client (hostname)
-  tft.setTextSize(1.3);
-  tft.setCursor(5, 80);
-  tft.print("Client: ");
-  tft.setTextSize(2);
-  tft.print(lastClient);
+    // 3) Domain
+    tft.setCursor(5, 55);
+    snprintf(buf, sizeof(buf), "Domain: %s", lastDomain.c_str());
+    tft.print(buf);
 
-  // 5) Query (NBNS/LLMNR + name)
-  tft.setTextSize(1.3);
-  tft.setCursor(5, 105);
-  tft.print(lastQueryProtocol + ": ");
-  tft.setTextSize(2);
-  tft.print(lastQueryName);
+    // 4) Client (hostname)
+    tft.setCursor(5, 80);
+    snprintf(buf, sizeof(buf), "Client: %s", lastClient.c_str());
+    tft.print(buf);
+
+    // 5) Query
+    tft.setCursor(5, 105);
+    snprintf(buf, sizeof(buf), "%s: %s", lastQueryProtocol.c_str(), lastQueryName.c_str());
+    tft.print(buf);
 }
 
 void extractAndPrintHash(uint8_t* pkt, uint32_t smbLength, uint8_t* ntlm) {
@@ -310,7 +306,6 @@ void extractAndPrintHash(uint8_t* pkt, uint32_t smbLength, uint8_t* ntlm) {
   lastUser          = username;
   lastDomain        = domain;
   lastClient        = workstation;
-  updateHashUI();
 }
 
 void terminateSMB1() {
@@ -573,12 +568,17 @@ void responder() {
   //M5Cardputer.Display.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
   if (!wifiConnected) wifiConnectMenu();
 
-  netbiosname_str = keyboard("Bruce", 20);
-  netbiosName = stringTochar(netbiosname_str);
-  netbiosdomain_str = keyboard("BRUCEGROUP", 20);
-  netbiosDomain = stringTochar(netbiosdomain_str);
-  dnsdomain_str = keyboard("Bruce.Local", 20);
-  dnsDomain = stringTochar(dnsdomain_str);
+  String tmp_name = keyboard("Bruce", 20);
+  strncpy(netbiosname_str, tmp_name.c_str(), sizeof(netbiosname_str)-1);
+  netbiosName = netbiosname_str;
+
+  String tmp_domain = keyboard("BRUCEGROUP", 20);
+  strncpy(netbiosdomain_str, tmp_domain.c_str(), sizeof(netbiosdomain_str)-1);
+  netbiosDomain = netbiosdomain_str;
+
+  String tmp_dns = keyboard("Bruce.Local", 20);
+  strncpy(dnsdomain_str, tmp_dns.c_str(), sizeof(dnsdomain_str)-1);
+  dnsDomain = dnsdomain_str;
 
   hashCount = 0;
   // Démarrer l'écoute NBNS (UDP 137)
@@ -1007,6 +1007,8 @@ void responder() {
     smbState.active = false;
     Serial.println(F("Client SMB disconnected."));
   }
+
+  vTaskDelay(10 / portTICK_PERIOD_MS); // Prevent watchdog reset
 }
 
   //waitAndReturnToMenu("Return to menu");

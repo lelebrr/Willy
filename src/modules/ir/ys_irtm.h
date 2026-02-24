@@ -2,6 +2,7 @@
 #define __YS_IRTM__
 
 #include <Arduino.h>
+#include "globals.h"
 
 /**
  * @class YS_IRTM

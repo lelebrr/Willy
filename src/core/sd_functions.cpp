@@ -477,28 +477,45 @@ size_t getFileSize(FS &fs, String filepath) {
 }
 
 String md5File(FS &fs, String filepath) {
-    if (!fs.exists(filepath)) return "";
-    String txt = readSmallFile(fs, filepath);
-    MD5Builder md5;
-    md5.begin();
-    md5.add(txt);
-    md5.calculate();
-    return (md5.toString());
+    File file = fs.open(filepath, FILE_READ);
+    if (!file) return "";
+
+    md5_context_t ctx;
+    esp_rom_md5_init(&ctx);
+
+    uint8_t buffer[512];
+    while (file.available()) {
+        size_t len = file.read(buffer, sizeof(buffer));
+        esp_rom_md5_update(&ctx, buffer, len);
+    }
+
+    uint8_t hash[16];
+    esp_rom_md5_final(hash, &ctx);
+    file.close();
+
+    char s[33];
+    for (int i = 0; i < 16; i++) {
+        sprintf(&s[i * 2], "%02x", hash[i]);
+    }
+    return String(s);
 }
 
 String crc32File(FS &fs, String filepath) {
-    if (!fs.exists(filepath)) return "";
-    String txt = readSmallFile(fs, filepath);
-    // derived from
-    // https://techoverflow.net/2022/08/05/how-to-compute-crc32-with-ethernet-polynomial-0x04c11db7-on-esp32-crc-h/
-    uint32_t romCRC =
-        (~esp_rom_crc32_le((uint32_t)~(0xffffffff), (const uint8_t *)txt.c_str(), txt.length())) ^ 0xffffffff;
+    File file = fs.open(filepath, FILE_READ);
+    if (!file) return "";
 
-    char s[18] = {0};
-    char crcBytes[4] = {0};
-    memcpy(crcBytes, &romCRC, sizeof(uint32_t));
-    snprintf(s, sizeof(s), "%02X%02X%02X%02X\n", crcBytes[3], crcBytes[2], crcBytes[1], crcBytes[0]);
-    return (String(s));
+    uint32_t crc = 0xFFFFFFFF;
+    uint8_t buffer[512];
+    while (file.available()) {
+        size_t len = file.read(buffer, sizeof(buffer));
+        crc = esp_rom_crc32_le(crc, buffer, len);
+    }
+    crc ^= 0xFFFFFFFF;
+    file.close();
+
+    char s[10];
+    sprintf(s, "%08lX", crc);
+    return String(s);
 }
 
 /***************************************************************************************

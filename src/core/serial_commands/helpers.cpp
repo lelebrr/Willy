@@ -40,25 +40,28 @@ char *_readFileFromSerial(size_t fileSizeChar) {
     serialDevice->println("Reading input data from serial buffer until EOF");
     serialDevice->flush();
     while (true) {
-        if (!serialDevice->available()) {
+        if (serialDevice->available()) {
+            lastData = millis();
+            int c = serialDevice->read();
+            if (c == -1) continue;
+
+            buf[bufSize++] = (char)c;
+            buf[bufSize] = '\0';
+
+            if (bufSize >= 3 && strcmp(buf + bufSize - 3, "EOF") == 0) {
+                bufSize -= 3;
+                buf[bufSize] = '\0';
+                break;
+            }
+
+            if (bufSize >= fileSizeChar) {
+                log_e("Input truncated!");
+                break;
+            }
+        } else {
             if (millis() - lastData > 5000) break; // timeout
-            delay(10);
-            continue;
+            vTaskDelay(pdMS_TO_TICKS(1));
         }
-
-        lastData = millis();
-        currLine = serialDevice->readStringUntil('\n');
-        if (currLine == "EOF") break;
-        size_t lineLength = currLine.length();
-
-        if (bufSize + lineLength + 2 > fileSizeChar) {
-            log_e("Input truncated!");
-            break;
-        }
-
-        memcpy(buf + bufSize, currLine.c_str(), lineLength);
-        bufSize += lineLength;
-        buf[bufSize++] = '\n';
     }
     buf[bufSize] = '\0';
     return buf;

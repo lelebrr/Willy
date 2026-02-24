@@ -4,6 +4,8 @@
 #include "PN532Killer.h"
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <NimBLEDevice.h>
+#include "globals.h"
 #include <cstdint>
 #include <set>
 #include <vector>

@@ -17,25 +17,25 @@
 
 void NRF24Menu::optionsMenu() {
     options.clear();
-    options.push_back({"Informacao", nrf_info});
+    options.push_back(Option("Informacao", nrf_common::nrf_info));
 
     if (bruceConfigPins.NRF24_bus.mosi == bruceConfigPins.SDCARD_bus.mosi &&
         bruceConfigPins.NRF24_bus.mosi != GPIO_NUM_NC)
-        options.push_back({"Espectro", [=]() { nrf_spectrum(&sdcardSPI); }});
+        options.push_back(Option("Espectro", [=]() { nrf_spectrum(&sdcardSPI); }));
 #if TFT_MOSI > 0 // Display doesn't use SPI bus
     else if (bruceConfigPins.NRF24_bus.mosi == (gpio_num_t)TFT_MOSI)
-        options.push_back({"Espectro", [=]() { nrf_spectrum(&tft.getSPIinstance()); }});
+        options.push_back(Option("Espectro", [=]() { nrf_spectrum(&tft.getSPIinstance()); }));
 #endif
-    else options.push_back({"Espectro", [=]() { nrf_spectrum(&SPI); }});
+    else options.push_back(Option("Espectro", [=]() { nrf_spectrum(&SPI); }));
 
-    options.push_back({"Jammer NRF", nrf_jammer});
-    options.push_back({"Jammer Canal", nrf_channel_jammer});
-    options.push_back({"Salto de Canal", nrf_channel_hopper});
+    options.push_back(Option("Jammer NRF", nrf_jammer));
+    options.push_back(Option("Jammer Canal", nrf_channel_jammer));
+    options.push_back(Option("Salto de Canal", nrf_channel_hopper));
 
-    options.push_back({"Ataques NRF24", [this]() { attacksMenu(); }});
+    options.push_back(Option("Ataques NRF24", [this]() { attacksMenu(); }));
 
 #if defined(ARDUINO_M5STICK_C_PLUS) || defined(ARDUINO_M5STICK_C_PLUS2)
-    options.push_back({"Config pinos", [this]() { configMenu(); }});
+    options.push_back(Option("Config pinos", [this]() { configMenu(); }));
 #endif
 
     addOptionToMainMenu();

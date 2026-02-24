@@ -27,29 +27,36 @@ void EthernetMenu::optionsMenu() {
              if (eth != nullptr) {
                  run_arp_scanner();
                  eth->stop();
+                 delete eth;
+                 eth = nullptr;
              } else {
-                    displayError("W5500 nao encontrado");
+                 displayError("W5500 nao encontrado");
              }
-         }                        },
+         }},
         {"DHCP Starvation",
          [this]() {
              start_ethernet();
              if (eth != nullptr) {
                  DHCPStarvation();
                  eth->stop();
+                 delete eth;
+                 eth = nullptr;
              } else {
-                    displayError("W5500 nao encontrado");
+                 displayError("W5500 nao encontrado");
              }
-         }                        },
+         }},
         {"MAC Flooding",    [this]() {
              start_ethernet();
              if (eth != nullptr) {
                  MACFlooding();
                  eth->stop();
+                 delete eth;
+                 eth = nullptr;
              } else {
-                    displayError("W5500 nao encontrado");
+                 displayError("W5500 nao encontrado");
              }
          }}
+
     };
     addOptionToMainMenu();
 

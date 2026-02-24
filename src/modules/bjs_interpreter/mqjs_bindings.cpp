@@ -2,30 +2,38 @@
  * @file mqjs_bindings.cpp
  * @brief Micro QuickJS bindings for Bruce
  * @version 1.0
- * 
+ *
  * Implementation for mquickjs API compatibility.
  */
 
 #include "interpreter.h"
 #include "core/display.h"
 #include "globals.h"
+extern "C" {
 #include "mquickjs.h"
+}
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <LittleFS.h>
+#include <SD.h>
+#include "mqjs_stdlib.h"
+#include "core/mykeyboard.h"
+#include "modules/ir/ys_irtm.h"
+#include "modules/badusb_ble/ducky_typer.h"
+#include "modules/rf/rf_send.h"
+#include "modules/rf/rf_utils.h"
 
 // Forward declarations
 extern int getBattery();
 
-// Buffer para JS_ToCString
-static JSCStringBuf g_string_buf;
-
-// Helper to convert JSValue to C string
-static const char* js_to_cstring(JSContext *ctx, JSValue val) {
-    return JS_ToCString(ctx, val, &g_string_buf);
-}
+// Helper to convert JSValue to C string (now uses local buffer passed by caller)
+#define JS_TO_CSTRING(ctx, val, buf) JS_ToCString(ctx, val, buf)
 
 // Forward declaration for the dispatch function
 static JSValue js_bruce_dispatch(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv, int magic);
+
+// Macro for easier function definition in the table
+#define BRUCE_CFUNC_DEF(magic, args) { { .generic_magic = js_bruce_dispatch }, JS_UNDEFINED, JS_CFUNC_generic_magic, args, magic }
 
 // Enum for function indices
 enum {
@@ -81,6 +89,70 @@ enum {
     FUNC_COUNT
 };
 
+// Function table for mQuickJS
+extern "C" const JSCFunctionDef bruce_func_table[] = {
+    BRUCE_CFUNC_DEF(FUNC_DELAY, 1),
+    BRUCE_CFUNC_DEF(FUNC_MILLIS, 0),
+    BRUCE_CFUNC_DEF(FUNC_PRINT, 1),
+    BRUCE_CFUNC_DEF(PRINTLN, 1),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_FILLSCREEN, 1),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_DRAWSTRING, 3),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_DRAWCENTRE, 4),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_SETTEXTCOLOR, 2),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_SETTEXTSIZE, 1),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_WIDTH, 0),
+    BRUCE_CFUNC_DEF(FUNC_DISPLAY_HEIGHT, 0),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_DIGITALWRITE, 2),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_DIGITALREAD, 1),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_ANALOGWRITE, 2),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_ANALOGREAD, 1),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_PINMODE, 2),
+    BRUCE_CFUNC_DEF(FUNC_WIFI_SCAN, 0),
+    BRUCE_CFUNC_DEF(FUNC_WIFI_CONNECT, 3),
+    BRUCE_CFUNC_DEF(FUNC_WIFI_DISCONNECT, 0),
+    BRUCE_CFUNC_DEF(FUNC_WIFI_STATUS, 0),
+    BRUCE_CFUNC_DEF(FUNC_WIFI_IP, 0),
+    BRUCE_CFUNC_DEF(FUNC_HTTP_GET, 1),
+    BRUCE_CFUNC_DEF(FUNC_STORAGE_READ, 1),
+    BRUCE_CFUNC_DEF(FUNC_STORAGE_WRITE, 3),
+    BRUCE_CFUNC_DEF(FUNC_STORAGE_REMOVE, 1),
+    BRUCE_CFUNC_DEF(FUNC_STORAGE_EXISTS, 1),
+    BRUCE_CFUNC_DEF(FUNC_SUBGHZ_TX, 4),
+    BRUCE_CFUNC_DEF(FUNC_BADUSB_RUN, 1),
+    BRUCE_CFUNC_DEF(FUNC_DEVICE_BATTERY, 0),
+    BRUCE_CFUNC_DEF(FUNC_DEVICE_FREEHEAP, 0),
+    BRUCE_CFUNC_DEF(FUNC_DEVICE_BOARD, 0),
+    BRUCE_CFUNC_DEF(FUNC_DEVICE_SDK, 0),
+    BRUCE_CFUNC_DEF(FUNC_IR_TX, 3),
+    BRUCE_CFUNC_DEF(FUNC_IR_SEND, 3),
+    BRUCE_CFUNC_DEF(FUNC_KEYBOARD_INPUT, 3),
+    BRUCE_CFUNC_DEF(FUNC_KEYBOARD_HEX, 3),
+    BRUCE_CFUNC_DEF(FUNC_KEYBOARD_NUM, 3),
+    BRUCE_CFUNC_DEF(FUNC_DIALOG_ERROR, 1),
+    BRUCE_CFUNC_DEF(FUNC_DIALOG_WARNING, 1),
+    BRUCE_CFUNC_DEF(FUNC_DIALOG_INFO, 1),
+    BRUCE_CFUNC_DEF(FUNC_DIALOG_SUCCESS, 1),
+    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETBOARDNAME, 0),
+    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETCPUFREQ, 0),
+    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETFREEHEAP, 0),
+    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETFLASHCHIPSIZE, 0),
+    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETSDKVERSION, 0),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_LEDC_ATTACH, 3),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_LEDC_WRITE, 2),
+    BRUCE_CFUNC_DEF(FUNC_GPIO_LEDC_DETACH, 1)
+};
+
+extern "C" const JSSTDLibraryDef bruce_stdlib_def = {
+    NULL,
+    bruce_func_table,
+    NULL,
+    0,
+    64,
+    0,
+    0,
+    JS_CLASS_USER
+};
+
 // delay(ms)
 static JSValue func_delay(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
     int ms = 0;
@@ -97,7 +169,8 @@ static JSValue func_millis(JSContext *ctx, JSValue *this_val, int argc, JSValue 
 // print(...)
 static JSValue func_print(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
     for (int i = 0; i < argc; i++) {
-        const char *s = js_to_cstring(ctx, argv[i]);
+        JSCStringBuf buf;
+        const char *s = JS_TO_CSTRING(ctx, argv[i], &buf);
         Serial.print(s);
     }
     return JS_UNDEFINED;
@@ -120,7 +193,8 @@ static JSValue func_display_fillScreen(JSContext *ctx, JSValue *this_val, int ar
 
 // display.drawString(str, x, y)
 static JSValue func_display_drawString(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    const char *s = js_to_cstring(ctx, argv[0]);
+    JSCStringBuf buf;
+    const char *s = JS_TO_CSTRING(ctx, argv[0], &buf);
     int x = 0, y = 0;
     if (argc > 1) JS_ToInt32(ctx, &x, argv[1]);
     if (argc > 2) JS_ToInt32(ctx, &y, argv[2]);
@@ -130,7 +204,8 @@ static JSValue func_display_drawString(JSContext *ctx, JSValue *this_val, int ar
 
 // display.drawCentreString(str, x, y, font)
 static JSValue func_display_drawCentreString(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    const char *s = js_to_cstring(ctx, argv[0]);
+    JSCStringBuf buf;
+    const char *s = JS_TO_CSTRING(ctx, argv[0], &buf);
     int x = 0, y = 0, f = 1;
     if (argc > 1) JS_ToInt32(ctx, &x, argv[1]);
     if (argc > 2) JS_ToInt32(ctx, &y, argv[2]);
@@ -207,24 +282,24 @@ static JSValue func_gpio_pinMode(JSContext *ctx, JSValue *this_val, int argc, JS
     return JS_UNDEFINED;
 }
 
-// wifi.scan()
+// WiFi.scan() -> returns array of SSIDs
 static JSValue func_wifi_scan(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
     int n = WiFi.scanNetworks();
     JSValue arr = JS_NewArray(ctx, n);
     for (int i = 0; i < n; i++) {
-        JSValue ssid = JS_NewStringLen(ctx, WiFi.SSID(i).c_str(), WiFi.SSID(i).length());
-        JS_SetPropertyUint32(ctx, arr, i, ssid);
+        JS_SetPropertyUint32(ctx, arr, i, JS_NewString(ctx, WiFi.SSID(i).c_str()));
     }
     return arr;
 }
 
 // wifi.connect(ssid, password, timeout)
 static JSValue func_wifi_connect(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    const char *ssid = js_to_cstring(ctx, argv[0]);
-    const char *pwd = (argc > 1) ? js_to_cstring(ctx, argv[1]) : "";
+    JSCStringBuf buf1, buf2;
+    const char *ssid = JS_TO_CSTRING(ctx, argv[0], &buf1);
+    const char *pwd = (argc > 1) ? JS_TO_CSTRING(ctx, argv[1], &buf2) : "";
     int timeout = 30;
     if (argc > 2) JS_ToInt32(ctx, &timeout, argv[2]);
-    
+
     WiFi.begin(ssid, pwd);
     int waited = 0;
     while (WiFi.status() != WL_CONNECTED && waited < timeout) {
@@ -251,48 +326,122 @@ static JSValue func_wifi_ip(JSContext *ctx, JSValue *this_val, int argc, JSValue
     return JS_NewStringLen(ctx, ip.c_str(), ip.length());
 }
 
-// http.get(url) - simplified
+// http.get(url) -> returns string
 static JSValue func_http_get(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    // Note: HTTPClient requires WiFi to be connected
-    // For simplicity, returning empty response
-    JSValue result = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, result, "code", JS_NewInt32(ctx, 0));
-    JS_SetPropertyStr(ctx, result, "data", JS_NewStringLen(ctx, "", 0));
-    return result;
+    JSCStringBuf buf;
+    const char *url = JS_TO_CSTRING(ctx, argv[0], &buf);
+    if (!url) return JS_EXCEPTION;
+
+    HTTPClient http;
+    http.begin(url);
+    int httpCode = http.GET();
+    String payload = "";
+    if (httpCode > 0) {
+        payload = http.getString();
+    }
+    http.end();
+    return JS_NewString(ctx, payload.c_str());
 }
 
 // storage.read(path)
 static JSValue func_storage_read(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    // Stub - requires storage implementation
-    return JS_NewStringLen(ctx, "", 0);
+    JSCStringBuf buf;
+    const char *path = JS_TO_CSTRING(ctx, argv[0], &buf);
+    if (!path) return JS_EXCEPTION;
+
+    FS *fs = &LittleFS;
+    if (String(path).startsWith("/sd")) fs = &SD;
+
+    if (!fs->exists(path)) return JS_UNDEFINED;
+    File f = fs->open(path, "r");
+    if (!f) return JS_UNDEFINED;
+    String content = f.readString();
+    f.close();
+    return JS_NewString(ctx, content.c_str());
 }
 
-// storage.write(path, data, mode)
+// storage.write(path, content, append)
 static JSValue func_storage_write(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    // Stub - requires storage implementation
-    return JS_NewBool(false);
+    JSCStringBuf buf1, buf2;
+    const char *path = JS_TO_CSTRING(ctx, argv[0], &buf1);
+    const char *content = JS_TO_CSTRING(ctx, argv[1], &buf2);
+    bool append = JS_ToBool(ctx, argv[2]);
+    if (!path || !content) return JS_EXCEPTION;
+
+    FS *fs = &LittleFS;
+    if (String(path).startsWith("/sd")) fs = &SD;
+
+    File f = fs->open(path, append ? "a" : "w");
+    if (!f) return JS_FALSE;
+    f.print(content);
+    f.close();
+    return JS_TRUE;
 }
 
 // storage.remove(path)
 static JSValue func_storage_remove(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    // Stub - requires storage implementation
-    return JS_NewBool(false);
+    JSCStringBuf buf;
+    const char *path = JS_TO_CSTRING(ctx, argv[0], &buf);
+    if (!path) return JS_EXCEPTION;
+
+    FS *fs = &LittleFS;
+    if (String(path).startsWith("/sd")) fs = &SD;
+
+    return fs->remove(path) ? JS_TRUE : JS_FALSE;
 }
 
 // storage.exists(path)
 static JSValue func_storage_exists(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    // Stub - requires storage implementation
-    return JS_NewBool(false);
+    JSCStringBuf buf;
+    const char *path = JS_TO_CSTRING(ctx, argv[0], &buf);
+    if (!path) return JS_EXCEPTION;
+
+    FS *fs = &LittleFS;
+    if (String(path).startsWith("/sd")) fs = &SD;
+
+    return fs->exists(path) ? JS_TRUE : JS_FALSE;
 }
 
-// subghz.tx(data, freq, te, count) - stub
+// subghz.tx(data, freq, te, count)
 static JSValue func_subghz_tx(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewBool(false);
+    JSCStringBuf buf;
+    const char *data = JS_TO_CSTRING(ctx, argv[0], &buf);
+    float freq = 433.92;
+    int te = 300, count = 10;
+    if (argc > 1) {
+        int freqInt;
+        JS_ToInt32(ctx, &freqInt, argv[1]);
+        freq = (float)freqInt;
+    }
+    if (argc > 2) JS_ToInt32(ctx, &te, argv[2]);
+    if (argc > 3) JS_ToInt32(ctx, &count, argv[3]);
+
+    if (String(data).endsWith(".sub")) {
+        FS *fs = &LittleFS;
+        if (String(data).startsWith("/sd")) fs = &SD;
+        return JS_NewBool(txSubFile(fs, data, true));
+    } else {
+        // Simple RC Switch send simulation/proxy
+        RCSwitch_send(strtoull(data, NULL, 16), 24, te, 1, count);
+        return JS_TRUE;
+    }
 }
 
-// badusb.run(filename) - stub
+// badusb.run(filename)
 static JSValue func_badusb_run(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewBool(false);
+    JSCStringBuf buf;
+    const char *filename = JS_TO_CSTRING(ctx, argv[0], &buf);
+    FS *fs = &LittleFS;
+    if (String(filename).startsWith("/sd")) fs = &SD;
+
+    HIDInterface *hid = nullptr;
+    ducky_startKb(hid, false);
+    if (hid) {
+        key_input(*fs, filename, hid);
+        delete hid;
+        return JS_TRUE;
+    }
+    return JS_FALSE;
 }
 
 // device.battery()
@@ -315,48 +464,85 @@ static JSValue func_device_sdk(JSContext *ctx, JSValue *this_val, int argc, JSVa
     return JS_NewStringLen(ctx, ESP.getSdkVersion(), strlen(ESP.getSdkVersion()));
 }
 
-// ir.tx(protocol, address, command) - stub
+// ir.tx(protocol, address, command)
 static JSValue func_ir_tx(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewBool(false);
+    int addr = 0, cmd = 0;
+    if (argc > 1) JS_ToInt32(ctx, &addr, argv[1]);
+    if (argc > 2) JS_ToInt32(ctx, &cmd, argv[2]);
+    ysIrtm.sendNEC(addr, cmd);
+    return JS_TRUE;
 }
 
-// ir.send(protocol, data, bits) - stub
+// ir.send(protocol, data, bits)
 static JSValue func_ir_send(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewBool(false);
+    int addr = 0, cmd = 0;
+    if (argc > 1) JS_ToInt32(ctx, &addr, argv[1]);
+    if (argc > 2) JS_ToInt32(ctx, &cmd, argv[2]);
+    ysIrtm.sendNEC(addr, cmd);
+    return JS_TRUE;
 }
 
-// keyboard.input(msg, def, maxLen) - stub
+// keyboard.input(msg, def, maxLen)
 static JSValue func_keyboard_input(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewStringLen(ctx, "", 0);
+    JSCStringBuf buf1, buf2;
+    const char *msg = JS_TO_CSTRING(ctx, argv[0], &buf1);
+    const char *def = (argc > 1) ? JS_TO_CSTRING(ctx, argv[1], &buf2) : "";
+    int maxLen = 76;
+    if (argc > 2) JS_ToInt32(ctx, &maxLen, argv[2]);
+
+    String res = keyboard(def, maxLen, msg);
+    return JS_NewString(ctx, res.c_str());
 }
 
-// keyboard.hex(msg, def, maxLen) - stub
+// keyboard.hex(msg, def, maxLen)
 static JSValue func_keyboard_hex(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewStringLen(ctx, "", 0);
+    JSCStringBuf buf1, buf2;
+    const char *msg = JS_TO_CSTRING(ctx, argv[0], &buf1);
+    const char *def = (argc > 1) ? JS_TO_CSTRING(ctx, argv[1], &buf2) : "";
+    int maxLen = 76;
+    if (argc > 2) JS_ToInt32(ctx, &maxLen, argv[2]);
+
+    String res = hex_keyboard(def, maxLen, msg);
+    return JS_NewString(ctx, res.c_str());
 }
 
-// keyboard.num(msg, def, maxLen) - stub
+// keyboard.num(msg, def, maxLen)
 static JSValue func_keyboard_num(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewInt32(ctx, 0);
+    JSCStringBuf buf1, buf2;
+    const char *msg = JS_TO_CSTRING(ctx, argv[0], &buf1);
+    const char *def = (argc > 1) ? JS_TO_CSTRING(ctx, argv[1], &buf2) : "0";
+    int maxLen = 10;
+    if (argc > 2) JS_ToInt32(ctx, &maxLen, argv[2]);
+
+    String res = num_keyboard(def, maxLen, msg);
+    return JS_NewInt32(ctx, res.toInt());
 }
 
-// dialog.error(msg) - stub
+// dialog.error(msg)
 static JSValue func_dialog_error(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
+    JSCStringBuf buf;
+    displayError(JS_TO_CSTRING(ctx, argv[0], &buf), true);
     return JS_UNDEFINED;
 }
 
-// dialog.warning(msg) - stub
+// dialog.warning(msg)
 static JSValue func_dialog_warning(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
+    JSCStringBuf buf;
+    displayWarning(JS_TO_CSTRING(ctx, argv[0], &buf), true);
     return JS_UNDEFINED;
 }
 
-// dialog.info(msg) - stub
+// dialog.info(msg)
 static JSValue func_dialog_info(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
+    JSCStringBuf buf;
+    displayInfo(JS_TO_CSTRING(ctx, argv[0], &buf), true);
     return JS_UNDEFINED;
 }
 
-// dialog.success(msg) - stub
+// dialog.success(msg)
 static JSValue func_dialog_success(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
+    JSCStringBuf buf;
+    displaySuccess(JS_TO_CSTRING(ctx, argv[0], &buf), true);
     return JS_UNDEFINED;
 }
 
@@ -459,17 +645,17 @@ static JSValue js_bruce_dispatch(JSContext *ctx, JSValue *this_val, int argc, JS
 // Main init function - registers all Bruce API functions
 void js_bruce_init(JSContext *ctx) {
     JSValue global_obj = JS_GetGlobalObject(ctx);
-    
+
     // bruce namespace
     JSValue bruce = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, bruce, "delay", JS_NewCFunctionParams(ctx, FUNC_DELAY, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, bruce, "millis", JS_NewCFunctionParams(ctx, FUNC_MILLIS, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "bruce", bruce);
-    
+
     // Print functions
     JS_SetPropertyStr(ctx, global_obj, "print", JS_NewCFunctionParams(ctx, FUNC_PRINT, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "println", JS_NewCFunctionParams(ctx, PRINTLN, JS_UNDEFINED));
-    
+
     // tft (display) namespace
     JSValue display = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, display, "fillScreen", JS_NewCFunctionParams(ctx, FUNC_DISPLAY_FILLSCREEN, JS_UNDEFINED));
@@ -480,7 +666,7 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, display, "width", JS_NewCFunctionParams(ctx, FUNC_DISPLAY_WIDTH, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, display, "height", JS_NewCFunctionParams(ctx, FUNC_DISPLAY_HEIGHT, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "tft", display);
-    
+
     // gpio namespace
     JSValue gpio = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, gpio, "digitalWrite", JS_NewCFunctionParams(ctx, FUNC_GPIO_DIGITALWRITE, JS_UNDEFINED));
@@ -492,7 +678,7 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, gpio, "ledcWrite", JS_NewCFunctionParams(ctx, FUNC_GPIO_LEDC_WRITE, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, gpio, "ledcDetach", JS_NewCFunctionParams(ctx, FUNC_GPIO_LEDC_DETACH, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "gpio", gpio);
-    
+
     // WiFi namespace
     JSValue wifi = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, wifi, "scan", JS_NewCFunctionParams(ctx, FUNC_WIFI_SCAN, JS_UNDEFINED));
@@ -501,12 +687,12 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, wifi, "status", JS_NewCFunctionParams(ctx, FUNC_WIFI_STATUS, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, wifi, "ip", JS_NewCFunctionParams(ctx, FUNC_WIFI_IP, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "WiFi", wifi);
-    
+
     // http namespace
     JSValue http = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, http, "get", JS_NewCFunctionParams(ctx, FUNC_HTTP_GET, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "http", http);
-    
+
     // storage namespace
     JSValue storage = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, storage, "read", JS_NewCFunctionParams(ctx, FUNC_STORAGE_READ, JS_UNDEFINED));
@@ -514,17 +700,17 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, storage, "remove", JS_NewCFunctionParams(ctx, FUNC_STORAGE_REMOVE, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, storage, "exists", JS_NewCFunctionParams(ctx, FUNC_STORAGE_EXISTS, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "storage", storage);
-    
+
     // subghz namespace
     JSValue subghz = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, subghz, "tx", JS_NewCFunctionParams(ctx, FUNC_SUBGHZ_TX, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "subghz", subghz);
-    
+
     // badusb namespace
     JSValue badusb = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, badusb, "run", JS_NewCFunctionParams(ctx, FUNC_BADUSB_RUN, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "badusb", badusb);
-    
+
     // device namespace
     JSValue device = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, device, "battery", JS_NewCFunctionParams(ctx, FUNC_DEVICE_BATTERY, JS_UNDEFINED));
@@ -532,20 +718,20 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, device, "board", JS_NewCFunctionParams(ctx, FUNC_DEVICE_BOARD, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, device, "sdk", JS_NewCFunctionParams(ctx, FUNC_DEVICE_SDK, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "device", device);
-    
+
     // ir namespace
     JSValue ir = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, ir, "tx", JS_NewCFunctionParams(ctx, FUNC_IR_TX, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, ir, "send", JS_NewCFunctionParams(ctx, FUNC_IR_SEND, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "ir", ir);
-    
+
     // keyboard namespace
     JSValue keyboard = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, keyboard, "input", JS_NewCFunctionParams(ctx, FUNC_KEYBOARD_INPUT, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, keyboard, "hex", JS_NewCFunctionParams(ctx, FUNC_KEYBOARD_HEX, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, keyboard, "num", JS_NewCFunctionParams(ctx, FUNC_KEYBOARD_NUM, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "keyboard", keyboard);
-    
+
     // dialog namespace
     JSValue dialog = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, dialog, "error", JS_NewCFunctionParams(ctx, FUNC_DIALOG_ERROR, JS_UNDEFINED));
@@ -553,7 +739,7 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, dialog, "info", JS_NewCFunctionParams(ctx, FUNC_DIALOG_INFO, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, dialog, "success", JS_NewCFunctionParams(ctx, FUNC_DIALOG_SUCCESS, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "dialog", dialog);
-    
+
     // compat namespace
     JSValue compat = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, compat, "getBoardName", JS_NewCFunctionParams(ctx, FUNC_COMPAT_GETBOARDNAME, JS_UNDEFINED));
@@ -562,4 +748,12 @@ void js_bruce_init(JSContext *ctx) {
     JS_SetPropertyStr(ctx, compat, "getFlashChipSize", JS_NewCFunctionParams(ctx, FUNC_COMPAT_GETFLASHCHIPSIZE, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, compat, "getSdkVersion", JS_NewCFunctionParams(ctx, FUNC_COMPAT_GETSDKVERSION, JS_UNDEFINED));
     JS_SetPropertyStr(ctx, global_obj, "compat", compat);
+
+    // Check for exceptions after init
+    if (JS_IsException(global_obj)) {
+        JSValue ex = JS_GetException(ctx);
+        JSCStringBuf buf;
+        const char *err = JS_TO_CSTRING(ctx, ex, &buf);
+        Serial.printf("JS Init Error: %s\n", err ? err : "Unknown");
+    }
 }

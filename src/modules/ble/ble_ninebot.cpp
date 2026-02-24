@@ -219,4 +219,6 @@ void BLENinebot::loop() {
 
         pBLEScan->clearResults();
     }
+    clientDisconnect();
+    NimBLEDevice::deinit();
 }

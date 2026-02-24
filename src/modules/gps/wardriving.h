@@ -11,7 +11,7 @@
 
 #include "modules/ble/ble_common.h"
 #include <TinyGPS++.h>
-#include <cstdint>
+#include <stdint.h>
 #include <esp_wifi_types.h>
 #include <globals.h>
 #include <set>

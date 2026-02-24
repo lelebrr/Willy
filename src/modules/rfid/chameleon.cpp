@@ -9,6 +9,7 @@
 #include "chameleon.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "globals.h"
 
 Chameleon::Chameleon() { setup(); }
 
@@ -959,7 +960,7 @@ void Chameleon::parseHFData() {
 
 void Chameleon::saveScanResult() {
     FS *fs;
-    if (!getFsStorage(fs)) return;
+    if (!getFsStorage(fs) || !fs) return;
 
     String filename = "scan_result";
 

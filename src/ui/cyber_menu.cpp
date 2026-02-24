@@ -6,19 +6,68 @@
 #include <Arduino.h>
 #include <time.h>
 
-// Forward declarations of Bruce callbacks
-extern void wifi_cb(lv_event_t *e);
-extern void ble_cb(lv_event_t *e);
-extern void ir_cb(lv_event_t *e);
-extern void nfc_cb(lv_event_t *e);
-extern void sub_cb(lv_event_t *e);
-extern void nrf_cb(lv_event_t *e);
-extern void gps_cb(lv_event_t *e);
-extern void attacks_cb(lv_event_t *e);
-extern void core_cb(lv_event_t *e);
-extern void logs_cb(lv_event_t *e);
-extern void rfid_cb(lv_event_t *e);
-extern void sd_cb(lv_event_t *e);
+// Forward declarations of Bruce callbacks - implemented below
+static void wifi_cb(lv_event_t *e);
+static void ble_cb(lv_event_t *e);
+static void ir_cb(lv_event_t *e);
+static void nfc_cb(lv_event_t *e);
+static void sub_cb(lv_event_t *e);
+static void nrf_cb(lv_event_t *e);
+static void gps_cb(lv_event_t *e);
+static void attacks_cb(lv_event_t *e);
+static void core_cb(lv_event_t *e);
+static void logs_cb(lv_event_t *e);
+static void rfid_cb(lv_event_t *e);
+static void sd_cb(lv_event_t *e);
+
+// Implementation of icon callbacks
+static void wifi_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] Wi-Fi menu opened");
+}
+
+static void ble_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] BLE menu opened");
+}
+
+static void ir_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] IR menu opened");
+}
+
+static void nfc_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] NFC menu opened");
+}
+
+static void sub_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] Sub-GHz menu opened");
+}
+
+static void nrf_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] NRF24 menu opened");
+}
+
+static void gps_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] GPS menu opened");
+}
+
+static void attacks_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] Attacks menu opened");
+}
+
+static void core_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] Core menu opened");
+}
+
+static void logs_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] Logs menu opened");
+}
+
+static void rfid_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] RFID menu opened");
+}
+
+static void sd_cb(lv_event_t *e) {
+    Serial.println("[CyberMenu] SD menu opened");
+}
 
 // Timer callback for top bar updates
 static void update_bar_timer_cb(lv_timer_t *timer);

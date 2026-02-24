@@ -1,4 +1,6 @@
 #include "ConfigMenu.h"
+#include <esp_pm.h>
+
 #include "core/display.h"
 #include "core/i2c_finder.h"
 #include "core/main_menu.h"
@@ -294,6 +296,7 @@ void ConfigMenu::devMenu() {
 **  Switch serial output to USB Serial
 **********************************************************************/
 void ConfigMenu::switchToUSBSerial() {
+    if (USBserial.getSerialOutput() == &Serial) return;
     USBserial.setSerialOutput(&Serial);
     Serial1.end();
 }
@@ -301,12 +304,18 @@ void ConfigMenu::switchToUSBSerial() {
 /*********************************************************************
 **  Function: switchToUARTSerial
 **  Switch serial output to UART (handles pin conflicts)
+**  Ensures robust transition between serial interfaces
 **********************************************************************/
 void ConfigMenu::switchToUARTSerial() {
+    if (USBserial.getSerialOutput() == &Serial1) return;
+
     // Check and resolve SD card pin conflicts
     if (bruceConfigPins.SDCARD_bus.checkConflict(bruceConfigPins.uart_bus.rx) ||
         bruceConfigPins.SDCARD_bus.checkConflict(bruceConfigPins.uart_bus.tx)) {
-        sdcardSPI.end();
+        if (sdcardMounted) {
+            sdcardSPI.end();
+            sdcardMounted = false;
+        }
     }
 
     // Check and resolve CC1101/NRF24 pin conflicts
@@ -323,6 +332,7 @@ void ConfigMenu::switchToUARTSerial() {
     Serial1.begin(115200, SERIAL_8N1, bruceConfigPins.uart_bus.rx, bruceConfigPins.uart_bus.tx);
     USBserial.setSerialOutput(&Serial1);
 }
+
 /*********************************************************************
 **  Function: drawIcon
 **  Draw config gear icon
@@ -331,20 +341,26 @@ void ConfigMenu::drawIcon(float scale) {
     clearIconArea();
     int radius = scale * 9;
 
-    // Draw 6 gear teeth segments
-    for (int i = 0; i < 6; i++) {
+    const int toothCount = 8;
+    const float angleStep = 360.0f / toothCount;
+    const float toothWidth = angleStep * 0.5f;
+    const float startOffset = (angleStep - toothWidth) / 2.0f;
+
+    for (int i = 0; i < toothCount; i++) {
+        float startAngle = startOffset + i * angleStep;
         tft.drawArc(
             iconCenterX,
             iconCenterY,
             3.5 * radius,
             2 * radius,
-            15 + 60 * i,
-            45 + 60 * i,
+            startAngle,
+            startAngle + toothWidth,
             bruceConfig.priColor,
             bruceConfig.bgColor,
             true
         );
     }
+
 
     // Draw inner circle
     tft.drawArc(

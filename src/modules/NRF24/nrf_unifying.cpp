@@ -2,6 +2,9 @@
 #include "nrf_unifying.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 void nrf_unifying_exploit() {
     NRF24_MODE mode = nrf_setMode();
@@ -38,7 +41,8 @@ void nrf_unifying_exploit() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     }; // Key press 'A' frame equivalent
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             NRFradio.setChannel(current_channel);
             // Some unknown / promiscuous address attempt for unencrypted injection

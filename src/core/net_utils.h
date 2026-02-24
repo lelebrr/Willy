@@ -5,7 +5,6 @@ bool internetConnection();
 
 String getManufacturer(const String &mac);
 
-String MAC(uint8_t *data);
 
 void stringToMAC(const std::string &macStr, uint8_t MAC[6]);
 

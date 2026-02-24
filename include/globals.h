@@ -116,6 +116,10 @@ struct Option {
         void *ptr = nullptr, bool hvrd = false
     )
         : label(lbl), operation(op), selected(sel), hover(hov), hoverPointer(ptr), hovered(hvrd) {}
+
+    // Explicit constructor for common {string, function} initialization
+    Option(const char* lbl, std::function<void()> op)
+        : label(lbl), operation(op) {}
 };
 
 struct keyStroke { // DO NOT CHANGE IT!!!!!

@@ -60,22 +60,65 @@ void WifiMenu::optionsMenu() {
     }
     if (WiFi.status() != WL_CONNECTED) {
         options = {
-            {"Conectar WiFi", lambdaHelper(wifiConnectMenu, WIFI_STA)},
-            {"Iniciar WiFi AP", [=]() {
+            Option("Conectar WiFi", lambdaHelper(wifiConnectMenu, WIFI_STA)),
+            Option("Iniciar WiFi AP", [=]() {
                  wifiConnectMenu(WIFI_AP);
                  displayInfo("pwd: " + bruceConfig.wifiAp.pwd, true);
-             }},
+             }),
         };
     }
-    if (WiFi.getMode() != WIFI_MODE_NULL) { options.push_back({"Desligar WiFi", wifiDisconnect}); }
+    if (WiFi.getMode() != WIFI_MODE_NULL)    options.push_back(Option("Desligar WiFi", wifiDisconnect));
     if (WiFi.getMode() == WIFI_MODE_STA || WiFi.getMode() == WIFI_MODE_APSTA) {
-        options.push_back({"Info AP", displayAPInfo});
+        options.push_back(Option("Info AP", []() {
+            wifi_ap_record_t info;
+            if (esp_wifi_sta_get_ap_info(&info) == ESP_OK) {
+                displayAPInfo(info);
+            } else {
+                displayError("Failed to get AP info");
+            }
+        }));
     }
-    options.push_back({"Ataques WiFi", wifi_atk_menu});
-    options.push_back({"Ataques Avancados", advancedAtksMenu});
-    options.push_back({"WPS Attacks", wpsAttacksMenu});
-    options.push_back({"WiFi Sniffers", wifiSniffersMenu});
-    options.push_back({"WiFi Attacks", wifiAttacksMenu});
+    options.push_back(Option("Ataques WiFi", [=]() {
+                         if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+                             if (displayMessage("Atacar em modo AP pode\ndesconectar clientes.\nContinuar?", "Não",
+                                                nullptr, "Sim", TFT_YELLOW) != 2)
+                                 return;
+                         }
+                         wifi_atk_menu();
+                     }));
+    options.push_back(Option("Ataques Avancados", [=]() {
+                         if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+                             if (displayMessage("Atacar em modo AP pode\ndesconectar clientes.\nContinuar?", "Não",
+                                                nullptr, "Sim", TFT_YELLOW) != 2)
+                                 return;
+                         }
+                         advancedAtksMenu();
+                     }));
+    options.push_back(Option("WPS Attacks", [=]() {
+                         if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+                             if (displayMessage("Atacar em modo AP pode\ndesconectar clientes.\nContinuar?", "Não",
+                                                nullptr, "Sim", TFT_YELLOW) != 2)
+                                 return;
+                         }
+                         wpsAttacksMenu();
+                     }));
+    options.push_back(Option("WiFi Sniffers", [=]() {
+                         if (WiFi.getMode() != WIFI_OFF) {
+                             if (displayMessage("Sniffer ira resetar a\nconexao atual.\nContinuar?", "Não", nullptr,
+                                                "Sim", TFT_YELLOW) != 2)
+                                 return;
+                         }
+                         wifiSniffersMenu();
+                     }));
+    options.push_back(Option("WiFi Attacks", [=]() {
+                         if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+                             if (displayMessage("Atacar em modo AP pode\ndesconectar clientes.\nContinuar?", "Não",
+                                                nullptr, "Sim", TFT_YELLOW) != 2)
+                                 return;
+                         }
+                         wifiAttacksMenu();
+                     }));
+
     options.push_back({"Evil Portal", [=]() {
                            if (isWebUIActive || server) {
                                stopWebUi();
@@ -85,10 +128,10 @@ void WifiMenu::optionsMenu() {
                        }});
     // options.push_back({"ReverseShell", [=]()       { ReverseShell(); }});
 #ifndef LITE_VERSION
-    options.push_back({"Ouvir TCP", listenTcpPort});
-    options.push_back({"Cliente TCP", clientTCP});
-    options.push_back({"TelNET", telnet_setup});
-    options.push_back({"SSH", lambdaHelper(ssh_setup, String(""))});
+    options.push_back(Option("Ouvir TCP", listenTcpPort));
+    options.push_back(Option("Cliente TCP", clientTCP));
+    options.push_back(Option("TelNET", telnet_setup));
+    options.push_back(Option("SSH", lambdaHelper(ssh_setup, String(""))));
     options.push_back({"Farejadores", [this]() {
                            std::vector<Option> snifferOptions;
                            snifferOptions.push_back({"Sniffer Bruto", sniffer_setup});

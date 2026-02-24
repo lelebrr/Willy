@@ -3,7 +3,7 @@
  * @author Willy Firmware
  * @brief GPS Advanced Configuration for NEO-6M GY-GPS6MV2
  * @version 1.0
- * 
+ *
  * Otimizações para o Módulo GPS (NEO-6M GY-GPS6MV2):
  * - Taxa de update: 1Hz (Padrão) a 10Hz (Avançado)
  * - Power Save Mode (PSM): Reduz consumo de 45mA para ~10-200uA
@@ -16,6 +16,7 @@
 #define __GPS_CONFIG_H__
 
 #include <Arduino.h>
+#include <globals.h>
 #include <HardwareSerial.h>
 
 // GPS Operation Modes
@@ -70,7 +71,7 @@ enum GPSDynamicModel {
 
 /**
  * @brief GPS Advanced Configuration Class
- * 
+ *
  * Gerencia todas as configurações avançadas do módulo GPS NEO-6M
  */
 class GPSConfig {
@@ -79,63 +80,63 @@ public:
     // Constructor
     /////////////////////////////////////////////////////////////////////////////////////
     GPSConfig();
-    
+
     /////////////////////////////////////////////////////////////////////////////////////
     // Configuration Properties
     /////////////////////////////////////////////////////////////////////////////////////
-    
+
     // Operation Mode
     GPSMode mode = GPS_MODE_STANDARD;
-    
+
     // Update Rate (Hz)
     GPSUpdateRate updateRate = GPS_RATE_1HZ;
-    
+
     // Power Mode
     GPSPowerMode powerMode = GPS_POWER_MAX_PERFORMANCE;
-    
+
     // Protocol Mode
     GPSProtocolMode protocolMode = GPS_PROTOCOL_NMEA;
-    
+
     // Navigation Mode
     GPSNavigationMode navMode = GPS_NAV_PORTABLE;
-    
+
     // Dynamic Model
     GPSDynamicModel dynamicModel = GPS_DYN_PORTABLE;
-    
+
     // Minimum satellite signal strength filter (dB-Hz)
     uint8_t minSatelliteSignal = 0;  // 0 = disabled, typical: 25-35 dB-Hz
-    
+
     // Enable AssistNow (offline almanac data)
     bool assistNowEnabled = false;
-    
+
     // Baudrate for advanced mode (higher speeds for higher update rates)
     uint32_t advancedBaudrate = 9600;
-    
+
     /////////////////////////////////////////////////////////////////////////////////////
     // Configuration Methods
     /////////////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * @brief Apply configuration to GPS module via serial
      * @param serial HardwareSerial connected to GPS
      * @return true if successful
      */
     bool applyConfiguration(HardwareSerial &serial);
-    
+
     /**
      * @brief Apply standard (default) configuration
      * @param serial HardwareSerial connected to GPS
      * @return true if successful
      */
     bool applyStandardConfig(HardwareSerial &serial);
-    
+
     /**
      * @brief Apply advanced configuration with all optimizations
      * @param serial HardwareSerial connected to GPS
      * @return true if successful
      */
     bool applyAdvancedConfig(HardwareSerial &serial);
-    
+
     /**
      * @brief Set update rate (1-10 Hz)
      * @param serial HardwareSerial connected to GPS
@@ -143,7 +144,7 @@ public:
      * @return true if successful
      */
     bool setUpdateRate(HardwareSerial &serial, uint8_t rateHz);
-    
+
     /**
      * @brief Enable Power Save Mode
      * @param serial HardwareSerial connected to GPS
@@ -151,7 +152,7 @@ public:
      * @return true if successful
      */
     bool setPowerSaveMode(HardwareSerial &serial, bool enable);
-    
+
     /**
      * @brief Set protocol mode (NMEA, UBX, or both)
      * @param serial HardwareSerial connected to GPS
@@ -159,7 +160,7 @@ public:
      * @return true if successful
      */
     bool setProtocolMode(HardwareSerial &serial, GPSProtocolMode mode);
-    
+
     /**
      * @brief Set navigation/dynamic model
      * @param serial HardwareSerial connected to GPS
@@ -167,7 +168,7 @@ public:
      * @return true if successful
      */
     bool setNavigationMode(HardwareSerial &serial, GPSDynamicModel model);
-    
+
     /**
      * @brief Set minimum satellite signal filter
      * @param serial HardwareSerial connected to GPS
@@ -175,7 +176,7 @@ public:
      * @return true if successful
      */
     bool setSatelliteFilter(HardwareSerial &serial, uint8_t minSignalDb);
-    
+
     /**
      * @brief Change GPS baudrate
      * @param serial HardwareSerial connected to GPS
@@ -183,46 +184,46 @@ public:
      * @return true if successful
      */
     bool changeBaudrate(HardwareSerial &serial, uint32_t newBaudrate);
-    
+
     /**
      * @brief Save current configuration to GPS EEPROM
      * @param serial HardwareSerial connected to GPS
      * @return true if successful
      */
     bool saveToEEPROM(HardwareSerial &serial);
-    
+
     /**
      * @brief Reset GPS to factory defaults
      * @param serial HardwareSerial connected to GPS
      * @return true if successful
      */
     bool factoryReset(HardwareSerial &serial);
-    
+
     /////////////////////////////////////////////////////////////////////////////////////
     // Helper Methods
     /////////////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * @brief Get update rate description string
      * @param rate Update rate enum
      * @return Human readable string
      */
     static String getUpdateRateString(GPSUpdateRate rate);
-    
+
     /**
      * @brief Get power mode description string
      * @param mode Power mode enum
      * @return Human readable string
      */
     static String getPowerModeString(GPSPowerMode mode);
-    
+
     /**
      * @brief Get protocol mode description string
      * @param mode Protocol mode enum
      * @return Human readable string
      */
     static String getProtocolModeString(GPSProtocolMode mode);
-    
+
     /**
      * @brief Get navigation mode description string
      * @param mode Navigation mode enum
@@ -234,7 +235,7 @@ private:
     /////////////////////////////////////////////////////////////////////////////////////
     // UBX Protocol Helpers
     /////////////////////////////////////////////////////////////////////////////////////
-    
+
     /**
      * @brief Calculate UBX checksum
      * @param data Pointer to data array
@@ -243,7 +244,7 @@ private:
      * @param ck_b Output checksum B
      */
     void calcUBXChecksum(uint8_t *data, uint16_t len, uint8_t &ck_a, uint8_t &ck_b);
-    
+
     /**
      * @brief Send UBX command
      * @param serial HardwareSerial connected to GPS
@@ -254,7 +255,7 @@ private:
      * @return true if sent successfully
      */
     bool sendUBXCommand(HardwareSerial &serial, uint8_t class_id, uint8_t msg_id, uint8_t *payload, uint16_t payload_len);
-    
+
     /**
      * @brief Send PMTK command (for MT3339 based GPS)
      * @param serial HardwareSerial connected to GPS
@@ -262,7 +263,7 @@ private:
      * @return true if sent successfully
      */
     bool sendPMTKCommand(HardwareSerial &serial, const String &command);
-    
+
     /**
      * @brief Wait for UBX ACK
      * @param serial HardwareSerial connected to GPS

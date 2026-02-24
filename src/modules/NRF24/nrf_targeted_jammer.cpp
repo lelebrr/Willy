@@ -2,6 +2,9 @@
 #include "nrf_targeted_jammer.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 void nrf_targeted_jammer() {
     NRF24_MODE mode = nrf_setMode();
@@ -27,7 +30,8 @@ void nrf_targeted_jammer() {
     uint32_t timer = millis();
     int current_channel = 0;
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             if (state == 0) {
                 // Scan phase

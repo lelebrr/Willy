@@ -30,49 +30,40 @@ void parse_config_file(File configFile) {
         Serial.println(line);
         line.trim();
 
-        if (line.startsWith("[Interface]") || line.isEmpty()) {
-            // Skip [Interface] or empty lines
+        if (line.startsWith("[Interface]") || line.isEmpty() || line.startsWith("#")) {
+            // Skip [Interface], empty lines, or comments
             continue;
-        } else if (line.startsWith("PrivateKey")) {
-            line.remove(0, line.indexOf('=') + 1);
-            line.trim();
-            Serial.println("Private Key: " + line);
-            strncpy(private_key, line.c_str(), sizeof(private_key) - 1);
-            private_key[sizeof(private_key) - 1] = '\0'; // Ensure null-terminated
-        } else if (line.startsWith("Address")) {
-            line.remove(0, line.indexOf('=') + 1);
-            line.trim();
-            Serial.println("Local IP: " + line);
-            int slashIndex = line.indexOf('/');
+        } else if (line.indexOf('=') != -1) {
+            String key = line.substring(0, line.indexOf('='));
+            String value = line.substring(line.indexOf('=') + 1);
+            key.trim();
+            value.trim();
 
-            if (slashIndex != -1) {
-                Serial.println("~~~~~~~~~~~~");
-                Serial.println(line.substring(0, slashIndex));
-                local_ip.fromString(line.substring(0, slashIndex));
-            }
-
-        } else if (line.startsWith("[Peer]")) {
-            // add [Peer] section
-        } else if (line.startsWith("PublicKey")) {
-            line.remove(0, line.indexOf('=') + 1);
-            line.trim();
-            Serial.println("Public Key: " + line);
-            strncpy(public_key, line.c_str(), sizeof(public_key) - 1);
-            public_key[sizeof(public_key) - 1] = '\0'; // Ensure null-terminated
-        } else if (line.startsWith("Endpoint")) {
-            line.remove(0, line.indexOf('=') + 1);
-            line.trim();
-            int colonIndex = line.indexOf(':');
-
-            if (colonIndex != -1) {
-                // Serial.println("Endpoint Line: " + line);
-                strncpy(
-                    endpoint_address, line.substring(0, colonIndex).c_str(), sizeof(endpoint_address) - 1
-                );
-                endpoint_address[sizeof(endpoint_address) - 1] = '\0'; // Ensure null-terminated
-                Serial.println("Endpoint Address: " + String(endpoint_address));
-                endpoint_port = line.substring(colonIndex + 1).toInt();
-                Serial.println("Endpoint Port: " + String(endpoint_port));
+            if (key.equalsIgnoreCase("PrivateKey")) {
+                Serial.println("Private Key: " + value);
+                strncpy(private_key, value.c_str(), sizeof(private_key) - 1);
+                private_key[sizeof(private_key) - 1] = '\0';
+            } else if (key.equalsIgnoreCase("Address")) {
+                Serial.println("Local IP: " + value);
+                int slashIndex = value.indexOf('/');
+                if (slashIndex != -1) {
+                    local_ip.fromString(value.substring(0, slashIndex));
+                } else {
+                    local_ip.fromString(value);
+                }
+            } else if (key.equalsIgnoreCase("PublicKey")) {
+                Serial.println("Public Key: " + value);
+                strncpy(public_key, value.c_str(), sizeof(public_key) - 1);
+                public_key[sizeof(public_key) - 1] = '\0';
+            } else if (key.equalsIgnoreCase("Endpoint")) {
+                int colonIndex = value.lastIndexOf(':');
+                if (colonIndex != -1) {
+                    strncpy(endpoint_address, value.substring(0, colonIndex).c_str(), sizeof(endpoint_address) - 1);
+                    endpoint_address[sizeof(endpoint_address) - 1] = '\0';
+                    Serial.println("Endpoint Address: " + String(endpoint_address));
+                    endpoint_port = value.substring(colonIndex + 1).toInt();
+                    Serial.println("Endpoint Port: " + String(endpoint_port));
+                }
             }
         }
     }

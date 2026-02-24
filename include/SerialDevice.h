@@ -23,6 +23,7 @@ public:
     virtual void flush() = 0;
 
     virtual int available() = 0;
+    virtual int read() = 0;
     virtual String readStringUntil(char terminator) = 0;
     virtual ~SerialDevice() = default;
 };

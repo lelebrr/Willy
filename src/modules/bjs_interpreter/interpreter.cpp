@@ -6,9 +6,12 @@
 #include <string.h>
 
 #if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
+extern "C" {
 #include "mquickjs.h"
+}
 
 void js_bruce_init(JSContext *ctx);
+extern "C" JSSTDLibraryDef bruce_stdlib_def;
 
 char *script = NULL;
 char *scriptDirpath = NULL;
@@ -31,6 +34,7 @@ void closeJS() {
 
 void interpreterHandler(void *pvParameters) {
     if (script == NULL) {
+        interpreterTaskHandler = NULL; // Ensure cleared if exiting early
         vTaskDelete(NULL);
         return;
     }
@@ -41,16 +45,20 @@ void interpreterHandler(void *pvParameters) {
     js_mem = psramFound() ? ps_malloc(mem_size) : malloc(mem_size);
     if (!js_mem) {
         log_e("Failed to allocate JS memory");
+        if (script) { free(script); script = NULL; }
+        interpreterTaskHandler = NULL;
         vTaskDelete(NULL);
         return;
     }
 
-    extern JSSTDLibraryDef bruce_stdlib_def;
+
     ctx = JS_NewContext(js_mem, mem_size, &bruce_stdlib_def);
     if (!ctx) {
         log_e("Failed to create JS context");
         free(js_mem);
         js_mem = NULL;
+        if (script) { free(script); script = NULL; }
+        interpreterTaskHandler = NULL;
         vTaskDelete(NULL);
         return;
     }
@@ -68,12 +76,9 @@ void interpreterHandler(void *pvParameters) {
     }
 
     closeJS();
-    if (script) free(script);
-    script = NULL;
-    if (scriptDirpath) free(scriptDirpath);
-    scriptDirpath = NULL;
-    if (scriptName) free(scriptName);
-    scriptName = NULL;
+    if (script) { free(script); script = NULL; }
+    if (scriptDirpath) { free(scriptDirpath); scriptDirpath = NULL; }
+    if (scriptName) { free(scriptName); scriptName = NULL; }
 
     interpreterTaskHandler = NULL;
     vTaskDelete(NULL);

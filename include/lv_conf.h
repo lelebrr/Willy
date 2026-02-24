@@ -19,9 +19,9 @@
    MEMORY SETTINGS
  *=========================*/
 
-#define LV_MEM_CUSTOM 0
+#define LV_MEM_CUSTOM 1
 #if LV_MEM_CUSTOM == 0
-    #define LV_MEM_SIZE (64U * 1024U)          /* 64kB for LVGL internal heap */
+    #define LV_MEM_SIZE (40U * 1024U)          /* Reduced size if static */
     #define LV_MEM_ADR 0
     #define LV_MEM_AUTO_DEFRAG 1
 #else

@@ -2,6 +2,9 @@
 #include "nrf_mass_pairing.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 void nrf_mass_pairing() {
     NRF24_MODE mode = nrf_setMode();
@@ -28,7 +31,8 @@ void nrf_mass_pairing() {
     uint32_t attempts = 0;
     int current_channel = 2;
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             NRFradio.setChannel(current_channel);
 

@@ -2,6 +2,9 @@
 #include "nrf_mousejack.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 // Common MouseJack addresses (simplified for demonstration/functional test)
 static const uint8_t mj_addresses[][5] = {
@@ -38,7 +41,8 @@ void nrf_mousejack_injector() {
     int current_addr_idx = 0;
     int injected_count = 0;
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         // Scanning
         if (CHECK_NRF_SPI(mode)) {
             NRFradio.setChannel(current_channel);

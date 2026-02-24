@@ -4,7 +4,7 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <SD.h>
-#include <globals.h>
+#include "globals.h"
 
 struct IRCode {
     IRCode(

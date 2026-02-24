@@ -231,6 +231,8 @@ bool Wigle::_upload_file(File file, String upload_message) {
             char c = client.read();
             // Serial.write(c);
             serverres.concat(c);
+        } else {
+            vTaskDelay(1 / portTICK_PERIOD_MS);
         }
         if (serverres.length() > 1024) break;
     }

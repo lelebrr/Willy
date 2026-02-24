@@ -15,7 +15,7 @@ private:
     bool mitm;
 
     File pcapFile;
-    void setup(const Host &host, IPAddress gateway);
+    void setup(const ScanHosts::Host &host, IPAddress gateway);
     void loop();
     bool arpPCAPfile();
     void sendARPPacket(
@@ -23,9 +23,7 @@ private:
     );
 
 public:
-    // @brief Dummy default constructori
-    ARPSpoofer() {};
-    ARPSpoofer(const Host &host, IPAddress gateway, uint8_t gatewayMAC[6], uint8_t mac[6], bool _mitm);
+    ARPSpoofer(const ScanHosts::Host &host, IPAddress gateway, uint8_t gatewayMAC[6], uint8_t mac[6], bool _mitm);
     ~ARPSpoofer();
 };
 

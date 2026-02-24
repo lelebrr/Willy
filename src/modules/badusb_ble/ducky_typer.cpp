@@ -380,6 +380,7 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
 
         if (lineContent.length() == 0) continue; // skip empty lines
 
+        {
         int spaceIndex = lineContent.indexOf(' ');
 
         // Check if this is a REPEAT command
@@ -493,6 +494,13 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
                     }
                     _hid->releaseAll();
                 }
+            } // end if (PriCmd != nullptr)
+
+            // Apply jitter if enabled (conceptually, here we add a small random delay)
+            // This makes the typing look more human-like to some heuristic systems.
+            if (bruceConfig.badUSBBLEKeyDelay > 0) {
+                int jitter = random(0, bruceConfig.badUSBBLEKeyDelay / 2 + 1);
+                delay(jitter);
             }
 
             // Output to screen
@@ -506,10 +514,11 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
             } else if (PriCmd->type == DuckyCommandType_Comment) {
                 printTFTBadUSBBLE(Argument, TFT_DARKGREEN, true);
             }
-        }
+        } // end for repeatCount
+        } // end scope block for spaceIndex/repeatCount
 
         printDecimalTime(millis() - startMillisBADUSBBLE);
-    }
+    } // end while payloadFile.available()
 
     printStatusBadUSBBLE("Finished");
 

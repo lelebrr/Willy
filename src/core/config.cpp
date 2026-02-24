@@ -1,6 +1,10 @@
 #include "config.h"
 #include "mifare_keys_manager.h"
 #include "sd_functions.h"
+#include <esp_pm.h>
+
+const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
+const String ENC_PREFIX = "_ENC_";
 
 JsonDocument BruceConfig::toJson() const {
     JsonDocument jsonDoc;
@@ -34,13 +38,15 @@ JsonDocument BruceConfig::toJson() const {
 
     JsonObject _webUI = setting["webUI"].to<JsonObject>();
     _webUI["user"] = webUI.user;
-    _webUI["pwd"] = webUI.pwd;
+    _webUI["user"] = webUI.user;
+    _webUI["pwd"] = encryptString(webUI.pwd);
     JsonObject _webUISessions = setting["webUISessions"].to<JsonObject>();
-    for (size_t i = 0; i < webUISessions.size(); i++) { _webUISessions[String(i + 1)] = webUISessions[i]; }
+    for (size_t i = 0; i < webUISessions.size(); i++) { _webUISessions[String(i + 1)] = encryptString(webUISessions[i]); }
 
     JsonObject _wifiAp = setting["wifiAp"].to<JsonObject>();
     _wifiAp["ssid"] = wifiAp.ssid;
-    _wifiAp["pwd"] = wifiAp.pwd;
+    _wifiAp["ssid"] = wifiAp.ssid;
+    _wifiAp["pwd"] = encryptString(wifiAp.pwd);
     setting["wifiMAC"] = wifiMAC; //@IncursioHack
 
     JsonArray _evilWifiNames = setting["evilWifiNames"].to<JsonArray>();
@@ -56,11 +62,11 @@ JsonDocument BruceConfig::toJson() const {
     setting["evilWifiPasswordMode"] = evilPortalPasswordMode;
 
     JsonObject _wifi = setting["wifi"].to<JsonObject>();
-    for (const auto &pair : wifi) { _wifi[pair.first] = pair.second; }
+    for (const auto &pair : wifi) { _wifi[pair.first] = encryptString(pair.second); }
 
     setting["startupApp"] = startupApp;
     setting["startupAppLuaScript"] = startupAppLuaScript;
-    setting["wigleBasicToken"] = wigleBasicToken;
+    setting["wigleBasicToken"] = encryptString(wigleBasicToken);
     setting["devMode"] = devMode;
     setting["colorInverted"] = colorInverted;
 
@@ -251,7 +257,7 @@ void BruceConfig::fromFile(bool checkFS) {
     if (!setting["webUI"].isNull()) {
         JsonObject webUIObj = setting["webUI"].as<JsonObject>();
         webUI.user = webUIObj["user"].as<String>();
-        webUI.pwd = webUIObj["pwd"].as<String>();
+        webUI.pwd = decryptString(webUIObj["pwd"].as<String>());
     } else {
         count++;
         log_e("Fail");
@@ -260,7 +266,7 @@ void BruceConfig::fromFile(bool checkFS) {
     if (!setting["webUISessions"].isNull()) {
         webUISessions.clear();
         JsonObject webUISessionsObj = setting["webUISessions"].as<JsonObject>();
-        for (JsonPair kv : webUISessionsObj) { webUISessions.push_back(kv.value().as<String>()); }
+        for (JsonPair kv : webUISessionsObj) { webUISessions.push_back(decryptString(kv.value().as<String>())); }
     } else {
         count++;
         log_e("Fail");
@@ -269,7 +275,7 @@ void BruceConfig::fromFile(bool checkFS) {
     if (!setting["wifiAp"].isNull()) {
         JsonObject wifiApObj = setting["wifiAp"].as<JsonObject>();
         wifiAp.ssid = wifiApObj["ssid"].as<String>();
-        wifiAp.pwd = wifiApObj["pwd"].as<String>();
+        wifiAp.pwd = decryptString(wifiApObj["pwd"].as<String>());
     } else {
         count++;
         log_e("Fail");
@@ -288,7 +294,7 @@ void BruceConfig::fromFile(bool checkFS) {
     if (!setting["wifi"].isNull()) {
         wifi.clear();
         JsonObject wifiObj = setting["wifi"].as<JsonObject>();
-        for (JsonPair kv : wifiObj) wifi[kv.key().c_str()] = kv.value().as<String>();
+        for (JsonPair kv : wifiObj) wifi[kv.key().c_str()] = decryptString(kv.value().as<String>());
     } else {
         count++;
         log_e("Fail");
@@ -345,7 +351,7 @@ void BruceConfig::fromFile(bool checkFS) {
     }
 
     if (!setting["wigleBasicToken"].isNull()) {
-        wigleBasicToken = setting["wigleBasicToken"].as<String>();
+        wigleBasicToken = decryptString(setting["wigleBasicToken"].as<String>());
     } else {
         count++;
         log_e("Fail");
@@ -834,4 +840,28 @@ bool BruceConfig::isValidWebUISession(const String &token) {
 
     saveFile();
     return true;
+}
+
+String BruceConfig::encryptString(const String &input) const {
+    if (input.isEmpty()) return "";
+    String output = ENC_PREFIX;
+    for (size_t i = 0; i < input.length(); i++) {
+        char c = input[i] ^ CRYPTO_KEY[i % CRYPTO_KEY.length()];
+        char hex[3];
+        sprintf(hex, "%02x", (unsigned char)c);
+        output += hex;
+    }
+    return output;
+}
+
+String BruceConfig::decryptString(const String &input) const {
+    if (!input.startsWith(ENC_PREFIX)) return input;
+    String hexData = input.substring(ENC_PREFIX.length());
+    String output = "";
+    for (size_t i = 0; i < hexData.length(); i += 2) {
+        String byteString = hexData.substring(i, i + 2);
+        char c = (char)strtol(byteString.c_str(), nullptr, 16);
+        output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
+    }
+    return output;
 }

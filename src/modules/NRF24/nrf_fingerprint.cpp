@@ -2,6 +2,9 @@
 #include "nrf_fingerprint.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 // Pseudo-promiscuous fingerprinting logic
 void nrf_device_fingerprint() {
@@ -34,7 +37,8 @@ void nrf_device_fingerprint() {
     tft.setCursor(10, 60);
     tft.println("Listening for addresses...");
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             if (millis() - last_hop > 100) {
                 current_channel = (current_channel + 1) % 125;

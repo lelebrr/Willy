@@ -7,14 +7,19 @@
  */
 
 #include "wardriving.h"
+#include "modules/ble/ble_common.h"
+#include <TinyGPS++.h>
 #include "core/display.h"
 #include "core/mykeyboard.h"
 #include "core/sd_functions.h"
 #include "core/wifi/wifi_common.h"
-#include "current_year.h"
 #include "core/serialcmds.h"
-#include "modules/ble/ble_common.h"
 #include "gps_config.h"
+#include <stdint.h>
+#include <esp_wifi_types.h>
+#include <globals.h>
+#include <set>
+#include "current_year.h"
 #include <cctype>
 #include <stdio.h>
 
@@ -94,7 +99,7 @@ bool Wardriving::begin_gps() {
         padprintln("Aplicando config avancada...");
         vTaskDelay(500 / portTICK_PERIOD_MS);
         gpsConfig.applyConfiguration(GPSserial);
-        
+
         // If baudrate was changed, reinitialize serial
         if (gpsConfig.advancedBaudrate != bruceConfigPins.gpsBaudrate && gpsConfig.advancedBaudrate > 0) {
             GPSserial.end();

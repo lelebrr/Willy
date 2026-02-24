@@ -15,6 +15,11 @@ ScrollableTextArea::ScrollableTextArea(const String &title)
     setup();
 }
 
+void ScrollableTextArea::setFontSize(uint8_t size) {
+    _fontSize = size;
+    setup();
+}
+
 ScrollableTextArea::ScrollableTextArea(
     uint8_t fontSize, int16_t startX, int16_t startY, int32_t width, int32_t height, bool drawBorders,
     bool indentWrappedLines

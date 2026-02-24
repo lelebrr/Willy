@@ -11,11 +11,10 @@ MassStorage::MassStorage() { setup(); }
 
 MassStorage::~MassStorage() {
     msc.end();
-    USB.~ESPUSB();
-
-    // Hack to make USB back to flash mode
+    // Do not call destructor on global USB object, just ensure DFU if needed
     USB.enableDFU();
 }
+
 
 void MassStorage::setup() {
     displayMessage("Mounting...");

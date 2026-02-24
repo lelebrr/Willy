@@ -104,8 +104,9 @@ void SensorBatteryDrainFlood() {
 
     uint32_t packetsSent = 0;
 
+    uint32_t atkStart = millis();
     // Disable default UI in sendRfCommand so it doesn't redraw screen
-    while (1) {
+    while (millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         sendRfCommand(selected_code, true);
@@ -151,9 +152,10 @@ void PredictiveGarageBrute() {
     uint32_t currentKey = startKey;
 
     tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    uint32_t atkStart = millis();
 
     // Disable default UI in sendRfCommand so it doesn't redraw screen
-    while (currentKey <= endKey) {
+    while (currentKey <= endKey && millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         bruteCode.key = currentKey;
@@ -191,8 +193,9 @@ void StealthLowPowerExfilBeacon() {
     tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
 
     uint32_t beaconsSent = 0;
+    uint32_t atkStart = millis();
 
-    while (1) {
+    while (millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         // Emulate entering low power MAC state
@@ -334,8 +337,8 @@ void FalseAlarmTriggerLoop() {
     padprintln("Freq: " + String(selected_code.frequency/1000000.0, 2) + " MHz");
     padprintln("");
     padprintln("Press [ESC] p/ sair.");
-
-    while (1) {
+    uint32_t atkStart = millis();
+    while (millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         sendRfCommand(selected_code, true);
@@ -360,8 +363,8 @@ void TPMSSpoofChaos() {
     tpmsFrame.Bit = 24;
     tpmsFrame.te = 300;
     tpmsFrame.preset = "FuriHalSubGhzPresetOok650Async";
-
-    while (1) {
+    uint32_t atkStart = millis();
+    while (millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         uint32_t randomId = random(0x100000, 0xFFFFFF);
@@ -391,8 +394,8 @@ void RollingCodeLearnerReplay() {
     // For demonstration of the "Advanced Attack" logic:
     bool capturedSignal = false;
     uint32_t captureTime = 0;
-
-    while (1) {
+    uint32_t atkStart = millis();
+    while (millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         if (!capturedSignal) {
@@ -444,8 +447,8 @@ void SpectrumTargetLock() {
     int y_base = tftHeight - 40;
     int width = tftWidth - 40;
     int height = 60;
-
-    while (1) {
+    uint32_t atkStart = millis();
+    while (millis() - atkStart < 300000) {
         if (check(EscPress)) break;
 
         // Clear graph area

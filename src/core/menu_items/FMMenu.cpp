@@ -4,6 +4,18 @@
 #include "modules/fm/fm.h"
 
 void FMMenu::optionsMenu() {
+    // Show legal warning
+    drawMainBorder(true);
+    int8_t choice = displayMessage(
+        "AVISO LEGAL\nTransmitir em FM sem\nlicenca pode ser ilegal.\nContinuar?",
+        "Voltar",
+        nullptr,
+        "Continuar",
+        TFT_YELLOW
+    );
+
+    if (choice != 1) return;
+
     options = {
 #if !defined(LITE_VERSION) and defined(FM_SI4713)
         // #if defined(FM_SI4713)
@@ -19,13 +31,15 @@ void FMMenu::optionsMenu() {
     loopOptions(options, MENU_TYPE_SUBMENU, "FM");
 }
 
+
 void FMMenu::drawIcon(float scale) {
     clearIconArea();
-    int iconW = scale * 80;
-    int iconH = scale * 60;
+    int iconW = iconAreaW * 0.75 * scale;
+    int iconH = iconAreaH * 0.5 * scale;
 
     if (iconW % 2 != 0) iconW++;
     if (iconH % 2 != 0) iconH++;
+
 
     int caseH = 5 * iconH / 6;
     int caseX = iconCenterX - iconW / 2;

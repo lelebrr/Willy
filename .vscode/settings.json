@@ -5,9 +5,7 @@
     },
     "editor.detectIndentation": true,
     "editor.guides.bracketPairs": "active",
-
     "idf.portWin": "COM4",
-
     "files.associations": {
         "Jenkinsfile": "groovy",
         "*.toml": "properties",
@@ -88,17 +86,16 @@
     },
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
-
     "githubPullRequests.ignoredPullRequestBranches": [
         "main"
     ],
-
     "cmake.ignoreCMakeListsMissing": true,
     "cmake.sourceDirectory": "C:/Projetos/Bruce/lib/M5GFX",
-
     "[cpp]": {
-        "editor.defaultFormatter": "ms-vscode.cpptools",
-        "editor.rulers": [120],
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.rulers": [
+            120
+        ],
         "editor.tabSize": 4,
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {

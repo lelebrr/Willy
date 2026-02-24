@@ -2,6 +2,9 @@
 #include "nrf_fuzzer.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 void nrf_smart_fuzzer() {
     NRF24_MODE mode = nrf_setMode();
@@ -27,8 +30,9 @@ void nrf_smart_fuzzer() {
 
     uint32_t packets_sent = 0;
     uint32_t last_update = millis();
+    uint32_t start_time = millis();
 
-    while (!check(EscPress)) {
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             uint8_t random_ch = random(0, 125);
             uint8_t payload_len = random(1, 33);

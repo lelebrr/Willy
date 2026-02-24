@@ -16,10 +16,10 @@ void panelSleep(bool on) {
 #if defined(ST7789_2_DRIVER) || defined(ST7789_DRIVER)
     if (on) {
         tft.writecommand(0x10); // SLPIN: panel off
-        delay(5);
+        vTaskDelay(pdMS_TO_TICKS(5));
     } else {
         tft.writecommand(0x11); // SLPOUT: panel on
-        delay(120);
+        vTaskDelay(pdMS_TO_TICKS(120));
     }
 #endif
     // Disables tft writings on the display

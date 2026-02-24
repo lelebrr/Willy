@@ -1,6 +1,8 @@
 #include "nrf_common.h"
 #include "../../core/mykeyboard.h"
 
+namespace nrf_common {
+
 RF24 NRFradio(bruceConfigPins.NRF24_bus.io0, bruceConfigPins.NRF24_bus.cs);
 HardwareSerial NRFSerial = HardwareSerial(2); // Uses UART2 for External NRF's
 SPIClass *NRFSPI;
@@ -97,3 +99,5 @@ NRF24_MODE nrf_setMode() {
     loopOptions(options);
     return mode;
 }
+
+} // namespace nrf_common

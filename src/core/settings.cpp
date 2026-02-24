@@ -748,8 +748,27 @@ void setRFIDModuleMenu() {
 **********************************************************************/
 void addMifareKeyMenu() {
     String key = keyboard("", 12, "Chave MIFARE");
-    if (key != "\x1B") bruceConfig.addMifareKey(key);
+    if (key != "\x1B" && !key.isEmpty()) {
+        if (key.length() == 12) {
+            bool isHex = true;
+            for (char c : key) {
+                if (!isxdigit(c)) {
+                    isHex = false;
+                    break;
+                }
+            }
+            if (isHex) {
+                bruceConfig.addMifareKey(key);
+                displaySuccess("Chave adicionada");
+            } else {
+                displayError("Apenas caracteres HEX", true);
+            }
+        } else {
+            displayError("Deve ter 12 digitos", true);
+        }
+    }
 }
+
 
 /*********************************************************************
 **  Function: setClock

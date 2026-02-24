@@ -3,6 +3,9 @@
 #include "nrf_replay.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 struct ReplayPacket {
     uint8_t data[32];
@@ -45,7 +48,8 @@ void nrf_keystroke_replay() {
 
     if (CHECK_NRF_SPI(mode)) NRFradio.startListening();
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (recording) {
             if (CHECK_NRF_SPI(mode) && NRFradio.available()) {
                 ReplayPacket pkt;

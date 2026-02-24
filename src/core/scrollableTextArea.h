@@ -31,6 +31,7 @@ public:
     void draw(bool force = false);
 
     void show(bool force = false);
+    void setFontSize(uint8_t size);
 
     uint32_t getMaxVisibleTextLength();
 

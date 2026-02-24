@@ -1,9 +1,12 @@
-// TODO: Be able to read bytes from server in background/task
-//       so there is no loss of data when inputing
+// Minimal placeholder implementation
 #include "modules/wifi/tcp_utils.h"
+#include <WiFi.h>
+#include "core/display.h"
+#include "globals.h"
 #include "core/wifi/wifi_common.h"
 
 bool inputMode;
+
 
 void listenTcpPort() {
     if (!wifiConnected) wifiConnectMenu();

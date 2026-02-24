@@ -399,10 +399,6 @@ void aj_adv(int ble_choice) {
             }
         }
 
-        BLEDevice::init("");
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-        pAdvertising = nullptr;
-        vTaskDelay(100 / portTICK_PERIOD_MS);
 #if defined(CONFIG_IDF_TARGET_ESP32C5)
         esp_bt_controller_deinit();
 #else
@@ -451,10 +447,6 @@ void aj_adv(int ble_choice) {
             break;
         }
     }
-    BLEDevice::init("");
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-    pAdvertising = nullptr;
-    vTaskDelay(100 / portTICK_PERIOD_MS);
 #if defined(CONFIG_IDF_TARGET_ESP32C5)
     esp_bt_controller_deinit();
 #else

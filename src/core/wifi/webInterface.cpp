@@ -488,14 +488,14 @@ void configureWebServer() {
     });
 
     // Rename file or folder
-    server->on("/rename", HTTP_POST, [](AsyncWebServerRequest *request) {
+    auto renameHandler = [](AsyncWebServerRequest *request) {
         if (checkUserWebAuth(request)) {
             if (request->hasArg("fileName") && request->hasArg("filePath")) {
                 String fs = request->arg("fs").c_str();
                 String fileName = request->arg("fileName").c_str();
                 String filePath = request->arg("filePath").c_str();
                 String filePath2 = filePath.substring(0, filePath.lastIndexOf('/') + 1) + fileName;
-                // Rename the file of folder
+                // Rename the file or folder
                 if (fs == "SD") {
                     if (SD.rename(filePath, filePath2))
                         request->send(200, "text/plain", filePath + " renamed to " + filePath2);
@@ -507,7 +507,9 @@ void configureWebServer() {
                 }
             }
         }
-    });
+    };
+    server->on("/rename", HTTP_POST, renameHandler);
+    server->on("/api/fs/rename", HTTP_POST, renameHandler);
 
     // Route to send a generic command (Tasmota compatible API)
     // https://tasmota.github.io/docs/Commands/#with-web-requests
@@ -553,7 +555,7 @@ void configureWebServer() {
     });
 
     // List files
-    server->on("/listfiles", HTTP_GET, [](AsyncWebServerRequest *request) {
+    auto listFilesHandler = [](AsyncWebServerRequest *request) {
         if (checkUserWebAuth(request)) {
             String folder = "/";
             if (request->hasArg("folder")) { folder = request->arg("folder"); }
@@ -563,7 +565,9 @@ void configureWebServer() {
                 request->send(200, "text/plain", listFiles(LittleFS, folder));
             }
         }
-    });
+    };
+    server->on("/listfiles", HTTP_GET, listFilesHandler);
+    server->on("/api/fs/list", HTTP_GET, listFilesHandler);
 
     // Download, create folder and delete
     server->on("/file", HTTP_GET, [](AsyncWebServerRequest *request) {

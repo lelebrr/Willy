@@ -638,7 +638,9 @@ int PN532::write_felica_data_block(int block, String data) {
     if (size != 16) { return false; }
 
     for (size_t i = 0; i < data.length(); i += 2) {
-        block_data[0][i / 2] = strtoul(data.substring(i, i + 2).c_str(), NULL, 16);
+        if (i/2 < 16) {
+            block_data[0][i / 2] = strtoul(data.substring(i, i + 2).c_str(), NULL, 16);
+        }
     }
 
     uint16_t block_list[1] = {(uint16_t)(block +

@@ -6,9 +6,14 @@
 
 void LoRaMenu::optionsMenu() {
     options = {
-        {"Chat",             []() { lorachat(); }      },
+        {"Chat",             []() {
+            if (displayMessage("AVISO: Transmissao LoRa\npode precisar de licenca.\nContinuar?", "Não", nullptr, "Sim", TFT_YELLOW) == 2) {
+                lorachat();
+            }
+        }      },
         {"Mudar usuario",  []() { changeusername(); }},
         {"Mudar Frequencia", []() { chfreq(); }        },
+
     };
     addOptionToMainMenu();
     String txt = "LoRa";

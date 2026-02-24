@@ -10,7 +10,7 @@
 #include <IRsend.h>
 #include <IRutils.h>
 #include <SD.h>
-#include <globals.h>
+#include "globals.h"
 
 // Jamming modes available to the user
 enum JamMode {

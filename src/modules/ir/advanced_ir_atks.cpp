@@ -15,7 +15,7 @@
 #include "core/settings.h"
 #include <WiFi.h>
 #include <Arduino.h>
-#include <globals.h>
+#include "globals.h"
 #include <SD.h>
 #include <SPI.h>
 #include <vector>
@@ -1286,4 +1286,58 @@ void irWaveformVisualizer() {
 
     deinitIRAttackMode();
     returnToMenu = true;
+}
+
+void irProtocolFuzzer(const IRFuzzerConfig& config) {
+    // Stub
+}
+
+std::vector<IRLearnedSignal> loadLearnedSignals(const String& filename) {
+    std::vector<IRLearnedSignal> signals;
+    return signals;
+}
+
+void irBurstOverloadJammer(const IRJammerConfig& config) {
+    // Stub
+}
+
+void startIRWebServer() {
+    // Stub
+}
+
+void stopIRWebServer() {
+    // Stub
+}
+
+std::vector<IRDatabaseCode> getSuggestedCommands(const String& brand) {
+    std::vector<IRDatabaseCode> cmds;
+    return cmds;
+}
+
+std::vector<IRDatabaseCode> loadIRDatabase(const String& brand) {
+    std::vector<IRDatabaseCode> codes;
+    return codes;
+}
+
+void executeIRBrute(const IRBruteConfig& config) {
+    // Stub
+}
+
+void addIRTarget(const IRTarget& target) {
+    multi_ir_targets.push_back(target);
+}
+
+void executeMultiIRAttack(const MultiIRConfig& config) {
+    // Stub
+}
+
+IRWaveformData captureIRWaveform() {
+    IRWaveformData data;
+    data.totalTime = 0;
+    data.pulseCount = 0;
+    return data;
+}
+
+bool detectIRResponse() {
+    return false;
 }

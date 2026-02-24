@@ -17,7 +17,7 @@
 #include "ir_utils.h"
 #include <IRrecv.h>
 #include <IRutils.h>
-#include <globals.h>
+#include "globals.h"
 
 #ifdef BRUCE_IR_SERIAL
 #include "ys_irtm.h"
@@ -502,4 +502,8 @@ bool IrRead::write_file(String filename, FS *fs) {
     file.close();
     delay(100);
     return true;
+}
+
+void IrRead::quickLoop() {
+    // Stub
 }

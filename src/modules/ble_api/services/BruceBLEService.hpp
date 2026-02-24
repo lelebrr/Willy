@@ -11,7 +11,7 @@ public:
     virtual ~BruceBLEService() = default;
     virtual void setup(NimBLEServer *pServer) = 0;
     virtual void end() = 0;
-    void setMTU(int new_mtu) { mtu = new_mtu; }
+    void setMTU(uint16_t new_mtu) { mtu = new_mtu; }
 };
 #endif
 #endif // BRUCE_BLE_SERVICE_H

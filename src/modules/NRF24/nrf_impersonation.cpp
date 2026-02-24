@@ -2,6 +2,9 @@
 #include "nrf_impersonation.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "nrf_common.h"
+
+using namespace nrf_common;
 
 void nrf_device_impersonation() {
     NRF24_MODE mode = nrf_setMode();
@@ -34,7 +37,8 @@ void nrf_device_impersonation() {
 
     int spoof_count = 0;
 
-    while (!check(EscPress)) {
+    uint32_t start_time = millis();
+    while (!check(EscPress) && (millis() - start_time < 60000)) {
         if (CHECK_NRF_SPI(mode)) {
             if (NRFradio.available()) {
                 uint8_t dummy[32];

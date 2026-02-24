@@ -10,7 +10,6 @@ static bool newValue = false;
 
 class BLESerialCallbacks : public NimBLECharacteristicCallbacks {
     void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo) override {
-        newValue = true;
     }
 };
 
@@ -36,6 +35,12 @@ int BLESerialService::available() {
     newValue = false;
 
     return serial_char->getValue().size();
+}
+
+int BLESerialService::read() {
+    std::string value = serial_char->getValue();
+    if (value.empty()) return -1;
+    return static_cast<int>(value[0]);
 }
 
 size_t BLESerialService::println(const String &s) {
@@ -66,7 +71,6 @@ void BLESerialService::vprintf(const char *fmt, va_list args) {
 }
 
 String BLESerialService::readStringUntil(char terminator) {
-    Serial.println("readStringUntil");
     String result = "";
     std::string value = serial_char->getValue();
     for (char c : value) {

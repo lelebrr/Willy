@@ -15,7 +15,11 @@ void ScriptsMenu::optionsMenu() {
 
     options = getScriptsOptionsList("", false);
 
-    options.push_back(Option{"Carregar...", [=]() { run_js_script(); }});
+    options.push_back(Option{"Carregar...", [=]() {
+        printMemoryUsage();
+        run_js_script();
+    }});
+
     addOptionToMainMenu();
 
     loopOptions(options, MENU_TYPE_SUBMENU, "Scripts");

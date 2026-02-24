@@ -1,122 +1,41 @@
 #include "ap_info.h"
-
-#include "core/display.h"
-#include "core/mykeyboard.h"
-#include "core/net_utils.h"
-#include "core/scrollableTextArea.h"
-#include "esp_wifi.h"
-#include "lwip/etharp.h"
 #include <WiFi.h>
-#include <globals.h>
+#include "core/display.h"
+#include "globals.h"
 
-String autoMode2String(wifi_auth_mode_t authMode) {
-    switch (authMode) {
-        case WIFI_AUTH_OPEN: return "OPEN";
-        case WIFI_AUTH_WEP: return "WEP";
-        case WIFI_AUTH_WPA_PSK: return "WPA_PSK";
-        case WIFI_AUTH_WPA2_PSK: return "WPA2_PSK";
-        case WIFI_AUTH_WPA_WPA2_PSK: return "WPA_WPA2_PSK";
-        case WIFI_AUTH_ENTERPRISE: return "WPA2_ENTERPRISE";
-        case WIFI_AUTH_WPA3_PSK: return "WPA3_PSK";
-        case WIFI_AUTH_WPA2_WPA3_PSK: return "WPA2_WPA3_PSK";
-        case WIFI_AUTH_WAPI_PSK: return "WAPI_PSK";
-        case WIFI_AUTH_WPA3_ENT_192: return "WPA3_ENT_192";
-        default: return "UNKNOWN";
+void displayAPInfo(const wifi_ap_record_t &record) {
+    drawMainBorderWithTitle("INFORMACOES DO AP");
+    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextSize(FM);
+    
+    char buf[64];
+    padprintln("");
+    padprintln("SSID: " + String((char*)record.ssid));
+    
+    snprintf(buf, sizeof(buf), "BSSID: %02X:%02X:%02X:%02X:%02X:%02X", 
+             record.bssid[0], record.bssid[1], record.bssid[2], 
+             record.bssid[3], record.bssid[4], record.bssid[5]);
+    padprintln(buf);
+    
+    padprintln("Canal: " + String(record.primary));
+    padprintln("RSSI: " + String(record.rssi) + " dBm");
+    
+    String auth;
+    switch (record.authmode) {
+        case WIFI_AUTH_OPEN: auth = "Aberto"; break;
+        case WIFI_AUTH_WEP: auth = "WEP"; break;
+        case WIFI_AUTH_WPA_PSK: auth = "WPA/PSK"; break;
+        case WIFI_AUTH_WPA2_PSK: auth = "WPA2/PSK"; break;
+        case WIFI_AUTH_WPA_WPA2_PSK: auth = "WPA/WPA2/PSK"; break;
+        case WIFI_AUTH_WPA2_ENTERPRISE: auth = "Enterprise"; break;
+        default: auth = "Desconhecido"; break;
     }
-}
-
-String cypherType2String(wifi_cipher_type_t cipherType) {
-    switch (cipherType) {
-        case WIFI_CIPHER_TYPE_NONE: return "NONE";
-        case WIFI_CIPHER_TYPE_WEP40: return "WEP40";
-        case WIFI_CIPHER_TYPE_WEP104: return "WEP104";
-        case WIFI_CIPHER_TYPE_TKIP: return "TKIP";
-        case WIFI_CIPHER_TYPE_CCMP: return "CCMP";
-        case WIFI_CIPHER_TYPE_TKIP_CCMP: return "TKIP_CCMP";
-        case WIFI_CIPHER_TYPE_AES_CMAC128: return "AES_CMAC128";
-        case WIFI_CIPHER_TYPE_SMS4: return "SMS4";
-        case WIFI_CIPHER_TYPE_GCMP: return "GCMP";
-        case WIFI_CIPHER_TYPE_GCMP256: return "GCMP256";
-        case WIFI_CIPHER_TYPE_AES_GMAC128: return "AES_GMAC128";
-        case WIFI_CIPHER_TYPE_AES_GMAC256: return "AES_GMAC256";
-        case WIFI_CIPHER_TYPE_UNKNOWN:
-        default: return "UNKNOWN";
+    padprintln("Seguranca: " + auth);
+    
+    padprintln("");
+    padprintln("Pressione Sair para voltar");
+    
+    while (!check(EscPress)) {
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-}
-
-String phyModes2String(wifi_ap_record_t record) {
-    String modes;
-    if (record.phy_11b || record.phy_11g || record.phy_11g || record.phy_11n) modes = "11";
-    if (record.phy_11b) modes += "b/";
-    if (record.phy_11g) modes += "g/";
-    if (record.phy_11n) modes += "n/";
-    if (record.phy_lr) modes += "low/";
-    if (!modes.isEmpty()) modes[modes.length() - 1] = ' ';
-
-    if (record.ftm_responder || record.ftm_initiator) {
-        modes += "FTM: ";
-        if (record.ftm_responder) modes += "RESP ";
-        if (record.ftm_initiator) modes += "INIT ";
-    }
-
-    return modes.isEmpty() ? "None" : modes;
-}
-
-String getChannelWidth(wifi_second_chan_t secondChannel) {
-    switch (secondChannel) {
-        case WIFI_SECOND_CHAN_NONE: return "HT20";   // 20 MHz channel width (no secondary channel)
-        case WIFI_SECOND_CHAN_ABOVE: return "HT40+"; // 40 MHz channel width with secondary channel above
-        case WIFI_SECOND_CHAN_BELOW: return "HT40-"; // 40 MHz channel width with secondary channel below
-        default: return "Unknown";
-    }
-}
-
-void fillInfo(ScrollableTextArea &area) {
-    wifi_ap_record_t ap_info;
-    esp_err_t res;
-    if ((res = esp_wifi_sta_get_ap_info(&ap_info)) != ESP_OK) {
-        String err;
-        switch (res) {
-            case ESP_ERR_WIFI_CONN: err = "iface is not initialized"; break;
-            case ESP_ERR_WIFI_NOT_CONNECT: err = "station disconnected"; break;
-            default: err = "failed with" + String(res); break;
-        }
-
-        area.addLine(err);
-        area.show();
-
-        while (check(SelPress)) yield();
-        while (!check(SelPress)) yield();
-    }
-
-    const auto mac = MAC(ap_info.bssid);
-
-    displayTextLine("Obtendo...");
-
-    // in promiscius mode also Rx/Tx can be gathered
-    // organized in the most to least usable
-    area.addLine("SSID: " + String((char *)ap_info.ssid));
-    area.addLine("Senha: " + bruceConfig.getWifiPassword((char *)ap_info.ssid));
-    area.addLine("Internet: " + String(internetConnection() ? "disp" : "indisp"));
-    area.addLine("Modos: " + phyModes2String(ap_info));
-    area.addLine("Sinal: " + String(ap_info.rssi) + "db");
-    // AP might not have assigned IP and gateway ip might differ from an ap ip
-    area.addLine("Gateway: " + WiFi.gatewayIP().toString());
-    area.addLine("Canal: " + String(ap_info.primary) + " " + getChannelWidth(ap_info.second));
-    area.addLine("BSSID: " + mac); // sometimes MAC != BSSID (but we ignore that case)
-    area.addLine("Fabricante: " + getManufacturer(mac));
-    area.addLine(
-        "Auth: " + autoMode2String(ap_info.authmode) + " WPA: " + String(ap_info.wps ? "ativ" : "desat")
-    );
-    area.addLine(
-        "Cifra uni: " + cypherType2String(ap_info.pairwise_cipher) +
-        " multi: " + cypherType2String(ap_info.group_cipher)
-    );
-    area.addLine("Antena: " + String(ap_info.ant));
-}
-
-void displayAPInfo() {
-    ScrollableTextArea area = ScrollableTextArea("AP INFO");
-    fillInfo(area);
-    area.show();
 }

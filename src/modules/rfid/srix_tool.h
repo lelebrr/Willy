@@ -29,6 +29,9 @@
 #include "pn532_srix.h"
 #include <Arduino.h>
 #include <FS.h>
+#include "core/display.h"
+#include "core/mykeyboard.h"
+#include "core/settings.h"
 
 class SRIXTool {
 public:

@@ -1,6 +1,5 @@
 #if !defined(LITE_VERSION)
 #include "BatteryService.hpp"
-#include "ArduinoJson.h"
 #include <NimBLEDevice.h>
 #include <NimBLEUtils.h>
 #include <WiFi.h>
@@ -16,7 +15,7 @@ void battery_handler_task(void *params) {
         uint8_t val = getBattery();
         battery_char->setValue(&val, 1);
 
-        delay(60000); // Update battery every minute
+        vTaskDelay(pdMS_TO_TICKS(60000)); // Update battery every minute
     }
 }
 
@@ -45,5 +44,13 @@ void BatteryService::setup(BLEServer *pServer) {
     );
 }
 
-void BatteryService::end() { vTaskDelete(battery_task_handle); }
+void BatteryService::end() {
+    if (battery_task_handle != nullptr) {
+        vTaskDelete(battery_task_handle);
+        battery_task_handle = nullptr;
+    }
+    if (pService != nullptr) {
+        // NimBLE services do not have a stop() method; cleaned up on deinit
+    }
+}
 #endif

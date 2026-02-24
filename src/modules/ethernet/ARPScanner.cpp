@@ -204,7 +204,7 @@ void ARPScanner::setup() {
         if (check(EscPress)) break;
     }
     UNLOCK_TCPIP_CORE();
-    auto it = std::find_if(hostslist_eth.begin(), hostslist_eth.end(), [this](const Host &host) {
+    auto it = std::find_if(hostslist_eth.begin(), hostslist_eth.end(), [this](const ScanHosts::Host &host) {
         return host.ip == gateway;
     });
 
@@ -279,7 +279,7 @@ bool ARPScanner::macStringToByteArray(const std::string &macStr, uint8_t macArra
     // Check if exactly 6 bytes were parsed
     return byteCount == 6;
 }
-void ARPScanner::afterScanOptions(const Host &host) {
+void ARPScanner::afterScanOptions(const ScanHosts::Host &host) {
     int opt = 0;
     IPAddress gw = gateway;
     options = {
@@ -302,7 +302,7 @@ void ARPScanner::afterScanOptions(const Host &host) {
          }},
         {"ARP Spoofing",
          [this, host, gw]() {
-             auto it = std::find_if(hostslist_eth.begin(), hostslist_eth.end(), [this](const Host &host) {
+             auto it = std::find_if(hostslist_eth.begin(), hostslist_eth.end(), [this](const ScanHosts::Host &host) {
                  return host.ip == gateway;
              });
 

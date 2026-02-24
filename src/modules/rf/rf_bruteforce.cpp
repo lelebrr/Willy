@@ -1,12 +1,6 @@
 #include "rf_bruteforce.h"
 
-#include "protocols/Ansonic.h"
-#include "protocols/Came.h"
-#include "protocols/Chamberlain.h"
-#include "protocols/Holtek.h"
-#include "protocols/Linear.h"
-#include "protocols/NiceFlo.h"
-#include "protocols/protocol.h"
+#include "protocols/rf_protocols.h"
 #include "rf_utils.h"
 
 float brute_frequency = 433.92;
@@ -71,26 +65,26 @@ bool rf_brute_start() {
         if (!initRfModule("tx")) return false;
     }
 
-    c_rf_protocol *protocol = nullptr;
+    rf_protocols::c_rf_protocol *protocol = nullptr;
     int bits = 0;
 
     if (brute_protocol == "Nice 12 Bit") {
-        protocol = new protocol_nice_flo();
+        protocol = new rf_protocols::protocol_nice_flo();
         bits = 12;
     } else if (brute_protocol == "Came 12 Bit") {
-        protocol = new protocol_came();
+        protocol = new rf_protocols::protocol_came();
         bits = 12;
     } else if (brute_protocol == "Ansonic 12 Bit") {
-        protocol = new protocol_ansonic();
+        protocol = new rf_protocols::protocol_ansonic();
         bits = 12;
     } else if (brute_protocol == "Holtek 12 Bit") {
-        protocol = new protocol_holtek();
+        protocol = new rf_protocols::protocol_holtek();
         bits = 12;
     } else if (brute_protocol == "Linear 12 Bit") {
-        protocol = new protocol_linear();
+        protocol = new rf_protocols::protocol_linear();
         bits = 12;
     } else if (brute_protocol == "Chamberlain 12 Bit") {
-        protocol = new protocol_ansonic();
+        protocol = new rf_protocols::protocol_chamberlain();
         bits = 12;
     } else {
         deinitRfModule();
@@ -116,7 +110,7 @@ bool rf_brute_start() {
 
             for (int j = bits - 1; j >= 0; --j) {
                 bool bit = (i >> j) & 1;
-                const std::vector<int> &timings = protocol->transposition_table[bit ? '1' : '0'];
+                const std::vector<int> &timings = protocol->transposition_table[bit ? 1 : 0];
                 for (auto duration : timings) { sendPulse(duration); }
             }
 

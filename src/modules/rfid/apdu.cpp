@@ -1,6 +1,7 @@
 #include "apdu.h"
 #include <vector>
 #include <string>
+#include <algorithm>
 
 const uint8_t ApduCommand::C_APDU_CLA = 0;
 const uint8_t ApduCommand::C_APDU_INS = 1;
@@ -73,8 +74,13 @@ std::vector<uint8_t> Ndef::urlNdefAbbrv(std::string url) {
 
     std::vector<uint8_t> ndefMessage;
 
+    std::string urlLower = url;
+    std::transform(urlLower.begin(), urlLower.end(), urlLower.begin(), ::tolower);
+
     for (size_t i = 0; i < abbrv_table.size(); ++i) {
-        if (url.find(abbrv_table[i]) == 0) {
+        std::string abbrv = abbrv_table[i];
+        std::transform(abbrv.begin(), abbrv.end(), abbrv.begin(), ::tolower);
+        if (urlLower.find(abbrv) == 0) {
             ndefMessage.push_back(static_cast<uint8_t>(i + 1));
             url = url.substr(abbrv_table[i].length());
             break;
@@ -86,6 +92,7 @@ std::vector<uint8_t> Ndef::urlNdefAbbrv(std::string url) {
 }
 
 std::vector<uint8_t> Ndef::newMessage(std::vector<uint8_t> ndef) {
+    if (ndef.size() > 255) return {}; // NDEF size limit for this message format
     std::vector<uint8_t> message;
     message.push_back(0xD1); // NDEF record header
     message.push_back(TNF_WELL_KNOWN);

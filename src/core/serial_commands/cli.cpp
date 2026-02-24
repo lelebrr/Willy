@@ -25,6 +25,8 @@ void cliErrorCallback(cmd_error *e) {
         serialDevice->print("Did you mean \"");
         serialDevice->print(cmdError.getCommand().toString());
         serialDevice->println("\"?");
+    } else {
+        serialDevice->println("Type 'help' for a list of available commands.");
     }
 }
 

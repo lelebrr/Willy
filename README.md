@@ -231,7 +231,13 @@ ENTER
 
 ## 🚀 Willy 2.1 Refinements
 
-A nova versão **Willy 2.1** traz uma experiência de usuário premium e recursos forenses avançados para o repositório oficial.
+A nova versão **Willy 2.1** traz uma experiência de usuário premium, recursos forenses avançados e desenvolvimento de ferramentas de geolocalização para pentest para o repositório oficial.
+
+### 🌍 GPS Mapping & Geolocalização Avançada
+
+- **Tracker e Mapping**: GPS tracker integrado com gravação de rotas e coordenadas em tempo real.
+- **Wardriving Integrado**: Escaneamento simultâneo de WiFi e rastreamento geográfico para auditoria sem fio.
+- **Wigle Upload**: Sincronização direta de dados de wardriving com a plataforma Wigle.net para análise avançada de segurança em redes.
 
 ### 🎨 Cyber Menu 2.1
 

@@ -9,6 +9,9 @@
 #include <esp_wifi.h>
 #include <esp_wifi_types.h>
 #include <globals.h>
+#include "core/main_menu.h"
+#include <FS.h>
+#include <SD.h>
 #include <iomanip>
 #include <iostream>
 #include <lwip/dns.h>
@@ -32,10 +35,12 @@ void getGatewayMAC(uint8_t gatewayMAC[6]) {
     wifi_ap_record_t ap_info;
     if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
         memcpy(gatewayMAC, ap_info.bssid, 6);
-        Serial.print("Gateway MAC: ");
-        Serial.println(macToString(gatewayMAC));
+        if (Serial) {
+            Serial.print("Gateway MAC: ");
+            Serial.println(macToString(gatewayMAC));
+        }
     } else {
-        Serial.println("Erro ao obter informações do AP.");
+        if (Serial) Serial.println("Erro ao obter informações do AP.");
     }
 }
 
@@ -125,7 +130,7 @@ void buildOptimizedDeauthFrame(uint8_t* frame,
 // ENHANCED STATION DEAUTH (MAIN FUNCTION)
 // ============================================
 
-void stationDeauth(Host host) {
+void stationDeauth(ScanHosts::Host host) {
     uint8_t MAC[6];
     uint8_t gatewayMAC[6];
     uint8_t victimIP[4];
@@ -246,6 +251,7 @@ void stationDeauth(Host host) {
             tft.drawRightString(String(fps) + " fps", tftWidth - 12, tftHeight - 36, 1);
             tft.drawRightString("Total: " + String(total_frames), tftWidth - 12, tftHeight - 20, 1);
         }
+        vTaskDelay(1 / portTICK_PERIOD_MS); // Yield to system
     }
 
     // Cleanup

@@ -11,7 +11,7 @@
 #include "core/net_utils.h"
 #include "core/scrollableTextArea.h"
 
-HostInfo::HostInfo(const Host &host, bool wifi) {
+HostInfo::HostInfo(const ScanHosts::Host &host, bool wifi) {
 #if !defined(LITE_VERSION)
     if (!wifi) {
         eth_client = new ESPNetifEthernetClient();
@@ -73,7 +73,7 @@ bool HostInfo::client_connected() {
 #endif
 }
 
-void HostInfo::setup(const Host &host) {
+void HostInfo::setup(const ScanHosts::Host &host) {
     const int TIMEOUT_MS = 150; // Timeout for connection attempt
 
     // Array of TCP ports to scan
@@ -127,7 +127,7 @@ void HostInfo::setup(const Host &host) {
                 connected = true;
                 break;
             }
-            continue;
+            yield(); // Allow background tasks and UI to run
         }
 
         if (connected) {

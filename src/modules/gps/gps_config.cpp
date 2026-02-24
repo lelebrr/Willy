@@ -32,41 +32,41 @@ bool GPSConfig::applyConfiguration(HardwareSerial &serial) {
 bool GPSConfig::applyStandardConfig(HardwareSerial &serial) {
     // Standard configuration: 1Hz, NMEA, no optimizations
     // Most GPS modules come with this as default, so we just ensure it
-    
+
     // Send PMTK command to set 1Hz update rate
     // $PMTK220,1000*1F = 1000ms interval (1Hz)
     sendPMTKCommand(serial, "PMTK220,1000");
-    
-    delay(100);
-    
+
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
     // Reset NMEA output
     sendPMTKCommand(serial, "PMTK314,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
-    delay(100);
-    
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
     // Enable standard NMEA sentences: RMC, VTG, GGA, GSA, GSV
     sendPMTKCommand(serial, "PMTK314,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0");
-    delay(100);
-    
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
     return true;
 }
 
 bool GPSConfig::applyAdvancedConfig(HardwareSerial &serial) {
     bool success = true;
-    
+
     // Step 1: Set update rate
     if (!setUpdateRate(serial, updateRate)) {
         displayWarning("Falha ao definir taxa de atualizacao", true);
         success = false;
     }
-    delay(200);
-    
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+
     // Step 2: Set navigation mode
     if (!setNavigationMode(serial, dynamicModel)) {
         displayWarning("Falha ao definir modo navegacao", true);
         success = false;
     }
-    delay(200);
-    
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+
     // Step 3: Set power mode
     if (powerMode == GPS_POWER_SAVE) {
         if (!setPowerSaveMode(serial, true)) {
@@ -85,8 +85,8 @@ bool GPSConfig::applyAdvancedConfig(HardwareSerial &serial) {
         };
         sendUBXCommand(serial, 0x06, 0x3B, payload, sizeof(payload));
     }
-    delay(200);
-    
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+
     // Step 4: Set satellite filter
     if (minSatelliteSignal > 0) {
         if (!setSatelliteFilter(serial, minSatelliteSignal)) {
@@ -94,8 +94,8 @@ bool GPSConfig::applyAdvancedConfig(HardwareSerial &serial) {
             success = false;
         }
     }
-    delay(200);
-    
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+
     // Step 5: Change baudrate if needed for higher update rates
     if (updateRate >= GPS_RATE_5HZ && advancedBaudrate > 9600) {
         if (!changeBaudrate(serial, advancedBaudrate)) {
@@ -104,11 +104,11 @@ bool GPSConfig::applyAdvancedConfig(HardwareSerial &serial) {
         }
         // Need to reinitialize serial at new baudrate (caller responsibility)
     }
-    delay(200);
-    
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+
     // Save to EEPROM to persist settings
     saveToEEPROM(serial);
-    
+
     return success;
 }
 
@@ -118,11 +118,11 @@ bool GPSConfig::applyAdvancedConfig(HardwareSerial &serial) {
 
 bool GPSConfig::setUpdateRate(HardwareSerial &serial, uint8_t rateHz) {
     uint16_t intervalMs = 1000 / rateHz;
-    
+
     // Method 1: PMTK command (works with MT3339 and many clones)
     String cmd = "PMTK220," + String(intervalMs);
     sendPMTKCommand(serial, cmd);
-    
+
     // Method 2: UBX-CFG-RATE command for u-blox modules
     // Payload: measure rate (ms), nav rate, time ref
     uint8_t payload[] = {
@@ -133,9 +133,9 @@ bool GPSConfig::setUpdateRate(HardwareSerial &serial, uint8_t rateHz) {
         0x01,  // time reference: UTC time
         0x00   // time reference MSB
     };
-    
+
     sendUBXCommand(serial, 0x06, 0x08, payload, sizeof(payload));
-    
+
     return waitForUBXAck(serial, 0x06, 0x08, 500);
 }
 
@@ -147,7 +147,7 @@ bool GPSConfig::setPowerSaveMode(HardwareSerial &serial, bool enable) {
             0x01,        // version
             0x08,        // mode: Power Save Mode with cyclic tracking
             0x00, 0x10,  // update period: 1 second
-            0x00, 0x10,  // search period: 1 second  
+            0x00, 0x10,  // search period: 1 second
             0x00, 0x00,  // grid offset
             0x40, 0x42, 0x0F, 0x00,  // on-time, min acquisition time
             0x00, 0x00, 0x00, 0x00   // reserved
@@ -166,7 +166,7 @@ bool GPSConfig::setPowerSaveMode(HardwareSerial &serial, bool enable) {
         };
         sendUBXCommand(serial, 0x06, 0x3B, payload, sizeof(payload));
     }
-    
+
     return waitForUBXAck(serial, 0x06, 0x3B, 500);
 }
 
@@ -175,28 +175,28 @@ bool GPSConfig::setProtocolMode(HardwareSerial &serial, GPSProtocolMode mode) {
     // Port ID 1 = UART1
     uint8_t payload[20] = {0};
     payload[0] = 0x01;  // Port ID: UART1
-    
+
     // TX ready pin
     payload[1] = 0x00;
     payload[2] = 0x00;
     payload[3] = 0x00;
-    
+
     // Mode: 8N1
     payload[4] = 0xD0;
     payload[5] = 0x08;
     payload[6] = 0x00;
     payload[7] = 0x00;
-    
+
     // Baudrate (keep current)
     payload[8] = 0x80;
     payload[9] = 0x25;
     payload[10] = 0x00;
     payload[11] = 0x00;  // 9600
-    
+
     // inProtoMask (input protocols)
     payload[12] = 0x07;  // UBX + NMEA + RTCM
     payload[13] = 0x00;
-    
+
     // outProtoMask (output protocols)
     switch (mode) {
         case GPS_PROTOCOL_NMEA:
@@ -210,60 +210,60 @@ bool GPSConfig::setProtocolMode(HardwareSerial &serial, GPSProtocolMode mode) {
             break;
     }
     payload[15] = 0x00;
-    
+
     // flags
     payload[16] = 0x00;
     payload[17] = 0x00;
     payload[18] = 0x00;
     payload[19] = 0x00;
-    
+
     sendUBXCommand(serial, 0x06, 0x00, payload, sizeof(payload));
-    
+
     return waitForUBXAck(serial, 0x06, 0x00, 500);
 }
 
 bool GPSConfig::setNavigationMode(HardwareSerial &serial, GPSDynamicModel model) {
     // UBX-CFG-NAV5: Navigation Engine Settings
     uint8_t payload[36] = {0};
-    
+
     // Mask: set dyn model
     payload[0] = 0x01;  // LSB of mask
     payload[1] = 0x00;  // MSB of mask
-    
+
     // Dynamic model
     payload[2] = (uint8_t)model;
-    
+
     // Auto-fixed mode
     payload[3] = 0x03;
-    
+
     // Min SVs for fix
     payload[4] = 0x03;
-    
+
     // Send the command
     sendUBXCommand(serial, 0x06, 0x24, payload, sizeof(payload));
-    
+
     return waitForUBXAck(serial, 0x06, 0x24, 500);
 }
 
 bool GPSConfig::setSatelliteFilter(HardwareSerial &serial, uint8_t minSignalDb) {
     // UBX-CFG-NAVX5: Navigation Engine Expert Settings
     uint8_t payload[40] = {0};
-    
+
     // Mask
     payload[0] = 0x00;
     payload[1] = 0x04;  // Bit 2: minCno
-    
+
     // Version
     payload[2] = 0x00;
     payload[3] = 0x02;
-    
+
     // minCno (minimum satellite signal strength)
     payload[4] = minSignalDb;
-    
+
     // Rest of payload is reserved/zeros
-    
+
     sendUBXCommand(serial, 0x06, 0x23, payload, sizeof(payload));
-    
+
     return waitForUBXAck(serial, 0x06, 0x23, 500);
 }
 
@@ -271,108 +271,108 @@ bool GPSConfig::changeBaudrate(HardwareSerial &serial, uint32_t newBaudrate) {
     // UBX-CFG-PRT: Port configuration for baudrate
     uint8_t payload[20] = {0};
     payload[0] = 0x01;  // Port ID: UART1
-    
+
     // TX ready pin
     payload[1] = 0x00;
     payload[2] = 0x00;
     payload[3] = 0x00;
-    
+
     // Mode: 8N1
     payload[4] = 0xD0;
     payload[5] = 0x08;
     payload[6] = 0x00;
     payload[7] = 0x00;
-    
+
     // Baudrate
     payload[8] = (uint8_t)(newBaudrate & 0xFF);
     payload[9] = (uint8_t)((newBaudrate >> 8) & 0xFF);
     payload[10] = (uint8_t)((newBaudrate >> 16) & 0xFF);
     payload[11] = (uint8_t)((newBaudrate >> 24) & 0xFF);
-    
+
     // inProtoMask
     payload[12] = 0x07;
     payload[13] = 0x00;
-    
+
     // outProtoMask
     payload[14] = 0x03;  // UBX + NMEA
     payload[15] = 0x00;
-    
+
     // flags
     payload[16] = 0x00;
     payload[17] = 0x00;
     payload[18] = 0x00;
     payload[19] = 0x00;
-    
+
     sendUBXCommand(serial, 0x06, 0x00, payload, sizeof(payload));
-    
+
     // Wait a bit for the command to be processed
-    delay(100);
-    
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
     // Update our stored baudrate
     advancedBaudrate = newBaudrate;
-    
+
     return true;
 }
 
 bool GPSConfig::saveToEEPROM(HardwareSerial &serial) {
     // UBX-CFG-CFG: Save current configuration
     uint8_t payload[13] = {0};
-    
+
     // Clear mask: don't clear anything
     payload[0] = 0x00;
     payload[1] = 0x00;
     payload[2] = 0x00;
     payload[3] = 0x00;
-    
+
     // Save mask: save all
     payload[4] = 0x1F;
     payload[5] = 0x1F;
     payload[6] = 0x00;
     payload[7] = 0x00;
-    
+
     // Load mask: don't load
     payload[8] = 0x00;
     payload[9] = 0x00;
     payload[10] = 0x00;
     payload[11] = 0x00;
-    
+
     // Device mask: all devices
     payload[12] = 0xFF;
-    
+
     sendUBXCommand(serial, 0x06, 0x09, payload, sizeof(payload));
-    
+
     return waitForUBXAck(serial, 0x06, 0x09, 1000);
 }
 
 bool GPSConfig::factoryReset(HardwareSerial &serial) {
     // UBX-CFG-CFG: Factory reset
     uint8_t payload[13] = {0};
-    
+
     // Clear mask: clear all
     payload[0] = 0xFF;
     payload[1] = 0xFF;
     payload[2] = 0x00;
     payload[3] = 0x00;
-    
+
     // Save mask: don't save
     payload[4] = 0x00;
     payload[5] = 0x00;
     payload[6] = 0x00;
     payload[7] = 0x00;
-    
+
     // Load mask: load all defaults
     payload[8] = 0xFF;
     payload[9] = 0xFF;
     payload[10] = 0x00;
     payload[11] = 0x00;
-    
+
     // Device mask: all devices
     payload[12] = 0xFF;
-    
+
     sendUBXCommand(serial, 0x06, 0x09, payload, sizeof(payload));
-    
-    delay(500);
-    
+
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
     return true;
 }
 
@@ -427,7 +427,7 @@ String GPSConfig::getNavigationModeString(GPSNavigationMode mode) {
 void GPSConfig::calcUBXChecksum(uint8_t *data, uint16_t len, uint8_t &ck_a, uint8_t &ck_b) {
     ck_a = 0;
     ck_b = 0;
-    
+
     for (uint16_t i = 0; i < len; i++) {
         ck_a += data[i];
         ck_b += ck_a;
@@ -438,67 +438,67 @@ bool GPSConfig::sendUBXCommand(HardwareSerial &serial, uint8_t class_id, uint8_t
     // Build UBX frame: sync1, sync2, class, id, length, payload, checksum
     uint16_t frame_len = 8 + payload_len;
     uint8_t *frame = new uint8_t[frame_len];
-    
+
     frame[0] = 0xB5;  // Sync char 1
     frame[1] = 0x62;  // Sync char 2
     frame[2] = class_id;
     frame[3] = msg_id;
     frame[4] = payload_len & 0xFF;
     frame[5] = (payload_len >> 8) & 0xFF;
-    
+
     // Copy payload
     if (payload_len > 0 && payload != nullptr) {
         memcpy(&frame[6], payload, payload_len);
     }
-    
+
     // Calculate checksum over class, id, length, and payload
     uint8_t ck_a, ck_b;
     calcUBXChecksum(&frame[2], 4 + payload_len, ck_a, ck_b);
-    
+
     frame[6 + payload_len] = ck_a;
     frame[7 + payload_len] = ck_b;
-    
+
     // Send the frame
     serial.write(frame, frame_len);
     serial.flush();
-    
+
     delete[] frame;
-    
+
     return true;
 }
 
 bool GPSConfig::sendPMTKCommand(HardwareSerial &serial, const String &command) {
     // Build PMTK command with checksum
     // Format: $PMTKxxx*checksum\r\n
-    
+
     // Calculate NMEA checksum (XOR of all characters between $ and *)
     uint8_t checksum = 0;
     for (size_t i = 0; i < command.length(); i++) {
         checksum ^= (uint8_t)command[i];
     }
-    
+
     String fullCommand = "$" + command + "*" + String(checksum, HEX);
     fullCommand.toUpperCase();
     fullCommand += "\r\n";
-    
+
     serial.print(fullCommand);
     serial.flush();
-    
+
     return true;
 }
 
 bool GPSConfig::waitForUBXAck(HardwareSerial &serial, uint8_t class_id, uint8_t msg_id, uint32_t timeout_ms) {
     uint32_t startTime = millis();
-    
+
     // Buffer for ACK message
     uint8_t buffer[10];
     uint8_t idx = 0;
     bool inMessage = false;
-    
+
     while (millis() - startTime < timeout_ms) {
         if (serial.available() > 0) {
             uint8_t byte = serial.read();
-            
+
             if (!inMessage) {
                 if (byte == 0xB5) {
                     idx = 0;
@@ -509,34 +509,34 @@ bool GPSConfig::waitForUBXAck(HardwareSerial &serial, uint8_t class_id, uint8_t 
                 if (idx < sizeof(buffer)) {
                     buffer[idx++] = byte;
                 }
-                
+
                 // Check for ACK-NAK or ACK-ACK message
                 // ACK-ACK: B5 62 05 01 ...
                 // ACK-NAK: B5 62 05 00 ...
                 if (idx >= 10) {
-                    if (buffer[0] == 0xB5 && buffer[1] == 0x62 && 
+                    if (buffer[0] == 0xB5 && buffer[1] == 0x62 &&
                         buffer[2] == 0x05) {  // ACK class
-                        
+
                         if (buffer[3] == 0x01 &&  // ACK-ACK
-                            buffer[6] == class_id && 
+                            buffer[6] == class_id &&
                             buffer[7] == msg_id) {
                             return true;  // ACK received
                         } else if (buffer[3] == 0x00 &&  // ACK-NAK
-                                   buffer[6] == class_id && 
+                                   buffer[6] == class_id &&
                                    buffer[7] == msg_id) {
                             return false;  // NAK received
                         }
                     }
-                    
+
                     // Reset for next message
                     inMessage = false;
                     idx = 0;
                 }
             }
         }
-        
-        delay(1);
+
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
-    
+
     return false;  // Timeout
 }

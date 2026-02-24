@@ -7,17 +7,19 @@ bool is_free_gpio_pin(int pin_no) {
 
 #if defined(ARDUINO_M5STICK_C_PLUS2) || defined(ARDUINO_M5STICK_C_PLUS)
     usable_pins.insert(usable_pins.end(), {25, 26, 32, 33, 0});
-#elif defined(ESP32S3DEVKITC1)
+#elif defined(ESP32S3DEVKITC1) || defined(ARDUINO_ESP32S3_DEV)
     usable_pins.insert(
         usable_pins.end(),
         {
             1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
             14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, // GPIO1 to GPIO25
-            33,                                             // GPIO33
+            33, 34, 35, 36, 37,                             // GPIO33 to GPIO37
             38, 39, 40, 41, 42,                             // GPIO38 to GPIO42
             47, 48                                          // GPIO47 to GPIO48
         }
     );
+#elif defined(ARDUINO_ESP32_DEV) || defined(ESP32)
+    usable_pins.insert(usable_pins.end(), {2, 4, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33});
 #endif
 
     for (int usable_pin : usable_pins)

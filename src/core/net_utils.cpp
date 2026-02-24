@@ -41,22 +41,6 @@ String getManufacturer(const String &mac) {
     return manufacturer;
 }
 
-String MAC(uint8_t *data) {
-    char macStr[18];
-    snprintf(
-        macStr,
-        sizeof(macStr),
-        "%02x:%02x:%02x:%02x:%02x:%02x",
-        data[0],
-        data[1],
-        data[2],
-        data[3],
-        data[4],
-        data[5]
-    );
-
-    return macStr;
-}
 
 void stringToMAC(const std::string &macStr, uint8_t MAC[6]) {
     std::stringstream ss(macStr);

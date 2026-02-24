@@ -16,8 +16,9 @@
 #include "sniffer.h"
 #include "vector"
 #include <Arduino.h>
-#include <globals.h>
 #include <nvs_flash.h>
+#include <WiFi.h>
+#include "esp_wifi.h"
 
 #define WIFI_ATK_NAME "WillyAttack"
 extern bool showHiddenNetworks;
@@ -364,6 +365,7 @@ ScanNets:
         if (millis() - rescan_counter > 60000) goto ScanNets; // re-scan networks for more relability
 
         if (check(EscPress)) break;
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
     wifi_atk_unsetWifi();
     returnToMenu = true;
@@ -748,15 +750,14 @@ void generateRandomWiFiMac(uint8_t *mac) {
     for (int i = 1; i < 6; i++) { mac[i] = random(0, 255); }
 }
 
-char randomName[32];
-char *randomSSID() {
+String randomSSID() {
     const char *charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    int len = rand() % 22 + 7; // Generate a random length between 1 and 10
+    int len = (rand() % 22) + 7;
+    String res = "";
     for (int i = 0; i < len; ++i) {
-        randomName[i] = charset[rand() % strlen(charset)]; // S elect random characters from the charset
+        res += charset[rand() % strlen(charset)];
     }
-    randomName[len] = '\0'; // Null-terminate the string
-    return randomName;
+    return res;
 }
 
 char emptySSID[32];
@@ -957,8 +958,8 @@ void beaconAttack() {
         } else if (BeaconMode == 1) {
             beaconSpamList(rickrollssids);
         } else if (BeaconMode == 2) {
-            char *randoms = randomSSID();
-            beaconSpamList(randoms);
+            String randoms = randomSSID();
+            beaconSpamList(randoms.c_str());
         }
 #if !defined(LITE_VERSION)
         else if (BeaconMode == 4) {

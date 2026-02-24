@@ -9,6 +9,7 @@
 #include "amiibo.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "globals.h"
 
 Amiibo::Amiibo() { setup(); }
 
@@ -181,6 +182,7 @@ bool Amiibo::openDumpFile() {
 }
 
 bool Amiibo::checkEmulationTagType() {
+    if (strDump.length() == 0) return false;
     byte sak = strtoul(printableUID.sak.c_str(), NULL, 16);
     int dataLen = strDump.length() / 2;
 

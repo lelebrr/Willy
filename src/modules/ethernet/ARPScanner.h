@@ -2,6 +2,7 @@
 #define ARP_SCANNER_H
 
 #include "Arduino.h"
+#include "freertos/FreeRTOS.h"
 #include "IPAddress.h"
 #include "modules/wifi/scan_hosts.h"
 #include "stdint.h"
@@ -18,8 +19,8 @@ private:
     void readArpTableETH(netif *iface);
     IPAddress gateway;
 
-    std::vector<Host> hostslist_eth;
-    void afterScanOptions(const Host &host);
+    std::vector<ScanHosts::Host> hostslist_eth;
+    void afterScanOptions(const ScanHosts::Host &host);
     bool macStringToByteArray(const std::string &macStr, uint8_t macArray[6]);
 
 public:

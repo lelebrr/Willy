@@ -8,6 +8,7 @@
 #include <SD.h>
 #include <vector>
 #include <stdint.h>
+#include <esp_sleep.h>
 #include "../../include/globals.h"
 #define STATUS_BAR_HEIGHT 30
 #define BORDER_OFFSET_FROM_SCREEN_EDGE 5

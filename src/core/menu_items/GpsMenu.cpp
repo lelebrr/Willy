@@ -23,9 +23,16 @@ void GpsMenu::optionsMenu() {
 
 void GpsMenu::wardrivingMenu() {
     options = {
-        {"Escanear Redes WiFi", []() { Wardriving(true, false); }},
-        {"Escanear Dispositivos Bluetooth",   []() { Wardriving(false, true); }},
-        {"Escanear Ambos",          []() { Wardriving(true, true); } },
+        {"Escanear Redes WiFi", []() {
+            Wardriving(true, false);
+        }},
+        {"Escanear Dispositivos Bluetooth",   []() {
+            Wardriving(false, true);
+        }},
+        {"Escanear Ambos",          []() {
+            Wardriving(true, true);
+        }},
+
         {"Voltar",               [this]() { optionsMenu(); }      },
     };
 
@@ -35,7 +42,7 @@ void GpsMenu::configMenu() {
     options = {
         {"Modo de Operacao", [this]() { modeMenu(); }                      },
         {"Baudrate",         setGpsBaudrateMenu                           },
-        {"Pinos GPS",        [=]() { setUARTPinsMenu(bruceConfigPins.gps_bus); }},
+        {"Pinos GPS",        [this]() { setUARTPinsMenu(bruceConfigPins.gps_bus); }},
         {"Voltar",           [this]() { optionsMenu(); }                    },
     };
 
@@ -44,16 +51,16 @@ void GpsMenu::configMenu() {
 
 void GpsMenu::modeMenu() {
     int idx = (gpsConfig.mode == GPS_MODE_STANDARD) ? 0 : 1;
-    
+
     options = {
-        {"Padrao (1Hz, NMEA)",  [=]() { 
+        {"Padrao (1Hz, NMEA)",  [this]() {
             gpsConfig.mode = GPS_MODE_STANDARD;
             gpsConfig.updateRate = GPS_RATE_1HZ;
             gpsConfig.powerMode = GPS_POWER_MAX_PERFORMANCE;
             gpsConfig.protocolMode = GPS_PROTOCOL_NMEA;
             displaySuccess("Modo Padrao selecionado");
         }, gpsConfig.mode == GPS_MODE_STANDARD},
-        {"Avancado",            [=]() { advancedConfigMenu(); }},
+        {"Avancado",            [this]() { advancedConfigMenu(); }},
     };
 
     loopOptions(options, MENU_TYPE_SUBMENU, "Modo GPS", idx);
@@ -79,7 +86,7 @@ void GpsMenu::updateRateMenu() {
     else if (gpsConfig.updateRate == GPS_RATE_2HZ) idx = 1;
     else if (gpsConfig.updateRate == GPS_RATE_5HZ) idx = 2;
     else if (gpsConfig.updateRate == GPS_RATE_10HZ) idx = 3;
-    
+
     options = {
         {"1 Hz (Padrao)",      [=]() { gpsConfig.updateRate = GPS_RATE_1HZ; }, gpsConfig.updateRate == GPS_RATE_1HZ},
         {"2 Hz",               [=]() { gpsConfig.updateRate = GPS_RATE_2HZ; }, gpsConfig.updateRate == GPS_RATE_2HZ},
@@ -92,7 +99,7 @@ void GpsMenu::updateRateMenu() {
 
 void GpsMenu::powerModeMenu() {
     int idx = (int)gpsConfig.powerMode;
-    
+
     options = {
         {"Max Desempenho",     [=]() { gpsConfig.powerMode = GPS_POWER_MAX_PERFORMANCE; }, gpsConfig.powerMode == GPS_POWER_MAX_PERFORMANCE},
         {"Eco (Economia)",     [=]() { gpsConfig.powerMode = GPS_POWER_ECO; }, gpsConfig.powerMode == GPS_POWER_ECO},
@@ -104,7 +111,7 @@ void GpsMenu::powerModeMenu() {
 
 void GpsMenu::protocolMenu() {
     int idx = (int)gpsConfig.protocolMode;
-    
+
     options = {
         {"NMEA (Texto)",       [=]() { gpsConfig.protocolMode = GPS_PROTOCOL_NMEA; }, gpsConfig.protocolMode == GPS_PROTOCOL_NMEA},
         {"UBX (Binario)",      [=]() { gpsConfig.protocolMode = GPS_PROTOCOL_UBX; }, gpsConfig.protocolMode == GPS_PROTOCOL_UBX},
@@ -125,7 +132,7 @@ void GpsMenu::navigationMenu() {
         case GPS_NAV_AIRBORNE: idx = 5; break;
         default: idx = 0;
     }
-    
+
     options = {
         {"Portatil",           [=]() { gpsConfig.navMode = GPS_NAV_PORTABLE; gpsConfig.dynamicModel = GPS_DYN_PORTABLE; }, gpsConfig.navMode == GPS_NAV_PORTABLE},
         {"Estacionario",       [=]() { gpsConfig.navMode = GPS_NAV_STATIONARY; gpsConfig.dynamicModel = GPS_DYN_STATIONARY; }, gpsConfig.navMode == GPS_NAV_STATIONARY},
@@ -145,7 +152,7 @@ void GpsMenu::satelliteFilterMenu() {
     else if (gpsConfig.minSatelliteSignal == 30) idx = 2;
     else if (gpsConfig.minSatelliteSignal == 35) idx = 3;
     else if (gpsConfig.minSatelliteSignal == 40) idx = 4;
-    
+
     options = {
         {"Desativado",         [=]() { gpsConfig.minSatelliteSignal = 0; }, gpsConfig.minSatelliteSignal == 0},
         {"25 dB-Hz",           [=]() { gpsConfig.minSatelliteSignal = 25; }, gpsConfig.minSatelliteSignal == 25},
@@ -166,27 +173,27 @@ void GpsMenu::applyAdvancedConfig() {
     padprintln("Energia: " + GPSConfig::getPowerModeString(gpsConfig.powerMode));
     padprintln("Nav: " + GPSConfig::getNavigationModeString(gpsConfig.navMode));
     padprintln("");
-    
+
     // Initialize serial for configuration
     HardwareSerial gpsSerial(2);
     gpsSerial.begin(bruceConfigPins.gpsBaudrate, SERIAL_8N1, bruceConfigPins.gps_bus.rx, bruceConfigPins.gps_bus.tx);
-    
+
     delay(500);
-    
+
     // Set mode to advanced
     gpsConfig.mode = GPS_MODE_ADVANCED;
-    
+
     // Apply configuration
     bool success = gpsConfig.applyConfiguration(gpsSerial);
-    
+
     gpsSerial.end();
-    
+
     if (success) {
         displaySuccess("Configuracao aplicada!");
     } else {
         displayWarning("Algumas config falharam", true);
     }
-    
+
     delay(1500);
     advancedConfigMenu();
 }

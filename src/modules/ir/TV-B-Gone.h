@@ -64,7 +64,7 @@ Distributed under Creative Commons 2.5 -- Attribution & Share Alike
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <SD.h>
-#include <globals.h>
+#include "globals.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>

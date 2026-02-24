@@ -29,6 +29,7 @@ public:
     void flush() override {}
     String readStringUntil(char terminator) override;
     int available() override;
+    int read() override;
     void setMTU(uint16_t mtu);
 };
 #endif

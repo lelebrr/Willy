@@ -1,6 +1,6 @@
 
 #include <Arduino.h>
-#include <MD5Builder.h>
+#include <esp_rom_md5.h>
 
 #include "mykeyboard.h"
 #include "passwords.h"
@@ -9,18 +9,14 @@
 #include <globals.h>
 
 String xorEncryptDecryptMD5(const String &input, const String &password, const int MD5_PASSES) {
-
-    MD5Builder md5;
-    String hash = password;
+    md5_context_t ctx;
+    uint8_t md5Hash[16];
 
     for (int i = 0; i < MD5_PASSES; i++) {
-        md5.begin();
-        md5.add(hash);
-        md5.calculate();
+        esp_rom_md5_init(&ctx);
+        esp_rom_md5_update(&ctx, (const uint8_t *)password.c_str(), password.length());
+        esp_rom_md5_final(md5Hash, &ctx);
     }
-
-    uint8_t md5Hash[16];
-    md5.getBytes(md5Hash); // Store MD5 hash in the output array
 
     String output = input; // Copy input to output for modification
     for (size_t i = 0; i < input.length(); i++) {

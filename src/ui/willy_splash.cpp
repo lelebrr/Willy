@@ -47,12 +47,6 @@ static void wiggle_anim_cb(void *var, int32_t v) {
     lv_obj_set_y((lv_obj_t*)var, v);
 }
 
-// Callback para bolhas subindo
-static void bubble_anim_cb(void *var, int32_t v) {
-    lv_obj_set_y((lv_obj_t*)var, v);
-    lv_obj_set_style_opa((lv_obj_t*)var, v > 30 ? (v * 2) : 255, 0);
-}
-
 // Desenha a baleia orca vetorial
 static void draw_orca(lv_obj_t *parent) {
     uint16_t primary_color = willyLogoConfig.corCustomizada ?
@@ -128,7 +122,7 @@ static void draw_orca(lv_obj_t *parent) {
     willy_label = lv_label_create(parent);
     lv_label_set_text(willy_label, "WILLY");
     lv_obj_set_style_text_color(willy_label, lv_color_hex(primary_color), 0);
-    lv_obj_set_style_text_font(willy_label, &lv_font_montserrat_28, 0);
+    lv_obj_set_style_text_font(willy_label, &lv_font_montserrat_14, 0);
     lv_obj_set_style_opa(willy_label, 0, 0);
     lv_obj_align(willy_label, LV_ALIGN_CENTER, 0, 60);
 

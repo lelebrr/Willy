@@ -7,13 +7,24 @@
 
 void FileMenu::optionsMenu() {
     options.clear();
-    if (setupSdCard()) options.push_back({"Cartao SD", [=]() { loopSD(SD); }});
+
+    // Check if SD is mounted using the global flag
+    if (sdcardMounted) {
+        options.push_back({"Cartao SD", [=]() { loopSD(SD); }});
+    } else {
+        options.push_back({"Cartao SD (Nao montado)", [=]() {
+            if (setupSdCard()) loopSD(SD);
+            else displayError("Falha ao montar SD", true);
+        }});
+    }
+
     options.push_back({"LittleFS", [=]() { loopSD(LittleFS); }});
     options.push_back({"WebUI", loopOptionsWebUi});
 
 #if defined(SOC_USB_OTG_SUPPORTED)
-    options.push_back({"Armaz. em Massa", [=]() { MassStorage(); }});
+    options.push_back({"Armaz. em Massa", [=]() { MassStorage ms; }});
 #endif
+
     addOptionToMainMenu();
 
     loopOptions(options, MENU_TYPE_SUBMENU, "Arquivos");

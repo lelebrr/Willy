@@ -37,10 +37,30 @@ void RFMenu::optionsMenu() {
         {"Rolling Learner",   [=]() { RollingCodeLearnerReplay(); }     },
         {"Spectrum Lock",     [=]() { SpectrumTargetLock(); }           },
         {"Sensor Drain Flood", [=]() { SensorBatteryDrainFlood(); } },
-        {"Jammer Intermitente",     [=]() { RFJammer(0); }},
+        {"Jammer Intermitente",
+         [=]() {
+             if (displayMessage("AVISO: Jamming pode ser\nilegal. Continuar?", "Não", nullptr, "Sim", TFT_RED) ==
+                 2) {
+                 RFJammer(0);
+             }
+         }},
+
 #endif
-        {"Jammer Contínuo",     [=]() { RFJammer(1); } },
-        {"Jammer Hopper",       [=]() { RFJammer(2); } },
+        {"Jammer Contínuo",
+         [=]() {
+             if (displayMessage("AVISO: Jamming pode ser\nilegal. Continuar?", "Não", nullptr, "Sim", TFT_RED) ==
+                 2) {
+                 RFJammer(1);
+             }
+         }},
+        {"Jammer Hopper",
+         [=]() {
+             if (displayMessage("AVISO: Jamming pode ser\nilegal. Continuar?", "Não", nullptr, "Sim", TFT_RED) ==
+                 2) {
+                 RFJammer(2);
+             }
+         }},
+
         {"Config",          [this]() { configMenu(); }},
     };
     addOptionToMainMenu();

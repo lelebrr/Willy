@@ -48,24 +48,24 @@ WillyLogger::~WillyLogger() {
 bool WillyLogger::begin() {
     // Cria mutex para thread safety
     if (_mutex == nullptr) {
-        _mutex = xSemaphoreCreateMutex();
+        _mutex = xSemaphoreCreateRecursiveMutex();
     }
-    
+
     // Carrega configuração
     loadConfig();
-    
+
     // Verifica se o SD está montado
     if (!sdcardMounted) {
         Serial.println(F("[WillyLogger] SD não montado - logging limitado"));
         _config.logToSD = false;
     }
-    
+
     // Cria diretório de logs
     if (_config.logToSD && !ensureLogDirectory()) {
         Serial.println(F("[WillyLogger] Erro ao criar diretório de logs"));
         _config.logToSD = false;
     }
-    
+
     // Cria arquivo de log inicial
     if (_config.logToSD) {
         _currentLogFile = generateLogFilename();
@@ -79,34 +79,34 @@ bool WillyLogger::begin() {
             _logFile.flush();
         }
     }
-    
+
     _initialized = true;
     _lastFlush = millis();
-    
+
     // Log inicial
     info(COMP_SYSTEM, "Willy Logger iniciado");
     logSystemStatus();
-    
+
     Serial.println(F("[WillyLogger] Sistema de logging ativo"));
     return true;
 }
 
 void WillyLogger::end() {
     if (!_initialized) return;
-    
+
     // Flush final
     flush();
-    
+
     if (_logFile) {
         _logFile.println(F("# Log encerrado"));
         _logFile.close();
     }
-    
+
     if (_mutex != nullptr) {
         vSemaphoreDelete(_mutex);
         _mutex = nullptr;
     }
-    
+
     _initialized = false;
 }
 
@@ -117,7 +117,7 @@ void WillyLogger::end() {
 void WillyLogger::setEnabled(bool enabled) {
     _config.enabled = enabled;
     saveConfig();
-    
+
     if (enabled && !_initialized) {
         begin();
     } else if (!enabled && _initialized) {
@@ -163,7 +163,7 @@ void WillyLogger::saveConfig() {
         doc["flushInterval"] = _config.flushInterval;
         doc["maxLogSize"] = _config.maxLogSize;
         doc["bufferEntries"] = _config.bufferEntries;
-        
+
         serializeJson(doc, f);
         f.close();
     }
@@ -173,19 +173,19 @@ void WillyLogger::saveConfig() {
 // Logging Principal
 /////////////////////////////////////////////////////////////////////////////////////
 
-void WillyLogger::log(WillyLogLevel level, WillyLogComponent component, 
-                       const char* message, int32_t v1, int32_t v2, int32_t v3, 
+void WillyLogger::log(WillyLogLevel level, WillyLogComponent component,
+                       const char* message, int32_t v1, int32_t v2, int32_t v3,
                        uint16_t errorCode) {
     // Verifica se deve logar
     if (!_config.enabled || level < _config.minLevel) return;
-    
+
     // Adquire mutex
     if (_mutex != nullptr) {
-        if (xSemaphoreTake(_mutex, pdMS_TO_TICKS(100)) != pdTRUE) {
+        if (xSemaphoreTakeRecursive(_mutex, pdMS_TO_TICKS(100)) != pdTRUE) {
             return; // Timeout, skip this log
         }
     }
-    
+
     // Cria entrada
     WillyLogEntry entry;
     entry.timestamp = millis();
@@ -198,38 +198,38 @@ void WillyLogger::log(WillyLogLevel level, WillyLogComponent component,
     entry.value3 = v3;
     entry.heapFree = ESP.getFreeHeap();
     entry.errorCode = errorCode;
-    
+
     // Atualiza estatísticas
     _totalEntries++;
     if (level == WILLY_LOG_LEVEL_ERROR) _errorCount++;
     if (level == WILLY_LOG_LEVEL_WARNING) _warningCount++;
-    
+
     // Escreve na serial
     if (_config.logToSerial) {
         writeToSerial(entry);
     }
-    
+
     // Adiciona ao buffer ou escreve direto
     if (_config.logToSD) {
         writeEntry(entry);
     }
-    
+
     // Libera mutex
     if (_mutex != nullptr) {
-        xSemaphoreGive(_mutex);
+        xSemaphoreGiveRecursive(_mutex);
     }
 }
 
-void WillyLogger::logf(WillyLogLevel level, WillyLogComponent component, 
+void WillyLogger::logf(WillyLogLevel level, WillyLogComponent component,
                         const char* format, ...) {
     if (!_config.enabled || level < _config.minLevel) return;
-    
+
     char buffer[192];
     va_list args;
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
-    
+
     log(level, component, buffer);
 }
 
@@ -344,7 +344,7 @@ void WillyLogger::logModuleInit(const char* moduleName, bool success, const char
     if (success) {
         logf(WILLY_LOG_LEVEL_INFO, COMP_SYSTEM, "Modulo iniciado: %s", moduleName);
     } else {
-        logf(WILLY_LOG_LEVEL_ERROR, COMP_SYSTEM, "Falha ao iniciar modulo: %s - %s", 
+        logf(WILLY_LOG_LEVEL_ERROR, COMP_SYSTEM, "Falha ao iniciar modulo: %s - %s",
              moduleName, details ? details : "unknown");
     }
 }
@@ -354,56 +354,64 @@ void WillyLogger::logModuleInit(const char* moduleName, bool success, const char
 /////////////////////////////////////////////////////////////////////////////////////
 
 void WillyLogger::flush() {
-    if (!_config.logToSD || !_logFile) return;
-    
+    if (_mutex != nullptr) xSemaphoreTakeRecursive(_mutex, portMAX_DELAY);
+    if (!_config.logToSD || !_logFile) {
+        if (_mutex != nullptr) xSemaphoreGiveRecursive(_mutex);
+        return;
+    }
+
     // Escreve todas as entradas do buffer
     for (const auto& entry : _buffer) {
         writeToFile(entry);
     }
-    
+
     _buffer.clear();
     _bufferIndex = 0;
-    
+
     if (_logFile) {
         _logFile.flush();
     }
-    
+
     _lastFlush = millis();
+    if (_mutex != nullptr) xSemaphoreGiveRecursive(_mutex);
 }
 
 bool WillyLogger::rotateLog() {
+    if (_mutex != nullptr) xSemaphoreTakeRecursive(_mutex, portMAX_DELAY);
     // Fecha arquivo atual
     if (_logFile) {
         _logFile.println(F("# Log rotacionado"));
         _logFile.close();
     }
-    
+
     // Gera novo nome
     _currentLogFile = generateLogFilename();
-    
+
     // Cria novo arquivo
     _logFile = SD.open(_currentLogFile, FILE_APPEND);
     if (!_logFile) {
         Serial.println(F("[WillyLogger] Erro ao rotacionar log"));
+        if (_mutex != nullptr) xSemaphoreGiveRecursive(_mutex);
         return false;
     }
-    
+
     // Cabeçalho
     _logFile.println(F("Timestamp,Level,Component,Message,Value1,Value2,Value3,HeapFree,ErrorCode"));
     _logFile.flush();
-    
+
     // Limpa logs antigos
     cleanupOldLogs();
-    
+
+    if (_mutex != nullptr) xSemaphoreGiveRecursive(_mutex);
     return true;
 }
 
 void WillyLogger::cleanupOldLogs(int maxFiles) {
     File root = SD.open(_config.logDirectory);
     if (!root || !root.isDirectory()) return;
-    
+
     std::vector<String> files;
-    
+
     File file = root.openNextFile();
     while (file) {
         if (!file.isDirectory()) {
@@ -415,7 +423,7 @@ void WillyLogger::cleanupOldLogs(int maxFiles) {
         file = root.openNextFile();
     }
     root.close();
-    
+
     // Remove os mais antigos se exceder limite
     while (files.size() > (size_t)maxFiles) {
         // Encontra o mais antigo (menor timestamp no nome)
@@ -425,7 +433,7 @@ void WillyLogger::cleanupOldLogs(int maxFiles) {
                 oldestIdx = i;
             }
         }
-        
+
         SD.remove(files[oldestIdx]);
         files.erase(files.begin() + oldestIdx);
     }
@@ -433,10 +441,10 @@ void WillyLogger::cleanupOldLogs(int maxFiles) {
 
 uint64_t WillyLogger::getTotalLogSize() {
     uint64_t total = 0;
-    
+
     File root = SD.open(_config.logDirectory);
     if (!root || !root.isDirectory()) return 0;
-    
+
     File file = root.openNextFile();
     while (file) {
         if (!file.isDirectory()) {
@@ -445,16 +453,16 @@ uint64_t WillyLogger::getTotalLogSize() {
         file = root.openNextFile();
     }
     root.close();
-    
+
     return total;
 }
 
 std::vector<String> WillyLogger::listLogFiles() {
     std::vector<String> files;
-    
+
     File root = SD.open(_config.logDirectory);
     if (!root || !root.isDirectory()) return files;
-    
+
     File file = root.openNextFile();
     while (file) {
         if (!file.isDirectory()) {
@@ -466,7 +474,7 @@ std::vector<String> WillyLogger::listLogFiles() {
         file = root.openNextFile();
     }
     root.close();
-    
+
     return files;
 }
 
@@ -496,36 +504,36 @@ void WillyLogger::getStats(uint32_t& totalEntries, uint32_t& errorCount, uint32_
 
 void WillyLogger::showLogWarning() {
     if (!_config.enabled) return;
-    
+
     // Desenha aviso no display
     #if defined(HAS_SCREEN)
     tft.fillScreen(TFT_BLACK);
-    
+
     // Ícone de aviso (triângulo)
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.setTextSize(FM);
     tft.drawCentreString("LOG ATIVO", tftWidth / 2, 30, 1);
-    
+
     // Informações
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setTextSize(FP);
     tft.drawCentreString("Gravando em:", tftWidth / 2, 60, 1);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawCentreString(_currentLogFile.c_str(), tftWidth / 2, 78, 1);
-    
+
     // Estatísticas
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
     tft.drawCentreString("Entradas: " + String(_totalEntries), tftWidth / 2, 105, 1);
-    
+
     if (_errorCount > 0) {
         tft.setTextColor(TFT_RED, TFT_BLACK);
         tft.drawCentreString("Erros: " + String(_errorCount), tftWidth / 2, 123, 1);
     }
-    
+
     // Heap
     tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
     tft.drawCentreString("Heap: " + String(ESP.getFreeHeap()) + " bytes", tftWidth / 2, tftHeight - 20, 1);
-    
+
     delay(2000);
     tft.fillScreen(TFT_BLACK);
     #endif
@@ -539,13 +547,13 @@ void WillyLogger::writeEntry(const WillyLogEntry& entry) {
     // Adiciona ao buffer
     _buffer.push_back(entry);
     _bufferIndex++;
-    
+
     // Verifica se precisa flush
-    if (_bufferIndex >= _config.bufferEntries || 
+    if (_bufferIndex >= _config.bufferEntries ||
         millis() - _lastFlush > _config.flushInterval) {
         flush();
     }
-    
+
     // Verifica rotação
     if (needsRotation()) {
         rotateLog();
@@ -554,7 +562,7 @@ void WillyLogger::writeEntry(const WillyLogEntry& entry) {
 
 void WillyLogger::writeToFile(const WillyLogEntry& entry) {
     if (!_logFile) return;
-    
+
     // Formato CSV
     _logFile.print(millis());
     _logFile.print(",");
@@ -585,7 +593,7 @@ void WillyLogger::writeToSerial(const WillyLogEntry& entry) {
     Serial.print(getComponentString(entry.component));
     Serial.print(F("]: "));
     Serial.print(entry.message);
-    
+
     // Valores auxiliares
     if (entry.value1 != 0 || entry.value2 != 0 || entry.value3 != 0) {
         Serial.print(F(" | v1="));
@@ -595,28 +603,28 @@ void WillyLogger::writeToSerial(const WillyLogEntry& entry) {
         Serial.print(F(" v3="));
         Serial.print(entry.value3);
     }
-    
+
     // Heap
     if (_config.includeHeap) {
         Serial.print(F(" | heap="));
         Serial.print(entry.heapFree);
     }
-    
+
     // ErrorCode
     if (entry.errorCode > 0) {
         Serial.print(F(" | err="));
         Serial.print(entry.errorCode);
     }
-    
+
     Serial.println();
 }
 
 String WillyLogger::generateLogFilename() {
     // Formato: /WILLY_LOGS/willy_YYYYMMDD_HHMMSS.csv
     char filename[64];
-    
+
     uint32_t ts = millis();
-    
+
     // Tenta usar tempo real se disponível
     struct tm timeinfo;
     if (getLocalTime(&timeinfo, 100)) {
@@ -628,7 +636,7 @@ String WillyLogger::generateLogFilename() {
         snprintf(filename, sizeof(filename), "%s/willy_%lu.csv",
                  _config.logDirectory.c_str(), ts);
     }
-    
+
     return String(filename);
 }
 
@@ -670,7 +678,7 @@ const char* getProtocolString(uint16_t protocol) {
         "DISH", "SHARP", "COOLIX", "DAIKIN", "DENON", "KELVINATOR",
         "SHERWOOD", "MITSUBISHI_AC", "RCMM", "GREE", "PRONTO", "NEC_LIKE"
     };
-    
+
     if (protocol < sizeof(protocols) / sizeof(protocols[0])) {
         return protocols[protocol];
     }

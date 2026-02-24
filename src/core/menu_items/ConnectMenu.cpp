@@ -9,12 +9,25 @@
 void ConnectMenu::optionsMenu() {
     options = {
 #ifndef LITE_VERSION
-        {"Enviar Arq", [=]() { FileSharing().sendFile(); }        },
-        {"Receber Arq", [=]() { FileSharing().receiveFile(); }     },
+        {"Enviar Arq", [=]() {
+            if (!sdcardMounted) {
+                displayError("SD Nao Montado", true);
+                return;
+            }
+            FileSharing().sendFile();
+        }},
+        {"Receber Arq", [=]() {
+            if (!sdcardMounted) {
+                displayError("SD Nao Montado", true);
+                return;
+            }
+            FileSharing().receiveFile();
+        }},
 
         {"Enviar Cmds", [=]() { EspSerialCmd().sendCommands(); }   },
         {"Receber Cmds", [=]() { EspSerialCmd().receiveCommands(); }},
 #endif
+
     };
     addOptionToMainMenu();
 

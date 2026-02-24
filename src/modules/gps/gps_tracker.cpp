@@ -129,6 +129,7 @@ void GPSTracker::loop() {
         int tmp = millis();
         while (millis() - tmp < MAX_WAIT && !gps.location.isUpdated()) {
             if (check(EscPress) || returnToMenu) return end();
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }
     }
 }

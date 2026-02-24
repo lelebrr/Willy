@@ -26,8 +26,12 @@ uint32_t irRxCallback(cmd *c) {
         i = new IrRead(true); // true -> headless mode
     }
 
-    serialDevice->println("Waiting for signal...");
-    String r = i->loop_headless(10); // 10s timeout
+    Argument timeoutArg = cmd.getArgument("timeout");
+    int timeout = timeoutArg.isSet() ? timeoutArg.getValue().toInt() : 10;
+    if (timeout <= 0) timeout = 10;
+
+    serialDevice->printf("Waiting for signal (timeout: %ds)...\n", timeout);
+    String r = i->loop_headless(timeout);
     if (r.length() == 0) return false;
 
     serialDevice->println(r);
@@ -192,6 +196,7 @@ uint32_t irSendCallback(cmd *c) {
 void createIrRxCommand(Command *irCmd) {
     Command cmd = irCmd->addCommand("rx", irRxCallback);
     cmd.addFlagArg("raw");
+    cmd.addArgument("timeout", "10");
 }
 
 void createIrTxCommand(Command *irCmd) {

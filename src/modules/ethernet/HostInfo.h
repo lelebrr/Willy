@@ -10,7 +10,7 @@ private:
 #if !defined(LITE_VERSION)
     ESPNetifEthernetClient *eth_client = nullptr;
 #endif
-    void setup(const Host &host);
+    void setup(const ScanHosts::Host &host);
     /*
     std::map<int, const char *> portServices = {
         //  hmm
@@ -147,7 +147,7 @@ private:
 
 public:
     HostInfo();
-    HostInfo(const Host &host, bool wifi);
+    HostInfo(const ScanHosts::Host &host, bool wifi);
     ~HostInfo();
 };
 

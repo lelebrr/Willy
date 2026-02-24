@@ -2,6 +2,8 @@
 #include "../../core/display.h"
 #include "../../core/mykeyboard.h"
 
+using namespace nrf_common;
+
 #define CHANNELS 80
 #define RGB565(r, g, b) ((((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)))
 uint8_t channel[CHANNELS];
@@ -97,7 +99,8 @@ void nrf_spectrum(SPIClass *SSPI) {
         for (uint8_t i = 0; i < 6; ++i) { NRFradio.openReadingPipe(i, noiseAddress[i]); }
         NRFradio.setDataRate(RF24_1MBPS);
 
-        while (!check(EscPress)) { scanChannels(SSPI); }
+        uint32_t start_time = millis();
+        while (!check(EscPress) && (millis() - start_time < 60000)) { scanChannels(SSPI); }
         NRFradio.stopListening();
         powerDown(*SSPI);
         delay(250);

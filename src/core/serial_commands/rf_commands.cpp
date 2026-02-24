@@ -17,6 +17,10 @@ uint32_t rfRxCallback(cmd *c) {
     String strFreq = freqArg.getValue();
 
     float frequency = strFreq.toFloat();
+    if (frequency < 300000000 || frequency > 928000000) {
+        serialDevice->println("Invalid frequency. Supported range: 300-928 MHz.");
+        return false;
+    }
     frequency /= 1000000; // passed as a long int (e.g. 433920000)
 
     // serialDevice->print("frequency: ");
@@ -81,8 +85,8 @@ uint32_t rfScanCallback(cmd *c) {
     float startFreq = startFreqStr.toFloat();
     float stopFreq = stopFreqStr.toFloat();
 
-    if (startFreq == 0 || stopFreq == 0) {
-        serialDevice->println("Invalid frequency range: " + String(startFreq) + " - " + String(stopFreq));
+    if (startFreq < 300000000 || stopFreq > 928000000 || startFreq >= stopFreq) {
+        serialDevice->println("Invalid range. Must be 300-928 MHz and start < stop.");
         return false;
     }
 

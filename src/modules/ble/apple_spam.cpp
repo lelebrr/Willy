@@ -132,10 +132,10 @@ void startAppleSpamAll() {
 
     int apple_index = 0;
 
+    BLEDevice::init("");
     while (apple_spam_running) {
         if (check(EscPress)) {
-            stopAppleSpam();
-            returnToMenu = true;
+            apple_spam_running = false;
             break;
         }
 
@@ -145,7 +145,6 @@ void startAppleSpamAll() {
         generateRandomMac(macAddr);
         esp_base_mac_addr_set(macAddr);
 
-        BLEDevice::init("");
         BLEAdvertising* pAdv = BLEDevice::getAdvertising();
 
         BLEAdvertisementData advertisementData = BLEAdvertisementData();
@@ -193,10 +192,10 @@ void startAppleSpam(int payloadIndex) {
     padprintln("");
     padprintln("Pressione ESC para parar");
 
+    BLEDevice::init("");
     while (apple_spam_running) {
         if (check(EscPress)) {
-            stopAppleSpam();
-            returnToMenu = true;
+            apple_spam_running = false;
             break;
         }
 
@@ -204,7 +203,6 @@ void startAppleSpam(int payloadIndex) {
         generateRandomMac(macAddr);
         esp_base_mac_addr_set(macAddr);
 
-        BLEDevice::init("");
         pAppleAdvertising = BLEDevice::getAdvertising();
 
         BLEAdvertisementData advertisementData = BLEAdvertisementData();

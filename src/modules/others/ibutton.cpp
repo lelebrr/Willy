@@ -5,8 +5,8 @@
 
 #define ONE_WIRE_BUS 0
 
-OneWire *oneWire;
-byte buffer[8];
+static OneWire *oneWire;
+static byte ibutton_buffer[8];
 
 void setup_ibutton() {
 Reset:
@@ -83,7 +83,7 @@ void write_ibutton() {
     tft.print("Current buffer:");
     tft.setCursor(40, 57);
     for (byte i = 0; i < 8; i++) {
-        tft.print(buffer[i], HEX);
+        tft.print(ibutton_buffer[i], HEX);
         tft.print(":");
     }
     delay(1000);
@@ -124,7 +124,7 @@ void write_ibutton() {
     delay(50);
     tft.print('>');
     for (byte i = 0; i < 8; i++) {
-        write_byte_rw1990(buffer[i]); // Write each byte
+        write_byte_rw1990(ibutton_buffer[i]); // Write each byte
         tft.print('*');
         delayMicroseconds(25);
     }
@@ -153,8 +153,20 @@ void write_ibutton() {
 }
 
 void read_ibutton() {
-    oneWire->write(0x33);           // Read ID command
-    oneWire->read_bytes(buffer, 8); // Read ID
+    uint32_t start = millis();
+    while (!oneWire->search(ibutton_buffer) && millis() - start < 10000) {
+        delay(100);
+    }
+    if (millis() - start >= 10000) {
+        tft.fillScreen(TFT_BLACK);
+        tft.setCursor(10, 50);
+        tft.setTextColor(TFT_RED);
+        tft.println("Timeout reading iButton");
+        tft.setTextColor(TFT_WHITE);
+        delay(2000);
+        return;
+    }
+    // Read ID command is handled by search in some cases, or we can just keep the buffer
 
     // Display iButton
     tft.fillScreen(TFT_BLACK);
@@ -164,11 +176,11 @@ void read_ibutton() {
     tft.setTextSize(1.75);
     tft.setCursor(12, 57);
     for (byte i = 0; i < 8; i++) {
-        tft.print(buffer[i], HEX);
+        tft.print(ibutton_buffer[i], HEX);
         tft.print(":");
     }
 
-    if (OneWire::crc8(buffer, 7) != buffer[7]) {
+    if (OneWire::crc8(ibutton_buffer, 7) != ibutton_buffer[7]) {
         tft.setCursor(55, 85);
         tft.setTextSize(FM);
         tft.setTextColor(TFT_RED);
@@ -186,7 +198,7 @@ void read_ibutton() {
 **  Main Menu to manually iButton Pin
 **********************************************************************/
 void setiButtonPinMenu() {
-    options = {};
+    std::vector<Option> options;
     gpio_num_t sel = GPIO_NUM_NC;
     for (int8_t i = -1; i <= GPIO_NUM_MAX; i++) {
         String tmp = "GPIO " + String(i);

@@ -7,6 +7,7 @@
  */
 
 #include "advanced_atks.h"
+#include "core/config.h"
 #include "core/display.h"
 #include "core/main_menu.h"
 #include "core/mykeyboard.h"
@@ -402,19 +403,19 @@ void clientBatteryDrain() {
     }
 
     // Menu para selecionar AP alvo
+    int selected_idx = -1;
     options.clear();
-    for (const auto& ap : ap_list) {
-        String name = String((char*)ap.ssid);
+    for (size_t i = 0; i < ap_list.size(); i++) {
+        String name = String((char*)ap_list[i].ssid);
         if (name.length() == 0) name = "<Hidden>";
-        options.push_back({name.substring(0, 20).c_str(), [&]() {}});
+        int idx = i;
+        options.push_back({name.substring(0, 20).c_str(), [&selected_idx, idx]() { selected_idx = idx; }});
     }
     addOptionToMainMenu();
 
-    // Seleciona todos os APs para ataque
-    int selected_idx = -1;
     loopOptions(options, MENU_TYPE_SUBMENU, "Selecione AP Alvo");
 
-    if (returnToMenu) {
+    if (returnToMenu || selected_idx < 0) {
         deinitAdvancedAttackMode();
         return;
     }
@@ -682,20 +683,21 @@ void wpa3DowngradeAttack() {
     }
 
     // Menu para selecionar rede
+    int sel_idx = -1;
     options.clear();
     for (int idx : wpa3_networks) {
         String name = WiFi.SSID(idx);
         if (name.length() == 0) name = "<Hidden>";
-        options.push_back({name.substring(0, 20).c_str(), [=]() {}});
+        options.push_back({name.substring(0, 20).c_str(), [&sel_idx, idx]() { sel_idx = idx; }});
     }
     addOptionToMainMenu();
 
     loopOptions(options, MENU_TYPE_SUBMENU, "Selecione Rede WPA3");
 
-    if (returnToMenu) return;
+    if (returnToMenu || sel_idx < 0) return;
 
     // Pega informações do AP selecionado
-    int selected = wpa3_networks[0]; // Default para o primeiro
+    int selected = sel_idx;
     String target_ssid = WiFi.SSID(selected);
     uint8_t target_bssid[6];
     memcpy(target_bssid, WiFi.BSSID(selected), 6);
@@ -893,34 +895,37 @@ void iotExploitInjector() {
     }
 
     // Menu para selecionar dispositivo
+    int sel_idx = -1;
     options.clear();
-    for (const auto& dev : iot_devices) {
-        String ssid = WiFi.SSID(dev.first);
-        String name = ssid.substring(0, 12) + " [" + String(dev.second.vendor) + "]";
-        options.push_back({name.c_str(), [&]() {}});
+    for (size_t i = 0; i < iot_devices.size(); i++) {
+        String ssid = WiFi.SSID(iot_devices[i].first);
+        String name = ssid.substring(0, 12) + " [" + String(iot_devices[i].second.vendor) + "]";
+        int idx = i;
+        options.push_back({name.c_str(), [&sel_idx, idx]() { sel_idx = idx; }});
     }
     addOptionToMainMenu();
 
     loopOptions(options, MENU_TYPE_SUBMENU, "Dispositivos IoT");
 
-    if (returnToMenu) return;
+    if (returnToMenu || sel_idx < 0) return;
 
-    // Seleciona primeiro dispositivo
-    int selected = iot_devices[0].first;
-    OUIEntry entry = iot_devices[0].second;
+    // Seleciona dispositivo escolhido
+    int selected = iot_devices[sel_idx].first;
+    OUIEntry entry = iot_devices[sel_idx].second;
     String target_ssid = WiFi.SSID(selected);
     uint8_t target_bssid[6];
     memcpy(target_bssid, WiFi.BSSID(selected), 6);
 
     // Menu de exploits
+    int sel_exploit = -1;
     options.clear();
-    options.push_back({"Scan de Portas", [&]() {}});
-    options.push_back({"HTTP Exploit", [&]() {}});
-    options.push_back({"TCP Payload", [&]() {}});
-    options.push_back({"UDP Flood", [&]() {}});
+    options.push_back({"Scan de Portas", [&sel_exploit]() { sel_exploit = 0; }});
+    options.push_back({"HTTP Exploit", [&sel_exploit]() { sel_exploit = 1; }});
+    options.push_back({"TCP Payload", [&sel_exploit]() { sel_exploit = 2; }});
+    options.push_back({"UDP Flood", [&sel_exploit]() { sel_exploit = 3; }});
     loopOptions(options, MENU_TYPE_SUBMENU, "Tipo de Exploit");
 
-    if (returnToMenu) return;
+    if (returnToMenu || sel_exploit < 0) return;
 
     if (!initAdvancedAttackMode()) return;
 
@@ -1032,8 +1037,18 @@ void iotExploitInjector() {
 
 std::vector<MeshNetwork> detectMeshNetworks() {
     std::vector<MeshNetwork> meshes;
-    // Mesh networks typically use action frames with mesh IDs
-    // Simplified detection
+    int nets = WiFi.scanNetworks(false, true);
+    for (int i = 0; i < nets; i++) {
+        // Simple logic: assume hidden or specific OUI might be mesh for now
+        // This is still a simplified detection but better than an empty vector
+        if (WiFi.SSID(i).length() == 0) {
+            MeshNetwork mesh;
+            memcpy(mesh.bssid, WiFi.BSSID(i), 6);
+            mesh.channel = WiFi.channel(i);
+            mesh.rssi = WiFi.RSSI(i);
+            meshes.push_back(mesh);
+        }
+    }
     return meshes;
 }
 
@@ -1138,18 +1153,20 @@ void smartDeauthScheduler() {
     }
 
     // Menu para selecionar rede
+    int sel_net = -1;
     options.clear();
     for (int i = 0; i < nets; i++) {
         String name = WiFi.SSID(i);
         if (name.length() == 0) name = "<Hidden>";
         name = name.substring(0, 18) + " ch." + String(WiFi.channel(i));
-        options.push_back({name.c_str(), [=]() {}});
+        int idx = i;
+        options.push_back({name.c_str(), [&sel_net, idx]() { sel_net = idx; }});
     }
     addOptionToMainMenu();
 
     loopOptions(options, MENU_TYPE_SUBMENU, "Selecione Alvo");
 
-    if (returnToMenu) return;
+    if (returnToMenu || sel_net < 0) return;
 
     // Configuração do agendamento
     options.clear();
@@ -1174,7 +1191,7 @@ void smartDeauthScheduler() {
     if (returnToMenu) return;
 
     // Configura alvo
-    int selected = 0; // Default para o primeiro
+    int selected = sel_net;
     active_schedule.target_ssid = WiFi.SSID(selected);
     memcpy(active_schedule.target_bssid, WiFi.BSSID(selected), 6);
     active_schedule.channel = WiFi.channel(selected);

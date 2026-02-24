@@ -1,10 +1,10 @@
 /**
  * @file advanced_atks.h
  * @brief Módulo de ataques WiFi avançados para fins acadêmicos e pesquisa em segurança.
- * 
+ *
  * AVISO: Este código é fornecido exclusivamente para fins educacionais e de pesquisa.
  * O uso indevido pode ser ilegal. Use apenas em ambientes controlados e com autorização.
- * 
+ *
  * @author Willy Team
  * @date 2026
  */
@@ -73,7 +73,7 @@ struct HeatmapPoint {
 //================================================================================
 /**
  * @brief Dynamic Beacon Fuzzer - Envia beacons malformados para crashar roteadores
- * 
+ *
  * O que faz: Envia beacons malformados aleatórios para testar robustez de roteadores.
  * Como faz: esp_wifi_80211_tx com buffer custom + random IE fields (loop 1000/s).
  * Para que serve: Descoberta de vulnerabilidades em equipamentos (fuzzing).
@@ -99,7 +99,7 @@ void dynamicBeaconFuzzer(const BeaconFuzzerConfig& config);
 //================================================================================
 /**
  * @brief Client Battery Drain - Impede dispositivos de entrar em modo sleep
- * 
+ *
  * O que faz: Impede que dispositivos entrem em modo sleep enviando PS-Poll spoofados.
  * Como faz: Monitora clientes + injeta respostas spoofadas continuamente.
  * Para que serve: Dreno de bateria para testes de autonomia.
@@ -117,7 +117,7 @@ void clientBatteryDrain(const std::vector<uint8_t[6]>& target_macs);
 //================================================================================
 /**
  * @brief Visual WiFi Heatmap - Mapa de calor em tempo real
- * 
+ *
  * O que faz: Mapa de calor em tempo real de APs e clientes por RSSI.
  * Como faz: Armazena posições + desenha com LVGL/TFT no CYD.
  * Para que serve: Reconhecimento físico em pentest de escritório.
@@ -139,7 +139,7 @@ void renderHeatmap();
 //================================================================================
 /**
  * @brief WPA3 Downgrade + MITM Coordinator
- * 
+ *
  * O que faz: Força downgrade de WPA3 para WPA2 e faz MITM automático.
  * Como faz: Beacon spoof sem PMF/SAE + evil portal integrado.
  * Para que serve: Teste de segurança em redes modernas WPA3.
@@ -165,7 +165,7 @@ void wpa3DowngradeAttack(const WPA3DowngradeConfig& config);
 //================================================================================
 /**
  * @brief IoT Targeted Exploit Injector
- * 
+ *
  * O que faz: Detecta IoT por OUI/MAC e injeta payloads conhecidos.
  * Como faz: Banco offline no SD + packet injection.
  * Para que serve: Teste de vulnerabilidades em dispositivos IoT.
@@ -201,7 +201,7 @@ bool detectIoTDevice(const uint8_t* mac, OUIEntry& entry);
 //================================================================================
 /**
  * @brief 802.11s Mesh Disruptor
- * 
+ *
  * O que faz: Quebra redes mesh inundando frames de controle.
  * Como faz: Detecta mesh + flood path-request frames.
  * Para que serve: Teste de resiliência de redes mesh IoT empresariais.
@@ -216,6 +216,7 @@ struct MeshNetwork {
     uint8_t mesh_id_len;
     uint8_t bssid[6];
     uint8_t channel;
+    int8_t rssi;
     uint8_t path_protocol;
     bool is_detected;
 };
@@ -230,7 +231,7 @@ std::vector<MeshNetwork> detectMeshNetworks();
 //================================================================================
 /**
  * @brief Smart Deauth Scheduler - Deauth programado
- * 
+ *
  * O que faz: Deauth programado por horário ou condição.
  * Como faz: Usa o interpretador JS já presente no Bruce.
  * Para que serve: Manter rede offline sem flood constante (stealth).
@@ -244,19 +245,19 @@ struct DeauthSchedule {
     uint8_t target_bssid[6];
     String target_ssid;
     uint8_t channel;
-    
+
     // Condições de tempo
     int8_t start_hour = -1;    // -1 = qualquer hora
     int8_t end_hour = -1;
     int8_t start_minute = -1;
     int8_t end_minute = -1;
-    
+
     // Condições de evento
     bool on_reconnect = false;  // Deauth quando cliente reconecta
     bool on_new_client = false; // Deauth quando novo cliente aparece
     uint16_t packets_per_burst = 10;
     uint32_t interval_ms = 60000; // Intervalo entre bursts
-    
+
     // Script JS personalizado
     String condition_script;
 };
@@ -269,7 +270,7 @@ void stopDeauthScheduler();
 //================================================================================
 /**
  * @brief Encrypted Traffic Fingerprint - Identificação passiva
- * 
+ *
  * O que faz: Identifica SO/dispositivo por estatística de pacotes criptografados.
  * Como faz: Análise simples de tamanho/intervals (mostra na tela).
  * Para que serve: Reconhecimento passivo avançado.
@@ -279,7 +280,7 @@ void encryptedTrafficFingerprint();
 /**
  * @brief Analisa tráfego e gera fingerprint
  */
-TrafficFingerprint analyzeTraffic(const std::vector<uint16_t>& packet_sizes, 
+TrafficFingerprint analyzeTraffic(const std::vector<uint16_t>& packet_sizes,
                                    const std::vector<uint32_t>& intervals);
 
 /**
@@ -292,7 +293,7 @@ const char* detectOSFromFingerprint(const TrafficFingerprint& fp);
 //================================================================================
 /**
  * @brief Rogue AP Session Hijack Portal - Portal que rouba sessões
- * 
+ *
  * O que faz: Portal que rouba sessões ativas (cookies).
  * Como faz: Evil Portal + JS injection no tráfego.
  * Para que serve: Teste de sequestro de sessão pós-phishing.
@@ -328,7 +329,7 @@ String generateHijackPage(const String& target_domain);
 //================================================================================
 /**
  * @brief Management Frame Limiter Bypass Flood
- * 
+ *
  * O que faz: Flood de management frames acima do limite de detecção.
  * Como faz: Rate control inteligente + random MAC.
  * Para que serve: DoS stealth em WIDS modernos.

@@ -4,6 +4,7 @@
 #ifndef MQJS_STDLIB_H
 #define MQJS_STDLIB_H
 
+
 // Minimal standard library for Bruce JavaScript interpreter
 const char *mqjs_stdlib = " \
     // Global Bruce Utility functions \

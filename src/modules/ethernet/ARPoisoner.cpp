@@ -16,6 +16,7 @@
 #include "lwipopts.h"
 #include <esp_wifi.h>
 #include <globals.h>
+#include "modules/wifi/sniffer.h"
 #include <iomanip>
 #include <iostream>
 #include <lwip/dns.h>
@@ -44,7 +45,10 @@ bool ARPoisoner::arpPCAPfile() {
     if (!fs->exists("/WillyPCAP")) fs->mkdir("/WillyPCAP");
     while (fs->exists(String("/WillyPCAP/ARP_session_" + String(nf++) + ".pcap").c_str())) yield();
     pcapFile = fs->open(String("/WillyPCAP/ARP_session_" + String(nf) + ".pcap").c_str(), FILE_WRITE);
-    if (pcapFile) return true;
+    if (pcapFile) {
+        writeHeader(pcapFile);
+        return true;
+    }
     else return false;
 }
 
@@ -59,6 +63,7 @@ void ARPoisoner::setup(IPAddress gateway) {
         gatewayIP[i] = gateway[i];
         victimIP[i] = gateway[i];
     }
+    victimIP[3] = 0; // Initialize victim IP base
     long tmp = 0;
     drawMainBorderWithTitle("ARP Poisoning");
     padprintln("");
@@ -92,7 +97,7 @@ void ARPoisoner::loop() {
                 // Sends Device random MACs back to gateway
                 sendARPPacket(gatewayIP, gatewayMAC, victimIP, victimMAC, pcapFile);
 
-                delay(10);
+                vTaskDelay(10 / portTICK_PERIOD_MS); // Use vTaskDelay for better stability
                 tft.drawRightString(
                     "   " + String(victimIP[0]) + "." + String(victimIP[1]) + "." + String(victimIP[2]) +
                         "." + String(i),
@@ -159,7 +164,7 @@ void ARPoisoner::sendARPPacket(
 
     // Capturar o pacote no arquivo PCAP
     if (pcapFile) {
-        pcapFile.write((const uint8_t *)p->payload, p->tot_len); // don't know if it will work
+        newPacketSD(millis() / 1000, (millis() % 1000) * 1000, p->tot_len, (uint8_t *)p->payload, pcapFile);
         pcapFile.flush();
     }
 }

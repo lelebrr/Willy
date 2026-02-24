@@ -19,8 +19,6 @@ private:
     );
 
 public:
-    // @brief Dummy default constructori
-    ARPoisoner() {};
     ARPoisoner(IPAddress gateway);
     ~ARPoisoner();
 };

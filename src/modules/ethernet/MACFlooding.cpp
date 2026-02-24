@@ -50,11 +50,20 @@ void MACFlooding::show_gui() {
 
 void MACFlooding::loop() {
     AnyKeyPress = false;
-    while (true) {
+    uint32_t packetCount = 0;
+    const uint32_t maxPackets = 50000; // Limit for academic safety
+    while (packetCount < maxPackets) {
         send_packet();
+        packetCount++;
+        vTaskDelay(1 / portTICK_PERIOD_MS); // Small delay to allow UI to breathe
         if (check(AnyKeyPress)) { break; }
     }
+    if (packetCount >= maxPackets) {
+        displayTextLine("Limite de pacotes atingido");
+        delay(2000);
+    }
 }
+
 
 uint16_t MACFlooding::calculate_ip_checksum() {
     uint16_t *buf = (uint16_t *)&ipv4_pkt;
@@ -90,7 +99,7 @@ void MACFlooding::prepare_packet_hdr() {
     ipv4_pkt._len = htons(20);    // 20, total len
     ipv4_pkt._id = random(65535); // Avoid overflow limiting random to u16
     ipv4_pkt._offset = 0x0;
-    ipv4_pkt._ttl = static_cast<u8_t>(htons(0x40)); // TTL: 64
+    ipv4_pkt._ttl = 0x40; // TTL: 64
     ipv4_pkt._proto = 0x11;                         // Protocol: 17(UDP)
 
     // memcpy(&ipv4_pkt.dest.addr, broadcast_mac_address, 4);

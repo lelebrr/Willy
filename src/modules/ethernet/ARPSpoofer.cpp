@@ -36,11 +36,11 @@
 #include <sstream>
 
 ARPSpoofer::ARPSpoofer(
-    const Host &host, IPAddress gateway, uint8_t _gatewayMAC[6], uint8_t mac[6], bool _mitm
+    const ScanHosts::Host &host, IPAddress gateway, uint8_t _gatewayMAC[6], uint8_t _mac[6], bool _mitm
 ) {
     mitm = _mitm;
     memcpy(gatewayMAC, _gatewayMAC, 6);
-    memcpy(mac, myMAC, 6);
+    memcpy(myMAC, _mac, 6); // FIX: Copy the passed ESP32 MAC to myMAC
     setup(host, gateway);
 }
 
@@ -58,7 +58,7 @@ bool ARPSpoofer::arpPCAPfile() {
     else return false;
 }
 
-void ARPSpoofer::setup(const Host &host, IPAddress gateway) {
+void ARPSpoofer::setup(const ScanHosts::Host &host, IPAddress gateway) {
     if (!arpPCAPfile()) Serial.println("Fail creating ARP Pcap file");
     writeHeader(pcapFile); // write pcap header into the file
 
@@ -167,7 +167,7 @@ void ARPSpoofer::sendARPPacket(
 
     // Capturar o pacote no arquivo PCAP
     if (pcapFile) {
-        pcapFile.write((const uint8_t *)p->payload, p->tot_len); // don't know if it will work
+        newPacketSD(millis() / 1000, (millis() % 1000) * 1000, p->tot_len, (uint8_t *)p->payload, pcapFile);
         pcapFile.flush();
     }
 }

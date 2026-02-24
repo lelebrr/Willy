@@ -2,6 +2,9 @@
 #include "core/display.h"
 #include "core/settings.h"
 #include "modules/others/timer.h"
+#include "core/wifi/wifi_common.h"
+#include "core/utils.h"
+
 
 void ClockMenu::optionsMenu() {
     while (!returnToMenu) {
@@ -20,15 +23,23 @@ void ClockMenu::optionsMenu() {
 
 void ClockMenu::showSubMenu() {
     options = {
-        {"Timer",         [=]() { Timer(); }            },
-        {"Voltar ao Relogio", [=]() {}                      },
-        {"Sair",          [=]() { returnToMenu = true; }}
-        // Add more options here
+        {"Timer",           [=]() { Timer(); }              },
+        {"Sincronizar NTP",  [=]() {
+            if (!wifiConnected) {
+                if (!wifiConnectMenu()) return;
+            }
+            displayInfo("Sincronizando...");
+            updateClockTimezone();
+            displayInfo("OK!", true);
+        }},
+        {"Voltar ao Relogio", [=]() {}                        },
+        {"Sair",            [=]() { returnToMenu = true; }  }
     };
 
     delay(200);
-    loopOptions(options);
+    loopOptions(options, MENU_TYPE_SUBMENU, "Relogio");
 }
+
 
 void ClockMenu::drawIcon(float scale) {
     clearIconArea();

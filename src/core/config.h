@@ -189,6 +189,10 @@ public:
     void addWebUISession(const String &token);
     void removeWebUISession(const String &token);
     bool isValidWebUISession(const String &token);
+
+private:
+    String encryptString(const String &input) const;
+    String decryptString(const String &input) const;
 };
 
 #endif

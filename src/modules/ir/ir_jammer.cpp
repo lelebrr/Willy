@@ -19,8 +19,8 @@
 #include "core/settings.h"
 #include "core/utils.h"
 #include "ir_utils.h"
-#include <globals.h>
-#include <interface.h>
+#include "globals.h"
+#include "interface.h"
 
 // Common IR remote control frequencies in Hz
 // Covers most consumer devices (30-56kHz range)
