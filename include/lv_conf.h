@@ -25,10 +25,10 @@
     #define LV_MEM_ADR 0
     #define LV_MEM_AUTO_DEFRAG 1
 #else
-    #define LV_MEM_CUSTOM_INCLUDE <stdlib.h>
-    #define LV_MEM_CUSTOM_ALLOC   malloc
-    #define LV_MEM_CUSTOM_FREE    free
-    #define LV_MEM_CUSTOM_REALLOC realloc
+    #define LV_MEM_CUSTOM_INCLUDE "esp_heap_caps.h"
+    #define LV_MEM_CUSTOM_ALLOC(size)   ({ void* p = heap_caps_malloc(size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT); if(!p) p = malloc(size); p; })
+    #define LV_MEM_CUSTOM_FREE          free
+    #define LV_MEM_CUSTOM_REALLOC(ptr, size) ({ void* p = heap_caps_realloc(ptr, size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT); if(!p) p = realloc(ptr, size); p; })
 #endif
 
 /*====================
@@ -142,6 +142,7 @@
 #define LV_FONT_MONTSERRAT_12 1
 #define LV_FONT_MONTSERRAT_14 1
 #define LV_FONT_MONTSERRAT_16 0
+#define LV_FONT_MONTSERRAT_28 1
 #define LV_FONT_DEFAULT &lv_font_montserrat_14
 
 /*=====================

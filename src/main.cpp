@@ -12,6 +12,7 @@
 #include <lvgl.h>
 #include <string>
 #include <vector>
+#include "ui/cyber_menu.h"
 io_expander ioExpander;
 BruceConfig bruceConfig;
 BruceConfigPins bruceConfigPins;
@@ -59,33 +60,19 @@ keyStroke KeyStroke;
 
 TaskHandle_t xHandle;
 void __attribute__((weak)) taskInputHandler(void *parameter) {
-    auto timer = millis();
     while (true) {
         checkPowerSaveTime();
-        // Sometimes this task run 2 or more times before looptask,
-        // and navigation gets stuck, the idea here is run the input detection
-        // if AnyKeyPress is false, or rerun if it was not renewed within 75ms (arbitrary)
-        // because AnyKeyPress will be true if didn´t passed through a check(bool var)
-        if (!AnyKeyPress || millis() - timer > 75) {
-            NextPress = false;
-            PrevPress = false;
-            UpPress = false;
-            DownPress = false;
-            SelPress = false;
-            EscPress = false;
-            AnyKeyPress = false;
-            SerialCmdPress = false;
-            NextPagePress = false;
-            PrevPagePress = false;
-            touchPoint.pressed = false;
-            touchPoint.Clear();
-#ifndef USE_TFT_eSPI_TOUCH
-            InputHandler();
-#endif
-            lv_timer_handler(); // Handle LVGL tasks
-            timer = millis();
+
+        // Input detection
+        InputHandler();
+
+        // Sole owner of LVGL timer processing for stability
+        if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(5)) == pdTRUE) {
+            lv_timer_handler();
+            xSemaphoreGive(lvgl_mutex);
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+
+        vTaskDelay(pdMS_TO_TICKS(15)); // Faster iteration (66Hz) for smooth touch
     }
 }
 // Public Globals Variables
@@ -158,6 +145,7 @@ volatile int tftHeight = VECTOR_DISPLAY_DEFAULT_WIDTH;
 #include "modules/rf/rf_utils.h"                 // for initCC1101once
 #include <Wire.h>
 #include "willy_logger.h"                        // Sistema de logging centralizado
+#include "ui/willy_splash.h"                     // Splash screen Willy
 
 /*********************************************************************
  **  Function: begin_storage
@@ -232,16 +220,21 @@ void begin_tft() {
  **  Draw boot screen
  *********************************************************************/
 void boot_screen() {
+    Serial.println("[BOOT] Inside boot_screen()...");
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
     tft.setTextSize(FM);
     tft.drawPixel(0, 0, bruceConfig.bgColor);
-    tft.drawCentreString("Bruce", tftWidth / 2, 10, 1);
+    Serial.println("[BOOT] Drawing 'Willy' string...");
+    tft.drawCentreString("Willy", tftWidth / 2, 10, 1);
     tft.setTextSize(FP);
+    Serial.println("[BOOT] Drawing version string...");
     tft.drawCentreString(BRUCE_VERSION, tftWidth / 2, 25, 1);
     tft.setTextSize(FM);
+    Serial.println("[BOOT] Drawing 'PREDATORY FIRMWARE' string...");
     tft.drawCentreString(
         "PREDATORY FIRMWARE", tftWidth / 2, tftHeight + 2, 1
     ); // will draw outside the screen on non touch devices
+    Serial.println("[BOOT] Finished boot_screen().");
 }
 
 /*********************************************************************
@@ -255,21 +248,37 @@ void boot_screen_anim() {
     int boot_img = 0;
     bool drawn = false;
     if (sdcardMounted) {
+        Serial.println("[BOOT] Checking SD for /boot.jpg...");
         if (SD.exists("/boot.jpg")) boot_img = 1;
-        else if (SD.exists("/boot.gif")) boot_img = 3;
+        else {
+            Serial.println("[BOOT] Checking SD for /boot.gif...");
+            if (SD.exists("/boot.gif")) boot_img = 3;
+        }
     }
-    if (boot_img == 0 && LittleFS.exists("/boot.jpg")) boot_img = 2;
-    else if (boot_img == 0 && LittleFS.exists("/boot.gif")) boot_img = 4;
+    if (boot_img == 0) {
+        Serial.println("[BOOT] Checking LittleFS for /boot.jpg...");
+        if (LittleFS.exists("/boot.jpg")) boot_img = 2;
+        else {
+            Serial.println("[BOOT] Checking LittleFS for /boot.gif...");
+            if (LittleFS.exists("/boot.gif")) boot_img = 4;
+        }
+    }
+    Serial.println("[BOOT] Checking theme override...");
     if (bruceConfig.theme.boot_img) boot_img = 5; // override others
 
+    Serial.println("[BOOT] Forcing TFT sync...");
     tft.drawPixel(0, 0, 0);       // Forces back communication with TFT, to avoid ghosting
                                   // Start image loop
-    while (millis() < i + 7000) { // boot image lasts for 5 secs
+    Serial.println("[BOOT] Starting while loop...");
+    while (millis() < i + 7000) { // boot image lasts for 7 secs
         if ((millis() - i > 2000) && !drawn) {
+            Serial.println("[BOOT] 2 seconds elapsed, starting drawing logic...");
             tft.fillRect(0, 45, tftWidth, tftHeight - 45, bruceConfig.bgColor);
             if (boot_img > 0 && !drawn) {
+                Serial.printf("[BOOT] boot_img = %d, drawing image...\n", boot_img);
                 tft.fillScreen(bruceConfig.bgColor);
                 if (boot_img == 5) {
+                    Serial.println("[BOOT] Drawing from theme FS...");
                     drawImg(
                         *bruceConfig.themeFS(),
                         bruceConfig.getThemeItemImg(bruceConfig.theme.paths.boot_img),
@@ -278,27 +287,29 @@ void boot_screen_anim() {
                         true,
                         3600
                     );
-                    Serial.println("Image from SD theme");
                 } else if (boot_img == 1) {
+                    Serial.println("[BOOT] Drawing /boot.jpg from SD...");
                     drawImg(SD, "/boot.jpg", 0, 0, true);
-                    Serial.println("Image from SD");
                 } else if (boot_img == 2) {
+                    Serial.println("[BOOT] Drawing /boot.jpg from LittleFS...");
                     drawImg(LittleFS, "/boot.jpg", 0, 0, true);
-                    Serial.println("Image from LittleFS");
                 } else if (boot_img == 3) {
+                    Serial.println("[BOOT] Drawing /boot.gif from SD...");
                     drawImg(SD, "/boot.gif", 0, 0, true, 3600);
-                    Serial.println("Image from SD");
                 } else if (boot_img == 4) {
+                    Serial.println("[BOOT] Drawing /boot.gif from LittleFS...");
                     drawImg(LittleFS, "/boot.gif", 0, 0, true, 3600);
-                    Serial.println("Image from LittleFS");
                 }
+                Serial.println("[BOOT] Image drawing call finished.");
                 tft.drawPixel(0, 0, 0); // Forces back communication with TFT, to avoid ghosting
             }
             drawn = true;
         }
 #if !defined(LITE_VERSION)
-        if (!boot_img && (millis() - i > 2200) && (millis() - i) < 2700)
+        if (!boot_img && (millis() - i > 2200) && (millis() - i) < 2700) {
+            // Serial.println("[BOOT] Drawing rect..."); // Too verbose
             tft.drawRect(2 * tftWidth / 3, tftHeight / 2, 2, 2, bruceConfig.priColor);
+        }
         if (!boot_img && (millis() - i > 2700) && (millis() - i) < 2900)
             tft.fillRect(0, 45, tftWidth, tftHeight - 45, bruceConfig.bgColor);
         if (!boot_img && (millis() - i > 2900) && (millis() - i) < 3400)
@@ -312,7 +323,8 @@ void boot_screen_anim() {
                 bruceConfig.priColor
             );
         if (!boot_img && (millis() - i > 3400) && (millis() - i) < 3600) tft.fillScreen(bruceConfig.bgColor);
-        if (!boot_img && (millis() - i > 3600))
+        if (!boot_img && (millis() - i > 3600)) {
+            // Serial.println("[BOOT] Drawing main bits..."); // Too verbose
             tft.drawXBitmap(
                 (tftWidth - 238) / 2,
                 (tftHeight - 133) / 2,
@@ -322,14 +334,18 @@ void boot_screen_anim() {
                 bruceConfig.bgColor,
                 bruceConfig.priColor
             );
+        }
 #endif
         if (check(AnyKeyPress)) // If any key or M5 key is pressed, it'll jump the boot screen
         {
+            Serial.println("[BOOT] Key press detected, jumping...");
             tft.fillScreen(bruceConfig.bgColor);
             delay(10);
             return;
         }
+        vTaskDelay(pdMS_TO_TICKS(50)); // Increase delay for debug print visibility logic
     }
+    Serial.println("[BOOT] Loop finished.");
 
     // Clear splashscreen
     tft.fillScreen(bruceConfig.bgColor);
@@ -441,7 +457,7 @@ void setup() {
     tft.setRotation(bruceConfigPins.rotation);
     tft.fillScreen(TFT_BLACK);
     // bruceConfig is not read yet.. just to show something on screen due to long boot time
-    tft.setTextColor(TFT_PURPLE, TFT_BLACK);
+    tft.setTextColor(TFT_CYAN, TFT_BLACK);
     tft.drawCentreString("Booting", tft.width() / 2, tft.height() / 2, 1);
 #else
     tft.begin();
@@ -449,8 +465,35 @@ void setup() {
     Serial.println("Starting begin_storage()...");
     begin_storage();
     Serial.println("begin_storage() completed successfully.");
+    Serial.println("Starting begin_tft()...");
     begin_tft();
+    Serial.println("begin_tft() completed successfully.");
+
+    Serial.println("Starting initLVGL()...");
     initLVGL(); // Initialize LVGL
+    Serial.println("initLVGL() completed successfully.");
+
+    if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, portMAX_DELAY) == pdTRUE) {
+        show_willy_splash(lv_scr_act()); // Show Willy splash screen
+        xSemaphoreGive(lvgl_mutex);
+    }
+
+    for (int i = 0; i < 55; i++) { // Wait for animation (approx 5.5s)
+        if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+            lv_timer_handler();
+            xSemaphoreGive(lvgl_mutex);
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    // Load a completely new screen to avoid dangling references
+    // from the splash screen animations before InputHandler and loop() take over
+    if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, portMAX_DELAY) == pdTRUE) {
+        lv_anim_del_all();
+        lv_obj_t *new_scr = lv_obj_create(NULL);
+        lv_scr_load_anim(new_scr, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, true);
+        lv_timer_handler(); // process screen load
+        xSemaphoreGive(lvgl_mutex);
+    }
 
     // SD Card presence check - warn if not found
     if (!sdcardMounted) {
@@ -472,10 +515,16 @@ void setup() {
         tft.fillScreen(bruceConfig.bgColor);
     }
 
+    Serial.println("Initializing clock...");
     init_clock();
+    Serial.println("Clock initialized.");
+
+    Serial.println("Initializing LED...");
     init_led();
+    Serial.println("LED initialized.");
 
     // Inicializa sistema de logging centralizado Willy
+    /*
     if (sdcardMounted) {
         willyLogger.begin();
         willyLogger.logSystemStatus();
@@ -484,46 +533,42 @@ void setup() {
         // Mostra aviso de log ativo
         willyLogger.showLogWarning();
     }
+    */
 
+    Serial.println("Reserving options capacity...");
     options.reserve(20); // preallocate some options space to avoid fragmentation
+    Serial.println("Options reserved.");
 
     // Set WiFi country to avoid warnings and ensure max power
+    Serial.println("Setting WiFi country...");
     const wifi_country_t country = {
         .cc = "US",
         .schan = 1,
         .nchan = 14,
-#ifdef CONFIG_ESP_PHY_MAX_TX_POWER
-        .max_tx_power = CONFIG_ESP_PHY_MAX_TX_POWER, // 20
-#endif
         .policy = WIFI_COUNTRY_POLICY_MANUAL
     };
 
     esp_wifi_set_max_tx_power(80); // 80 translates to 20dBm
     esp_wifi_set_country(&country);
+    Serial.println("WiFi country set.");
 
     // Some GPIO Settings (such as CYD's brightness control must be set after tft and sdcard)
+    Serial.println("Starting _post_setup_gpio()...");
     _post_setup_gpio();
+    Serial.println("_post_setup_gpio() completed successfully.");
     // end of post gpio begin
 
     // #ifndef USE_TFT_eSPI_TOUCH
-    // This task keeps running all the time, will never stop
-    xTaskCreate(
-        taskInputHandler,              // Task function
-        "InputHandler",                // Task Name
-        INPUT_HANDLER_TASK_STACK_SIZE, // Stack size
-        NULL,                          // Task parameters
-        2,                             // Task priority (0 to 3), loopTask has priority 2.
-        &xHandle                       // Task handle (not used)
-    );
-    // #endif
 #if defined(HAS_SCREEN)
+    Serial.println("Opening theme file...");
     bruceConfig.openThemeFile(bruceConfig.themeFS(), bruceConfig.themePath, false);
+    Serial.println("Theme file opened.");
+
     if (!bruceConfig.instantBoot) {
-        boot_screen_anim();
-        startup_sound();
+        Serial.println("Legacy boot screen disabled (Using Willy Splash).");
     }
     if (bruceConfig.wifiAtStartup) {
-        log_i("Loading Wifi at Startup");
+        Serial.println("Creating wifiConnectTask...");
         xTaskCreate(
             wifiConnectTask,   // Task function
             "wifiConnectTask", // Task Name
@@ -532,15 +577,33 @@ void setup() {
             2,                 // Task priority (0 to 3), loopTask has priority 2.
             NULL               // Task handle (not used)
         );
+        Serial.println("wifiConnectTask created.");
     }
 #endif
     //  start a task to handle serial commands while the webui is running
+    Serial.println("Starting serial commands handler task...");
     startSerialCommandsHandlerTask(true);
+    Serial.println("Serial commands handler task started.");
 
+    Serial.println("Waking up screen...");
     wakeUpScreen();
+    Serial.println("Screen woken up.");
+
     if (bruceConfig.startupApp != "" && !startupApp.startApp(bruceConfig.startupApp)) {
         bruceConfig.setStartupApp("");
     }
+
+    // This task keeps running all the time, will never stop
+    Serial.println("Creating InputHandler task...");
+    xTaskCreate(
+        taskInputHandler,              // Task function
+        "InputHandler",                // Task Name
+        INPUT_HANDLER_TASK_STACK_SIZE, // Stack size
+        NULL,                          // Task parameters
+        2,                             // Task priority (0 to 3), loopTask has priority 2.
+        &xHandle                       // Task handle (not used)
+    );
+    Serial.println("InputHandler task created. setup() finished.");
 }
 
 /**********************************************************************
@@ -562,10 +625,44 @@ void loop() {
         previousMillis = millis(); // ensure that will not dim screen when get back to menu
     }
 #endif
-    tft.fillScreen(bruceConfig.bgColor);
+    // Set Cyber Menu as default UI
+    static bool menu_initialized = false;
+    if (!menu_initialized) {
+        if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, portMAX_DELAY) == pdTRUE) {
+            setup_cyber_menu(lv_scr_act());
+            menu_initialized = true;
+            xSemaphoreGive(lvgl_mutex);
+        }
+    }
 
-    mainMenu.begin();
-    delay(1);
+    // LVGL timer handling removed from here, now centralized in taskInputHandler() for stability
+
+    // Check if the user clicked an LVGL icon
+    if (pending_cyber_menu_action >= 0) {
+        int action = pending_cyber_menu_action;
+        pending_cyber_menu_action = -1; // reset immediately
+
+        // Clear LVGL screen before booting the traditional menu to avoid visual collision
+        if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, portMAX_DELAY) == pdTRUE) {
+            lv_obj_clean(lv_scr_act());
+            lv_timer_handler();
+            xSemaphoreGive(lvgl_mutex);
+        }
+
+        // Action maps to the index of options in MainMenu as defined in main_menu.cpp options.push_back order
+        // Ensure index does not drift
+        auto menuOptions = mainMenu.getItems();
+        if (action < menuOptions.size()) {
+            tft.fillScreen(bruceConfig.bgColor);
+            menuOptions[action]->optionsMenu(); // Directly open the specific classic menu
+        }
+
+        // Upon return, we re-arm LVGL menu initialization
+        menu_initialized = false;
+        tft.fillScreen(bruceConfig.bgColor); // clear old Bruce rendering
+    }
+
+    delay(5);
 }
 #else
 

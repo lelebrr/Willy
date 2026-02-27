@@ -100,6 +100,11 @@ bool setupSdCard() {
     // If not using TFT Bus, use a specific bus
     else {
     NEXT:
+        Serial.printf("[SD] Starting SPI: SCK=%d, MISO=%d, MOSI=%d, CS=%d\n",
+                      (int)bruceConfigPins.SDCARD_bus.sck,
+                      (int)bruceConfigPins.SDCARD_bus.miso,
+                      (int)bruceConfigPins.SDCARD_bus.mosi,
+                      (int)bruceConfigPins.SDCARD_bus.cs);
         sdcardSPI.begin(
             (int8_t)bruceConfigPins.SDCARD_bus.sck,
             (int8_t)bruceConfigPins.SDCARD_bus.miso,
@@ -109,13 +114,17 @@ bool setupSdCard() {
         delay(10);
         if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI)) {
             Serial.println("SD.begin (sdcardSPI) failed, trying 4MHz...");
-            if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI, 20000000)) {
-                result = false;
+            if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI, 4000000)) {
+                Serial.println("SD.begin (sdcardSPI) failed at 4MHz, trying 1MHz...");
+                if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI, 1000000)) {
+                    result = false;
 #if defined(ARDUINO_M5STICK_C_PLUS) || defined(ARDUINO_M5STICK_C_PLUS2)
-                // If using Shared SPI, do not stop the bus if SDCard is not present
-                // If using Legacy, release the pins from this SPI Bus
-                if (bruceConfigPins.SDCARD_bus.miso != bruceConfigPins.CC1101_bus.miso) sdcardSPI.end();
+                    if (bruceConfigPins.SDCARD_bus.miso != bruceConfigPins.CC1101_bus.miso) sdcardSPI.end();
 #endif
+                } else {
+                    Serial.println("SDCARD mounted at 1MHz");
+                    result = true;
+                }
             } else result = true;
         }
         Serial.println("SDCard in a different Bus, using sdcardSPI instance");
@@ -123,11 +132,11 @@ bool setupSdCard() {
 #endif
 
     if (result == false) {
-        Serial.println("SDCARD NOT mounted, check wiring and format");
+        Serial.println("[SD] SDCARD NOT mounted, check wiring and format");
         sdcardMounted = false;
         return false;
     } else {
-        Serial.println("SDCARD mounted successfully");
+        Serial.println("[SD] SDCARD mounted successfully");
         sdcardMounted = true;
         // Optimization: Create basic directory structure on mount
         SD.mkdir("/WillyPCAP");

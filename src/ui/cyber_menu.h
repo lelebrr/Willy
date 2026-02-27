@@ -9,4 +9,6 @@
  */
 void setup_cyber_menu(lv_obj_t *menu);
 
+extern volatile int pending_cyber_menu_action;
+
 #endif

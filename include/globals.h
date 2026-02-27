@@ -119,7 +119,7 @@ struct Option {
 
     // Explicit constructor for common {string, function} initialization
     Option(const char* lbl, std::function<void()> op)
-        : label(lbl), operation(op) {}
+        : label(lbl), operation(op), selected(false), hover(nullptr), hoverPointer(nullptr), hovered(false) {}
 };
 
 struct keyStroke { // DO NOT CHANGE IT!!!!!
@@ -228,14 +228,14 @@ extern inline bool check(volatile bool &btn, bool resetButtonStatus = true) {
 
 #ifndef USE_TFT_eSPI_TOUCH
     if (!btn) return false;
-    vTaskSuspend(xHandle);
+    if (xHandle != NULL) vTaskSuspend(xHandle);
     if (resetButtonStatus) {
         btn = false;
         AnyKeyPress = false;
         SerialCmdPress = false;
     }
     delay(10);
-    vTaskResume(xHandle);
+    if (xHandle != NULL) vTaskResume(xHandle);
     return true;
 #else
 

@@ -26,7 +26,7 @@ const int default_webserverporthttp = 80;
 IPAddress AP_GATEWAY(172, 0, 0, 1); // Gateway
 
 AsyncWebServer *server = nullptr; // initialise webserver
-const char *host = "bruce";
+const char *host = "willy";
 String uploadFolder = "";
 static bool mdnsRunning = false;
 
@@ -142,7 +142,7 @@ bool checkUserWebAuth(AsyncWebServerRequest *request, bool onFailureReturnLoginP
     if (request->hasHeader("Cookie")) {
         const AsyncWebHeader *cookie = request->getHeader("Cookie");
         String c = cookie->value();
-        int idx = c.indexOf("BRUCESESSION=");
+        int idx = c.indexOf("WILLYSESSION=");
         if (idx != -1) {
             int start = idx + 13;
             int end = c.indexOf(';', start);
@@ -251,13 +251,13 @@ void drawWebUiScreen(bool mode_ap) {
         tft.drawCentreString("WillyNet/WillyNet", tftWidth / 2, 7, 1);
     }
     setTftDisplay(0, 0, ALCOLOR, FM);
-    tft.drawCentreString("BRUCE WebUI", tftWidth / 2, 27, 1);
+    tft.drawCentreString("WILLY WebUI", tftWidth / 2, 27, 1);
     String txt;
     if (!mode_ap) txt = WiFi.localIP().toString();
     else txt = WiFi.softAPIP().toString();
     tft.setTextColor(bruceConfig.priColor);
 
-    tft.drawCentreString("http://bruce.local", tftWidth / 2, 45, 1);
+    tft.drawCentreString("http://willy.local", tftWidth / 2, 45, 1);
     setTftDisplay(7, 67);
 
     tft.setTextSize(FM);
@@ -386,7 +386,7 @@ void configureWebServer() {
                 String token = generateToken();
                 AsyncWebServerResponse *response = request->beginResponse(302);
                 response->addHeader("Location", "/");
-                response->addHeader("Set-Cookie", "BRUCESESSION=" + token + "; Path=/; HttpOnly");
+                response->addHeader("Set-Cookie", "WILLYSESSION=" + token + "; Path=/; HttpOnly");
                 request->send(response);
                 bruceConfig.addWebUISession(token);
                 willyLogger.info(COMP_WEBUI, "User Login successful");
@@ -403,7 +403,7 @@ void configureWebServer() {
         if (request->hasHeader("Cookie")) {
             const AsyncWebHeader *cookie = request->getHeader("Cookie");
             String c = cookie->value();
-            int idx = c.indexOf("BRUCESESSION=");
+            int idx = c.indexOf("WILLYSESSION=");
             if (idx != -1) {
                 int start = idx + 13;
                 int end = c.indexOf(';', start);
@@ -414,7 +414,7 @@ void configureWebServer() {
         }
         AsyncWebServerResponse *response = request->beginResponse(302);
         response->addHeader("Location", "/?loggedout");
-        response->addHeader("Set-Cookie", "BRUCESESSION=0; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+        response->addHeader("Set-Cookie", "WILLYSESSION=0; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
         request->send(response);
     });
 

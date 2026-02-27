@@ -35,6 +35,9 @@ static lv_color_t *buf2 = NULL;
 static lv_disp_drv_t disp_drv;
 static lv_indev_drv_t indev_drv;
 
+/* LVGL Thread Safety Mutex */
+SemaphoreHandle_t lvgl_mutex = NULL;
+
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
     uint32_t w = (area->x2 - area->x1 + 1);
@@ -42,7 +45,7 @@ void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *c
 
     tft.startWrite();
     tft.setAddrWindow(area->x1, area->y1, w, h);
-    tft.pushColors((uint16_t *)&color_p->full, w * h, true);
+    tft.pushColors((uint16_t *)&color_p->full, w * h, false);
     tft.endWrite();
 
     lv_disp_flush_ready(disp_drv);
@@ -60,19 +63,36 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
 }
 
 void initLVGL() {
+    Serial.println("[LVGL] Starting lv_init()...");
     lv_init();
 
-    size_t buffer_size = tftWidth * 40; // 40 lines buffer
+    // Create the LVGL mutex for thread safety
+    lvgl_mutex = xSemaphoreCreateMutex();
+
+    Serial.println("[LVGL] lv_init() done.");
+
+    size_t buffer_size = tftWidth * 10; // 10 lines buffer (save RAM)
+    Serial.printf("[LVGL] Buffer size: %d bytes\n", buffer_size * sizeof(lv_color_t));
 
     if (psramFound()) {
+        Serial.println("[LVGL] PSRAM found, allocating...");
         buf1 = (lv_color_t *)ps_malloc(buffer_size * sizeof(lv_color_t));
         buf2 = (lv_color_t *)ps_malloc(buffer_size * sizeof(lv_color_t));
+        Serial.printf("[LVGL] PSRAM buffers: buf1=%p, buf2=%p\n", buf1, buf2);
     }
 
-    if (!buf1) buf1 = (lv_color_t *)malloc(buffer_size * sizeof(lv_color_t));
-    if (!buf2) buf2 = (lv_color_t *)malloc(buffer_size * sizeof(lv_color_t));
+    if (!buf1) {
+        Serial.println("[LVGL] Allocating buf1 in internal RAM...");
+        buf1 = (lv_color_t *)malloc(buffer_size * sizeof(lv_color_t));
+    }
+    if (!buf2) {
+        Serial.println("[LVGL] Allocating buf2 in internal RAM...");
+        buf2 = (lv_color_t *)malloc(buffer_size * sizeof(lv_color_t));
+    }
+    Serial.printf("[LVGL] Final buffers: buf1=%p, buf2=%p\n", buf1, buf2);
 
     lv_disp_draw_buf_init(&draw_buf, buf1, buf2, buffer_size);
+    Serial.println("[LVGL] draw_buf initialized.");
 
     /*Initialize the display*/
     lv_disp_drv_init(&disp_drv);
@@ -81,12 +101,14 @@ void initLVGL() {
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);
+    Serial.println("[LVGL] display driver registered.");
 
     /*Initialize the (dummy) input device driver*/
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = my_touchpad_read;
     lv_indev_drv_register(&indev_drv);
+    Serial.println("[LVGL] input driver registered.");
 }
 /***************************************************************************************
 ** Function name: displayScrollingText
@@ -672,8 +694,8 @@ int loopOptions(
                 forceMenuOption = -1; // reset SerialCommand navigation option
                 Serial.print("Forcely ");
             }
-            Serial.println("Selected: " + String(options[chosen].label));
-            options[chosen].operation();
+            std::function<void()> callback = options[chosen].operation;
+            if (callback) callback();
             break;
         }
         // interpreter_start -> running the interpreter
@@ -837,11 +859,7 @@ void drawStatusBar() {
     tft.setTextSize(FP);
     tft.drawString("H:" + String(freeHeap) + "k C:" + String(cpuFreq) + "M", 10, 7);
 
-    uint8_t bat = getBattery();
-    uint8_t bat_margin = 85;
-    if (bat > 0) {
-        drawBatteryStatus(bat);
-    } else bat_margin = 26;
+    uint8_t bat_margin = 26;
     if (sdcardMounted) {
         tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
         tft.setTextSize(FP);
@@ -956,24 +974,7 @@ void printCenterFootnote(String text) {
 ** Description:   Draws battery info into the Status bar
 ***************************************************************************************/
 void drawBatteryStatus(uint8_t bat) {
-    if (bat == 0) return;
-
-    bool charging = isCharging();
-
-    uint16_t color = bruceConfig.priColor;
-    uint16_t barcolor = bruceConfig.priColor;
-    if (bat < 16) barcolor = color = TFT_RED;
-    else if (bat < 34) barcolor = color = TFT_YELLOW;
-    if (charging) color = TFT_GREEN;
-
-    tft.drawRoundRect(tftWidth - 43, 6, 36, 19, 2, charging ? color : bruceConfig.bgColor); // (bolder border)
-    tft.drawRoundRect(tftWidth - 42, 7, 34, 17, 2, color);
-    tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-    tft.drawRightString((bat == 100 ? "" : " ") + String(bat) + "%", tftWidth - 45, 12, 1);
-    tft.fillRoundRect(tftWidth - 40, 9, 30 * bat / 100, 13, 2, barcolor);
-    tft.drawLine(tftWidth - 30, 9, tftWidth - 30, 9 + 13, bruceConfig.bgColor);
-    tft.drawLine(tftWidth - 20, 9, tftWidth - 20, 9 + 13, bruceConfig.bgColor);
+    // Battery info removed
 }
 /***************************************************************************************
 ** Function name: drawWireguardStatus()

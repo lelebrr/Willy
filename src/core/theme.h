@@ -3,8 +3,8 @@
 #include "sd_functions.h"
 #include <ArduinoJson.h>
 
-#define DEFAULT_PRICOLOR 0xA80F
-#define DEFAULT_SECCOLOR 0xCB76
+#define DEFAULT_PRICOLOR 0x07FF // Cyan Neon for Willy
+#define DEFAULT_SECCOLOR 0x03EF // Darker Cyan
 
 struct themeFiles {
     String wifi = "";

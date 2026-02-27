@@ -17,7 +17,7 @@
 void OthersMenu::optionsMenu() {
     options = {
         {"Códigos QR",   qrcode_menu                  },
-        {"Megalodon",    shark_setup                  },
+        {"Orca",    shark_setup                  },
 
 #if defined(MIC_SPM1423) || defined(MIC_INMP441)
         {"Microfone",    [this]() { micMenu(); }      }, //@deveclipse

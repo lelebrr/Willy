@@ -125,6 +125,8 @@ void setTftDisplay(
 );
 
 void initLVGL();
+extern SemaphoreHandle_t lvgl_mutex;
+
 void turnOffDisplay();
 bool wakeUpScreen();
 

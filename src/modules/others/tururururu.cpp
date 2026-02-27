@@ -27,16 +27,16 @@ void initSprites() {
     // tft.createSprite(tftWidth,tftHeight);
     tft.fillScreen(bruceConfig.bgColor);
 
-    // menu_op para desenhar o tubarao
+    // menu_op para desenhar a orca (Willy)
     sprite.deleteSprite();
     sprite.createSprite(32, 30);
     sprite.fillScreen(bruceConfig.bgColor);
-    sprite.fillEllipse(19, 17, 10, 5, TFT_DARKGREY);
-    sprite.fillCircle(17, 24, 5, TFT_LIGHTGREY);
-    sprite.fillTriangle(0, 10, 0, 22, 9, 17, TFT_DARKGREY);
-    sprite.fillTriangle(17, 6, 17, 14, 22, 14, TFT_DARKGREY);
-    sprite.fillCircle(25, 14, 1, TFT_RED);
-    sprite.fillTriangle(23, 18, 29, 18, 24, 21, TFT_RED);
+    sprite.fillEllipse(19, 17, 10, 5, TFT_BLACK); // Corpo - Preto
+    sprite.fillCircle(17, 22, 4, TFT_WHITE); // Barriga - Branco
+    sprite.fillTriangle(0, 10, 0, 22, 9, 17, TFT_BLACK); // Cauda - Preto
+    sprite.fillTriangle(17, 6, 17, 14, 22, 14, TFT_BLACK); // Barbatana - Preto
+    sprite.fillCircle(25, 14, 1, TFT_WHITE); // Olho
+    sprite.fillTriangle(23, 18, 29, 18, 24, 21, TFT_CYAN); // Detalhe Willy
     sprite.fillRect(0, 21, 32, 15, bruceConfig.bgColor);
 
     // draw para desenhar o peixe

@@ -1,4 +1,4 @@
-<div align="center">
+free<div align="center">
 
 # 🛡️ Willy Firmware
 
@@ -1158,16 +1158,19 @@ A nova versão **Willy 2.1** traz uma experiência de usuário premium, recursos
 <div align="center">
 
 | Dispositivo | Display | Touch | SD Card | USB | Preço | Status |
-|-------------|---------|-------|---------|-----|-------|--------|
-| **CYD-2432S028** | 2.8" TFT | Resistivo | ✅ | 1x USB-C | ~R$100 | ⭐ Recomendado |
-| **CYD-2USB** | 2.8" TFT | Resistivo | ✅ | 2x USB-C | ~R$125 | ⭐ Recomendado |
-| **M5Stack Cardputer** | - | ❌ | ✅ | USB-C | ~R$250 | ✅ Suportado |
-| **M5Stack Core2** | 2.0" TFT | Capacitivo | ✅ | USB-C | ~R$275 | ✅ Suportado |
-| **M5Stack CoreS3** | 2.0" TFT | Capacitivo | ✅ | USB-C | ~R$300 | ✅ Suportado |
-| **Lilygo T-Embed** | 1.14" TFT | Rotary | ✅ | USB-C | ~R$225 | ✅ Suportado |
-| **Lilygo T-Display S3** | 1.9" TFT | ❌ | Opcional | USB-C | ~R$125 | ✅ Suportado |
-| **Lilygo T-Deck** | 2.8" TFT | Capacitivo | ✅ | USB-C | ~R$400 | ✅ Suportado |
-| **Lilygo T-Watch S3** | 1.78" TFT | Capacitivo | ✅ | USB-C | ~R$350 | ✅ Suportado |
+ |-------------|---------|-------|---------|-----|----------------|--------|
+ | **CYD-2432S028** | 2.8" TFT | Resistivo | ✅ | 1x USB-C | **R$9 999,999** | ⭐ Recomendado |
+ | **CYD-2USB** | 2.8" TFT | Resistivo | ✅ | 2x USB-C | **R$9 999,999** | ⭐ Recomendado |
+  | **M5Stack Core2 Pro** | 2.0" TFT | Capacitivo | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **Lilygo T‑Display Pro** | 2.0" TFT | Capacitivo | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **ESP32‑S3‑DevKitM** | 2.4" TFT | Capacitivo | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **Raspberry Pi Pico W Plus** | 2.0" LCD | Capacitivo | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **Arduino Nano ESP32 Pro** | 1.3" TFT | Capacitivo | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **ESP32‑S2‑DevKitC** | 2.4" TFT | ❌ | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **ESP32‑S3‑DevKitC** | 2.4" TFT | ❌ | ✅ | USB‑C | **R$ 9 999,999** | ✅ Suportado |
+  | **Flipper Zero** | 1.8" LCD | ❌ | ✅ | Micro‑USB | **R$ 9 999,999** | ✅ Suportado |
+  | **Raspberry Pi Pico W** | 2.0" LCD | ❌ | ✅ | Micro‑USB | **R$ 9 999,999** | ✅ Suportado |
+  | **Arduino Nano ESP32** | 0.96" OLED | ❌ | ✅ | Micro‑USB | **R$ 9 999,999** | ✅ Suportado |
 
 </div>
 
@@ -1193,7 +1196,11 @@ A nova versão **Willy 2.1** traz uma experiência de usuário premium, recursos
 </div>
 
 <div align="center">
-[<kbd>🔍 Ver Mais Módulos</kbd>](docs/hardware_externo.md)
+ [<kbd>🔍 Ver Mais Módulos</kbd>](docs/hardware_externo.md)
+</div>
+
+<div align="center">
+ [<kbd>🔍 Ver Mais Dispositivos</kbd>](docs/device_details.md)
 </div>
 
 ---

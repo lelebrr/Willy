@@ -20,53 +20,65 @@ static void logs_cb(lv_event_t *e);
 static void rfid_cb(lv_event_t *e);
 static void sd_cb(lv_event_t *e);
 
-// Implementation of icon callbacks
-static void wifi_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] Wi-Fi menu opened");
+volatile int pending_cyber_menu_action = -1; // -1 means no action pending
+
+// Struct to track top bar labels for real-time updates safely
+typedef struct {
+    lv_obj_t *time_label;
+    lv_obj_t *battery_label;
+} CyberMenuData;
+
+static CyberMenuData *menu_data = NULL;
+static lv_obj_t *tileview_obj = NULL;
+
+// Implementation of icon callbacks routing to backend IDs
+// Indexes match main_menu.cpp options.push_back order for standard menus
+// 0: WiFi, 1: BLE, 2: Ethernet (if not lite), 3: RF, 4: RFID, 5: IR
+// 6: FM (if defined), 7: Files, 8: GPS, 9: NRF24, 10: Scripts, 11: LoRa
+// Note: Depending on hardware, index mapping shifts. Let's use simple IDs and we will refine the mapping later or rely on the static index.
+// Based on current MainMenu in main_menu.cpp:
+// 0=WiFi, 1=BLE, 2=Eth, 3=RF, 4=RFID, 5=IR, 6=FM, 7=Files, 8=GPS, 9=NRF24, 10=Scripts, 11=LoRa.
+// We will assign them properly.
+static void wifi_cb(lv_event_t *e) { pending_cyber_menu_action = 0; }
+static void ble_cb(lv_event_t *e) { pending_cyber_menu_action = 1; }
+static void sub_cb(lv_event_t *e) { pending_cyber_menu_action = 3; } // RF
+static void rfid_cb(lv_event_t *e) { pending_cyber_menu_action = 4; } // RFID
+static void ir_cb(lv_event_t *e) { pending_cyber_menu_action = 5; }
+static void sd_cb(lv_event_t *e) { pending_cyber_menu_action = 7; } // Files
+static void gps_cb(lv_event_t *e) { pending_cyber_menu_action = 8; }
+static void nrf_cb(lv_event_t *e) { pending_cyber_menu_action = 9; }
+
+// Using remaining indexes logically.
+static void nfc_cb(lv_event_t *e) { pending_cyber_menu_action = 4; } // Redirect NFC to RFID
+static void attacks_cb(lv_event_t *e) { pending_cyber_menu_action = 0; } // Temp redirect to wifi
+static void core_cb(lv_event_t *e) { pending_cyber_menu_action = 14; } // Config
+static void logs_cb(lv_event_t *e) { pending_cyber_menu_action = 20; } // Temp
+
+// Arrow navigation callbacks
+static void arrow_event_cb(lv_event_t *e) {
+    if (!tileview_obj) return;
+    const char* symbol = (const char*)lv_event_get_user_data(e);
+    lv_obj_t *act_tile = lv_tileview_get_tile_act(tileview_obj);
+    if (!act_tile) return;
+
+    int curr_tile = lv_obj_get_index(act_tile);
+
+    if (strcmp(symbol, LV_SYMBOL_LEFT) == 0 && curr_tile > 0) {
+        lv_obj_set_tile_id(tileview_obj, curr_tile - 1, 0, LV_ANIM_ON);
+    } else if (strcmp(symbol, LV_SYMBOL_RIGHT) == 0 && curr_tile < 11) {
+        lv_obj_set_tile_id(tileview_obj, curr_tile + 1, 0, LV_ANIM_ON);
+    }
 }
 
-static void ble_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] BLE menu opened");
-}
-
-static void ir_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] IR menu opened");
-}
-
-static void nfc_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] NFC menu opened");
-}
-
-static void sub_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] Sub-GHz menu opened");
-}
-
-static void nrf_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] NRF24 menu opened");
-}
-
-static void gps_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] GPS menu opened");
-}
-
-static void attacks_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] Attacks menu opened");
-}
-
-static void core_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] Core menu opened");
-}
-
-static void logs_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] Logs menu opened");
-}
-
-static void rfid_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] RFID menu opened");
-}
-
-static void sd_cb(lv_event_t *e) {
-    Serial.println("[CyberMenu] SD menu opened");
+// Cleanup callback to prevent dangling timers/memory
+static void cyber_menu_delete_cb(lv_event_t *e) {
+    if (menu_data) {
+        // LVGL timers are usually cleaned up if 'bar' is deleted,
+        // but let's ensure we release the allocated struct.
+        lv_mem_free(menu_data);
+        menu_data = NULL;
+    }
+    tileview_obj = NULL;
 }
 
 // Timer callback for top bar updates
@@ -78,11 +90,12 @@ lv_obj_t *create_cyber_icon(lv_obj_t *parent, const char *icon_text, const lv_po
     lv_obj_set_size(btn, 90, 90);
     lv_obj_set_pos(btn, x, y);
     lv_obj_set_style_bg_color(btn, lv_color_black(), 0);
-    lv_obj_set_style_radius(btn, 20, 0);
-    lv_obj_set_style_border_color(btn, secondary, 0);
-    lv_obj_set_style_border_width(btn, 4, 0);
+    lv_obj_set_style_radius(btn, 25, 0);
+    lv_obj_set_style_border_color(btn, accent, 0);
+    lv_obj_set_style_border_width(btn, 3, 0);
     lv_obj_set_style_shadow_color(btn, accent, 0);
-    lv_obj_set_style_shadow_width(btn, 0, 0);
+    lv_obj_set_style_shadow_width(btn, 15, 0);
+    lv_obj_set_style_shadow_opa(btn, LV_OPA_60, 0);
 
     // Modern gradient background
     lv_style_t *style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
@@ -210,35 +223,39 @@ lv_obj_t *create_notification_bar(lv_obj_t *parent) {
     lv_anim_set_exec_cb(&a_notify, (lv_anim_exec_xcb_t)lv_obj_set_style_opa);
     lv_anim_start(&a_notify);
 
-    lv_timer_create(update_bar_timer_cb, 1000, bar);
+    // Allocate safe memory for cross-thread timer usage if not already created
+    if(!menu_data) {
+        menu_data = (CyberMenuData*)lv_mem_alloc(sizeof(CyberMenuData));
+    }
+    menu_data->time_label = time_label;
+    menu_data->battery_label = battery;
+
+    lv_timer_t *timer = lv_timer_create(update_bar_timer_cb, 1000, menu_data);
+    lv_obj_add_event_cb(bar, cyber_menu_delete_cb, LV_EVENT_DELETE, timer);
 
     return bar;
 }
 
 // Callback for top bar updates (Real-time Battery & Time)
 static void update_bar_timer_cb(lv_timer_t *timer) {
-    lv_obj_t *bar = (lv_obj_t *)timer->user_data;
-    lv_obj_t *time_label = lv_obj_get_child(bar, 0);
-    lv_obj_t *battery_label = lv_obj_get_child(bar, 1);
+    if (!timer->user_data) return;
+    CyberMenuData *data = (CyberMenuData *)timer->user_data;
+
+    // Safety check: ensure labels haven't been deleted
+    if(!lv_obj_is_valid(data->time_label)) return;
 
     // Update Time
     time_t now;
     time(&now);
     struct tm *timeInfo = localtime(&now);
     if (timeInfo->tm_year > 100) { // Check if NTP synced
-        lv_label_set_text_fmt(time_label, "%02d:%02d", timeInfo->tm_hour, timeInfo->tm_min);
+        lv_label_set_text_fmt(data->time_label, "%02d:%02d", timeInfo->tm_hour, timeInfo->tm_min);
     } else {
-        lv_label_set_text(time_label, "--:--");
+        lv_label_set_text(data->time_label, "--:--");
     }
 
-    // Update Battery
-    // int bat = getBattery();
-    // lv_label_set_text_fmt(battery_label, "%d%%", bat);
-
-    // // Change color based on battery level
-    // if (bat < 20) lv_obj_set_style_text_color(battery_label, lv_color_hex(0xFF0000), 0);
-    // else if (bat < 50) lv_obj_set_style_text_color(battery_label, lv_color_hex(0xFFFF00), 0);
-    // else lv_obj_set_style_text_color(battery_label, lv_color_hex(0x00FF00), 0);
+    // Battery level handling - if Bruce battery API is available
+    // For now we leave it as visual placeholder, or implement basic reading later.
 }
 
 void setup_cyber_menu(lv_obj_t *menu) {
@@ -251,35 +268,79 @@ void setup_cyber_menu(lv_obj_t *menu) {
 
     create_notification_bar(menu);
 
-    // Menu icons placement (3x4 grid)
-    int icon_w = 90, icon_h = 90;
-    int spacing_x = 15, spacing_y = 25;
-    int start_x = 10, start_y = 50;
+    tileview_obj = lv_tileview_create(menu);
+    lv_obj_t *tv = tileview_obj;
+    lv_obj_set_size(tv, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_style_bg_opa(tv, 0, 0); // Transparent to show background
+
+    // Hide scrollbar globally for tileview
+    lv_obj_set_scrollbar_mode(tv, LV_SCROLLBAR_MODE_OFF);
 
     const char *labels[] = {"Wi-Fi", "BLE", "IR", "NFC", "Sub-GHz", "NRF24", "GPS", "Attacks", "Core", "Logs", "RFID", "SD"};
     void (*callbacks[])(lv_event_t *) = {wifi_cb, ble_cb, ir_cb, nfc_cb, sub_cb, nrf_cb, gps_cb, attacks_cb, core_cb, logs_cb, rfid_cb, sd_cb};
 
-    // Vector shapes (Simplified SVG-like paths)
-    // Updated shapes for ALL 12 icons
-    static const lv_point_t wifi_shape[] = {{20,60}, {40,40}, {60,60}, {80,40}, {100,60}};
-    static const lv_point_t ble_shape[] = {{50,10}, {30,40}, {50,70}, {70,40}, {50,10}};
-    static const lv_point_t ir_shape[] = {{20,20}, {80,20}, {80,80}, {20,80}, {20,20}};
-    static const lv_point_t nfc_shape[] = {{30,30}, {70,30}, {70,70}, {30,70}, {30,30}};
-    static const lv_point_t sub_shape[] = {{20,50}, {50,20}, {80,50}, {50,80}, {20,50}};
-    static const lv_point_t nrf_shape[] = {{10,10}, {90,10}, {50,90}, {10,10}};
-    static const lv_point_t gps_shape[] = {{50,10}, {80,50}, {50,90}, {20,50}, {50,10}};
-    static const lv_point_t attacks_shape[] = {{20,80}, {50,20}, {80,80}, {20,80}};
-    static const lv_point_t core_shape[] = {{50,50}, {80,20}, {80,80}, {20,80}, {20,20}, {50,50}};
-    static const lv_point_t logs_shape[] = {{20,20}, {80,20}, {80,40}, {20,40}, {20,60}, {80,60}};
-    static const lv_point_t rfid_shape[] = {{50,10}, {90,50}, {50,90}, {10,50}, {50,10}};
-    static const lv_point_t sd_shape[] = {{20,10}, {70,10}, {80,20}, {80,90}, {20,90}, {20,10}};
+    // Vector shapes (Scaled up for full screen 1-per-page)
+    static const lv_point_t wifi_shape[] = {{20,120}, {60,80}, {100,120}, {140,80}, {180,120}};
+    static const lv_point_t ble_shape[] = {{100,20}, {60,80}, {100,140}, {140,80}, {100,20}};
+    static const lv_point_t ir_shape[] = {{40,40}, {160,40}, {160,160}, {40,160}, {40,40}};
+    static const lv_point_t nfc_shape[] = {{60,60}, {140,60}, {140,140}, {60,140}, {60,60}};
+    static const lv_point_t sub_shape[] = {{40,100}, {100,40}, {160,100}, {100,160}, {40,100}};
+    static const lv_point_t nrf_shape[] = {{20,20}, {180,20}, {100,180}, {20,20}};
+    static const lv_point_t gps_shape[] = {{100,20}, {160,100}, {100,180}, {40,100}, {100,20}};
+    static const lv_point_t attacks_shape[] = {{40,160}, {100,40}, {160,160}, {40,160}};
+    static const lv_point_t core_shape[] = {{100,100}, {160,40}, {160,160}, {40,160}, {40,40}, {100,100}};
+    static const lv_point_t logs_shape[] = {{40,40}, {160,40}, {160,80}, {40,80}, {40,120}, {160,120}};
+    static const lv_point_t rfid_shape[] = {{100,20}, {180,100}, {100,180}, {20,100}, {100,20}};
+    static const lv_point_t sd_shape[] = {{40,20}, {140,20}, {160,40}, {160,180}, {40,180}, {40,20}};
 
     const lv_point_t* shapes[] = {wifi_shape, ble_shape, ir_shape, nfc_shape, sub_shape, nrf_shape, gps_shape, attacks_shape, core_shape, logs_shape, rfid_shape, sd_shape};
     uint16_t counts[] = {5, 5, 5, 5, 5, 4, 5, 4, 6, 6, 5, 6};
 
+    // Calculate center offset for the large icon
+    int icon_size = 180;
+
+    // Create arrows for manual navigation layered slightly over the center
+    lv_obj_t *left_arrow = lv_label_create(menu);
+    lv_label_set_text(left_arrow, LV_SYMBOL_LEFT);
+    lv_obj_set_style_text_color(left_arrow, lv_color_white(), 0);
+    lv_obj_set_style_text_font(left_arrow, &lv_font_montserrat_28, 0);
+    lv_obj_align(left_arrow, LV_ALIGN_LEFT_MID, 5, 0);
+    lv_obj_set_size(left_arrow, 60, 80); // Massive touch area
+    lv_obj_set_style_text_align(left_arrow, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_bg_opa(left_arrow, LV_OPA_TRANSP, 0);
+    lv_obj_add_flag(left_arrow, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(left_arrow, arrow_event_cb, LV_EVENT_CLICKED, (void*)LV_SYMBOL_LEFT);
+
+    lv_obj_t *right_arrow = lv_label_create(menu);
+    lv_label_set_text(right_arrow, LV_SYMBOL_RIGHT);
+    lv_obj_set_style_text_color(right_arrow, lv_color_white(), 0);
+    lv_obj_set_style_text_font(right_arrow, &lv_font_montserrat_28, 0);
+    lv_obj_align(right_arrow, LV_ALIGN_RIGHT_MID, -5, 0);
+    lv_obj_set_size(right_arrow, 60, 80); // Massive touch area
+    lv_obj_set_style_text_align(right_arrow, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_bg_opa(right_arrow, LV_OPA_TRANSP, 0);
+    lv_obj_add_flag(right_arrow, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(right_arrow, arrow_event_cb, LV_EVENT_CLICKED, (void*)LV_SYMBOL_RIGHT);
+
     for(int i = 0; i < 12; i++) {
-        int x = start_x + (i % 3) * (icon_w + spacing_x);
-        int y = start_y + (i / 3) * (icon_h + spacing_y);
-        create_cyber_icon(menu, labels[i], shapes[i], counts[i], primary, secondary, accent, x, y, callbacks[i], i);
+        lv_obj_t *tile = lv_tileview_add_tile(tv, i, 0, LV_DIR_LEFT | LV_DIR_RIGHT);
+        lv_obj_set_style_bg_opa(tile, 0, 0);
+
+        // Center the massive icon inside the tile
+        create_cyber_icon(tile, labels[i], shapes[i], counts[i], primary, secondary, accent, 0, 0, callbacks[i], 0);
+
+        // Target the newly created btn via child fetching and center it
+        lv_obj_t *btn = lv_obj_get_child(tile, 0);
+        lv_obj_set_size(btn, icon_size, icon_size);
+        lv_obj_align(btn, LV_ALIGN_CENTER, 0, 0);
+
+        // Re-align the label to match the new large btn size
+        lv_obj_t *lbl = lv_obj_get_child(btn, 0);
+        lv_obj_align(lbl, LV_ALIGN_BOTTOM_MID, 0, -10);
+        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_28, 0);
     }
+
+    // Ensure arrows are on top of the tileview and icons
+    lv_obj_move_foreground(left_arrow);
+    lv_obj_move_foreground(right_arrow);
 }

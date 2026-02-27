@@ -50,7 +50,7 @@ public:
 #ifdef HAS_RGB_LED
     // Led
     int ledBright = 50;
-    uint32_t ledColor = 0x960064;
+    uint32_t ledColor = 0x00FFFF; // Cyan for Willy
     int ledBlinkEnabled = 1;
     int ledEffect = 0;
     int ledEffectSpeed = 5;
@@ -58,7 +58,7 @@ public:
 #endif
 
     // Wifi
-    Credential webUI = {"admin", "bruce"};
+    Credential webUI = {"admin", "willy"};
     std::vector<String> webUISessions = {}; // FIFO queue of session tokens
     WiFiCredential wifiAp = {"WillyNet", "WillyNet"};
     std::map<String, String> wifi = {};
@@ -90,7 +90,7 @@ public:
     std::vector<String> disabledMenus = {};
 
     std::vector<QrCodeEntry> qrCodes = {
-        {"Bruce AP",   "WIFI:T:WPA;S:WillyNet;P:WillyNet;;"},
+        {"Willy AP",   "WIFI:T:WPA;S:WillyNet;P:WillyNet;;"},
         {"Willy Wiki", "https://github.com/lelebrr/Willy/wiki"},
         {"Willy Site", "https://willy.computer"            },
         {"Rickroll",   "https://youtu.be/dQw4w9WgXcQ"      }

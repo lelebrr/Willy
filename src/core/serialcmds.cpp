@@ -38,17 +38,27 @@ void handleSerialCommands(SerialCli &serialCli) {
     CmdPacket packet;
     if (cmdQueue && rspQueue) {
         if (xQueueReceive(cmdQueue, &packet, 0) == pdTRUE) {
-            bool result = serialCli.parse(String(packet.text));
+            String cmdString = String(packet.text);
+            cmdString.trim();
+            bool result = false;
+            if (cmdString.length() > 0) {
+                result = serialCli.parse(cmdString);
+            }
             xQueueSend(rspQueue, &result, 0);
-            Serial.println("COMMAND: " + String(packet.text));
-            Serial.printf("[CLI] Result: %s\n", result ? "TRUE" : "FALSE");
+            if (cmdString.length() > 0) {
+                Serial.println("COMMAND: " + cmdString);
+                Serial.printf("[CLI] Result: %s\n", result ? "TRUE" : "FALSE");
+            }
         }
     }
     if (!serialDevice->available()) return;
 
     String cmd_str = serialDevice->readStringUntil('\n');
-    Serial.println("COMMAND: " + cmd_str);
-    serialCli.parse(cmd_str);
+    cmd_str.trim();
+    if (cmd_str.length() > 0) {
+        Serial.println("COMMAND: " + cmd_str);
+        serialCli.parse(cmd_str);
+    }
     serialDevice->print("# "); // prompt
     backToMenu();              // forced menu redrawn
 }
@@ -73,7 +83,7 @@ void startSerialCommandsHandlerTask(bool initQueues) {
         SERIAL_CMDS_TASK_STACK_SIZE, // Stack size in bytes
         NULL, // This is a pointer to the parameter that will be passed to the new task. We are not using it
               // here and therefore it is set to NULL.
-        2,    // Priority of the task
+        1,    // Priority of the task (Lowered to avoid UI starvation)
         &serialcmdsTaskHandle, // Task handle (optional, can be NULL).
 #if SOC_CPU_CORES_NUM > 1
         1 // Core where the task should run. By default, all your Arduino code runs on Core 1 and the Wi-Fi

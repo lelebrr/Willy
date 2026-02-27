@@ -12,7 +12,6 @@ BatteryService::~BatteryService() {}
 void battery_handler_task(void *params) {
     NimBLECharacteristic *battery_char = static_cast<NimBLECharacteristic *>(params);
     while (true) {
-        // uint8_t val = getBattery();
         uint8_t val = 0;
         battery_char->setValue(&val, 1);
 

@@ -267,7 +267,7 @@ void BruceConfigPins::loadFile(JsonDocument &jsonDoc, bool checkFS) {
     }
     file.close();
 
-    serializeJsonPretty(jsonDoc, Serial);
+    // Print removed
 }
 
 void BruceConfigPins::fromFile(bool checkFS) {
@@ -281,7 +281,7 @@ void BruceConfigPins::fromFile(bool checkFS) {
 void BruceConfigPins::createFile() {
     JsonDocument jsonDoc;
     toJson(jsonDoc.to<JsonObject>());
-    serializeJsonPretty(jsonDoc, Serial);
+    // Print removed
 
     // Open file for writing
     FS *fs = &LittleFS;

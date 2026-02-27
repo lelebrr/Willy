@@ -67,24 +67,32 @@ void _setup_gpio() {
 ** Description:   second stage gpio setup to make a few functions work
 ***************************************************************************************/
 void _post_setup_gpio() {
+    Serial.println("[GPIO] Starting _post_setup_gpio()...");
 #if defined(USE_TFT_eSPI_TOUCH)
+    Serial.println("[GPIO] USE_TFT_eSPI_TOUCH defined, starting calibration...");
     pinMode(TOUCH_CS, OUTPUT);
     uint16_t calData[5];
+    Serial.println("[GPIO] Opening /calData...");
     File caldata = LittleFS.open("/calData", "r");
 
     if (!caldata) {
+        Serial.println("[GPIO] /calData not found, calibrating...");
         tft.setRotation(ROTATION);
         tft.calibrateTouch(calData, TFT_WHITE, TFT_BLACK, 10);
 
+        Serial.println("[GPIO] Calibration done, saving to /calData...");
         caldata = LittleFS.open("/calData", "w");
         if (caldata) {
             caldata.printf(
                 "%d\n%d\n%d\n%d\n%d\n", calData[0], calData[1], calData[2], calData[3], calData[4]
             );
             caldata.close();
+            Serial.println("[GPIO] /calData saved.");
+        } else {
+            Serial.println("[GPIO] Failed to open /calData for writing.");
         }
     } else {
-        Serial.print("\ntft Calibration data: ");
+        Serial.print("[GPIO] tft Calibration data: ");
         for (int i = 0; i < 5; i++) {
             String line = caldata.readStringUntil('\n');
             calData[i] = line.toInt();
@@ -94,12 +102,15 @@ void _post_setup_gpio() {
         caldata.close();
     }
     tft.setTouch(calData);
+    Serial.println("[GPIO] Touch set.");
 #endif
 
     // Brightness control must be initialized after tft in this case @Pirata
+    Serial.println("[GPIO] Attaching LEDC for backlight...");
     pinMode(TFT_BL, OUTPUT);
     ledcAttach(TFT_BL, TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits);
     ledcWrite(TFT_BL, 255);
+    Serial.println("[GPIO] Backlight attached and set to 255.");
 }
 
 /*********************************************************************
@@ -126,7 +137,7 @@ void _setBrightness(uint8_t brightval) {
 **********************************************************************/
 void InputHandler(void) {
     static long d_tmp = 0;
-    if (millis() - d_tmp > 200 || LongPress) {
+    if (millis() - d_tmp > 30 || LongPress) {
         // I know R3CK.. I Should NOT nest if statements..
         // but it is needed to not keep SPI bus used without need, it save resources
 #if defined(USE_TFT_eSPI_TOUCH)
