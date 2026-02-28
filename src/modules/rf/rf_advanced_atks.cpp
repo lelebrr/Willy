@@ -452,8 +452,8 @@ void SpectrumTargetLock() {
         if (check(EscPress)) break;
 
         // Clear graph area
-        tft.fillRect(x_start, y_base - height, width, height, ILI9341_BLACK);
-        tft.drawRect(x_start, y_base - height, width, height, ILI9341_WHITE);
+        tft.fillRect(x_start, y_base - height, width, height, TFT_BLACK);
+        tft.drawRect(x_start, y_base - height, width, height, TFT_WHITE);
 
         int peak_x = 0;
         int max_h = 0;
@@ -466,13 +466,13 @@ void SpectrumTargetLock() {
                 max_h = h;
                 peak_x = i;
             }
-            tft.drawFastVLine(x_start + i, y_base - h, h, ILI9341_GREEN);
+            tft.drawFastVLine(x_start + i, y_base - h, h, TFT_GREEN);
         }
 
         // Draw "Target Lock" on peak
-        tft.drawFastVLine(x_start + peak_x, y_base - height, height, ILI9341_RED);
+        tft.drawFastVLine(x_start + peak_x, y_base - height, height, TFT_RED);
         tft.setCursor(x_start + peak_x - 20, y_base - height - 15);
-        tft.setTextColor(ILI9341_RED);
+        tft.setTextColor(TFT_RED);
         tft.print("LOCK");
         tft.setTextColor(bruceConfig.priColor);
 

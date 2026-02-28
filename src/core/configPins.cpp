@@ -361,7 +361,7 @@ void BruceConfigPins::setLoRaPins(SPIPins value) {
     saveFile();
 }
 void BruceConfigPins::setW5500Pins(SPIPins value) {
-    LoRa_bus = value;
+    W5500_bus = value;
     validateSpiPins(W5500_bus);
     saveFile();
 }
@@ -398,7 +398,7 @@ void BruceConfigPins::setUARTPins(UARTPins value) {
     validateUARTPins(value);
     saveFile();
 }
-void BruceConfigPins::validateSpiPins(SPIPins value) {
+void BruceConfigPins::validateSpiPins(SPIPins &value) {
     if (value.sck < 0 || value.sck > GPIO_PIN_COUNT) value.sck = GPIO_NUM_NC;
     if (value.miso < 0 || value.miso > GPIO_PIN_COUNT) value.miso = GPIO_NUM_NC;
     if (value.mosi < 0 || value.mosi > GPIO_PIN_COUNT) value.mosi = GPIO_NUM_NC;
@@ -407,12 +407,12 @@ void BruceConfigPins::validateSpiPins(SPIPins value) {
     if (value.io2 < 0 || value.io2 > GPIO_PIN_COUNT) value.io2 = GPIO_NUM_NC;
 }
 
-void BruceConfigPins::validateI2CPins(I2CPins value) {
+void BruceConfigPins::validateI2CPins(I2CPins &value) {
     if (value.sda < 0 || value.sda > GPIO_PIN_COUNT) value.sda = GPIO_NUM_NC;
     if (value.scl < 0 || value.scl > GPIO_PIN_COUNT) value.scl = GPIO_NUM_NC;
 }
 
-void BruceConfigPins::validateUARTPins(UARTPins value) {
+void BruceConfigPins::validateUARTPins(UARTPins &value) {
     if (value.rx < 0 || value.rx > GPIO_PIN_COUNT) value.rx = GPIO_NUM_NC;
     if (value.tx < 0 || value.tx > GPIO_PIN_COUNT) value.tx = GPIO_NUM_NC;
 }

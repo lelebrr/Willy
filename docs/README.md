@@ -111,7 +111,8 @@
 | **CYD-2432S028** | 3.5" TFT ILI9341 | Resistivo | ✅ | USB-C | ~$20 | ⭐ Recomendado |
 | **CYD-2USB** | 3.5" TFT ILI9341 | Resistivo | ✅ | 2x USB-C | ~$25 | ⭐ Recomendado |
 | **CYD-2432W328C** | 2.8" TFT | Capacitivo | ✅ | USB-C | ~$22 | ✅ Suportado |
-| **CYD-3248S035** | 3.5" TFT ST7796 | Resistivo | ✅ | USB-C | ~$25 | ✅ Suportado |
+| **CYD-3248S035R** | 3.5" TFT ST7796 | Resistivo (XPT2046) | ✅ | Micro-USB | ~$25 | ✅ Suportado |
+| **CYD-3248S035C** | 3.5" TFT ST7796 | Capacitivo (GT911) | ✅ | Micro-USB | ~$25 | ✅ Suportado |
 | **M5Stack Cardputer** | - | ❌ | ✅ | USB-C | ~$50 | ✅ Suportado |
 | **M5Stack Core2** | 2.0" TFT | Capacitivo | ✅ | USB-C | ~$55 | ✅ Suportado |
 | **M5Stack CoreS3** | 2.0" TFT | Capacitivo | ✅ | USB-C | ~$60 | ✅ Suportado |

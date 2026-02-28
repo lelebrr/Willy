@@ -210,12 +210,12 @@ Crie `boards/minha_placa/interface.cpp`:
 void initBoard() {
     // Inicializar GPIO
     pinMode(BTN_PIN, INPUT_PULLUP);
-    
+
     // Inicializar LED RGB se existir
     #ifdef HAS_RGB_LED
     // Código de inicialização do LED
     #endif
-    
+
     // Outras inicializações específicas
 }
 
@@ -250,20 +250,20 @@ build_flags =
     ${env.build_flags}
     -Iboards/minha_placa
     -Os
-    
+
     # Debug
     -DCORE_DEBUG_LEVEL=0
     -DCONFIG_ESP32_JTAG_SUPPORT_DISABLE=1
-    
+
     # Identificação da placa
     -DMINHA_PLACA=1
     -DDEVICE_NAME='"Minha Placa"'
-    
+
     # Recursos
     -DWilly_IR_SERIAL=1
     -DHAS_SCREEN=1
     -DHAS_TOUCH=1
-    
+
     # Display TFT
     -DUSER_SETUP_LOADED=1
     -DILI9341_2_DRIVER=1
@@ -271,21 +271,21 @@ build_flags =
     -DTFT_HEIGHT=320
     -DTFT_BL=21
     -DTFT_BACKLIGHT_ON=HIGH
-    
+
     # Cartão SD
     -DSDCARD_CS=5
     -DSDCARD_SCK=18
     -DSDCARD_MISO=19
     -DSDCARD_MOSI=23
-    
+
     # IR
     -DIR_TX_PINS='{{"Pino 1", 1}}'
     -DIR_RX_PINS='{{"Pino 3", 3}}'
-    
+
     # RF
     -DRF_TX_PINS='{{"Pino 22", 22}}'
     -DRF_RX_PINS='{{"Pino 27", 27}}'
-    
+
     # CC1101 via SPI
     -DUSE_CC1101_VIA_SPI
     -DCC1101_GDO0_PIN=27
@@ -293,7 +293,7 @@ build_flags =
     -DCC1101_MOSI_PIN=SPI_MOSI_PIN
     -DCC1101_SCK_PIN=SPI_SCK_PIN
     -DCC1101_MISO_PIN=SPI_MISO_PIN
-    
+
     # NRF24 via SPI
     -DUSE_NRF24_VIA_SPI
     -DNRF24_CE_PIN=27
@@ -437,6 +437,61 @@ Igual ao CYD-2432S028, mas com 2 portas USB-C.
 |-----------|-------|
 | **USB** | 2x USB-C |
 | **Display** | ILI9341 com inversão |
+
+### 📱 CYD-3248S035 (Cheap Yellow Display 3.5")
+
+| Especificação | Valor |
+|---------------|-------|
+| **MCU** | ESP32-WROOM-32 |
+| **Display** | 3.5" TFT ST7796 (480x320) |
+| **Touch (R)** | Resistivo XPT2046 |
+| **Touch (C)** | Capacitivo GT911 |
+| **Cartão SD** | Slot embutido |
+| **USB** | 1x Micro-USB |
+| **Extras** | RGB LED, Speaker, LDR |
+| **Preço** | ~$25 |
+
+#### Pinagem CYD-3248S035
+
+```
+TFT (ST7796):
+  MOSI → GPIO 13
+  MISO → GPIO 12
+  SCK  → GPIO 14
+  CS   → GPIO 15
+  DC   → GPIO 2
+  BL   → GPIO 27
+
+Touch Resistivo (XPT2046):
+  CS   → GPIO 33
+  IRQ  → GPIO 36
+  (CLK/DIN/DOUT compartilhados com TFT)
+
+Touch Capacitivo (GT911):
+  SDA  → GPIO 33
+  SCL  → GPIO 32
+  RST  → GPIO 25
+  INT  → GPIO 21
+
+Cartão SD:
+  MOSI → GPIO 23
+  MISO → GPIO 19
+  SCK  → GPIO 18
+  CS   → GPIO 5
+
+Periféricos & Expansão:
+  Speaker     → GPIO 26 (P4 Conector)
+  LED R       → GPIO 4  (ativo LOW)
+  LED G       → GPIO 16 (ativo LOW)
+  LED B       → GPIO 17 (ativo LOW)
+  LDR (Luz)   → GPIO 34 (ADC, input-only)
+  Bateria     → Conector 4P (1.25mm) Direct Power (Sem Mod de ADC nativo)
+  P1 (UART)   → TX (1), RX (3)
+  P3 (IO)     → GPIO 35, 22, 21
+  CN1 (I2C)   → SCL (22), SDA (27)
+```
+
+📖 **Documentação completa:** [hardware_cyd_3248s035.md](../docs/hardware_cyd_3248s035.md)
 
 ### 📱 ESP-General
 

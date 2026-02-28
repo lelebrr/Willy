@@ -482,7 +482,7 @@ void RFIDSkimmerHunterPro() {
         if (nfcModule->nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLen, 500)) {
             tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
             tft.setCursor(10, tftHeight / 2 + 20);
-            tft.setTextColor(ILI9341_RED);
+            tft.setTextColor(TFT_RED);
             tft.print("TAG: ");
             for (uint8_t i = 0; i < uidLen; i++) {
                 if (uid[i] < 0x10) tft.print("0");
@@ -563,7 +563,7 @@ void NFCWormPropagator() {
         if (nfcModule->nfc.TgInitAsTarget()) {
             tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
             tft.setCursor(10, tftHeight / 2 + 20);
-            tft.setTextColor(ILI9341_RED);
+            tft.setTextColor(TFT_RED);
             tft.print("WORM ENVIADO!");
             tft.setTextColor(bruceConfig.priColor);
 
@@ -655,12 +655,12 @@ void MifareMasterKeyBrute() {
             tft.print("]: ");
 
             if (nfcModule->nfc.mifareclassic_AuthenticateBlock(uid, uidLen, 4, 0, keys[currentKey])) {
-                tft.setTextColor(ILI9341_GREEN);
+                tft.setTextColor(TFT_GREEN);
                 tft.print("SUCESSO!");
                 tft.setTextColor(bruceConfig.priColor);
                 delay(3000);
             } else {
-                tft.setTextColor(ILI9341_RED);
+                tft.setTextColor(TFT_RED);
                 tft.print("FALHA");
                 tft.setTextColor(bruceConfig.priColor);
             }

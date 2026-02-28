@@ -108,9 +108,28 @@ void _post_setup_gpio() {
     // Brightness control must be initialized after tft in this case @Pirata
     Serial.println("[GPIO] Attaching LEDC for backlight...");
     pinMode(TFT_BL, OUTPUT);
+    digitalWrite(TFT_BL, HIGH); // Ensure it starts HIGH before PWM
     ledcAttach(TFT_BL, TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits);
     ledcWrite(TFT_BL, 255);
     Serial.println("[GPIO] Backlight attached and set to 255.");
+
+#if defined(ST7789_DRIVER)
+    // Gamma correction for CYD-2USB ST7789 variant
+    // Fixes washed-out colors (see https://github.com/Bodmer/TFT_eSPI/discussions/3018)
+    Serial.println("[GPIO] Applying ST7789 gamma correction and waking display...");
+    tft.writecommand(0x26); // GAMMASET
+    tft.native()->writedata(2);
+    delay(120);
+    tft.writecommand(0x26); // GAMMASET
+    tft.native()->writedata(1);
+
+    // Explicitly wake up and turn on display (fixes blank screen issue)
+    tft.writecommand(0x11); // SLPOUT (Sleep Out)
+    delay(120);
+    tft.writecommand(0x29); // DISPON (Display On)
+
+    Serial.println("[GPIO] Gamma correction applied and display turned ON.");
+#endif
 }
 
 /*********************************************************************
@@ -246,6 +265,17 @@ void InputHandler(void) {
 ** Turns off the device (or try to)
 **********************************************************************/
 void powerOff() {
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, LOW);
+    esp_deep_sleep_start();
+}
+
+/*********************************************************************
+** Function: goToDeepSleep
+** location: mykeyboard.cpp
+** Puts the device into DeepSleep
+**********************************************************************/
+void goToDeepSleep() {
+    _setBrightness(0);
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, LOW);
     esp_deep_sleep_start();
 }

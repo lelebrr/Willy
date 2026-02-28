@@ -60,6 +60,7 @@ keyStroke KeyStroke;
 
 TaskHandle_t xHandle;
 void __attribute__((weak)) taskInputHandler(void *parameter) {
+    Serial.println("[DBG] taskInputHandler started");
     while (true) {
         checkPowerSaveTime();
 
@@ -612,6 +613,7 @@ void setup() {
  **********************************************************************/
 #if defined(HAS_SCREEN)
 void loop() {
+    static bool _dbg_first_loop = true; if (_dbg_first_loop) { Serial.println("[DBG] loop() entered!"); _dbg_first_loop = false; }
 #if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
     if (interpreter_state > 0) {
         vTaskDelete(serialcmdsTaskHandle); // stop serial commands while in interpreter
@@ -667,6 +669,7 @@ void loop() {
 #else
 
 void loop() {
+    static bool _dbg_first_loop = true; if (_dbg_first_loop) { Serial.println("[DBG] loop() entered!"); _dbg_first_loop = false; }
     tft.setLogging();
     Serial.println(
         "\n"

