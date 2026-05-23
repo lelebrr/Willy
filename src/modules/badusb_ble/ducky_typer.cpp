@@ -317,6 +317,8 @@ EXIT:
 #if !defined(USB_as_HID)
         mySerial.end();       // Stops UART Serial as HID
         Serial.begin(115200); // Force restart of Serial, just in case....
+#else
+        Serial.begin(115200);
 #endif
     }
     returnToMenu = true;
@@ -538,6 +540,8 @@ void key_input_from_string(String text) {
     hid_usb = nullptr;
 #if !defined(USB_as_HID)
     mySerial.end();
+#else
+    Serial.begin(115200);
 #endif
 }
 #ifndef KB_HID_EXIT_MSG
@@ -665,6 +669,8 @@ EXIT:
 #if !defined(USB_as_HID)
         mySerial.end();       // Stops UART Serial as HID
         Serial.begin(115200); // Force restart of Serial, just in case....
+#else
+        Serial.begin(115200);
 #endif
     }
 }
