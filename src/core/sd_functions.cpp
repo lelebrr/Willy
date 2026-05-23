@@ -900,10 +900,13 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                                                   if (plaintext.length() == 0)
                                                       return displayError("Decryption failed", true);
                                                   plaintext.trim(); // remove newlines
-                                                                    // if(plaintext.length()<..)
-                                                  displaySuccess(plaintext, true);
-                                                  // else
-                                                  // TODO: show in the text viewer
+                                                  if (plaintext.length() < 64) {
+                                                      displaySuccess(plaintext, true);
+                                                  } else {
+                                                      ScrollableTextArea area = ScrollableTextArea("DECRYPTED");
+                                                      area.fromString(plaintext);
+                                                      area.show();
+                                                  }
                                               }}
                         );
                     }
