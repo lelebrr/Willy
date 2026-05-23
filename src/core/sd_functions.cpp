@@ -869,7 +869,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                                                key_input(fs, filepath, hid_usb);
                                                delete hid_usb;
                                                hid_usb = nullptr;
-                                               // TODO: reinit serial port
+                                               Serial.begin(115200);
                                            }});
                         options.push_back(Option{"USB HID Digitar", [&]() {
                                                String t = readSmallFile(fs, filepath);
