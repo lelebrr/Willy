@@ -154,10 +154,19 @@ uint32_t irTxBufferCallback(cmd *c) {
 #endif
 }
 
+static uint32_t _reverseBits(uint32_t x, int numBits) {
+    uint32_t y = 0;
+    for (int i = 0; i < numBits; ++i) {
+        y <<= 1;
+        y |= x & 1;
+        x >>= 1;
+    }
+    return y;
+}
+
 uint32_t irSendCallback(cmd *c) {
     // tasmota json command  https://tasmota.github.io/docs/Tasmota-IR/#sending-ir-commands
     // e.g. IRSend {\"Protocol\":\"NEC\",\"Bits\":32,\"Data\":\"0x20DF10EF\"}
-    // TODO: decode "data" into "address+command" and use existing "send*Command" funcs
 
     Command cmd(c);
 
@@ -189,6 +198,68 @@ uint32_t irSendCallback(cmd *c) {
     if (!args_json["Protocol"].isNull()) protocolStr = args_json["Protocol"].as<String>();
 
     if (!args_json["Bits"].isNull()) bits = args_json["Bits"].as<int>();
+
+    uint64_t dataValue = strtoull(dataStr.c_str(), nullptr, 16);
+    uint32_t address = 0;
+    uint32_t command = 0;
+    bool parsed = false;
+
+    if (protocolStr.equalsIgnoreCase("NEC") || protocolStr.equalsIgnoreCase("NECext")) {
+        uint8_t cmd_val = (dataValue & 0xFF00) >> 8;
+        command = _reverseBits(cmd_val, 8);
+
+        uint8_t addr = (dataValue & 0xFF000000) >> 24;
+        uint8_t addr_inv = (dataValue & 0x00FF0000) >> 16;
+        if (addr == (addr_inv ^ 0xFF)) {
+            address = _reverseBits(addr, 8);
+        } else {
+            address = _reverseBits((dataValue >> 16) & 0xFFFF, 16);
+        }
+        parsed = true;
+    } else if (protocolStr.equalsIgnoreCase("SAMSUNG") || protocolStr.equalsIgnoreCase("Samsung32")) {
+        uint8_t cmd_val = (dataValue & 0xFF00) >> 8;
+        command = _reverseBits(cmd_val, 8);
+        uint8_t addr = (dataValue & 0xFF000000) >> 24;
+        address = _reverseBits(addr, 8);
+        parsed = true;
+    } else if (protocolStr.equalsIgnoreCase("RC5") || protocolStr.equalsIgnoreCase("RC5X")) {
+        command = dataValue & 0x3F;
+        address = (dataValue >> 6) & 0x1F;
+        parsed = true;
+    } else if (protocolStr.equalsIgnoreCase("RC6")) {
+        command = dataValue & 0xFF;
+        address = (dataValue >> 8) & 0xFF;
+        parsed = true;
+    } else if (protocolStr.equalsIgnoreCase("SIRC") || protocolStr.equalsIgnoreCase("SONY") ||
+               protocolStr.equalsIgnoreCase("SIRC15") || protocolStr.equalsIgnoreCase("SIRC20")) {
+        command = dataValue & 0x7F;
+        if (bits == 12) address = (dataValue >> 7) & 0x1F;
+        else if (bits == 15) address = (dataValue >> 7) & 0xFF;
+        else if (bits == 20) address = (dataValue >> 7) & 0x1FFF;
+        parsed = true;
+    }
+
+    if (parsed) {
+        char addrBuf[16];
+        snprintf(addrBuf, sizeof(addrBuf), "%02X%02X%02X%02X",
+                 address & 0xFF, (address >> 8) & 0xFF,
+                 (address >> 16) & 0xFF, (address >> 24) & 0xFF);
+
+        char cmdBuf[16];
+        snprintf(cmdBuf, sizeof(cmdBuf), "%02X%02X%02X%02X",
+                 command & 0xFF, (command >> 8) & 0xFF,
+                 (command >> 16) & 0xFF, (command >> 24) & 0xFF);
+
+        IRCode code;
+        code.type = "parsed";
+        code.protocol = protocolStr;
+        code.address = String(addrBuf);
+        code.command = String(cmdBuf);
+        code.bits = bits;
+
+        sendIRCommand(&code);
+        return true;
+    }
 
     return sendDecodedCommand(protocolStr, dataStr, bits);
 }
