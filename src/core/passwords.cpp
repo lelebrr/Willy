@@ -155,9 +155,21 @@ String encryptString(String &plaintext, const String &password_str) {
     String dataStr = xorEncryptDecryptMD5(plaintext, password_str, 10);
     String dataStrHex = "";
 
-    for (size_t i = 0; i < dataStr.length(); i++) dataStrHex += String(dataStr[i], HEX) + " ";
-    dataStrHex.toUpperCase();
-    dataStrHex.trim();
+    if (dataStr.length() > 0) {
+        dataStrHex.reserve(dataStr.length() * 3);
+        const char hexChars[] = "0123456789ABCDEF";
+        for (size_t i = 0; i < dataStr.length(); i++) {
+            uint8_t c = (uint8_t)dataStr[i];
+            if (c < 16) {
+                char hex[3] = { hexChars[c & 0x0F], ' ', '\0' };
+                dataStrHex += hex;
+            } else {
+                char hex[4] = { hexChars[c >> 4], hexChars[c & 0x0F], ' ', '\0' };
+                dataStrHex += hex;
+            }
+        }
+        dataStrHex.trim();
+    }
 
     String out = "Filetype: Bruce Encrypted File\nVersion: 1\n";
     out += "Algo: XOR\n"; // TODO: add AES
