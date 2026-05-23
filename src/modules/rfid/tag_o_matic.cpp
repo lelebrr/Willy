@@ -504,8 +504,17 @@ void TagOMatic::save_scan_result() {
 
     if (!file) { return; }
 
-    file.println("Filetype: Bruce RFID Scan Result");
-    for (String uid : _scanned_tags) { file.println(uid); }
+    String payload = "Filetype: Bruce RFID Scan Result\r\n";
+    size_t payload_size = payload.length();
+    for (const String &uid : _scanned_tags) { payload_size += uid.length() + 2; }
+
+    payload.reserve(payload_size);
+    for (const String &uid : _scanned_tags) {
+        payload += uid;
+        payload += "\r\n";
+    }
+
+    file.print(payload);
 
     file.close();
     return;
