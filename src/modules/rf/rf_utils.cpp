@@ -1,5 +1,7 @@
 #include "rf_utils.h"
 #include "core/settings.h"
+#include <Preferences.h>
+#include <ArduinoJson.h>
 
 // CRC-64-ECMA constants
 const uint64_t CRC64_ECMA_POLY = 0x42F0E1EBA9EA3693; // Polynomial for CRC-64-ECMA
@@ -77,8 +79,9 @@ const float subghz_frequency_list[] = {
     928.000f
 };
 
-RfCodes recent_rfcodes[16];       // TODO: save/load in EEPROM
-int recent_rfcodes_last_used = 0; // TODO: save/load in EEPROM
+RfCodes recent_rfcodes[16];
+int recent_rfcodes_last_used = 0;
+static bool recent_rfcodes_loaded = false;
 bool rmtInstalled = true;
 static bool cc1101_spi_ready = false;
 
@@ -303,6 +306,45 @@ int find_pulse_index(const std::vector<int> &indexed_durations, int duration) {
     return closest_index; // Otherwise, return the closest match
 }
 
+static void loadRecentRfCodes() {
+    if (recent_rfcodes_loaded) return;
+    recent_rfcodes_loaded = true;
+
+    Preferences prefs;
+    prefs.begin("recent_rf", true); // true = read-only
+    recent_rfcodes_last_used = prefs.getInt("last", 0);
+    if (recent_rfcodes_last_used < 0 || recent_rfcodes_last_used > 15) {
+        recent_rfcodes_last_used = 0;
+    }
+
+    for (int i = 0; i < 16; i++) {
+        String key = "c" + String(i);
+        String jsonStr = prefs.getString(key.c_str(), "");
+        if (jsonStr != "") {
+            JsonDocument doc;
+            DeserializationError error = deserializeJson(doc, jsonStr);
+            if (!error) {
+                recent_rfcodes[i].frequency = doc["freq"].as<float>();
+                recent_rfcodes[i].key = doc["key"] | 0ULL;
+                recent_rfcodes[i].protocol = doc["prot"] | "";
+                recent_rfcodes[i].preset = doc["preset"] | "";
+                recent_rfcodes[i].data = doc["data"] | "";
+                recent_rfcodes[i].te = doc["te"] | 0;
+                recent_rfcodes[i].filepath = doc["filepath"] | "";
+                recent_rfcodes[i].Bit = doc["bit"] | 0;
+                recent_rfcodes[i].BitRAW = doc["bitraw"] | 0;
+
+                recent_rfcodes[i].indexed_durations.clear();
+                JsonArray durs = doc["durs"].as<JsonArray>();
+                for (JsonVariant v : durs) {
+                    recent_rfcodes[i].indexed_durations.push_back(v.as<int>());
+                }
+            }
+        }
+    }
+    prefs.end();
+}
+
 // Function to compute CRC-64-ECMA
 uint64_t crc64_ecma(const std::vector<int> &data) {
     uint64_t crc = CRC64_ECMA_INIT;
@@ -322,13 +364,45 @@ uint64_t crc64_ecma(const std::vector<int> &data) {
 }
 
 void addToRecentCodes(struct RfCodes rfcode) {
+    loadRecentRfCodes();
+
     // copy rfcode -> recent_rfcodes[recent_rfcodes_last_used]
     recent_rfcodes[recent_rfcodes_last_used] = rfcode;
+
+    Preferences prefs;
+    prefs.begin("recent_rf", false);
+
+    JsonDocument doc;
+    doc["freq"] = rfcode.frequency;
+    doc["key"] = rfcode.key;
+    doc["prot"] = rfcode.protocol;
+    doc["preset"] = rfcode.preset;
+    doc["data"] = rfcode.data;
+    doc["te"] = rfcode.te;
+    doc["filepath"] = rfcode.filepath;
+    doc["bit"] = rfcode.Bit;
+    doc["bitraw"] = rfcode.BitRAW;
+
+    JsonArray durs = doc["durs"].to<JsonArray>();
+    for (int d : rfcode.indexed_durations) {
+        durs.add(d);
+    }
+
+    String jsonStr;
+    serializeJson(doc, jsonStr);
+
+    String pKey = "c" + String(recent_rfcodes_last_used);
+    prefs.putString(pKey.c_str(), jsonStr);
+
     recent_rfcodes_last_used += 1;
     if (recent_rfcodes_last_used == 16) recent_rfcodes_last_used = 0; // cycle
+
+    prefs.putInt("last", recent_rfcodes_last_used);
+    prefs.end();
 }
 
 struct RfCodes selectRecentRfMenu() {
+    loadRecentRfCodes();
     options = {};
     bool exit = false;
     struct RfCodes selected_code;
