@@ -519,3 +519,28 @@ void BruceConfigPins::validateGpsBaudrateValue() {
         gpsBaudrate != 115200)
         gpsBaudrate = 9600;
 }
+
+
+bool BruceConfigPins::setSetting(const String& name, const String& value) {
+    static const std::map<String, std::function<void(BruceConfigPins*, const String&)>> settingsMap = {
+        {"rot", [](BruceConfigPins* cfg, const String& val) { cfg->setRotation(val.toInt()); }},
+        {"bleName", [](BruceConfigPins* cfg, const String& val) { cfg->setBleName(val); }},
+        {"irTx", [](BruceConfigPins* cfg, const String& val) { cfg->setIrTxPin(val.toInt()); }},
+        {"irTxRepeats", [](BruceConfigPins* cfg, const String& val) { cfg->setIrTxRepeats(static_cast<uint8_t>(val.toInt())); }},
+        {"irRx", [](BruceConfigPins* cfg, const String& val) { cfg->setIrRxPin(val.toInt()); }},
+        {"rfTx", [](BruceConfigPins* cfg, const String& val) { cfg->setRfTxPin(val.toInt()); }},
+        {"rfRx", [](BruceConfigPins* cfg, const String& val) { cfg->setRfRxPin(val.toInt()); }},
+        {"rfModule", [](BruceConfigPins* cfg, const String& val) { cfg->setRfModule(static_cast<RFModules>(val.toInt())); }},
+        {"rfFreq", [](BruceConfigPins* cfg, const String& val) { if (val.toFloat()) cfg->setRfFreq(val.toFloat()); }},
+        {"rfFxdFreq", [](BruceConfigPins* cfg, const String& val) { cfg->setRfFxdFreq(val.toInt()); }},
+        {"rfScanRange", [](BruceConfigPins* cfg, const String& val) { cfg->setRfScanRange(val.toInt()); }},
+        {"rfidModule", [](BruceConfigPins* cfg, const String& val) { cfg->setRfidModule(static_cast<RFIDModules>(val.toInt())); }}
+    };
+
+    auto it = settingsMap.find(name);
+    if (it != settingsMap.end()) {
+        it->second(this, value);
+        return true;
+    }
+    return false;
+}

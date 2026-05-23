@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <map>
+#include <functional>
 #include <precompiler_flags.h>
 #include <set>
 #include <vector>
@@ -185,6 +186,7 @@ public:
     void setBadUSBBLEShowOutput(bool value);
     void addDisabledMenu(String value);
     // TODO: removeDisabledMenu(String value);
+    bool setSetting(const String& name, const String& value);
 
     void addWebUISession(const String &token);
     void removeWebUISession(const String &token);
