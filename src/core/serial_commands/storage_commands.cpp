@@ -2,6 +2,7 @@
 #include "core/sd_functions.h"
 #include "helpers.h"
 #include <globals.h>
+#include "core/utils.h"
 
 uint32_t listCallback(cmd *c) {
     Command cmd(c);
@@ -38,7 +39,7 @@ uint32_t listCallback(cmd *c) {
                     serialDevice->print("\t");
                     serialDevice->println(file.size());
                     // serialDevice->println(file.path());
-                    // serialDevice->println(file.getLastWrite());  // TODO: parse to localtime
+                    // serialDevice->println(formatTimestamp(file.getLastWrite()));
                     file.close();
                 }
             }
@@ -311,7 +312,7 @@ uint32_t statCallback(cmd *c) {
     serialDevice->println("");
 
     serialDevice->print("Modify: ");
-    serialDevice->print(file.getLastWrite()); // TODO: parse to localtime
+    serialDevice->print(formatTimestamp(file.getLastWrite()));
     serialDevice->println("");
 
     file.close();
