@@ -867,9 +867,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                         options.push_back(Option{"Executar BadUSB", [&]() {
                                                ducky_startKb(hid_usb, false);
                                                key_input(fs, filepath, hid_usb);
-                                               delete hid_usb;
-                                               hid_usb = nullptr;
-                                               // TODO: reinit serial port
+                                               ducky_stopKb(hid_usb, false);
                                            }});
                         options.push_back(Option{"USB HID Digitar", [&]() {
                                                String t = readSmallFile(fs, filepath);

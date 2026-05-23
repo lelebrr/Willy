@@ -223,6 +223,25 @@ void ducky_startKb(HIDInterface *&hid, bool ble) {
     }
 }
 
+void ducky_stopKb(HIDInterface *&hid, bool ble) {
+    if (!ble) {
+        if (hid != nullptr) {
+            delete hid; // Keep the hid object alive for BLE
+            hid = nullptr;
+        }
+#if defined(USB_as_HID)
+        USB.~ESPUSB(); // Explicit destructor call
+        delay(100);
+        USB.enableDFU(); // Re-enable DFU for future uploads
+        delay(100);
+        Serial.begin(115200);
+#else
+        mySerial.end();       // Stops UART Serial as HID
+        Serial.begin(115200); // Force restart of Serial, just in case....
+#endif
+    }
+}
+
 // Start badUSBBLE or badBLE ducky runner
 void ducky_setup(HIDInterface *&hid, bool ble) {
     Serial.println("Ducky typer begin");
@@ -311,14 +330,7 @@ void ducky_setup(HIDInterface *&hid, bool ble) {
         goto StartRunningScript;
     }
 EXIT:
-    if (!ble) {
-        delete hid; // Keep the hid object alive for BLE
-        hid = nullptr;
-#if !defined(USB_as_HID)
-        mySerial.end();       // Stops UART Serial as HID
-        Serial.begin(115200); // Force restart of Serial, just in case....
-#endif
-    }
+    ducky_stopKb(hid, ble);
     returnToMenu = true;
 }
 
@@ -534,11 +546,7 @@ void key_input_from_string(String text) {
 
     hid_usb->print(text.c_str()); // buggy with some special chars
 
-    delete hid_usb;
-    hid_usb = nullptr;
-#if !defined(USB_as_HID)
-    mySerial.end();
-#endif
+    ducky_stopKb(hid_usb, false);
 }
 #ifndef KB_HID_EXIT_MSG
 #define KB_HID_EXIT_MSG "Exit"
@@ -660,12 +668,7 @@ void ducky_keyboard(HIDInterface *&hid, bool ble) {
     }
 EXIT:
     if (!ble) {
-        delete hid; // Keep the hid object alive for BLE
-        hid = nullptr;
-#if !defined(USB_as_HID)
-        mySerial.end();       // Stops UART Serial as HID
-        Serial.begin(115200); // Force restart of Serial, just in case....
-#endif
+        ducky_stopKb(hid, ble);
     }
 }
 

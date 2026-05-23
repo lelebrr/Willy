@@ -30,13 +30,7 @@ uint32_t badusbFileCallback(cmd *c) {
 #ifdef USB_as_HID
     ducky_startKb(hid_usb, false);
     key_input(*fs, filepath, hid_usb);
-    delete hid_usb;
-    hid_usb = nullptr;
-
-    // TODO: need to reinit serial when finished
-    // Kb.end();
-    // USB.~ESPUSB(); // Explicit call to destructor
-    // serialDevice->begin(115200);
+    ducky_stopKb(hid_usb, false);
 
     return true;
 #else
@@ -63,8 +57,7 @@ uint32_t badusbBufferCallback(cmd *c) {
 #ifdef USB_as_HID
     ducky_startKb(hid_usb, false);
     key_input(PSRamFS, tmpfilepath, hid_usb);
-    delete hid_usb;
-    hid_usb = nullptr;
+    ducky_stopKb(hid_usb, false);
 
     PSRamFS.remove(tmpfilepath);
     return true;
