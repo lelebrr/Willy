@@ -1122,13 +1122,13 @@ void drawMfkey32Icon(int x, int y) {
     int turns = 0;
 
     while (startX <= endX && startY <= endY && turns < 3) {
-        for (int i = startX; i <= endX; i++) { tft.drawPixel(i, startY, bruceConfig.priColor); }
+        tft.drawFastHLine(startX, startY, endX - startX + 1, bruceConfig.priColor);
         startY += step;
-        for (int i = startY; i <= endY; i++) { tft.drawPixel(endX, i, bruceConfig.priColor); }
+        tft.drawFastVLine(endX, startY, endY - startY + 1, bruceConfig.priColor);
         endX -= step;
-        for (int i = endX; i >= startX; i--) { tft.drawPixel(i, endY, bruceConfig.priColor); }
+        tft.drawFastHLine(startX, endY, endX - startX + 1, bruceConfig.priColor);
         endY -= step;
-        for (int i = endY; i >= startY; i--) { tft.drawPixel(startX, i, bruceConfig.priColor); }
+        tft.drawFastVLine(startX, startY, endY - startY + 1, bruceConfig.priColor);
         startX += step;
         turns++;
     }
