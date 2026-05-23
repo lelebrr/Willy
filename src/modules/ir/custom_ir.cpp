@@ -75,6 +75,183 @@ void selectRecentIrMenu() {
     return;
 }
 
+class MemoryStream {
+private:
+    const char* buffer;
+    size_t length;
+    size_t position;
+
+public:
+    MemoryStream(const char* buf) : buffer(buf), position(0) {
+        length = strlen(buf);
+    }
+
+    bool available() const {
+        return position < length;
+    }
+
+    String readStringUntil(char terminator) {
+        String result = "";
+        while (position < length) {
+            char c = buffer[position++];
+            if (c == terminator) {
+                break;
+            }
+            result += c;
+        }
+        return result;
+    }
+
+    void seek(size_t pos) {
+        position = (pos < length) ? pos : length;
+    }
+};
+
+bool txIrBuffer(const char *buffer, bool hideDefaultUI) {
+    // SPAM all codes of the buffer
+    if (!buffer) return false;
+
+    MemoryStream memStream(buffer);
+
+    int total_codes = 0;
+    String line;
+
+#ifdef BRUCE_IR_SERIAL
+    displayWarning("ATIVE A CHAVE IR!", true);
+#endif
+
+    setup_ir_pin(bruceConfigPins.irTx, OUTPUT);
+    // digitalWrite(bruceConfigPins.irTx, LED_ON);
+
+    bool endingEarly = false;
+    int codes_sent = 0;
+    uint16_t frequency = 0;
+    String rawData = "";
+    String protocol = "";
+    String address = "";
+    String command = "";
+    String value = "";
+    uint8_t bits = 32;
+
+    // count the number of codes to replay
+    while (memStream.available()) {
+        line = memStream.readStringUntil('\n');
+        if (line.startsWith("type:")) total_codes++;
+    }
+
+    Serial.printf("\nStarted SPAM all codes with: %d codes", total_codes);
+    // comes back to first position, beggining of the file
+    memStream.seek(0);
+    while (memStream.available()) {
+        if (!hideDefaultUI) { progressHandler(codes_sent, total_codes); }
+        line = memStream.readStringUntil('\n');
+        if (line.endsWith("\r")) line.remove(line.length() - 1);
+
+        if (line.startsWith("type:")) {
+            codes_sent++;
+            String type = line.substring(5);
+            type.trim();
+            Serial.println("Type: " + type);
+            if (type == "raw") {
+                Serial.println("RAW code");
+                while (memStream.available()) {
+                    line = memStream.readStringUntil('\n');
+                    if (line.endsWith("\r")) line.remove(line.length() - 1);
+
+                    if (line.startsWith("frequency:")) {
+                        line = line.substring(10);
+                        line.trim();
+                        frequency = line.toInt();
+                        Serial.printf("Frequency: %d\n", frequency);
+                    } else if (line.startsWith("data:")) {
+                        rawData = line.substring(5);
+                        rawData.trim();
+                        Serial.println("RawData: " + rawData);
+                    } else if ((frequency != 0 && rawData != "") || line.startsWith("#")) {
+                        IRCode code;
+                        code.type = "raw";
+                        code.data = rawData;
+                        code.frequency = frequency;
+                        sendIRCommand(&code, hideDefaultUI);
+
+                        rawData = "";
+                        frequency = 0;
+                        type = "";
+                        line = "";
+                        break;
+                    }
+                }
+            } else if (type == "parsed") {
+                Serial.println("PARSED");
+                while (memStream.available()) {
+                    line = memStream.readStringUntil('\n');
+                    if (line.endsWith("\r")) line.remove(line.length() - 1);
+
+                    if (line.startsWith("protocol:")) {
+                        protocol = line.substring(9);
+                        protocol.trim();
+                        Serial.println("Protocol: " + protocol);
+                    } else if (line.startsWith("address:")) {
+                        address = line.substring(8);
+                        address.trim();
+                        Serial.println("Address: " + address);
+                    } else if (line.startsWith("command:")) {
+                        command = line.substring(8);
+                        command.trim();
+                        Serial.println("Command: " + command);
+                    } else if (line.startsWith("value:") || line.startsWith("state:")) {
+                        value = line.substring(6);
+                        value.trim();
+                        Serial.println("Value: " + value);
+                    } else if (line.startsWith("bits:")) {
+                        bits = line.substring(strlen("bits:")).toInt();
+                        Serial.println("bits: " + bits);
+                    } else if (line.indexOf("#") != -1) { // TODO: also detect EOF
+                        IRCode code(protocol, address, command, value, bits);
+                        sendIRCommand(&code, hideDefaultUI);
+
+                        protocol = "";
+                        address = "";
+                        command = "";
+                        value = "";
+                        bits = 32;
+                        type = "";
+                        line = "";
+                        break;
+                    }
+                }
+            }
+        }
+        // if user is pushing (holding down) TRIGGER button, stop transmission early
+        if (check(SelPress)) // Pause TV-B-Gone
+        {
+            while (check(SelPress)) yield();
+            if (!hideDefaultUI) { displayTextLine("Paused"); }
+
+            while (!check(SelPress)) { // If Presses Select again, continues
+                if (check(EscPress)) {
+                    endingEarly = true;
+                    break;
+                }
+            }
+            while (check(SelPress)) { yield(); }
+            if (endingEarly) break; // Cancels  custom IR Spam
+            if (!hideDefaultUI) { displayTextLine("Running, Wait"); }
+        }
+    } // end while file has lines to process
+    Serial.println("EXTRA finished");
+
+    resetCodesArray();
+
+#ifdef BRUCE_IR_SERIAL
+    ysIrtm.end();
+#endif
+
+    digitalWrite(bruceConfigPins.irTx, LED_OFF);
+    return true;
+}
+
+
 bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
     // SPAM all codes of the file
 
