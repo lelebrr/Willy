@@ -64,16 +64,6 @@ void write_byte_rw1990(byte data) {
     }
 }
 
-// Not working (((
-// void write_byte_rw1990(byte data) {
-//     for (int data_bit = 0; data_bit < 8; data_bit++) {
-//         delay(25);
-//         // oneWire->write_bit(~data);
-//         oneWire->write_bit(data & 0x01);
-//         data >>= 1;
-//     }
-// }
-
 void write_ibutton() {
 
     // Dislay ID
