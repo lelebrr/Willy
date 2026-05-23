@@ -13,18 +13,9 @@
 #include "../core/config.h"
 #include "../core/mykeyboard.h"
 #include "modules/others/audio.h"
+#include "../../include/willy_config.h"
 
 #define ACCENT_COLOR 0x00FFFF
-
-// ====================== CONFIGURAÇÕES ======================
-struct WillyConfig {
-    int velocidade = 1;           // 0 = lento, 1 = normal, 2 = rápido
-    bool somAtivado = true;
-    int tipoSom = 0;              // 0 = rugido + esguicho, 1 = só esguicho
-    uint32_t corPrimaria = 0x9B00FF; // Roxo neon
-};
-
-static WillyConfig willyCfg;
 
 // ====================== OBJETOS ======================
 static lv_obj_t *orca_container = nullptr;
@@ -39,32 +30,9 @@ static lv_obj_t *version_text = nullptr;
 static lv_obj_t *bubbles[15] = {nullptr};
 static lv_obj_t *circuits[8] = {nullptr};
 
-// ====================== FUNÇÕES DE CONFIG ======================
-void load_willy_config() {
-    if (!LittleFS.begin()) return;
-    File f = LittleFS.open("/willy_splash.conf", "r");
-    if (f) {
-        willyCfg.velocidade = f.readStringUntil('\n').toInt();
-        willyCfg.somAtivado = f.readStringUntil('\n') == "1";
-        willyCfg.tipoSom = f.readStringUntil('\n').toInt();
-        willyCfg.corPrimaria = strtol(f.readStringUntil('\n').c_str(), NULL, 16);
-        f.close();
-    }
-}
-
-void save_willy_config() {
-    File f = LittleFS.open("/willy_splash.conf", "w");
-    if (f) {
-        f.println(willyCfg.velocidade);
-        f.println(willyCfg.somAtivado ? "1" : "0");
-        f.println(willyCfg.tipoSom);
-        f.printf("%04lX\n", (unsigned long)willyCfg.corPrimaria);
-        f.close();
-    }
-}
-
 // ====================== SOM DA ORCA ======================
 static void play_orca_boot_sound() {
+    WillyConfig& willyCfg = getWillyCfg();
     if (!willyCfg.somAtivado) return;
 
     if (willyCfg.tipoSom == 0 || willyCfg.tipoSom == 1) {
@@ -86,6 +54,7 @@ static void play_orca_boot_sound() {
 
 // ====================== DESENHO DA ORCA ======================
 static void create_orca(lv_obj_t *parent) {
+    WillyConfig& willyCfg = getWillyCfg();
     orca_container = lv_obj_create(parent);
     lv_obj_set_size(orca_container, 160, 100);
     lv_obj_set_pos(orca_container, -200, 50);
@@ -148,6 +117,7 @@ static void create_orca(lv_obj_t *parent) {
 }
 
 static void create_particles(lv_obj_t *parent) {
+    WillyConfig& willyCfg = getWillyCfg();
     for (int i = 0; i < 15; i++) {
         bubbles[i] = lv_obj_create(parent);
         lv_obj_set_size(bubbles[i], 4 + (i % 3), 4 + (i % 3));
@@ -171,6 +141,7 @@ static void create_particles(lv_obj_t *parent) {
 
 // ====================== ANIMAÇÕES + PARTÍCULAS ======================
 static void start_animations() {
+    WillyConfig& willyCfg = getWillyCfg();
     int base = (willyCfg.velocidade == 0) ? 2600 : (willyCfg.velocidade == 2 ? 1400 : 1900);
 
     // Orca entra nadando
