@@ -82,6 +82,21 @@ int recent_rfcodes_last_used = 0; // TODO: save/load in EEPROM
 bool rmtInstalled = true;
 static bool cc1101_spi_ready = false;
 
+bool isValidFrequency(float frequency, int module) {
+    if (module == M5_RF_MODULE) {
+        // M5_RF_MODULE is typically a fixed 433MHz module
+        return (frequency >= 433.0f && frequency <= 435.0f);
+    } else if (module == CC1101_SPI_MODULE) {
+        // CC1101 supports three frequency bands:
+        // 300-348 MHz, 387-464 MHz, 779-928 MHz
+        if (frequency >= 300.0f && frequency <= 348.0f) return true;
+        if (frequency >= 387.0f && frequency <= 464.0f) return true;
+        if (frequency >= 779.0f && frequency <= 928.0f) return true;
+        return false;
+    }
+    return false;
+}
+
 bool initRfModule(String mode, float frequency) {
     // use default frequency if no one is passed
     if (!frequency) frequency = bruceConfigPins.rfFreq;
