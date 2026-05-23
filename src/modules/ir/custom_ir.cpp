@@ -144,7 +144,7 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
                         rawData = line.substring(5);
                         rawData.trim();
                         Serial.println("RawData: " + rawData);
-                    } else if ((frequency != 0 && rawData != "") || line.startsWith("#")) {
+                    } else if (line.startsWith("#")) {
                         IRCode code;
                         code.type = "raw";
                         code.data = rawData;
@@ -157,6 +157,19 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
                         line = "";
                         break;
                     }
+                }
+
+                if (frequency != 0 && rawData != "") {
+                    IRCode code;
+                    code.type = "raw";
+                    code.data = rawData;
+                    code.frequency = frequency;
+                    sendIRCommand(&code, hideDefaultUI);
+
+                    rawData = "";
+                    frequency = 0;
+                    type = "";
+                    line = "";
                 }
             } else if (type == "parsed") {
                 Serial.println("PARSED");
@@ -196,6 +209,19 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
                         line = "";
                         break;
                     }
+                }
+
+                if (protocol != "" || value != "") {
+                    IRCode code(protocol, address, command, value, bits);
+                    sendIRCommand(&code, hideDefaultUI);
+
+                    protocol = "";
+                    address = "";
+                    command = "";
+                    value = "";
+                    bits = 32;
+                    type = "";
+                    line = "";
                 }
             }
         }
