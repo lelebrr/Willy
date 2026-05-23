@@ -1040,7 +1040,29 @@ void sniffer_setup() {
     memcpy(deauth_frame, deauth_frame_default, sizeof(deauth_frame_default));
     // Main sniffer loop
 
+    static String serialCmdBuffer = "";
     for (;;) {
+        if (serialDevice && serialDevice->available()) {
+            while (serialDevice->available()) {
+                char c = serialDevice->read();
+                if (c == '\n' || c == '\r') {
+                    serialCmdBuffer.trim();
+                    if (serialCmdBuffer.length() > 0) {
+                        if (serialCmdBuffer.equalsIgnoreCase("stop") || serialCmdBuffer.equalsIgnoreCase("exit") || serialCmdBuffer.equalsIgnoreCase("quit") || serialCmdBuffer.equalsIgnoreCase("q")) {
+                            returnToMenu = true;
+                            serialDevice->println("Exiting sniffer...");
+                        }
+                    }
+                    serialCmdBuffer = "";
+                } else {
+                    serialCmdBuffer += c;
+                    if (serialCmdBuffer.length() > 32) {
+                        serialCmdBuffer = ""; // Prevent buffer overflow if no newline is received
+                    }
+                }
+            }
+        }
+
         if (returnToMenu) {
             if (littleFsWasFull) {
                 Serial.println("Not enough space on LittleFS");
