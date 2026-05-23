@@ -47,29 +47,40 @@ uint32_t badusbFileCallback(cmd *c) {
 #endif
 }
 
+
+class StringStream : public Stream {
+public:
+    StringStream(const String &s) : str(s), pos(0) {}
+    StringStream(const char *c) : str(c), pos(0) {}
+    virtual size_t write(uint8_t) { return 0; }
+    virtual int available() { return str.length() - pos; }
+    virtual int read() { return pos < str.length() ? str[pos++] : -1; }
+    virtual int peek() { return pos < str.length() ? str[pos] : -1; }
+    virtual void flush() {}
+private:
+    String str;
+    unsigned int pos;
+};
+
 uint32_t badusbBufferCallback(cmd *c) {
 #ifndef LITE_VERSION
-    if (!(_setupPsramFs())) return false;
 
     char *txt = _readFileFromSerial();
-    String tmpfilepath = "/tmpramfile"; // TODO: Change to use char *txt directly
-    File f = PSRamFS.open(tmpfilepath, FILE_WRITE);
-    if (!f) return false;
-
-    f.write((const uint8_t *)txt, strlen(txt));
-    f.close();
-    free(txt);
+    if (!txt) return false;
 
 #ifdef USB_as_HID
     ducky_startKb(hid_usb, false);
-    key_input(PSRamFS, tmpfilepath, hid_usb);
+
+    StringStream stream(txt);
+    key_input(&stream, "buffer", hid_usb);
+
     delete hid_usb;
     hid_usb = nullptr;
 
-    PSRamFS.remove(tmpfilepath);
+    free(txt);
     return true;
 #else
-    PSRamFS.remove(tmpfilepath);
+    free(txt);
     return false;
 #endif
 #else

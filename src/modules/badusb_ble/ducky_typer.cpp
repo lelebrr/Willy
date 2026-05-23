@@ -322,11 +322,18 @@ EXIT:
     returnToMenu = true;
 }
 
+
 // Parses a file to run in the badUSBBLE
 void key_input(FS fs, String bad_script, HIDInterface *_hid) {
     if (!fs.exists(bad_script) || bad_script == "") return;
     File payloadFile = fs.open(bad_script, "r");
     if (!payloadFile) return;
+    key_input(&payloadFile, bad_script, _hid);
+    payloadFile.close();
+}
+
+void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
+    if (!stream) return;
     String lineContent = "";
     String Command = "";
     char Cmd[25];
@@ -340,7 +347,7 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
 
     _hid->releaseAll();
 
-    printHeaderBadUSBBLE(bad_script);
+    printHeaderBadUSBBLE(bad_script_name);
 
     printStatusBadUSBBLE("Running");
 
@@ -367,7 +374,7 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
 
     uint32_t startMillisBADUSBBLE = millis();
 
-    while (payloadFile.available()) {
+    while (stream->available()) {
 
         previousMillis = millis(); // resets DimScreen
         if (check(SelPress)) {
@@ -375,7 +382,7 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
         }
         // CRLF is a combination of two control characters: the "Carriage Return" represented by
         // the character "\r" and the "Line Feed" represented by the character "\n".
-        lineContent = payloadFile.readStringUntil('\n');
+        lineContent = stream->readStringUntil('\n');
         if (lineContent.endsWith("\r")) lineContent.remove(lineContent.length() - 1);
 
         if (lineContent.length() == 0) continue; // skip empty lines
@@ -518,15 +525,15 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
         } // end scope block for spaceIndex/repeatCount
 
         printDecimalTime(millis() - startMillisBADUSBBLE);
-    } // end while payloadFile.available()
+    } // end while stream->available()
 
     printStatusBadUSBBLE("Finished");
 
 EXIT:
     tft.setTextSize(FP);
-    payloadFile.close();
-    _hid->releaseAll();
+        _hid->releaseAll();
 }
+
 
 // Sends a simple command
 void key_input_from_string(String text) {
