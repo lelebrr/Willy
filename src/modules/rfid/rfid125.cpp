@@ -65,21 +65,6 @@ void RFID125::loop() {
 
         switch (_current_state) {
             case READ_MODE: read_card(); break;
-            // case LOAD_MODE:
-            //     load_file();
-            //     break;
-            // case CLONE_MODE:
-            //     clone_card();
-            //     break;
-            // case WRITE_MODE:
-            //     write_data();
-            //     break;
-            // case WRITE_NDEF_MODE:
-            //     write_ndef_data();
-            //     break;
-            // case ERASE_MODE:
-            //     erase_card();
-            //     break;
             case SAVE_MODE: save_file(); break;
         }
     }
@@ -88,14 +73,9 @@ void RFID125::loop() {
 void RFID125::select_state() {
     options = {};
     if (_tag_read) {
-        //     options.push_back({"Clone UID",  [this]() { set_state(CLONE_MODE); }});
-        //     options.push_back({"Write data", [this]() { set_state(WRITE_MODE); }});
         options.push_back({"Salvar arquivo", [this]() { set_state(SAVE_MODE); }});
     }
     options.push_back({"Ler tag", [this]() { set_state(READ_MODE); }});
-    // options.push_back({"Load file",  [this]() { set_state(LOAD_MODE); }});
-    // options.push_back({"Write NDEF", [this]() { set_state(WRITE_NDEF_MODE); }});
-    // options.push_back({"Erase tag",  [this]() { set_state(ERASE_MODE); }});
     loopOptions(options);
 }
 
@@ -104,24 +84,9 @@ void RFID125::set_state(RFID125_State state) {
     display_banner();
     switch (state) {
         case READ_MODE:
-            // case LOAD_MODE:
             _tag_read = false;
             break;
-        // case CLONE_MODE:
-        //     padprintln("New UID: " + printableUID.uid);
-        //     padprintln("SAK: " + printableUID.sak);
-        //     padprintln("");
-        //     break;
-        // case WRITE_MODE:
-        //     if (!pageReadSuccess) padprintln("[!] Data blocks are incomplete");
-        //     padprintln(String(dataPages) + " pages of data to write");
-        //     padprintln("");
-        //     break;
-        // case WRITE_NDEF_MODE:
-        //     _ndef_created = false;
-        //     break;
         case SAVE_MODE:
-            // case ERASE_MODE:
             break;
     }
 }
@@ -143,26 +108,6 @@ void RFID125::display_banner() {
             padprintln("             MODO LEITURA");
             padprintln("             ---------");
             break;
-        // case LOAD_MODE:
-        //     padprintln("             LOAD MODE");
-        //     padprintln("             ---------");
-        //     break;
-        // case CLONE_MODE:
-        //     padprintln("            CLONE MODE");
-        //     padprintln("            ----------");
-        //     break;
-        // case ERASE_MODE:
-        //     padprintln("            ERASE MODE");
-        //     padprintln("            ----------");
-        //     break;
-        // case WRITE_MODE:
-        //     padprintln("       WRITE DATA MODE");
-        //     padprintln("       ---------------");
-        //     break;
-        // case WRITE_NDEF_MODE:
-        //     padprintln("       WRITE NDEF MODE");
-        //     padprintln("       ---------------");
-        //     break;
         case SAVE_MODE:
             padprintln("             MODO SALVAR");
             padprintln("             ---------");
