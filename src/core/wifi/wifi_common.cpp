@@ -62,8 +62,8 @@ bool _wifiConnect(const String &ssid, int encryption) {
     }
 
     if (connected) {
-        wifiConnected = true;
-        wifiIP = WiFi.localIP().toString();
+        WifiState::wifiConnected = true;
+        WifiState::wifiIP = WiFi.localIP().toString();
         bruceConfig.addWifiCredential(ssid, password);
 
         // Start timezone update in background if not already running
@@ -113,9 +113,9 @@ bool _setupAP() {
     IPAddress AP_GATEWAY(172, 0, 0, 1);
     WiFi.softAPConfig(AP_GATEWAY, AP_GATEWAY, IPAddress(255, 255, 255, 0));
     WiFi.softAP(bruceConfig.wifiAp.ssid, bruceConfig.wifiAp.pwd, 6, 0, 4, false);
-    wifiIP = WiFi.softAPIP().toString(); // update global var
-    Serial.println("IP: " + wifiIP);
-    wifiConnected = true;
+    WifiState::wifiIP = WiFi.softAPIP().toString(); // update global var
+    Serial.println("IP: " + WifiState::wifiIP);
+    WifiState::wifiConnected = true;
     return true;
 }
 
@@ -123,7 +123,7 @@ void wifiDisconnect() {
     WiFi.softAPdisconnect(true); // turn off AP mode
     WiFi.disconnect(true, true); // turn off STA mode
     WiFi.mode(WIFI_OFF);         // enforces WIFI_OFF mode
-    wifiConnected = false;
+    WifiState::wifiConnected = false;
     returnToMenu = true;
 }
 
@@ -205,7 +205,7 @@ bool wifiConnectMenu(wifi_mode_t mode) {
         wifiDisconnect(); // Forced turning off the wifi module if exiting back to the menu
         return false;
     }
-    return wifiConnected;
+    return WifiState::wifiConnected;
 }
 
 void wifiConnectTask(void *pvParameters) {
@@ -224,8 +224,8 @@ void wifiConnectTask(void *pvParameters) {
         WiFi.begin(ssid, pwd);
         for (int i = 0; i < 50; i++) {
             if (WiFi.status() == WL_CONNECTED) {
-                wifiConnected = true;
-                wifiIP = WiFi.localIP().toString();
+                WifiState::wifiConnected = true;
+                WifiState::wifiIP = WiFi.localIP().toString();
 
                 // Start timezone update in background if not already running
                 if (timezoneTaskHandle == NULL) {
@@ -270,8 +270,8 @@ bool wifiConnecttoKnownNet(void) {
         }
     }
     if (WiFi.status() == WL_CONNECTED) {
-        wifiConnected = true;
-        wifiIP = WiFi.localIP().toString();
+        WifiState::wifiConnected = true;
+        WifiState::wifiIP = WiFi.localIP().toString();
 
         // Start timezone update in background if not already running
         if (timezoneTaskHandle == NULL) {
@@ -286,7 +286,7 @@ void updateTimezoneTask(void *pvParameters) {
     vTaskDelay(5000 / portTICK_PERIOD_MS);
 
     // Only update timezone if WiFi is still connected
-    if (WiFi.isConnected() && wifiConnected) { updateClockTimezone(); }
+    if (WiFi.isConnected() && WifiState::wifiConnected) { updateClockTimezone(); }
 
     // Clear the task handle before deleting
     timezoneTaskHandle = NULL;

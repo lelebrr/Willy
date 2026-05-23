@@ -566,7 +566,7 @@ void responder() {
 
   tft.fillScreen(bruceConfig.bgColor);
   //M5Cardputer.Display.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-  if (!wifiConnected) wifiConnectMenu();
+  if (!WifiState::wifiConnected) wifiConnectMenu();
 
   String tmp_name = keyboard("Bruce", 20);
   strncpy(netbiosname_str, tmp_name.c_str(), sizeof(netbiosname_str)-1);

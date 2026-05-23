@@ -934,7 +934,7 @@ void beaconAttack() {
     addOptionToMainMenu();
     loopOptions(options);
 
-    wifiConnected = true; // display wifi icon
+    WifiState::wifiConnected = true; // display wifi icon
     String beaconFile = "";
     File file;
     FS *fs;

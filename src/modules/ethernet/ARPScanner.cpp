@@ -286,7 +286,7 @@ void ARPScanner::afterScanOptions(const ScanHosts::Host &host) {
         {"Info do Host",
          [=]() {
              HostInfo(
-                 host, wifiConnected
+                 host, WifiState::wifiConnected
              ); // At this point we are sure that if user use WiFi is connected for sure
          }},
 #ifndef LITE_VERSION
@@ -294,7 +294,7 @@ void ARPScanner::afterScanOptions(const ScanHosts::Host &host) {
 #endif
         {"Deauth Estacao",
          [=]() {
-             if (!wifiConnected) {
+             if (!WifiState::wifiConnected) {
                  displayError("Deauth estacao indisp. na ethernet");
              } else {
                  stationDeauth(host);

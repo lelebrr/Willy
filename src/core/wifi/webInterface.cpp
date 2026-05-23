@@ -44,7 +44,7 @@ String generateToken(int length = 24) {
 **********************************************************************/
 void stopWebUi() {
     tft.setLogging(false);
-    isWebUIActive = false;
+    WifiState::isWebUIActive = false;
     server->end();
     server->~AsyncWebServer();
     free(server);
@@ -59,7 +59,7 @@ void stopWebUi() {
 **  Display options to launch the WebUI
 **********************************************************************/
 void loopOptionsWebUi() {
-    if (isWebUIActive) {
+    if (WifiState::isWebUIActive) {
         bool opt = WiFi.getMode() - 1;
         options = {
             {"Stop WebUI", stopWebUi},
@@ -743,7 +743,7 @@ void startWebUi(bool mode_ap) {
 
         configureWebServer();
 
-        isWebUIActive = true;
+        WifiState::isWebUIActive = true;
     }
     tft.setLogging();
     drawWebUiScreen(mode_ap);

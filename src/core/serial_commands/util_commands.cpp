@@ -119,9 +119,9 @@ uint32_t infoCallback(cmd *c) {
     // Crystal is 40MHz
     // MAC: 24:58:7c:5b:24:5c
 
-    if (wifiConnected) {
+    if (WifiState::wifiConnected) {
         serialDevice->println("Wifi: connected");
-        serialDevice->println("Ip: " + wifiIP); // read global var
+        serialDevice->println("Ip: " + WifiState::wifiIP); // read global var
     } else {
         serialDevice->println("Wifi: not connected");
     }

@@ -101,7 +101,7 @@ void EvilPortal::beginAP() {
     else WiFi.mode(WIFI_MODE_AP);
     WiFi.softAPConfig(apGateway, apGateway, IPAddress(255, 255, 255, 0));
     WiFi.softAP(apName, emptyString, _channel);
-    wifiConnected = true;
+    WifiState::wifiConnected = true;
 
     int tmp = millis();
     while (millis() - tmp < 3000) yield();

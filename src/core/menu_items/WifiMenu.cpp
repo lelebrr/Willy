@@ -45,7 +45,7 @@ bool showHiddenNetworks = false;
 void WifiMenu::optionsMenu() {
     returnToMenu = false;
     options.clear();
-    if (isWebUIActive) {
+    if (WifiState::isWebUIActive) {
         drawMainBorderWithTitle("WiFi", true);
         padprintln("");
         padprintln("Iniciar uma funcao WiFi ira provavelmente parar a WebUI");
@@ -120,7 +120,7 @@ void WifiMenu::optionsMenu() {
                      }));
 
     options.push_back({"Evil Portal", [=]() {
-                           if (isWebUIActive || server) {
+                           if (WifiState::isWebUIActive || server) {
                                stopWebUi();
                                wifiDisconnect();
                            }
@@ -142,7 +142,7 @@ void WifiMenu::optionsMenu() {
                        }});
     options.push_back({"Escanear Hosts", [=]() {
                            bool doScan = true;
-                           if (!wifiConnected) doScan = wifiConnectMenu();
+                           if (!WifiState::wifiConnected) doScan = wifiConnectMenu();
 
                            if (doScan) {
                                esp_netif_t *esp_netinterface =
