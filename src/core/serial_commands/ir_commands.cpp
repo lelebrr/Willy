@@ -6,6 +6,18 @@
 #include <ArduinoJson.h>
 #include <globals.h>
 
+
+static String formatFlipperHex(uint32_t val) {
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%02X %02X %02X %02X",
+             (unsigned int)(val & 0xFF),
+             (unsigned int)((val >> 8) & 0xFF),
+             (unsigned int)((val >> 16) & 0xFF),
+             (unsigned int)((val >> 24) & 0xFF));
+    return String(buf);
+}
+
+
 uint32_t irCallback(cmd *c) {
     serialDevice->println("Turning off IR LED");
     digitalWrite(bruceConfigPins.irTx, LED_OFF);
@@ -157,14 +169,12 @@ uint32_t irTxBufferCallback(cmd *c) {
 uint32_t irSendCallback(cmd *c) {
     // tasmota json command  https://tasmota.github.io/docs/Tasmota-IR/#sending-ir-commands
     // e.g. IRSend {\"Protocol\":\"NEC\",\"Bits\":32,\"Data\":\"0x20DF10EF\"}
-    // TODO: decode "data" into "address+command" and use existing "send*Command" funcs
 
     Command cmd(c);
 
     Argument args = cmd.getArgument(0);
     String args_str = args.getValue();
     args_str.trim();
-    // serialDevice->println(command);
 
     JsonDocument jsonDoc;
     if (deserializeJson(jsonDoc, args_str)) {
@@ -189,6 +199,54 @@ uint32_t irSendCallback(cmd *c) {
     if (!args_json["Protocol"].isNull()) protocolStr = args_json["Protocol"].as<String>();
 
     if (!args_json["Bits"].isNull()) bits = args_json["Bits"].as<int>();
+
+    String cleanDataStr = dataStr;
+    cleanDataStr.trim();
+    if (cleanDataStr.startsWith("0x") || cleanDataStr.startsWith("0X")) {
+        cleanDataStr = cleanDataStr.substring(2);
+    }
+    uint64_t dataValue = strtoull(cleanDataStr.c_str(), nullptr, 16);
+
+    String proto = protocolStr;
+    proto.toUpperCase();
+
+    String addressStr = "";
+    String commandStr = "";
+
+    if (proto == "NEC" || proto == "NECEXT") {
+        addressStr = formatFlipperHex((dataValue >> 16) & 0xFFFF);
+        commandStr = formatFlipperHex(dataValue & 0xFFFF);
+        sendNECextCommand(addressStr, commandStr, false);
+        return true;
+    } else if (proto == "SAMSUNG" || proto == "SAMSUNG32") {
+        addressStr = formatFlipperHex((dataValue >> 16) & 0xFFFF);
+        commandStr = formatFlipperHex(dataValue & 0xFFFF);
+        sendSamsungCommand(addressStr, commandStr, false);
+        return true;
+    } else if (proto == "RC5" || proto == "RC5X") {
+        addressStr = formatFlipperHex((dataValue >> 6) & 0x1F);
+        commandStr = formatFlipperHex(dataValue & 0x3F);
+        sendRC5Command(addressStr, commandStr, false);
+        return true;
+    } else if (proto == "RC6") {
+        addressStr = formatFlipperHex((dataValue >> 8) & 0xFF);
+        commandStr = formatFlipperHex(dataValue & 0xFF);
+        sendRC6Command(addressStr, commandStr, false);
+        return true;
+    } else if (proto == "SIRC" || proto == "SIRC15" || proto == "SIRC20") {
+        addressStr = formatFlipperHex(dataValue >> 7);
+        commandStr = formatFlipperHex(dataValue & 0x7F);
+        int sonyBits = 12;
+        if (proto == "SIRC15") sonyBits = 15;
+        if (proto == "SIRC20") sonyBits = 20;
+        sendSonyCommand(addressStr, commandStr, sonyBits, false);
+        return true;
+    } else if (proto == "KASEIKYO") {
+        addressStr = formatFlipperHex((dataValue >> 16) & 0xFFFF); // Approximation for standard 48-bit Kaseikyo format
+        commandStr = formatFlipperHex(dataValue & 0xFFFF);
+        sendKaseikyoCommand(addressStr, commandStr, false);
+        return true;
+    }
 
     return sendDecodedCommand(protocolStr, dataStr, bits);
 }
