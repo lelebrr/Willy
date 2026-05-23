@@ -1005,7 +1005,8 @@ void sniffer_setup() {
 
     wifi_config_t wifi_config;
     strcpy((char *)wifi_config.ap.ssid, "WillySniffer");
-    strcpy((char *)wifi_config.ap.password, "WillyNet");
+    strncpy((char *)wifi_config.ap.password, bruceConfig.getDefaultWifiApPwd().c_str(), sizeof(wifi_config.ap.password) - 1);
+    wifi_config.ap.password[sizeof(wifi_config.ap.password) - 1] = '\0';
     wifi_config.ap.ssid_len = strlen("WillySniffer");
     wifi_config.ap.channel = 1;                   // Channel
     wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK; // auth mode

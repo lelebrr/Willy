@@ -87,6 +87,36 @@ JsonDocument BruceConfig::toJson() const {
     return jsonDoc;
 }
 
+
+String BruceConfig::getDefaultWifiApSsid() const {
+    uint64_t chipid = ESP.getEfuseMac();
+    char buf[32];
+    snprintf(buf, sizeof(buf), "WillyNet_%04X", (uint16_t)(chipid >> 32));
+    return String(buf);
+}
+
+String BruceConfig::getDefaultWifiApPwd() const {
+    uint64_t chipid = ESP.getEfuseMac();
+    char buf[32];
+    snprintf(buf, sizeof(buf), "Willy_%08X", (uint32_t)chipid);
+    return String(buf);
+}
+
+void BruceConfig::initDefaults() {
+    if (wifiAp.ssid.isEmpty() || wifiAp.ssid == "WillyNet") wifiAp.ssid = getDefaultWifiApSsid();
+    if (wifiAp.pwd.isEmpty() || wifiAp.pwd == "WillyNet") wifiAp.pwd = getDefaultWifiApPwd();
+
+    // Set default QR codes if none exist initially (this only runs on first init before loading from file)
+    if (qrCodes.empty() && wifiAp.ssid == getDefaultWifiApSsid()) {
+        qrCodes = {
+            {"Willy AP",   "WIFI:T:WPA;S:" + wifiAp.ssid + ";P:" + wifiAp.pwd + ";;"},
+            {"Willy Wiki", "https://github.com/lelebrr/Willy/wiki"},
+            {"Willy Site", "https://willy.computer"},
+            {"Rickroll",   "https://youtu.be/dQw4w9WgXcQ"}
+        };
+    }
+}
+
 void BruceConfig::fromFile(bool checkFS) {
     FS *fs;
     if (checkFS) {

@@ -248,7 +248,7 @@ void drawWebUiScreen(bool mode_ap) {
     tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, ALCOLOR);
     if (mode_ap) {
         setTftDisplay(0, 0, bruceConfig.bgColor, FM);
-        tft.drawCentreString("WillyNet/WillyNet", tftWidth / 2, 7, 1);
+        tft.drawCentreString(bruceConfig.wifiAp.ssid + "/" + bruceConfig.wifiAp.pwd, tftWidth / 2, 7, 1);
     }
     setTftDisplay(0, 0, ALCOLOR, FM);
     tft.drawCentreString("WILLY WebUI", tftWidth / 2, 27, 1);
