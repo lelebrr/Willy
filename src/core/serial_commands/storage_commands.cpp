@@ -36,9 +36,10 @@ uint32_t listCallback(cmd *c) {
                 // Serial.printf("File size: %llu bytes\n", file.size());
                 if (file) {
                     serialDevice->print("\t");
-                    serialDevice->println(file.size());
+                    serialDevice->print(file.size());
+                    serialDevice->print("\t");
+                    serialDevice->println(formatTimestamp(file.getLastWrite()));
                     // serialDevice->println(file.path());
-                    // serialDevice->println(file.getLastWrite());  // TODO: parse to localtime
                     file.close();
                 }
             }
@@ -311,7 +312,7 @@ uint32_t statCallback(cmd *c) {
     serialDevice->println("");
 
     serialDevice->print("Modify: ");
-    serialDevice->print(file.getLastWrite()); // TODO: parse to localtime
+    serialDevice->print(formatTimestamp(file.getLastWrite()));
     serialDevice->println("");
 
     file.close();
