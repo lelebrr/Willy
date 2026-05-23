@@ -326,7 +326,16 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         tft.setTextSize(2);
 
         // Center "AUDIO" text in box
-        String AudioFormatLabel = "AUDIO";              // TODO: Use file extension
+        String AudioFormatLabel = "AUDIO";
+        int lastSlash = filepath.lastIndexOf('/');
+        int lastDot = filepath.lastIndexOf('.');
+        if (lastDot > lastSlash) {
+            AudioFormatLabel = filepath.substring(lastDot + 1);
+            AudioFormatLabel.toUpperCase();
+            if (AudioFormatLabel.length() > 5) {
+                AudioFormatLabel = AudioFormatLabel.substring(0, 5);
+            }
+        }
         int textWidth = AudioFormatLabel.length() * 12; // textSize(2): 6 pixel base * 2 = 12 pixel per char
         int textHeight = 16;                            // textSize(2): 8 pixel base * 2 = 16 pixel
         int centerX = ui.MARGIN_X + (boxSize - textWidth) / 2 + 2; // Offset 5
