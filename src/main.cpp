@@ -148,6 +148,7 @@ volatile int tftHeight = VECTOR_DISPLAY_DEFAULT_WIDTH;
 #include "willy_logger.h"                        // Sistema de logging centralizado
 #include "ui/willy_splash.h"                     // Splash screen Willy
 
+// --- BEGIN_STORAGE_TEST_EXTRACT ---
 /*********************************************************************
  **  Function: begin_storage
  **  Config LittleFS and SD storage
@@ -158,6 +159,7 @@ void begin_storage() {
     bruceConfig.fromFile(checkFS);
     bruceConfigPins.fromFile(checkFS);
 }
+// --- END_STORAGE_TEST_EXTRACT ---
 
 /*********************************************************************
  **  Function: _setup_gpio()
