@@ -5,6 +5,18 @@
 
 const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
 const String ENC_PREFIX = "_ENC_";
+const String ENC_V2_PREFIX = "_ENC_V2_";
+
+static String getCryptoKey() {
+    static String key = "";
+    if (key.isEmpty()) {
+        uint64_t mac = ESP.getEfuseMac();
+        char buf[17];
+        snprintf(buf, sizeof(buf), "%04x%08x", (uint32_t)(mac >> 32), (uint32_t)mac);
+        key = String(buf);
+    }
+    return key;
+}
 
 JsonDocument BruceConfig::toJson() const {
     JsonDocument jsonDoc;
@@ -845,24 +857,37 @@ bool BruceConfig::isValidWebUISession(const String &token) {
 
 String BruceConfig::encryptString(const String &input) const {
     if (input.isEmpty()) return "";
-    String output = ENC_PREFIX;
+    String output = ENC_V2_PREFIX;
+    String cryptoKey = getCryptoKey();
     for (size_t i = 0; i < input.length(); i++) {
-        char c = input[i] ^ CRYPTO_KEY[i % CRYPTO_KEY.length()];
+        char c = input[i] ^ cryptoKey[i % cryptoKey.length()];
         char hex[3];
-        sprintf(hex, "%02x", (unsigned char)c);
+        snprintf(hex, sizeof(hex), "%02x", (unsigned char)c);
         output += hex;
     }
     return output;
 }
 
 String BruceConfig::decryptString(const String &input) const {
-    if (!input.startsWith(ENC_PREFIX)) return input;
-    String hexData = input.substring(ENC_PREFIX.length());
-    String output = "";
-    for (size_t i = 0; i < hexData.length(); i += 2) {
-        String byteString = hexData.substring(i, i + 2);
-        char c = (char)strtol(byteString.c_str(), nullptr, 16);
-        output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
+    if (input.startsWith(ENC_V2_PREFIX)) {
+        String hexData = input.substring(ENC_V2_PREFIX.length());
+        String output = "";
+        String cryptoKey = getCryptoKey();
+        for (size_t i = 0; i < hexData.length(); i += 2) {
+            String byteString = hexData.substring(i, i + 2);
+            char c = (char)strtol(byteString.c_str(), nullptr, 16);
+            output += (char)(c ^ cryptoKey[(i / 2) % cryptoKey.length()]);
+        }
+        return output;
+    } else if (input.startsWith(ENC_PREFIX)) {
+        String hexData = input.substring(ENC_PREFIX.length());
+        String output = "";
+        for (size_t i = 0; i < hexData.length(); i += 2) {
+            String byteString = hexData.substring(i, i + 2);
+            char c = (char)strtol(byteString.c_str(), nullptr, 16);
+            output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
+        }
+        return output;
     }
-    return output;
+    return input;
 }
