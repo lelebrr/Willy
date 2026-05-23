@@ -214,7 +214,7 @@ bool wifi_atk_unsetWifi() {
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-    if (WiFi.status() != WL_CONNECTED && WiFi.softAPSSID() != bruceConfig.wifiAp.ssid) wifiDisconnect();
+    if (WiFi.status() != WL_CONNECTED && WiFi.softAPSSID() != bruceConfig.wifiAp.ssid) WifiCommon::disconnect();
 
     return true;
 }

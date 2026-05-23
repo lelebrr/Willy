@@ -20,7 +20,7 @@ EvilPortal::~EvilPortal() {
     webServer.end();
     dnsServer.stop();
     vTaskDelay(100 / portTICK_PERIOD_MS);
-    wifiDisconnect();
+    WifiCommon::disconnect();
 };
 
 void EvilPortal::CaptiveRequestHandler::handleRequest(AsyncWebServerRequest *request) {
@@ -172,7 +172,7 @@ void EvilPortal::setupRoutes() {
 
 void EvilPortal::restartWiFi(bool reset) {
     webServer.end();
-    wifiDisconnect();
+    WifiCommon::disconnect();
     WiFi.softAP(apName);
     webServer.begin();
 
@@ -215,7 +215,7 @@ void EvilPortal::loop() {
         if (check(EscPress) || returnToMenu) break;
 
         if (verifyPass) {
-            wifiDisconnect();
+            WifiCommon::disconnect();
             verifyPass = false;
         }
         vTaskDelay(10 / portTICK_PERIOD_MS); // Prevent watchdog timeout and yield to other tasks

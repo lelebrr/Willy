@@ -214,5 +214,5 @@ void brucegotchi_start() {
     // Turn off WiFi
     esp_wifi_set_promiscuous(false);
     esp_wifi_set_promiscuous_rx_cb(nullptr);
-    wifiDisconnect();
+    WifiCommon::disconnect();
 }

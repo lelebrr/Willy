@@ -814,7 +814,7 @@ void setClock() {
     if (returnToMenu) return;
 
     if (bruceConfig.automaticTimeUpdateViaNTP) {
-        if (!wifiConnected) wifiConnectMenu();
+        if (!wifiConnected) WifiCommon::connectMenu();
 
         options.clear();
 
@@ -1683,7 +1683,7 @@ bool appStoreInstalled() {
 #include <HTTPClient.h>
 void installAppStoreJS() {
 
-    if (WiFi.status() != WL_CONNECTED) { wifiConnectMenu(WIFI_STA); }
+    if (WiFi.status() != WL_CONNECTED) { WifiCommon::connectMenu(WIFI_STA); }
     if (WiFi.status() != WL_CONNECTED) {
         displayWarning("WiFi not connected", true);
         return;

@@ -163,7 +163,7 @@ void stationDeauth(ScanHosts::Host host) {
 
     if (!enhanced_mode) {
         // Fallback to Bruce's original AP mode
-        wifiDisconnect();
+        WifiCommon::disconnect();
         delay(10);
         WiFi.mode(WIFI_AP);
 
@@ -259,7 +259,7 @@ void stationDeauth(ScanHosts::Host host) {
         esp_wifi_set_promiscuous(false);
     }
 
-    wifiDisconnect();
+    WifiCommon::disconnect();
     WiFi.mode(WIFI_STA);
 
     // Show summary
