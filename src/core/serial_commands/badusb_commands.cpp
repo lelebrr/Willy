@@ -33,10 +33,10 @@ uint32_t badusbFileCallback(cmd *c) {
     delete hid_usb;
     hid_usb = nullptr;
 
-    // TODO: need to reinit serial when finished
-    // Kb.end();
-    // USB.~ESPUSB(); // Explicit call to destructor
-    // serialDevice->begin(115200);
+    USB.~ESPUSB(); // Explicit call to destructor
+    delay(100);
+    USB.enableDFU(); // Re-enable DFU
+    delay(100);
 
     return true;
 #else
@@ -65,6 +65,11 @@ uint32_t badusbBufferCallback(cmd *c) {
     key_input(PSRamFS, tmpfilepath, hid_usb);
     delete hid_usb;
     hid_usb = nullptr;
+
+    USB.~ESPUSB(); // Explicit call to destructor
+    delay(100);
+    USB.enableDFU(); // Re-enable DFU
+    delay(100);
 
     PSRamFS.remove(tmpfilepath);
     return true;
