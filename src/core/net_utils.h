@@ -13,3 +13,5 @@ String ipToString(const uint8_t *ip);
 
 // Função para converter MAC para string
 String macToString(const uint8_t *mac);
+
+void toBytes(IPAddress ip, uint8_t *bytes);
