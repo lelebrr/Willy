@@ -158,6 +158,19 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
                         break;
                     }
                 }
+
+                if (!line.startsWith("#") && frequency != 0 && rawData != "") {
+                    IRCode code;
+                    code.type = "raw";
+                    code.data = rawData;
+                    code.frequency = frequency;
+                    sendIRCommand(&code, hideDefaultUI);
+
+                    rawData = "";
+                    frequency = 0;
+                    type = "";
+                    line = "";
+                }
             } else if (type == "parsed") {
                 Serial.println("PARSED");
                 while (databaseFile.available()) {
@@ -183,7 +196,7 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
                     } else if (line.startsWith("bits:")) {
                         bits = line.substring(strlen("bits:")).toInt();
                         Serial.println("bits: " + bits);
-                    } else if (line.indexOf("#") != -1) { // TODO: also detect EOF
+                    } else if (line.indexOf("#") != -1) {
                         IRCode code(protocol, address, command, value, bits);
                         sendIRCommand(&code, hideDefaultUI);
 
@@ -196,6 +209,19 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
                         line = "";
                         break;
                     }
+                }
+
+                if (line.indexOf("#") == -1 && protocol != "") {
+                    IRCode code(protocol, address, command, value, bits);
+                    sendIRCommand(&code, hideDefaultUI);
+
+                    protocol = "";
+                    address = "";
+                    command = "";
+                    value = "";
+                    bits = 32;
+                    type = "";
+                    line = "";
                 }
             }
         }
