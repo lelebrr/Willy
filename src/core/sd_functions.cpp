@@ -431,9 +431,23 @@ String readSmallFile(FS &fs, String filepath) {
         displayError("Arquivo muito grande", true);
         return "";
     }
-    // TODO: if(psramFound()) -> use PSRAM instead
-
-    fileContent = file.readString();
+    char *buf = (char *)(psramFound() ? ps_malloc(fileSize + 1) : malloc(fileSize + 1));
+    if (buf) {
+        size_t bytesRead = 0;
+        while (bytesRead < fileSize && file.available()) {
+            size_t toRead = fileSize - bytesRead;
+            if (toRead > 512) { toRead = 512; }
+            size_t r = file.read((uint8_t *)(buf + bytesRead), toRead);
+            if (r == 0) break;
+            bytesRead += r;
+        }
+        buf[bytesRead] = '\0';
+        fileContent = String(buf);
+        free(buf);
+    } else {
+        Serial.printf("Could not allocate memory for small file: %s\n", filepath.c_str());
+        // Fallback or just let it return empty string
+    }
 
     file.close();
     return fileContent;
