@@ -88,7 +88,14 @@ uint32_t listenTCPCallback(cmd *c) {
         return false;
     }
 
-    listenTcpPort();
+    Command cmd(c);
+    Argument portArg = cmd.getArgument("port");
+    int port = 0;
+    if (portArg.isSet()) {
+        port = portArg.getValue().toInt();
+    }
+
+    listenTcpPort(port);
 
     return true;
 }
@@ -120,7 +127,8 @@ void createWifiCommands(SimpleCLI *cli) {
     Command ScanHostsCmd = cli->addCommand("arp", scanHostsCallback);
 
     Command listenTCPCmd =
-        cli->addCommand("listen", listenTCPCallback); // TODO: make possible to select port to open via Serial
+        cli->addCommand("listen", listenTCPCallback);
+    listenTCPCmd.addPosArg("port", "0");
 
     Command snifferCmd =
         cli->addCommand("sniffer", snifferCallback); // TODO: be able to exit from it from Serial

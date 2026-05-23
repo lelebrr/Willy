@@ -8,7 +8,7 @@
 bool inputMode;
 
 
-void listenTcpPort() {
+void listenTcpPort(int defaultPort) {
     if (!wifiConnected) wifiConnectMenu();
 
     WiFiClient tcpClient;
@@ -16,15 +16,20 @@ void listenTcpPort() {
     tft.setTextSize(1);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
-    String portNumber = num_keyboard("", 5, "Porta TCP p/ ouvir");
-    if (portNumber.length() == 0) {
-        displayError("Sem numero porta, saindo", true);
-        return;
-    }
-    int portNumberInt = atoi(portNumber.c_str());
-    if (portNumberInt == 0) {
-        displayError("Porta invalida, saindo", true);
-        return;
+    int portNumberInt = defaultPort;
+    String portNumber = String(defaultPort);
+
+    if (portNumberInt <= 0) {
+        portNumber = num_keyboard("", 5, "Porta TCP p/ ouvir");
+        if (portNumber.length() == 0) {
+            displayError("Sem numero porta, saindo", true);
+            return;
+        }
+        portNumberInt = atoi(portNumber.c_str());
+        if (portNumberInt == 0) {
+            displayError("Porta invalida, saindo", true);
+            return;
+        }
     }
 
     WiFiServer server(portNumberInt);
