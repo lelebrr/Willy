@@ -438,17 +438,16 @@ String readSmallFile(FS &fs, String filepath) {
         while (bytesRead < fileSize && file.available()) {
             size_t toRead = fileSize - bytesRead;
             if (toRead > 512) { toRead = 512; }
-            int actuallyRead = file.read((uint8_t *)(buf + bytesRead), toRead);
-            if (actuallyRead <= 0) {
-                break;
-            }
-            bytesRead += actuallyRead;
+            size_t r = file.read((uint8_t *)(buf + bytesRead), toRead);
+            if (r == 0) break;
+            bytesRead += r;
         }
         buf[bytesRead] = '\0';
         fileContent = String(buf);
         free(buf);
     } else {
-        fileContent = file.readString();
+        Serial.printf("Could not allocate memory for small file: %s\n", filepath.c_str());
+        // Fallback or just let it return empty string
     }
 
     file.close();
