@@ -3,6 +3,8 @@
 
 #include "structs.h"
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
+#include <functional>
+
 // ESP-IDF 5.5 based framework determines the channels autommatically
 // you do not have the hability to choose the channel
 rmt_channel_handle_t setup_rf_rx();
@@ -32,5 +34,7 @@ void addToRecentCodes(struct RfCodes rfcode);
 struct RfCodes selectRecentRfMenu();
 bool setMHZMenu();
 void rf_range_selection(float currentFrequency = 0.0);
+
+float rf_freq_scan(std::function<bool()> on_step = nullptr, int fxdFreq = 0);
 
 #endif

@@ -501,3 +501,58 @@ void rf_range_selection(float currentFrequency) {
     if (bruceConfigPins.rfFxdFreq) displayTextLine("Freq. de Scan definida para " + String(bruceConfigPins.rfFreq));
     else displayTextLine("Faixa definida para " + String(subghz_frequency_ranges[bruceConfigPins.rfScanRange]));
 }
+
+#define FREQUENCY_SCAN_MAX_TRIES 5
+float rf_freq_scan(std::function<bool()> on_step, int fxdFreq) {
+    float frequency = 0;
+    int idx = range_limits[bruceConfigPins.rfScanRange][0];
+    uint8_t attempt = 0;
+    int rssi = -80, rssiThreshold = -65;
+
+    FreqFound best_frequencies[FREQUENCY_SCAN_MAX_TRIES];
+    for (int i = 0; i < FREQUENCY_SCAN_MAX_TRIES; i++) {
+        best_frequencies[i].freq = 433.92;
+        best_frequencies[i].rssi = -75;
+    }
+
+    while (frequency <= 0 && !check(EscPress)) { // FastScan
+        if (on_step && on_step()) {
+            return 0; // Aborted by callback
+        }
+        previousMillis = millis();
+        if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
+            if (idx < range_limits[bruceConfigPins.rfScanRange][0] ||
+                idx > range_limits[bruceConfigPins.rfScanRange][1]) {
+                idx = range_limits[bruceConfigPins.rfScanRange][0];
+            }
+            float checkFrequency = subghz_frequency_list[idx];
+            setMHZ(checkFrequency);
+            tft.drawPixel(0, 0, 0); // To make sure CC1101 shared with TFT works properly
+            vTaskDelay(5 / portTICK_PERIOD_MS);
+            rssi = ELECHOUSE_cc1101.getRssi();
+            if (rssi > rssiThreshold) {
+                best_frequencies[attempt].freq = checkFrequency;
+                best_frequencies[attempt].rssi = rssi;
+                attempt++;
+                if (attempt >= FREQUENCY_SCAN_MAX_TRIES) {
+                    int max_index = 0;
+                    for (int i = 1; i < FREQUENCY_SCAN_MAX_TRIES; ++i) {
+                        if (best_frequencies[i].rssi > best_frequencies[max_index].rssi) { max_index = i; }
+                    }
+
+                    bruceConfigPins.setRfFreq(best_frequencies[max_index].freq, fxdFreq);
+                    frequency = best_frequencies[max_index].freq;
+                    Serial.println("Frequency Found: " + String(frequency));
+                    deinitRfModule();
+                    initRfModule("rx", frequency);
+                }
+            }
+            ++idx;
+        } else {
+
+            frequency = 433.92;
+            bruceConfigPins.setRfFreq(433.92, fxdFreq);
+        }
+    }
+    return frequency;
+}
