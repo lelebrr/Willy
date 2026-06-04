@@ -723,8 +723,8 @@ void configureWebServer() {
 void startWebUi(bool mode_ap) {
     bool keepWifiConnected = false;
     if (WiFi.status() != WL_CONNECTED) {
-        if (mode_ap) wifiConnectMenu(WIFI_AP);
-        else wifiConnectMenu(WIFI_STA);
+        if (mode_ap) WifiCommon::connectMenu(WIFI_AP);
+        else WifiCommon::connectMenu(WIFI_STA);
     } else {
         keepWifiConnected = true;
     }
@@ -764,7 +764,7 @@ void startWebUi(bool mode_ap) {
     if (closeServer) {
         stopWebUi();
         vTaskDelay(pdMS_TO_TICKS(100));
-        if (!keepWifiConnected) { wifiDisconnect(); }
+        if (!keepWifiConnected) { WifiCommon::disconnect(); }
     }
 #endif
 }

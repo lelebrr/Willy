@@ -312,7 +312,7 @@ const wifi_promiscuous_filter_t filter = {
 };
 
 void initPwngrid() {
-    ensureWifiPlatform();
+    WifiCommon::ensurePlatform();
     wifi_init_config_t WIFI_INIT_CONFIG = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init(&WIFI_INIT_CONFIG);
     esp_wifi_set_storage(WIFI_STORAGE_RAM);

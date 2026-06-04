@@ -60,14 +60,14 @@ void WifiMenu::optionsMenu() {
     }
     if (WiFi.status() != WL_CONNECTED) {
         options = {
-            Option("Conectar WiFi", lambdaHelper(wifiConnectMenu, WIFI_STA)),
+            Option("Conectar WiFi", lambdaHelper(WifiCommon::connectMenu, WIFI_STA)),
             Option("Iniciar WiFi AP", [=]() {
-                 wifiConnectMenu(WIFI_AP);
+                 WifiCommon::connectMenu(WIFI_AP);
                  displayInfo("pwd: " + bruceConfig.wifiAp.pwd, true);
              }),
         };
     }
-    if (WiFi.getMode() != WIFI_MODE_NULL)    options.push_back(Option("Desligar WiFi", wifiDisconnect));
+    if (WiFi.getMode() != WIFI_MODE_NULL)    options.push_back(Option("Desligar WiFi", WifiCommon::disconnect));
     if (WiFi.getMode() == WIFI_MODE_STA || WiFi.getMode() == WIFI_MODE_APSTA) {
         options.push_back(Option("Info AP", []() {
             wifi_ap_record_t info;
@@ -122,7 +122,7 @@ void WifiMenu::optionsMenu() {
     options.push_back({"Evil Portal", [=]() {
                            if (isWebUIActive || server) {
                                stopWebUi();
-                               wifiDisconnect();
+                               WifiCommon::disconnect();
                            }
                            EvilPortal();
                        }});
@@ -142,7 +142,7 @@ void WifiMenu::optionsMenu() {
                        }});
     options.push_back({"Escanear Hosts", [=]() {
                            bool doScan = true;
-                           if (!wifiConnected) doScan = wifiConnectMenu();
+                           if (!wifiConnected) doScan = WifiCommon::connectMenu();
 
                            if (doScan) {
                                esp_netif_t *esp_netinterface =

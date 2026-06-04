@@ -11,7 +11,7 @@
 
 static TaskHandle_t timezoneTaskHandle = NULL;
 
-void ensureWifiPlatform() {
+void WifiCommon::ensurePlatform() {
     static bool netifInitialized = false;
     static bool eventLoopCreated = false;
     static portMUX_TYPE platformMux = portMUX_INITIALIZER_UNLOCKED;
@@ -37,7 +37,7 @@ void ensureWifiPlatform() {
     }
 }
 
-bool _wifiConnect(const String &ssid, int encryption) {
+bool WifiCommon::_wifiConnect(const String &ssid, int encryption) {
     String password = bruceConfig.getWifiPassword(ssid);
     if (password == "" && encryption > 0) { password = keyboard(password, 63, "Network Password:", true); }
     bool connected = _connectToWifiNetwork(ssid, password);
@@ -53,7 +53,7 @@ bool _wifiConnect(const String &ssid, int encryption) {
         loopOptions(options);
 
         if (!retry) {
-            wifiDisconnect();
+            disconnect();
             return false;
         }
 
@@ -76,7 +76,7 @@ bool _wifiConnect(const String &ssid, int encryption) {
     return connected;
 }
 
-bool _connectToWifiNetwork(const String &ssid, const String &pwd) {
+bool WifiCommon::_connectToWifiNetwork(const String &ssid, const String &pwd) {
     drawMainBorderWithTitle("WiFi Connect");
     padprintln("");
     padprint("Connecting to: " + ssid + ".");
@@ -109,7 +109,7 @@ bool _connectToWifiNetwork(const String &ssid, const String &pwd) {
     return WiFi.status() == WL_CONNECTED;
 }
 
-bool _setupAP() {
+bool WifiCommon::_setupAP() {
     IPAddress AP_GATEWAY(172, 0, 0, 1);
     WiFi.softAPConfig(AP_GATEWAY, AP_GATEWAY, IPAddress(255, 255, 255, 0));
     WiFi.softAP(bruceConfig.wifiAp.ssid, bruceConfig.wifiAp.pwd, 6, 0, 4, false);
@@ -119,7 +119,7 @@ bool _setupAP() {
     return true;
 }
 
-void wifiDisconnect() {
+void WifiCommon::disconnect() {
     WiFi.softAPdisconnect(true); // turn off AP mode
     WiFi.disconnect(true, true); // turn off STA mode
     WiFi.mode(WIFI_OFF);         // enforces WIFI_OFF mode
@@ -127,7 +127,7 @@ void wifiDisconnect() {
     returnToMenu = true;
 }
 
-bool wifiConnectMenu(wifi_mode_t mode) {
+bool WifiCommon::connectMenu(wifi_mode_t mode) {
     if (WiFi.isConnected()) return false; // safeguard
 
     switch (mode) {
@@ -202,13 +202,13 @@ bool wifiConnectMenu(wifi_mode_t mode) {
     }
 
     if (returnToMenu) {
-        wifiDisconnect(); // Forced turning off the wifi module if exiting back to the menu
+        disconnect(); // Forced turning off the wifi module if exiting back to the menu
         return false;
     }
     return wifiConnected;
 }
 
-void wifiConnectTask(void *pvParameters) {
+void WifiCommon::connectTask(void *pvParameters) {
     if (WiFi.status() == WL_CONNECTED) return;
 
     WiFi.mode(WIFI_MODE_STA);
@@ -243,9 +243,9 @@ void wifiConnectTask(void *pvParameters) {
     return;
 }
 
-String checkMAC() { return String(WiFi.macAddress()); }
+String WifiCommon::checkMAC() { return String(WiFi.macAddress()); }
 
-bool wifiConnecttoKnownNet(void) {
+bool WifiCommon::connectToKnownNet(void) {
     if (WiFi.isConnected()) return true; // safeguard
     bool result = false;
     int nets;
@@ -281,7 +281,7 @@ bool wifiConnecttoKnownNet(void) {
     return result;
 }
 
-void updateTimezoneTask(void *pvParameters) {
+void WifiCommon::updateTimezoneTask(void *pvParameters) {
     // Wait a bit for connection to stabilize before updating timezone
     vTaskDelay(5000 / portTICK_PERIOD_MS);
 

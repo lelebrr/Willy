@@ -997,7 +997,7 @@ void sniffer_setup() {
     beaconLastSeen.clear(); // ensure starts empty
 
     /* setup wifi */
-    ensureWifiPlatform();
+    WifiCommon::ensurePlatform();
     nvs_flash_init();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -1314,7 +1314,7 @@ Exit:
     sniffer_wait_for_flush(1000);
     closeRawFile();
     closeDeauthFile();
-    wifiDisconnect();
+    WifiCommon::disconnect();
     vTaskDelay(1 / portTICK_RATE_MS);
 }
 
