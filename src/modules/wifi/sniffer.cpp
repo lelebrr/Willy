@@ -1296,11 +1296,11 @@ void sniffer_setup() {
             Serial.println("<<---- Starting Deauthentication Process ---->>");
             for (auto registeredBeacon : registeredBeacons) {
                 if (registeredBeacon.channel == ch) {
-                    memcpy(&ap_record.bssid, registeredBeacon.MAC, 6);
+                    wifi_ap_record_t local_ap_record = {};
+                    memcpy(&local_ap_record.bssid, registeredBeacon.MAC, 6);
                     wsl_bypasser_send_raw_frame(
-                        &ap_record, registeredBeacon.channel
+                        &local_ap_record, registeredBeacon.channel
                     ); // writes the buffer with the information
-                    // XXX: ap_record reused between this and wifi_atks.h
                     send_raw_frame(deauth_frame, 26);
                     deauth_sent = true;
                     deauth_counter++;
