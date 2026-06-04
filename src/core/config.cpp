@@ -1,6 +1,7 @@
 #include "config.h"
 #include "mifare_keys_manager.h"
 #include "sd_functions.h"
+#include <algorithm>
 #include <esp_pm.h>
 #include <algorithm>
 
