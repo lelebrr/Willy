@@ -1,6 +1,7 @@
 #include "rf_scan.h"
 #include "core/led_control.h"
 #include "core/sd_functions.h"
+#include "core/file_utils.h"
 #include "core/type_convertion.h"
 #include "rf_send.h"
 #include <globals.h>

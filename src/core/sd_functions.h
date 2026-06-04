@@ -59,6 +59,5 @@ bool getFsStorage(FS *&fs);
 
 void fileInfo(FS fs, String filepath);
 
-File createNewFile(FS *&fs, String filepath, String filename);
 
 #endif
