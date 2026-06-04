@@ -426,6 +426,7 @@ void padprintf(const char *format, ...) {
     tft.setCursor(BORDER_PAD_X, tft.getCursorY());
     tft.printf("%s", buffer);
 }
+// --- BEGIN_PADPRINT_TEST_EXTRACT ---
 
 void padprint(const String &s, int16_t padx) {
     tft.setCursor(padx * BORDER_PAD_X, tft.getCursorY());
@@ -472,6 +473,7 @@ void padprint(double n, int digits, int16_t padx) {
     tft.print(n, digits);
 }
 
+// --- END_PADPRINT_TEST_EXTRACT ---
 void padprintln(const String &s, int16_t padx) {
     if (s.isEmpty()) {
         tft.setCursor(padx * BORDER_PAD_X, tft.getCursorY());
