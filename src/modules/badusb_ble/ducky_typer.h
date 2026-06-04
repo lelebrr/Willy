@@ -30,6 +30,7 @@ void ducky_stopKb(HIDInterface *&hid, bool ble);
 
 // Parses a file to run in the badUSB
 void key_input(FS fs, String bad_script, HIDInterface *hid);
+void key_input(Stream *stream, String bad_script_name, HIDInterface *hid);
 
 // Sends a simple command through USB
 void key_input_from_string(String text);
