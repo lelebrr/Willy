@@ -427,13 +427,29 @@ String readSmallFile(FS &fs, String filepath) {
     if (!file) return "";
 
     size_t fileSize = file.size();
-    if (fileSize > SAFE_STACK_BUFFER_SIZE || fileSize > ESP.getFreeHeap()) {
+    uint32_t availableMemory = psramFound() ? ESP.getFreePsram() : ESP.getFreeHeap();
+    if (fileSize > SAFE_STACK_BUFFER_SIZE || fileSize > availableMemory) {
         displayError("Arquivo muito grande", true);
         return "";
     }
-    // TODO: if(psramFound()) -> use PSRAM instead
-
-    fileContent = file.readString();
+    char *buf = (char *)(psramFound() ? ps_malloc(fileSize + 1) : malloc(fileSize + 1));
+    if (buf) {
+        size_t bytesRead = 0;
+        while (bytesRead < fileSize && file.available()) {
+            size_t toRead = fileSize - bytesRead;
+            if (toRead > 512) { toRead = 512; }
+            int actuallyRead = file.read((uint8_t *)(buf + bytesRead), toRead);
+            if (actuallyRead <= 0) {
+                break;
+            }
+            bytesRead += actuallyRead;
+        }
+        buf[bytesRead] = '\0';
+        fileContent = String(buf);
+        free(buf);
+    } else {
+        fileContent = file.readString();
+    }
 
     file.close();
     return fileContent;
