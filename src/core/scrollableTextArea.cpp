@@ -31,7 +31,7 @@ ScrollableTextArea::ScrollableTextArea(
 }
 
 ScrollableTextArea::~ScrollableTextArea() {
-    // We don't use Sprites for big things, unfortunetly theres no much RAM in all devices
+    clear();
 }
 
 void ScrollableTextArea::setup() {
@@ -71,7 +71,8 @@ void ScrollableTextArea::scrollToLine(size_t lineNumber) {
 }
 
 String ScrollableTextArea::getLine(size_t lineNumber) {
-    return linesBuffer[(lineNumber >= linesBuffer.size()) ? linesBuffer.size() : lineNumber];
+    if (lineNumber >= linesBuffer.size()) return "";
+    return String(linesBuffer[lineNumber]);
 }
 
 size_t ScrollableTextArea::getMaxLines() { return linesBuffer.size(); }
@@ -99,7 +100,7 @@ void ScrollableTextArea::update(bool force) {
 }
 
 void ScrollableTextArea::fromFile(File file) {
-    linesBuffer.clear();
+    clear();
     while (file.available()) addLine(file.readStringUntil('\n'));
 
     draw(true);
@@ -109,6 +110,9 @@ void ScrollableTextArea::fromFile(File file) {
 
 void ScrollableTextArea::clear() {
     firstVisibleLine = 0;
+    for (char *line : linesBuffer) {
+        if(line) free(line);
+    }
     linesBuffer.clear();
 }
 
@@ -133,7 +137,8 @@ void ScrollableTextArea::fromString(const String &text) {
 // for devices it will act as a scrollable text area
 void ScrollableTextArea::addLine(const String &text) {
     if (text.isEmpty()) {
-        linesBuffer.emplace_back("");
+        char *emptyStr = (char *)(psramFound() ? ps_malloc(1) : malloc(1));
+        if (emptyStr) { emptyStr[0] = '\0'; linesBuffer.push_back(emptyStr); }
         return;
     }
 
@@ -154,7 +159,11 @@ void ScrollableTextArea::addLine(const String &text) {
         }
         if (buff.endsWith("\r")) buff.remove(buff.length() - 1);
 
-        linesBuffer.emplace_back(buff);
+        char *newStr = (char *)(psramFound() ? ps_malloc(buff.length() + 1) : malloc(buff.length() + 1));
+        if (newStr) {
+            strcpy(newStr, buff.c_str());
+            linesBuffer.push_back(newStr);
+        }
         firstLine = false;
     }
 
