@@ -867,7 +867,8 @@ void sendRawCommand(uint16_t frequency, String rawData, bool hideDefaultUI) {
     }
 
     uint16_t dataBufferSize = 1;
-    for (int i = 0; i < rawData.length(); i++) {
+    int rawDataLen = rawData.length();
+    for (int i = 0; i < rawDataLen; i++) {
         if (rawData[i] == ' ') dataBufferSize += 1;
     }
     uint16_t *dataBuffer = (uint16_t *)malloc((dataBufferSize) * sizeof(uint16_t));
