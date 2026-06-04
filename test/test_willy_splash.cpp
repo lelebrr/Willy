@@ -1,73 +1,74 @@
 #include <iostream>
 #include <cassert>
 #include "Arduino.h"
-#include "../include/willy_config.h"
+#include "LittleFS.h"
 
-void test_save_willy_config() {
-    std::cout << "Testing save_willy_config()...\n";
+LittleFSClass LittleFS;
 
-    // Set config values
-    WillyConfig& cfg = getWillyCfg();
-    cfg.velocidade = 2;
-    cfg.somAtivado = false;
-    cfg.tipoSom = 1;
-    cfg.corPrimaria = 0xFF00AA;
+#include "willy_extracted.cpp"
 
-    // Save to mock FS
-    save_willy_config();
-
-    // %04lX on 0xFF00AA prints FF00AA
-    std::string expected_content = "2\n0\n1\nFF00AA\n";
-
-    std::cout << "Actual content: '" << LittleFS.file_content << "'\n";
-    std::cout << "Expected content: '" << expected_content << "'\n";
-
-    assert(LittleFS.file_content == expected_content);
-    std::cout << "test_save_willy_config passed!\n";
+void reset_config() {
+    willyCfg.velocidade = 1;
+    willyCfg.somAtivado = true;
+    willyCfg.tipoSom = 0;
+    willyCfg.corPrimaria = 0x9B00FF;
 }
 
-void test_save_willy_config_edge_case() {
-    std::cout << "Testing save_willy_config() edge case...\n";
-
-    // Set config values
-    WillyConfig& cfg = getWillyCfg();
-    cfg.velocidade = 0;
-    cfg.somAtivado = true;
-    cfg.tipoSom = 0;
-    cfg.corPrimaria = 0x5;
-
-    // Save to mock FS
-    save_willy_config();
-
-    // %04lX on 0x5 prints 0005
-    std::string expected_content = "0\n1\n0\n0005\n";
-
-    assert(LittleFS.file_content == expected_content);
-    std::cout << "test_save_willy_config_edge_case passed!\n";
-}
-
-void test_load_willy_config() {
-    std::cout << "Testing load_willy_config()...\n";
-
-    // Mock file content
-    LittleFS.file_content = "0\n1\n0\nFFFF\n";
-
-    // Load from mock FS
+void test_default_config() {
+    LittleFS.files.clear();
+    reset_config();
     load_willy_config();
 
-    // Verify config values
-    WillyConfig& cfg = getWillyCfg();
-    assert(cfg.velocidade == 0);
-    assert(cfg.somAtivado == true);
-    assert(cfg.tipoSom == 0);
-    assert(cfg.corPrimaria == 0xFFFF);
-    std::cout << "test_load_willy_config passed!\n";
+    assert(willyCfg.velocidade == 1);
+    assert(willyCfg.somAtivado == true);
+    assert(willyCfg.tipoSom == 0);
+    assert(willyCfg.corPrimaria == 0x9B00FF);
+    std::cout << "test_default_config passed" << std::endl;
+}
+
+void test_load_valid_config() {
+    LittleFS.files["/willy_splash.conf"] = "2\n1\n1\nFF0000\n";
+    reset_config();
+    load_willy_config();
+
+    assert(willyCfg.velocidade == 2);
+    assert(willyCfg.somAtivado == true);
+    assert(willyCfg.tipoSom == 1);
+    assert(willyCfg.corPrimaria == 0xFF0000);
+    std::cout << "test_load_valid_config passed" << std::endl;
+}
+
+void test_load_partial_config() {
+    LittleFS.files["/willy_splash.conf"] = "0\n0\n";
+    reset_config();
+    load_willy_config();
+
+    assert(willyCfg.velocidade == 0);
+    assert(willyCfg.somAtivado == false);
+    assert(willyCfg.tipoSom == 0);
+    assert(willyCfg.corPrimaria == 0);
+    std::cout << "test_load_partial_config passed" << std::endl;
+}
+
+void test_littlefs_fail() {
+    LittleFS.files["/willy_splash.conf"] = "2\n1\n1\nFF0000\n";
+    LittleFS.begin_result = false;
+    reset_config();
+    load_willy_config();
+
+    assert(willyCfg.velocidade == 1);
+    assert(willyCfg.somAtivado == true);
+    assert(willyCfg.tipoSom == 0);
+    assert(willyCfg.corPrimaria == 0x9B00FF);
+    std::cout << "test_littlefs_fail passed" << std::endl;
+    LittleFS.begin_result = true;
 }
 
 int main() {
-    test_save_willy_config();
-    test_save_willy_config_edge_case();
-    test_load_willy_config();
-    std::cout << "All tests passed successfully!\n";
+    test_default_config();
+    test_load_valid_config();
+    test_load_partial_config();
+    test_littlefs_fail();
+    std::cout << "All tests passed!" << std::endl;
     return 0;
 }

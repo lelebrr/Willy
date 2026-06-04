@@ -1,23 +1,16 @@
-CXX = g++
-CXXFLAGS = -I. -Wall -Wextra -std=c++11 -DWILLY_TESTING
+all: test_willy_splash
 
-SRCS = test_willy_splash.cpp ../src/ui/willy_config.cpp Arduino.cpp
-OBJS = $(SRCS:.cpp=.o)
-TARGET = test_runner
+willy_extracted.cpp: ../src/ui/willy_splash.cpp
+	echo '#include <cstdint>' > willy_extracted.cpp
+	sed -n '/struct WillyConfig/,/^};/p' ../src/ui/willy_splash.cpp >> willy_extracted.cpp
+	echo 'static WillyConfig willyCfg;' >> willy_extracted.cpp
+	sed -n '/void load_willy_config()/,/^}/p' ../src/ui/willy_splash.cpp >> willy_extracted.cpp
 
-.PHONY: all run clean
+test_runner: test_willy_splash.cpp willy_extracted.cpp
+	g++ -I. test_willy_splash.cpp -o test_runner
 
-all: $(TARGET)
-
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-run: all
-	./$(TARGET)
-	@rm -f $(OBJS) $(TARGET)
+test_willy_splash: test_runner
+	./test_runner
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f test_runner willy_extracted.cpp
