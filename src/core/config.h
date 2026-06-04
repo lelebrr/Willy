@@ -183,8 +183,7 @@ public:
     void validateBadUSBBLEKeyDelay();
     void setBadUSBBLEShowOutput(bool value);
     void addDisabledMenu(String value);
-    // TODO: removeDisabledMenu(String value);
-    bool setSetting(const String& name, const String& value);
+    void removeDisabledMenu(String value);
 
     void addWebUISession(const String &token);
     void removeWebUISession(const String &token);

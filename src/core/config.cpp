@@ -2,6 +2,7 @@
 #include "mifare_keys_manager.h"
 #include "sd_functions.h"
 #include <esp_pm.h>
+#include <algorithm>
 
 const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
 const String ENC_PREFIX = "_ENC_";
@@ -821,6 +822,14 @@ void BruceConfig::addDisabledMenu(String value) {
     // TODO: check if duplicate
     disabledMenus.push_back(value);
     saveFile();
+}
+
+void BruceConfig::removeDisabledMenu(String value) {
+    auto it = std::find(disabledMenus.begin(), disabledMenus.end(), value);
+    if (it != disabledMenus.end()) {
+        disabledMenus.erase(it);
+        saveFile();
+    }
 }
 
 void BruceConfig::addQrCodeEntry(const String &menuName, const String &content) {
