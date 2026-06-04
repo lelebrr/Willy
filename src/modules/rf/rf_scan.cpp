@@ -321,7 +321,7 @@ void RFScan::replay_signal(bool asRaw) {
 void RFScan::save_signal(bool asRaw) {
     asRaw = asRaw || received.protocol == "RAW";
     Serial.println(asRaw ? "RCSwitch_SaveSignal RAW true" : "RCSwitch_SaveSignal RAW false");
-    decimalToHexString(received.key, hexString);
+    decimalToHexString(received.key, hexString, sizeof(hexString));
     RCSwitch_SaveSignal(found_freq, received, asRaw, hexString, autoSave);
     lastSavedKey = received.key;
 }
@@ -385,7 +385,7 @@ void display_signal_data(RfCodes received) {
     else padprintln("Protocolo: " + String(received.protocol));
 
     if (received.key > 0) {
-        decimalToHexString(received.key, hexString);
+        decimalToHexString(received.key, hexString, sizeof(hexString));
         if (received.protocol == "RAW") {
             padprintln("Comprim.: " + String(received.Bit) + " transitions");
             // tft.setCursor(tft.getCursorX(), tft.getCursorY() + 2);
@@ -397,7 +397,8 @@ void display_signal_data(RfCodes received) {
             padprintln("Binario: " + String(b));
         }
     } else {
-        strcpy(hexString, "Codigo nao identif.");
+        strncpy(hexString, "Codigo nao identif.", sizeof(hexString));
+        hexString[sizeof(hexString) - 1] = '\0';
         padprintln("Comprim.: Codigo nao identif.");
         padprintln("Comp. gravacao: " + String(transitions) + " transitions");
     }
@@ -594,7 +595,7 @@ RestartRec:
                 }
                 // Serial.println(received.protocol);
                 // Serial.println(received.data);
-                decimalToHexString(received.key, hexString);
+                decimalToHexString(received.key, hexString, sizeof(hexString));
 
                 display_info(received, 1, raw);
             }
@@ -669,7 +670,7 @@ RestartRec:
                     addToRecentCodes(received);
                     goto RestartRec;
                 } else if (chosen == 2) {
-                    decimalToHexString(received.key, hexString);
+                    decimalToHexString(received.key, hexString, sizeof(hexString));
                     RCSwitch_SaveSignal(frequency, received, raw, hexString);
                     vTaskDelay(1000 / portTICK_PERIOD_MS);
                     drawMainBorder();

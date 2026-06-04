@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 String hexStrToBinStr(const String &hexStr);
-void decimalToHexString(uint64_t decimal, char *output);
+void decimalToHexString(uint64_t decimal, char *output, size_t outputSize);
 uint8_t hexCharToDecimal(char c);
 uint32_t hexStringToDecimal(const char *hexString);
 char *dec2binWzerofill(uint64_t Dec, unsigned int bitLength);

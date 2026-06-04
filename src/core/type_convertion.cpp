@@ -35,17 +35,21 @@ String hexStrToBinStr(const String &hexStr) {
     return binStr;
 }
 
-void decimalToHexString(uint64_t decimal, char *output) {
+void decimalToHexString(uint64_t decimal, char *output, size_t outputSize) {
+    if (outputSize < 24) { // 16 digits + 7 spaces + null terminator
+        if (outputSize > 0) output[0] = '\0';
+        return;
+    }
+
     char hexDigits[] = "0123456789ABCDEF";
-    char temp[65];
+    char temp[16];
     int index = 15;
 
-    // Initialize tem string with zeros
-    for (int i = 0; i < 64; i++) { temp[i] = '0'; }
-    temp[65] = '\0';
+    // Initialize temp string with zeros
+    for (int i = 0; i < 16; i++) { temp[i] = '0'; }
 
     // Convert decimal to hexadecimal
-    while (decimal > 0) {
+    while (decimal > 0 && index >= 0) {
         temp[index--] = hexDigits[decimal % 16];
         decimal /= 16;
     }
