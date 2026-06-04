@@ -8,6 +8,7 @@
 #include "type_convertion.h"
 #include <globals.h>
 
+// --- BEGIN_XOR_TEST_EXTRACT ---
 String xorEncryptDecryptMD5(const String &input, const String &password, const int MD5_PASSES) {
     md5_context_t ctx;
     uint8_t md5Hash[16];
@@ -25,6 +26,7 @@ String xorEncryptDecryptMD5(const String &input, const String &password, const i
 
     return output;
 }
+// --- END_XOR_TEST_EXTRACT ---
 
 bool isValidAscii(const String &text) {
     for (int i = 0; i < text.length(); i++) {
@@ -151,6 +153,7 @@ String readDecryptedFile(FS &fs, String filepath) {
 
 // void writeEncryptedFile(FS &fs, String filepath, String& plaintext)
 
+// --- BEGIN_PASSWORDS_TEST_EXTRACT ---
 String encryptString(String &plaintext, const String &password_str) {
     String dataStr = xorEncryptDecryptMD5(plaintext, password_str, 10);
     String dataStrHex = "";
@@ -161,7 +164,7 @@ String encryptString(String &plaintext, const String &password_str) {
         for (size_t i = 0; i < dataStr.length(); i++) {
             uint8_t c = (uint8_t)dataStr[i];
             if (c < 16) {
-                char hex[3] = { hexChars[c & 0x0F], ' ', '\0' };
+                char hex[4] = { '0', hexChars[c & 0x0F], ' ', '\0' };
                 dataStrHex += hex;
             } else {
                 char hex[4] = { hexChars[c >> 4], hexChars[c & 0x0F], ' ', '\0' };
@@ -179,6 +182,7 @@ String encryptString(String &plaintext, const String &password_str) {
 
     return out;
 }
+// --- END_PASSWORDS_TEST_EXTRACT ---
 
 /* OLD:
 String decryptString(String& cypertext, const String& password_str)
