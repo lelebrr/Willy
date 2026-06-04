@@ -64,3 +64,11 @@ String macToString(const uint8_t *mac) {
     sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     return String(buf);
 }
+
+// Helper function to convert IPAddress to byte array
+void toBytes(IPAddress ip, uint8_t *bytes) {
+    bytes[0] = ip[0];
+    bytes[1] = ip[1];
+    bytes[2] = ip[2];
+    bytes[3] = ip[3];
+}
