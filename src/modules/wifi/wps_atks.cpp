@@ -498,7 +498,8 @@ void wpsPinBruteForceNative() {
             attempts++;
 
             // Try connection with this PIN
-            strcpy(wps_config.pin, pin_buf);
+            strncpy(wps_config.pin, pin_buf, sizeof(wps_config.pin) - 1);
+            wps_config.pin[sizeof(wps_config.pin) - 1] = '\0';
             esp_wifi_wps_enable(&wps_config);
             esp_wifi_wps_start(0);
 
