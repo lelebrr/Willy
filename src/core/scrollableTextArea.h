@@ -37,8 +37,7 @@ public:
 
     size_t firstVisibleLine;
     size_t lastVisibleLine;
-    /// TODO: Change to std::vector<char *> and alloc to PSRAM if possible
-    std::vector<String> linesBuffer;
+    std::vector<char *> linesBuffer;
 
 private:
     bool _redraw;
