@@ -128,7 +128,7 @@ void WifiMenu::optionsMenu() {
                        }});
     // options.push_back({"ReverseShell", [=]()       { ReverseShell(); }});
 #ifndef LITE_VERSION
-    options.push_back(Option("Ouvir TCP", listenTcpPort));
+    options.push_back(Option("Ouvir TCP", []() { listenTcpPort(); }));
     options.push_back(Option("Cliente TCP", clientTCP));
     options.push_back(Option("TelNET", telnet_setup));
     options.push_back(Option("SSH", lambdaHelper(ssh_setup, String(""))));

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "core/mykeyboard.h"
 
-void listenTcpPort();
+void listenTcpPort(int defaultPort = 0);
 void clientTCP();
 
 #endif // TCP_UTILS_H
