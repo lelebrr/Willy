@@ -65,7 +65,6 @@ String macToString(const uint8_t *mac) {
     return String(buf);
 }
 
-// Helper function to convert IPAddress to byte array
 void toBytes(IPAddress ip, uint8_t *bytes) {
     bytes[0] = ip[0];
     bytes[1] = ip[1];
