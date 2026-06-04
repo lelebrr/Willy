@@ -16,3 +16,5 @@ pre_build_*.py
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+setup_gpio_impl.cpp
+test_runner
