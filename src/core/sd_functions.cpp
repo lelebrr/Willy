@@ -28,6 +28,7 @@ std::vector<FileList> fileList;
 ** Function name: setupSdCard
 ** Description:   Start SD Card
 ***************************************************************************************/
+// --- BEGIN_SD_SETUP_TEST_EXTRACT ---
 bool setupSdCard() {
 #ifndef USE_SD_MMC
     if (bruceConfigPins.SDCARD_bus.sck < 0) {
@@ -146,6 +147,7 @@ bool setupSdCard() {
         return true;
     }
 }
+// --- END_SD_SETUP_TEST_EXTRACT ---
 
 // --- BEGIN_GET_HIERARCHICAL_PATH_TEST_EXTRACT ---
 /***************************************************************************************
@@ -1003,6 +1005,7 @@ void viewFile(FS fs, String filepath) {
 **  Function: checkLittleFsSize
 **  Check if there are more then 4096 bytes available for storage
 **********************************************************************/
+// --- BEGIN_SD_FS_TEST_EXTRACT ---
 bool checkLittleFsSize() {
     if ((LittleFS.totalBytes() - LittleFS.usedBytes()) < 4096) {
         displayError("LittleFS is Full", true);
@@ -1029,6 +1032,7 @@ bool getFsStorage(FS *&fs) {
 
     return true;
 }
+// --- END_SD_FS_TEST_EXTRACT ---
 
 /*********************************************************************
 **  Function: fileInfo
