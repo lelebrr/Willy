@@ -329,12 +329,9 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         String AudioFormatLabel = "AUDIO";
         int lastSlash = filepath.lastIndexOf('/');
         int lastDot = filepath.lastIndexOf('.');
-        if (lastDot > lastSlash) {
+        if (lastDot != -1 && lastDot > lastSlash && lastDot < filepath.length() - 1) {
             AudioFormatLabel = filepath.substring(lastDot + 1);
             AudioFormatLabel.toUpperCase();
-            if (AudioFormatLabel.length() > 5) {
-                AudioFormatLabel = AudioFormatLabel.substring(0, 5);
-            }
         }
         int textWidth = AudioFormatLabel.length() * 12; // textSize(2): 6 pixel base * 2 = 12 pixel per char
         int textHeight = 16;                            // textSize(2): 8 pixel base * 2 = 16 pixel
