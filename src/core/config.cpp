@@ -896,3 +896,43 @@ String BruceConfig::decryptString(const String &input) const {
     }
     return output;
 }
+
+
+bool BruceConfig::setSetting(const String& name, const String& value) {
+    static const std::map<String, std::function<void(BruceConfig*, const String&)>> settingsMap = {
+        {"priColor", [](BruceConfig* cfg, const String& val) { cfg->setUiColor(val.toInt()); }},
+        {"dimmerSet", [](BruceConfig* cfg, const String& val) { cfg->setDimmer(val.toInt()); }},
+        {"bright", [](BruceConfig* cfg, const String& val) { cfg->setBright(val.toInt()); }},
+        {"tmz", [](BruceConfig* cfg, const String& val) { cfg->setTmz(val.toFloat()); }},
+        {"soundEnabled", [](BruceConfig* cfg, const String& val) { cfg->setSoundEnabled(val.toInt()); }},
+        {"wifiAtStartup", [](BruceConfig* cfg, const String& val) { cfg->setWifiAtStartup(val.toInt()); }},
+        {"webUI", [](BruceConfig* cfg, const String& val) {
+            cfg->setWebUICreds(
+                val.substring(0, val.indexOf(",")),
+                val.substring(val.indexOf(",") + 1)
+            );
+        }},
+        {"wifiAp", [](BruceConfig* cfg, const String& val) {
+            cfg->setWifiApCreds(
+                val.substring(0, val.indexOf(",")),
+                val.substring(val.indexOf(",") + 1)
+            );
+        }},
+        {"wifi", [](BruceConfig* cfg, const String& val) {
+            cfg->addWifiCredential(
+                val.substring(0, val.indexOf(",")),
+                val.substring(val.indexOf(",") + 1)
+            );
+        }},
+        {"wigleBasicToken", [](BruceConfig* cfg, const String& val) { cfg->setWigleBasicToken(val); }},
+        {"devMode", [](BruceConfig* cfg, const String& val) { cfg->setDevMode(val.toInt()); }},
+        {"disabledMenus", [](BruceConfig* cfg, const String& val) { cfg->addDisabledMenu(val); }}
+    };
+
+    auto it = settingsMap.find(name);
+    if (it != settingsMap.end()) {
+        it->second(this, value);
+        return true;
+    }
+    return false;
+}

@@ -32,50 +32,10 @@ uint32_t settingsCallback(cmd *c) {
         return true;
     }
 
-    // TODO: improve this logic and move to BruceConfig
-    if (setting_name == "priColor") bruceConfig.setUiColor(setting_value.toInt());
-    if (setting_name == "rot") bruceConfigPins.setRotation(setting_value.toInt());
-    if (setting_name == "dimmerSet") bruceConfig.setDimmer(setting_value.toInt());
-    if (setting_name == "bright") bruceConfig.setBright(setting_value.toInt());
-    if (setting_name == "tmz") bruceConfig.setTmz(setting_value.toFloat());
-    if (setting_name == "soundEnabled") bruceConfig.setSoundEnabled(setting_value.toInt());
-    if (setting_name == "wifiAtStartup") bruceConfig.setWifiAtStartup(setting_value.toInt());
-    if (setting_name == "webUI") {
-        bruceConfig.setWebUICreds(
-            setting_value.substring(0, setting_value.indexOf(",")),
-            setting_value.substring(setting_value.indexOf(",") + 1)
-        );
+    if (!bruceConfig.setSetting(setting_name, setting_value) &&
+        !bruceConfigPins.setSetting(setting_name, setting_value)) {
+        serialDevice->println("Setting update failed or unsupported via serial: " + setting_name);
     }
-    if (setting_name == "wifiAp") {
-        bruceConfig.setWifiApCreds(
-            setting_value.substring(0, setting_value.indexOf(",")),
-            setting_value.substring(setting_value.indexOf(",") + 1)
-        );
-    }
-    if (setting_name == "wifi") {
-        bruceConfig.addWifiCredential(
-            setting_value.substring(0, setting_value.indexOf(",")),
-            setting_value.substring(setting_value.indexOf(",") + 1)
-        );
-    }
-    if (setting_name == "bleName") bruceConfigPins.setBleName(setting_value);
-    if (setting_name == "irTx") bruceConfigPins.setIrTxPin(setting_value.toInt());
-    if (setting_name == "irTxRepeats")
-        bruceConfigPins.setIrTxRepeats(static_cast<uint8_t>(setting_value.toInt()));
-    if (setting_name == "irRx") bruceConfigPins.setIrRxPin(setting_value.toInt());
-    if (setting_name == "rfTx") bruceConfigPins.setRfTxPin(setting_value.toInt());
-    if (setting_name == "rfRx") bruceConfigPins.setRfRxPin(setting_value.toInt());
-    if (setting_name == "rfModule")
-        bruceConfigPins.setRfModule(static_cast<RFModules>(setting_value.toInt()));
-    if (setting_name == "rfFreq" && setting_value.toFloat())
-        bruceConfigPins.setRfFreq(setting_value.toFloat());
-    if (setting_name == "rfFxdFreq") bruceConfigPins.setRfFxdFreq(setting_value.toInt());
-    if (setting_name == "rfScanRange") bruceConfigPins.setRfScanRange(setting_value.toInt());
-    if (setting_name == "rfidModule")
-        bruceConfigPins.setRfidModule(static_cast<RFIDModules>(setting_value.toInt()));
-    if (setting_name == "wigleBasicToken") bruceConfig.setWigleBasicToken(setting_value);
-    if (setting_name == "devMode") bruceConfig.setDevMode(setting_value.toInt());
-    if (setting_name == "disabledMenus") bruceConfig.addDisabledMenu(setting_value);
 
     return true;
 }
