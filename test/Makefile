@@ -1,13 +1,23 @@
 CXX = g++
-CXXFLAGS = -I. -std=c++11
+CXXFLAGS = -I. -Wall -Wextra -std=c++11 -DWILLY_TESTING
 
-all: test_runner
+SRCS = test_willy_splash.cpp ../src/ui/willy_config.cpp Arduino.cpp
+OBJS = $(SRCS:.cpp=.o)
+TARGET = test_runner
 
-setup_gpio_impl.cpp: ../src/main.cpp
-	python3 extract_test.py
+.PHONY: all run clean
 
-test_runner: test_main_setup_gpio.cpp setup_gpio_impl.cpp
-	$(CXX) $(CXXFLAGS) test_main_setup_gpio.cpp -o $@
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+run: all
+	./$(TARGET)
+	@rm -f $(OBJS) $(TARGET)
 
 clean:
-	rm -f test_runner setup_gpio_impl.cpp
+	rm -f $(OBJS) $(TARGET)
