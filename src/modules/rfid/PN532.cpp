@@ -13,6 +13,7 @@
 #include "core/display.h"
 #include "core/i2c_finder.h"
 #include "core/sd_functions.h"
+#include "core/file_utils.h"
 #include "core/type_convertion.h"
 #include "willy_logger.h"
 

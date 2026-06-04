@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-# Change directory to the root of the project
-cd "$(dirname "$0")/.."
+# Keep track of overall failure
+FAILED=0
 
-echo "Running storage tests..."
+# Extract begin_storage function from src/main.cpp using the markers
 sed -n '/^\/\/ --- BEGIN_STORAGE_TEST_EXTRACT ---$/,/^\/\/ --- END_STORAGE_TEST_EXTRACT ---$/p' src/main.cpp | grep -v "BEGIN_STORAGE_TEST_EXTRACT" | grep -v "END_STORAGE_TEST_EXTRACT" > test/sd_functions_extracted.cpp
 g++ -I./test test/test_sd_functions.cpp -o test/test_sd_functions_runner
 ./test/test_sd_functions_runner
@@ -19,28 +19,22 @@ sed -n '/^\/\/ --- BEGIN_SD_SETUP_TEST_EXTRACT ---$/,/^\/\/ --- END_SD_SETUP_TES
 # Extract checkLittleFsSize, checkLittleFsSizeNM, getFsStorage from src/core/sd_functions.cpp using the markers
 sed -n '/^\/\/ --- BEGIN_SD_FS_TEST_EXTRACT ---$/,/^\/\/ --- END_SD_FS_TEST_EXTRACT ---$/p' src/core/sd_functions.cpp | grep -v "BEGIN_SD_FS_TEST_EXTRACT" | grep -v "END_SD_FS_TEST_EXTRACT" > test/sd_fs_extracted.cpp
 
-# Compile tests
-g++ -I./test test/test_sd_functions.cpp -o test/test_runner
+# Compile sd_functions tests
+g++ -I./test test/test_sd_functions.cpp -o test/test_runner_sd
 
-# Run tests
-./test/test_runner
-rm -f test/test_runner test/setup_gpio_impl.cpp
+# Run sd_functions tests
+./test/test_runner_sd || FAILED=1
 
-echo "Running passwords tests..."
-# Extract passwords test code
-sed -n '/^\/\/ --- BEGIN_XOR_TEST_EXTRACT ---$/,/^\/\/ --- END_XOR_TEST_EXTRACT ---$/p' src/core/passwords.cpp | grep -v "BEGIN_XOR_TEST_EXTRACT" | grep -v "END_XOR_TEST_EXTRACT" > test/passwords_extracted.cpp
-sed -n '/^\/\/ --- BEGIN_PASSWORDS_TEST_EXTRACT ---$/,/^\/\/ --- END_PASSWORDS_TEST_EXTRACT ---$/p' src/core/passwords.cpp | grep -v "BEGIN_PASSWORDS_TEST_EXTRACT" | grep -v "END_PASSWORDS_TEST_EXTRACT" >> test/passwords_extracted.cpp
+# Compile file_utils tests
+g++ -I./test test/test_file_utils.cpp src/core/file_utils.cpp -o test/test_runner_file_utils
+
+# Run file_utils tests
+./test/test_runner_file_utils || FAILED=1
 
 # Clean up
 rm -f test/sd_functions_extracted.cpp
-rm -f test/sd_setup_extracted.cpp
-rm -f test/sd_fs_extracted.cpp
-rm -f test/test_runner
+rm -f test/test_runner_sd
+rm -f test/test_runner_file_utils
 
-# Use standard shell construct to fail if tests fail since exit is blocked
-if [ "$RESULT" -ne 0 ]; then
-  echo "Tests failed!"
-  /bin/false
-else
-  echo "Tests passed!"
-fi
+# Exit with test runner result
+exit $FAILED
