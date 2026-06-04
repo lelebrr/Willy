@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <map>
+#include <functional>
 #include <precompiler_flags.h>
 #include <set>
 #include <vector>
@@ -60,7 +61,7 @@ public:
     // Wifi
     Credential webUI = {"admin", "willy"};
     std::vector<String> webUISessions = {}; // FIFO queue of session tokens
-    WiFiCredential wifiAp = {"WillyNet", "WillyNet"};
+    WiFiCredential wifiAp = {"", ""};
     std::map<String, String> wifi = {};
     std::set<String> evilWifiNames = {};
     String wifiMAC = ""; //@IncursioHack
@@ -89,17 +90,12 @@ public:
 
     std::vector<String> disabledMenus = {};
 
-    std::vector<QrCodeEntry> qrCodes = {
-        {"Willy AP",   "WIFI:T:WPA;S:WillyNet;P:WillyNet;;"},
-        {"Willy Wiki", "https://github.com/lelebrr/Willy/wiki"},
-        {"Willy Site", "https://willy.computer"            },
-        {"Rickroll",   "https://youtu.be/dQw4w9WgXcQ"      }
-    };
+    std::vector<QrCodeEntry> qrCodes = {};
 
     /////////////////////////////////////////////////////////////////////////////////////
     // Constructor
     /////////////////////////////////////////////////////////////////////////////////////
-    BruceConfig() {};
+    BruceConfig() { initDefaults(); };
     // ~BruceConfig();
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +105,9 @@ public:
     void fromFile(bool checkFS = true);
     void factoryReset();
     void validateConfig();
+    void initDefaults();
+    String getDefaultWifiApSsid() const;
+    String getDefaultWifiApPwd() const;
     JsonDocument toJson() const;
 
     // UI Color
@@ -185,6 +184,7 @@ public:
     void setBadUSBBLEShowOutput(bool value);
     void addDisabledMenu(String value);
     // TODO: removeDisabledMenu(String value);
+    bool setSetting(const String& name, const String& value);
 
     void addWebUISession(const String &token);
     void removeWebUISession(const String &token);

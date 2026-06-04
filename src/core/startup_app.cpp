@@ -38,7 +38,7 @@ StartupApp::StartupApp() {
     _startupApps["Mass Storage"] = []() { MassStorage(); };
 #endif
     _startupApps["Wardriving"] = []() { Wardriving(); };
-    _startupApps["WebUI"] = []() { startWebUi(!wifiConnecttoKnownNet()); };
+    _startupApps["WebUI"] = []() { startWebUi(!WifiCommon::connectToKnownNet()); };
 #if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
     _startupApps["JS Script"] = []() {
         FS *fs;

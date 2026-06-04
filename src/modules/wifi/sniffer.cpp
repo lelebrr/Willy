@@ -997,7 +997,7 @@ void sniffer_setup() {
     beaconLastSeen.clear(); // ensure starts empty
 
     /* setup wifi */
-    ensureWifiPlatform();
+    WifiCommon::ensurePlatform();
     nvs_flash_init();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -1005,7 +1005,8 @@ void sniffer_setup() {
 
     wifi_config_t wifi_config;
     strcpy((char *)wifi_config.ap.ssid, "WillySniffer");
-    strcpy((char *)wifi_config.ap.password, "WillyNet");
+    strncpy((char *)wifi_config.ap.password, bruceConfig.getDefaultWifiApPwd().c_str(), sizeof(wifi_config.ap.password) - 1);
+    wifi_config.ap.password[sizeof(wifi_config.ap.password) - 1] = '\0';
     wifi_config.ap.ssid_len = strlen("WillySniffer");
     wifi_config.ap.channel = 1;                   // Channel
     wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK; // auth mode
@@ -1040,7 +1041,29 @@ void sniffer_setup() {
     memcpy(deauth_frame, deauth_frame_default, sizeof(deauth_frame_default));
     // Main sniffer loop
 
+    static String serialCmdBuffer = "";
     for (;;) {
+        if (serialDevice && serialDevice->available()) {
+            while (serialDevice->available()) {
+                char c = serialDevice->read();
+                if (c == '\n' || c == '\r') {
+                    serialCmdBuffer.trim();
+                    if (serialCmdBuffer.length() > 0) {
+                        if (serialCmdBuffer.equalsIgnoreCase("stop") || serialCmdBuffer.equalsIgnoreCase("exit") || serialCmdBuffer.equalsIgnoreCase("quit") || serialCmdBuffer.equalsIgnoreCase("q")) {
+                            returnToMenu = true;
+                            serialDevice->println("Exiting sniffer...");
+                        }
+                    }
+                    serialCmdBuffer = "";
+                } else {
+                    serialCmdBuffer += c;
+                    if (serialCmdBuffer.length() > 32) {
+                        serialCmdBuffer = ""; // Prevent buffer overflow if no newline is received
+                    }
+                }
+            }
+        }
+
         if (returnToMenu) {
             if (littleFsWasFull) {
                 Serial.println("Not enough space on LittleFS");
@@ -1118,6 +1141,13 @@ void sniffer_setup() {
             break;
         }
 #endif
+
+        if (Serial.available()) {
+            while (Serial.available()) Serial.read(); // consume input
+            returnToMenu = true;
+            _pcap_file.close();
+            break;
+        }
 
         if (check(SelPress)) { // pressed ok - show menu
             options = {
@@ -1313,7 +1343,7 @@ Exit:
     sniffer_wait_for_flush(1000);
     closeRawFile();
     closeDeauthFile();
-    wifiDisconnect();
+    WifiCommon::disconnect();
     vTaskDelay(1 / portTICK_RATE_MS);
 }
 

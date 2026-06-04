@@ -220,6 +220,11 @@ void IrRead::read_signal() {
 #endif
     if (_read_signal || !irrecv.decode(&results)) return;
 
+    if (results.repeat) {
+        irrecv.resume();
+        return;
+    }
+
     _read_signal = true;
 
     // Always switches to RAW data, regardless of the decoding result
@@ -411,14 +416,23 @@ void IrRead::save_device() {
 
 String IrRead::loop_headless(int max_loops) {
 
-    while (!irrecv.decode(&results)) { // MEMO: default timeout is 15ms
-        max_loops -= 1;
-        if (max_loops <= 0) {
-            Serial.println("timeout");
-            return ""; // nothing received
+    bool signal_found = false;
+    while (!signal_found) { // MEMO: default timeout is 15ms
+        if (irrecv.decode(&results)) {
+            if (results.repeat) {
+                irrecv.resume();
+            } else {
+                signal_found = true;
+            }
+        } else {
+            max_loops -= 1;
+            if (max_loops <= 0) {
+                Serial.println("timeout");
+                return ""; // nothing received
+            }
+            delay(1000);
+            // delay(50);
         }
-        delay(1000);
-        // delay(50);
     }
 
     irrecv.disableIRIn();
@@ -429,7 +443,6 @@ String IrRead::loop_headless(int max_loops) {
     }
 
     if (results.overflow) displayWarning("buffer overflow, dados truncados", true);
-    // TODO: check results.repeat
 
     String r = "Filetype: IR signals file\n";
     r += "Version: 1\n";

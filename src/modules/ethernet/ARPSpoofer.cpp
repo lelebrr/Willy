@@ -62,11 +62,10 @@ void ARPSpoofer::setup(const ScanHosts::Host &host, IPAddress gateway) {
     if (!arpPCAPfile()) Serial.println("Fail creating ARP Pcap file");
     writeHeader(pcapFile); // write pcap header into the file
 
-    for (int i = 0; i < 4; i++) victimIP[i] = host.ip[i];
+    toBytes(host.ip, victimIP);
     stringToMAC(host.mac.c_str(), victimMAC);
 
-    // TODO: Use toBytes helper
-    for (int i = 0; i < 4; i++) gatewayIP[i] = gateway[i];
+    toBytes(gateway, gatewayIP);
 
     drawMainBorderWithTitle("ARP Spoofing");
     padprintln("");

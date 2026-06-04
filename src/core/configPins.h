@@ -5,6 +5,8 @@
 #include <ArduinoJson.h>
 #include <precompiler_flags.h>
 #include <set>
+#include <map>
+#include <functional>
 #ifndef CC1101_GDO2_PIN
 #define CC1101_GDO2_PIN -1
 #endif
@@ -273,4 +275,6 @@ public:
     // GPS
     void setGpsBaudrate(int value);
     void validateGpsBaudrateValue();
+
+    bool setSetting(const String& name, const String& value);
 };

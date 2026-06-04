@@ -700,7 +700,7 @@ void setRFFreqMenu() {
     if (freq_str == "\x1B") return;
     if (freq_str.length() > 1) {
         result = freq_str.toFloat();          // returns 0 if not valid
-        if (result >= 280 && result <= 928) { // TODO: check valid freq according to current module?
+        if (isValidFrequency(result, bruceConfigPins.rfModule)) {
             bruceConfigPins.setRfFreq(result);
             return;
         }
@@ -814,7 +814,7 @@ void setClock() {
     if (returnToMenu) return;
 
     if (bruceConfig.automaticTimeUpdateViaNTP) {
-        if (!wifiConnected) wifiConnectMenu();
+        if (!wifiConnected) WifiCommon::connectMenu();
 
         options.clear();
 
@@ -1272,11 +1272,12 @@ void setGpsBaudrateMenu() {
 **  Handles Menu to set the WiFi AP SSID
 **********************************************************************/
 void setWifiApSsidMenu() {
-    const bool isDefault = bruceConfig.wifiAp.ssid == "WillyNet";
+    const String defaultSsid = bruceConfig.getDefaultWifiApSsid();
+    const bool isDefault = bruceConfig.wifiAp.ssid == defaultSsid;
 
     options = {
-        {"Default (WillyNet)",
-         [=]() { bruceConfig.setWifiApCreds("WillyNet", bruceConfig.wifiAp.pwd); },
+        {"Default (" + defaultSsid + ")",
+         [=]() { bruceConfig.setWifiApCreds(defaultSsid, bruceConfig.wifiAp.pwd); },
          isDefault                                                                            },
         {"Custom",
          [=]() {
@@ -1297,11 +1298,12 @@ void setWifiApSsidMenu() {
 **  Handles Menu to set the WiFi AP Password
 **********************************************************************/
 void setWifiApPasswordMenu() {
-    const bool isDefault = bruceConfig.wifiAp.pwd == "WillyNet";
+    const String defaultPwd = bruceConfig.getDefaultWifiApPwd();
+    const bool isDefault = bruceConfig.wifiAp.pwd == defaultPwd;
 
     options = {
-        {"Default (WillyNet)",
-         [=]() { bruceConfig.setWifiApCreds(bruceConfig.wifiAp.ssid, "WillyNet"); },
+        {"Default (" + defaultPwd + ")",
+         [=]() { bruceConfig.setWifiApCreds(bruceConfig.wifiAp.ssid, defaultPwd); },
          isDefault                                                                             },
         {"Custom",
          [=]() {
@@ -1683,7 +1685,7 @@ bool appStoreInstalled() {
 #include <HTTPClient.h>
 void installAppStoreJS() {
 
-    if (WiFi.status() != WL_CONNECTED) { wifiConnectMenu(WIFI_STA); }
+    if (WiFi.status() != WL_CONNECTED) { WifiCommon::connectMenu(WIFI_STA); }
     if (WiFi.status() != WL_CONNECTED) {
         displayWarning("WiFi not connected", true);
         return;

@@ -5,6 +5,18 @@
 
 const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
 const String ENC_PREFIX = "_ENC_";
+const String ENC_V2_PREFIX = "_ENC_V2_";
+
+static String getCryptoKey() {
+    static String key = "";
+    if (key.isEmpty()) {
+        uint64_t mac = ESP.getEfuseMac();
+        char buf[17];
+        snprintf(buf, sizeof(buf), "%04x%08x", (uint32_t)(mac >> 32), (uint32_t)mac);
+        key = String(buf);
+    }
+    return key;
+}
 
 JsonDocument BruceConfig::toJson() const {
     JsonDocument jsonDoc;
@@ -85,6 +97,36 @@ JsonDocument BruceConfig::toJson() const {
     }
 
     return jsonDoc;
+}
+
+
+String BruceConfig::getDefaultWifiApSsid() const {
+    uint64_t chipid = ESP.getEfuseMac();
+    char buf[32];
+    snprintf(buf, sizeof(buf), "WillyNet_%04X", (uint16_t)(chipid >> 32));
+    return String(buf);
+}
+
+String BruceConfig::getDefaultWifiApPwd() const {
+    uint64_t chipid = ESP.getEfuseMac();
+    char buf[32];
+    snprintf(buf, sizeof(buf), "Willy_%08X", (uint32_t)chipid);
+    return String(buf);
+}
+
+void BruceConfig::initDefaults() {
+    if (wifiAp.ssid.isEmpty() || wifiAp.ssid == "WillyNet") wifiAp.ssid = getDefaultWifiApSsid();
+    if (wifiAp.pwd.isEmpty() || wifiAp.pwd == "WillyNet") wifiAp.pwd = getDefaultWifiApPwd();
+
+    // Set default QR codes if none exist initially (this only runs on first init before loading from file)
+    if (qrCodes.empty() && wifiAp.ssid == getDefaultWifiApSsid()) {
+        qrCodes = {
+            {"Willy AP",   "WIFI:T:WPA;S:" + wifiAp.ssid + ";P:" + wifiAp.pwd + ";;"},
+            {"Willy Wiki", "https://github.com/lelebrr/Willy/wiki"},
+            {"Willy Site", "https://willy.computer"},
+            {"Rickroll",   "https://youtu.be/dQw4w9WgXcQ"}
+        };
+    }
 }
 
 void BruceConfig::fromFile(bool checkFS) {
@@ -845,24 +887,77 @@ bool BruceConfig::isValidWebUISession(const String &token) {
 
 String BruceConfig::encryptString(const String &input) const {
     if (input.isEmpty()) return "";
-    String output = ENC_PREFIX;
+    String output = ENC_V2_PREFIX;
+    String cryptoKey = getCryptoKey();
     for (size_t i = 0; i < input.length(); i++) {
-        char c = input[i] ^ CRYPTO_KEY[i % CRYPTO_KEY.length()];
+        char c = input[i] ^ cryptoKey[i % cryptoKey.length()];
         char hex[3];
-        sprintf(hex, "%02x", (unsigned char)c);
+        snprintf(hex, sizeof(hex), "%02x", (unsigned char)c);
         output += hex;
     }
     return output;
 }
 
 String BruceConfig::decryptString(const String &input) const {
-    if (!input.startsWith(ENC_PREFIX)) return input;
-    String hexData = input.substring(ENC_PREFIX.length());
-    String output = "";
-    for (size_t i = 0; i < hexData.length(); i += 2) {
-        String byteString = hexData.substring(i, i + 2);
-        char c = (char)strtol(byteString.c_str(), nullptr, 16);
-        output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
+    if (input.startsWith(ENC_V2_PREFIX)) {
+        String hexData = input.substring(ENC_V2_PREFIX.length());
+        String output = "";
+        String cryptoKey = getCryptoKey();
+        for (size_t i = 0; i < hexData.length(); i += 2) {
+            String byteString = hexData.substring(i, i + 2);
+            char c = (char)strtol(byteString.c_str(), nullptr, 16);
+            output += (char)(c ^ cryptoKey[(i / 2) % cryptoKey.length()]);
+        }
+        return output;
+    } else if (input.startsWith(ENC_PREFIX)) {
+        String hexData = input.substring(ENC_PREFIX.length());
+        String output = "";
+        for (size_t i = 0; i < hexData.length(); i += 2) {
+            String byteString = hexData.substring(i, i + 2);
+            char c = (char)strtol(byteString.c_str(), nullptr, 16);
+            output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
+        }
+        return output;
     }
-    return output;
+    return input;
+}
+
+
+bool BruceConfig::setSetting(const String& name, const String& value) {
+    static const std::map<String, std::function<void(BruceConfig*, const String&)>> settingsMap = {
+        {"priColor", [](BruceConfig* cfg, const String& val) { cfg->setUiColor(val.toInt()); }},
+        {"dimmerSet", [](BruceConfig* cfg, const String& val) { cfg->setDimmer(val.toInt()); }},
+        {"bright", [](BruceConfig* cfg, const String& val) { cfg->setBright(val.toInt()); }},
+        {"tmz", [](BruceConfig* cfg, const String& val) { cfg->setTmz(val.toFloat()); }},
+        {"soundEnabled", [](BruceConfig* cfg, const String& val) { cfg->setSoundEnabled(val.toInt()); }},
+        {"wifiAtStartup", [](BruceConfig* cfg, const String& val) { cfg->setWifiAtStartup(val.toInt()); }},
+        {"webUI", [](BruceConfig* cfg, const String& val) {
+            cfg->setWebUICreds(
+                val.substring(0, val.indexOf(",")),
+                val.substring(val.indexOf(",") + 1)
+            );
+        }},
+        {"wifiAp", [](BruceConfig* cfg, const String& val) {
+            cfg->setWifiApCreds(
+                val.substring(0, val.indexOf(",")),
+                val.substring(val.indexOf(",") + 1)
+            );
+        }},
+        {"wifi", [](BruceConfig* cfg, const String& val) {
+            cfg->addWifiCredential(
+                val.substring(0, val.indexOf(",")),
+                val.substring(val.indexOf(",") + 1)
+            );
+        }},
+        {"wigleBasicToken", [](BruceConfig* cfg, const String& val) { cfg->setWigleBasicToken(val); }},
+        {"devMode", [](BruceConfig* cfg, const String& val) { cfg->setDevMode(val.toInt()); }},
+        {"disabledMenus", [](BruceConfig* cfg, const String& val) { cfg->addDisabledMenu(val); }}
+    };
+
+    auto it = settingsMap.find(name);
+    if (it != settingsMap.end()) {
+        it->second(this, value);
+        return true;
+    }
+    return false;
 }

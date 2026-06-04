@@ -24,16 +24,16 @@ uint32_t wifiCallback(cmd *c) {
     pwd.trim();
 
     if (status == "off") {
-        wifiDisconnect();
+        WifiCommon::disconnect();
         return true;
     } else if (status == "on") {
         if (wifiConnected) {
             serialDevice->println("Wifi already connected");
             return true;
         }
-        if (wifiConnecttoKnownNet()) return true;
-        wifiDisconnect();
-        return _setupAP();
+        if (WifiCommon::connectToKnownNet()) return true;
+        WifiCommon::disconnect();
+        return WifiCommon::_setupAP();
 
     } else if (status == "add" && ssid != "" && pwd != "") {
         bruceConfig.addWifiCredential(ssid, pwd);
@@ -123,7 +123,7 @@ void createWifiCommands(SimpleCLI *cli) {
         cli->addCommand("listen", listenTCPCallback); // TODO: make possible to select port to open via Serial
 
     Command snifferCmd =
-        cli->addCommand("sniffer", snifferCallback); // TODO: be able to exit from it from Serial
+        cli->addCommand("sniffer", snifferCallback);
 
 #endif
     // Command responderCmd = cli->addCommand("responder", responderCallback); TODO

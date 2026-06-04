@@ -317,6 +317,8 @@ EXIT:
 #if !defined(USB_as_HID)
         mySerial.end();       // Stops UART Serial as HID
         Serial.begin(115200); // Force restart of Serial, just in case....
+#else
+        Serial.begin(115200);
 #endif
     }
     returnToMenu = true;
@@ -401,7 +403,9 @@ void key_input(FS fs, String bad_script, HIDInterface *_hid) {
                 Command = lineContent;
                 Argument = "";
             }
-            strcpy(Cmd, Command.c_str());
+            memset(Cmd, 0, sizeof(Cmd));
+            strncpy(Cmd, Command.c_str(), sizeof(Cmd) - 1);
+            Cmd[sizeof(Cmd) - 1] = '\0';
             RepeatTmp = "1";
         }
 
@@ -670,6 +674,8 @@ EXIT:
 #if !defined(USB_as_HID)
         mySerial.end();       // Stops UART Serial as HID
         Serial.begin(115200); // Force restart of Serial, just in case....
+#else
+        Serial.begin(115200);
 #endif
     }
 }

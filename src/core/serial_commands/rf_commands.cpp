@@ -62,7 +62,24 @@ uint32_t rfTxCallback(cmd *c) {
     unsigned int te = std::stoul(strTe.c_str());
     unsigned int count = std::stoul(strCount.c_str());
 
-    unsigned int bits = 24; // TODO: compute from key
+    const char* keyCStr = strKey.c_str();
+    while (*keyCStr == ' ' || *keyCStr == '\t' || *keyCStr == '\r' || *keyCStr == '\n') keyCStr++;
+
+    int len = 0;
+    while (keyCStr[len] != '\0') len++;
+    while (len > 0 && (keyCStr[len-1] == ' ' || keyCStr[len-1] == '\t' || keyCStr[len-1] == '\r' || keyCStr[len-1] == '\n')) {
+        len--;
+    }
+
+    if (len >= 2 && keyCStr[0] == '0' && (keyCStr[1] == 'x' || keyCStr[1] == 'X')) {
+        keyCStr += 2;
+        len -= 2;
+    }
+
+    unsigned int bits = 24;
+    if (len > 0) {
+        bits = len * 4;
+    }
 
     // check valid frequency and init the rf module
     if (!initRfModule("tx", float(frequency / 1000000.0))) return false;

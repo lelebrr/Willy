@@ -148,6 +148,7 @@ volatile int tftHeight = VECTOR_DISPLAY_DEFAULT_WIDTH;
 #include "willy_logger.h"                        // Sistema de logging centralizado
 #include "ui/willy_splash.h"                     // Splash screen Willy
 
+// --- BEGIN_STORAGE_TEST_EXTRACT ---
 /*********************************************************************
  **  Function: begin_storage
  **  Config LittleFS and SD storage
@@ -158,6 +159,7 @@ void begin_storage() {
     bruceConfig.fromFile(checkFS);
     bruceConfigPins.fromFile(checkFS);
 }
+// --- END_STORAGE_TEST_EXTRACT ---
 
 /*********************************************************************
  **  Function: _setup_gpio()
@@ -569,16 +571,16 @@ void setup() {
         Serial.println("Legacy boot screen disabled (Using Willy Splash).");
     }
     if (bruceConfig.wifiAtStartup) {
-        Serial.println("Creating wifiConnectTask...");
+        Serial.println("Creating WifiCommon::connectTask...");
         xTaskCreate(
-            wifiConnectTask,   // Task function
-            "wifiConnectTask", // Task Name
+            WifiCommon::connectTask,   // Task function
+            "WifiCommon::connectTask", // Task Name
             4096,              // Stack size
             NULL,              // Task parameters
             2,                 // Task priority (0 to 3), loopTask has priority 2.
             NULL               // Task handle (not used)
         );
-        Serial.println("wifiConnectTask created.");
+        Serial.println("WifiCommon::connectTask created.");
     }
 #endif
     //  start a task to handle serial commands while the webui is running

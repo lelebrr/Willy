@@ -63,13 +63,6 @@ uint8_t mac[6] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 uint8_t target_ip[4] = {192, 168, 1, 254};
 uint8_t target_mac[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void toBytes(IPAddress ip, uint8_t *bytes) {
-    bytes[0] = ip[0];
-    bytes[1] = ip[1];
-    bytes[2] = ip[2];
-    bytes[3] = ip[3];
-}
-
 void ARPScanner::readArpTableETH(netif *iface) {
     for (uint32_t i = 0; i < ARP_TABLE_SIZE; ++i) {
         ip4_addr_t *ip_ret;

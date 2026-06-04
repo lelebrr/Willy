@@ -18,6 +18,8 @@ extern const char *subghz_frequency_ranges[];
 extern const int range_limits[4][2];
 extern bool rmtInstalled;
 
+bool isValidFrequency(float frequency, int module);
+
 bool initRfModule(String mode = "", float frequency = 0);
 void deinitRfModule();
 void initCC1101once(SPIClass *SSPI);
