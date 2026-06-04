@@ -237,6 +237,24 @@ void mic_test_one_task() {
     // Border around the spectrogram
     tft.drawRect(displayX - 2, displayY - 2, displayWidth + 4, displayHeight + 4, bruceConfig.priColor);
 
+    // Pre-calculate color palette
+    uint16_t colorPalette[256];
+    for (int i = 0; i < 256; i++) {
+        colorPalette[i] = rgb565(
+            pgm_read_byte(&ImageData[i * 3 + 0]),
+            pgm_read_byte(&ImageData[i * 3 + 1]),
+            pgm_read_byte(&ImageData[i * 3 + 2])
+        );
+    }
+
+    int *x_to_index_mul = (int *)malloc(displayWidth * sizeof(int));
+    if (!x_to_index_mul) {
+        Serial.println("Error alloc x_to_index_mul, exiting");
+        displayError("Not Enough RAM", true);
+        free(frameBuffer);
+        return;
+    }
+
     while (1) {
         fft_config_t *plan = fft_init(FFT_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
         size_t bytesread;
@@ -262,22 +280,20 @@ void mic_test_one_task() {
         fft_destroy(plan);
 
         // ===== RENDER WITH SCALING =====
+        for (int x = 0; x < displayWidth; x++) {
+            int srcX = (x * SPECTRUM_WIDTH) / displayWidth;
+            int index = (srcX + posData) % HISTORY_LEN;
+            x_to_index_mul[x] = index * SPECTRUM_HEIGHT;
+        }
+
         for (int y = 0; y < displayHeight; y++) {
             // Original spectrum y-display y-map
             int srcY = (y * SPECTRUM_HEIGHT) / displayHeight;
+            int y_offset = y * displayWidth;
 
             for (int x = 0; x < displayWidth; x++) {
-                // Original spectrum display x-map
-                int srcX = (x * SPECTRUM_WIDTH) / displayWidth;
-                int index = (srcX + posData) % HISTORY_LEN;
-
-                uint8_t val = fftHistory[index * SPECTRUM_HEIGHT + srcY];
-                uint16_t color = rgb565(
-                    pgm_read_byte(&ImageData[val * 3 + 0]),
-                    pgm_read_byte(&ImageData[val * 3 + 1]),
-                    pgm_read_byte(&ImageData[val * 3 + 2])
-                );
-                frameBuffer[y * displayWidth + x] = color;
+                uint8_t val = fftHistory[x_to_index_mul[x] + srcY];
+                frameBuffer[y_offset + x] = colorPalette[val];
             }
         }
 
@@ -288,6 +304,7 @@ void mic_test_one_task() {
     i2s_channel_disable(i2s_chan);
 
     free(frameBuffer);
+    free(x_to_index_mul);
 }
 
 bool isGPIOOutput(gpio_num_t gpio) {
