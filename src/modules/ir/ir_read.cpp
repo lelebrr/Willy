@@ -284,8 +284,12 @@ String IrRead::parse_raw_signal() {
     raw_data_len = getCorrectedRawLength(&results);
 
     String signal_code = "";
+    signal_code.reserve(raw_data_len * 6);
 
-    for (uint16_t i = 0; i < raw_data_len; i++) { signal_code += String(rawcode[i]) + " "; }
+    for (uint16_t i = 0; i < raw_data_len; i++) {
+        signal_code += String(rawcode[i]);
+        signal_code += " ";
+    }
 
     delete[] rawcode;
     rawcode = nullptr;
