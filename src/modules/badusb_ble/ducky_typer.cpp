@@ -543,7 +543,10 @@ void key_input_from_string(String text) {
 #if !defined(USB_as_HID)
     mySerial.end();
 #else
-    Serial.begin(115200);
+    USB.~ESPUSB(); // Explicit call to destructor
+    delay(100);
+    USB.enableDFU(); // Re-enable DFU
+    delay(100);
 #endif
 }
 #ifndef KB_HID_EXIT_MSG
