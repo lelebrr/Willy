@@ -30,13 +30,7 @@ uint32_t badusbFileCallback(cmd *c) {
 #ifdef USB_as_HID
     ducky_startKb(hid_usb, false);
     key_input(*fs, filepath, hid_usb);
-    delete hid_usb;
-    hid_usb = nullptr;
-
-    USB.~ESPUSB(); // Explicit call to destructor
-    delay(100);
-    USB.enableDFU(); // Re-enable DFU
-    delay(100);
+    ducky_stopKb(hid_usb, false);
 
     return true;
 #else
@@ -63,13 +57,7 @@ uint32_t badusbBufferCallback(cmd *c) {
 #ifdef USB_as_HID
     ducky_startKb(hid_usb, false);
     key_input(PSRamFS, tmpfilepath, hid_usb);
-    delete hid_usb;
-    hid_usb = nullptr;
-
-    USB.~ESPUSB(); // Explicit call to destructor
-    delay(100);
-    USB.enableDFU(); // Re-enable DFU
-    delay(100);
+    ducky_stopKb(hid_usb, false);
 
     PSRamFS.remove(tmpfilepath);
     return true;

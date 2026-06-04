@@ -431,23 +431,9 @@ String readSmallFile(FS &fs, String filepath) {
         displayError("Arquivo muito grande", true);
         return "";
     }
-    char *buf = (char *)(psramFound() ? ps_malloc(fileSize + 1) : malloc(fileSize + 1));
-    if (buf) {
-        size_t bytesRead = 0;
-        while (bytesRead < fileSize && file.available()) {
-            size_t toRead = fileSize - bytesRead;
-            if (toRead > 512) { toRead = 512; }
-            size_t actualRead = file.read((uint8_t *)(buf + bytesRead), toRead);
-            bytesRead += actualRead;
-            if (actualRead == 0) break;
-        }
-        buf[bytesRead] = '\0';
-        fileContent = String(buf);
-        free(buf);
-    } else {
-        // Fallback if allocation fails
-        fileContent = file.readString();
-    }
+    // TODO: if(psramFound()) -> use PSRAM instead
+
+    fileContent = file.readString();
 
     file.close();
     return fileContent;
@@ -669,7 +655,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
     String Folder = rootPath;
     String PreFolder = rootPath;
     tft.drawPixel(0, 0, 0);
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(bruceConfig.bgColor); // TODO: Does only the T-Embed CC1101 need this?
     tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
 
     bool exit = false;
@@ -881,12 +867,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                         options.push_back(Option{"Executar BadUSB", [&]() {
                                                ducky_startKb(hid_usb, false);
                                                key_input(fs, filepath, hid_usb);
-                                               delete hid_usb;
-                                               hid_usb = nullptr;
-                                                USB.~ESPUSB(); // Explicit call to destructor
-                                                delay(100);
-                                                USB.enableDFU(); // Re-enable DFU
-                                                delay(100);
+                                               ducky_stopKb(hid_usb, false);
                                            }});
                         options.push_back(Option{"USB HID Digitar", [&]() {
                                                String t = readSmallFile(fs, filepath);
@@ -917,13 +898,10 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                                                   if (plaintext.length() == 0)
                                                       return displayError("Decryption failed", true);
                                                   plaintext.trim(); // remove newlines
-                                                  if (plaintext.length() < 64) {
-                                                      displaySuccess(plaintext, true);
-                                                  } else {
-                                                      ScrollableTextArea area = ScrollableTextArea("DECRYPTED");
-                                                      area.fromString(plaintext);
-                                                      area.show();
-                                                  }
+                                                                    // if(plaintext.length()<..)
+                                                  displaySuccess(plaintext, true);
+                                                  // else
+                                                  // TODO: show in the text viewer
                                               }}
                         );
                     }
