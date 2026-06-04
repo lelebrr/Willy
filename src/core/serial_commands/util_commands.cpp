@@ -401,18 +401,16 @@ uint32_t loaderCallback(cmd *c) {
         backToMenu();
         serialDevice->println("Application closed.");
         return true;
-
     } else if (arg == "info") {
-        serialDevice->println("Current state / Active application: " + menuOptionLabel);
+        serialDevice->println("Loader state: " + menuOptionLabel);
         return true;
-
     } else {
         serialDevice->println(
             "Loader command accept:\n"
             "loader list          : Lists available applications\n"
             "loader open appname  : Runs the entered application.\n"
-            "loader close         : Closes the running application.\n"
-            "loader info          : Displays the loader's state.\n"
+            "loader close : Closes the running application.\n"
+            "loader info : Displays the loader's state.\n"
         );
         return false;
     }
