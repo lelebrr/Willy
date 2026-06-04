@@ -700,7 +700,7 @@ void setRFFreqMenu() {
     if (freq_str == "\x1B") return;
     if (freq_str.length() > 1) {
         result = freq_str.toFloat();          // returns 0 if not valid
-        if (result >= 280 && result <= 928) { // TODO: check valid freq according to current module?
+        if (isValidFrequency(result, bruceConfigPins.rfModule)) {
             bruceConfigPins.setRfFreq(result);
             return;
         }
