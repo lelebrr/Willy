@@ -81,14 +81,23 @@ String readDecryptedFile(FS &fs, String filepath) {
     String cypertextData = "";
     String plaintext = "";
     bool unsupported_params = false;
+    int keyDerivationPasses = 10;
 
     while (cyphertextFile.available()) {
         line = cyphertextFile.readStringUntil('\n');
         if (line.startsWith("Filetype:") && !line.endsWith("Bruce Encrypted File")) unsupported_params = true;
         if (line.startsWith("Algo:") && !line.endsWith("XOR")) unsupported_params = true;
         if (line.startsWith("KeyDerivationAlgo:") && !line.endsWith("MD5")) unsupported_params = true;
-        if (line.startsWith("KeyDerivationPasses:") && !line.endsWith("10"))
-            unsupported_params = true; // TODO: parse
+        if (line.startsWith("KeyDerivationPasses:")) {
+            const char *valStr = line.c_str() + strlen("KeyDerivationPasses:");
+            while (*valStr == ' ') valStr++;
+            int passes = atoi(valStr);
+            if (passes > 0) {
+                keyDerivationPasses = passes;
+            } else {
+                unsupported_params = true;
+            }
+        }
         if (line.startsWith("Data:")) cypertextData = line.substring(strlen("Data:"));
     }
 
@@ -136,7 +145,7 @@ String readDecryptedFile(FS &fs, String filepath) {
     // Serial.println(cypertextData);
     // Serial.println(cypertextDataDec);
 
-    plaintext = xorEncryptDecryptMD5(cypertextDataDec, cachedPassword, 10);
+    plaintext = xorEncryptDecryptMD5(cypertextDataDec, cachedPassword, keyDerivationPasses);
 
     if (!isValidAscii(plaintext)) {
         // invalidate cached password -> will ask again on the next try
