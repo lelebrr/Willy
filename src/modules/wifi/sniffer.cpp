@@ -1142,6 +1142,13 @@ void sniffer_setup() {
         }
 #endif
 
+        if (Serial.available()) {
+            while (Serial.available()) Serial.read(); // consume input
+            returnToMenu = true;
+            _pcap_file.close();
+            break;
+        }
+
         if (check(SelPress)) { // pressed ok - show menu
             options = {
                 {"New File",
