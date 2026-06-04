@@ -1206,8 +1206,9 @@ void drawIRWaveform(const IRWaveformData& data, int x, int y, int width, int hei
 
     int prev_x = x;
     int prev_y = y + height / 2;
+    size_t timings_size = data.rawTimings.size();
 
-    for (size_t i = 0; i < data.rawTimings.size(); i++) {
+    for (size_t i = 0; i < timings_size; i++) {
         int seg_width = data.rawTimings[i] * time_scale;
 
         if (data.states[i]) {
