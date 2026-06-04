@@ -900,56 +900,72 @@ public:
         write(uniCode);
     }
 
-    // TODO: fix back color handling
     size_t write(uint8_t c) override {
+        if (c == '\r') return 1;
         if (c == '\n') {
             cursor_y += 8 * gfxFontSize;
             cursor_x = 0;
+            return 1;
         }
         if (wrap && cursor_x + 5 * gfxFontSize > width()) {
             cursor_x = 0;
             cursor_y += 8 * gfxFontSize;
         }
+        if (textcolor != textbgcolor) {
+            fillRect(cursor_x, cursor_y, 5 * gfxFontSize, 8 * gfxFontSize, textbgcolor);
+        }
         text(cursor_x, cursor_y, (char *)&c, 1);
         cursor_x += 5 * gfxFontSize;
-        return 0;
+        return 1;
     }
 
-    // TODO: fix back color handling
     size_t write(const char *s) {
-        int l = strlen(s);
-        char *clean = (char *)malloc(l + 1);
-        if (!clean) return 0;
-        // Remove '\n' from string
-        int j = 0;
-        for (int i = 0; i < l; ++i) {
-            if (s[i] != '\n') clean[j++] = s[i];
-        }
-        clean[j] = '\0';
-
+        if (!s) return 0;
+        size_t l = strlen(s);
+        size_t processed = 0;
         int w = width();
-        int len = j;
-        if (!wrap || cursor_x + 5 * gfxFontSize * len <= w) {
-            text(cursor_x, cursor_y, clean);
-            cursor_x += 5 * gfxFontSize * len;
-        } else {
-            const char *p = clean;
-            while (len > 0) {
-                int end = ((int)w - cursor_x) / (5 * gfxFontSize);
-                if (end <= 0) {
-                    cursor_x = 0;
-                    cursor_y += 8 * gfxFontSize;
-                    end = w / (5 * gfxFontSize);
+
+        while (processed < l) {
+            if (s[processed] == '\r') {
+                processed++;
+                continue;
+            }
+            if (s[processed] == '\n') {
+                cursor_y += 8 * gfxFontSize;
+                cursor_x = 0;
+                processed++;
+                continue;
+            }
+
+            if (wrap && cursor_x + 5 * gfxFontSize > w) {
+                cursor_x = 0;
+                cursor_y += 8 * gfxFontSize;
+            }
+
+            int chars_to_draw = 0;
+            int max_chars_on_line = wrap ? ((w - cursor_x) / (5 * gfxFontSize)) : (l - processed);
+            if (max_chars_on_line <= 0 && wrap) {
+                max_chars_on_line = 1;
+            }
+
+            while (processed + chars_to_draw < l &&
+                   s[processed + chars_to_draw] != '\n' &&
+                   s[processed + chars_to_draw] != '\r' &&
+                   chars_to_draw < VECTOR_DISPLAY_MAX_STRING &&
+                   (!wrap || chars_to_draw < max_chars_on_line)) {
+                chars_to_draw++;
+            }
+
+            if (chars_to_draw > 0) {
+                if (textcolor != textbgcolor) {
+                    fillRect(cursor_x, cursor_y, chars_to_draw * 5 * gfxFontSize, 8 * gfxFontSize, textbgcolor);
                 }
-                if (end > len) end = len;
-                text(cursor_x, cursor_y, p, end);
-                p += end;
-                len -= end;
-                cursor_x = 5 * gfxFontSize * end;
+                text(cursor_x, cursor_y, s + processed, chars_to_draw);
+                cursor_x += chars_to_draw * 5 * gfxFontSize;
+                processed += chars_to_draw;
             }
         }
-        free(clean);
-        return 0;
+        return l;
     }
 
     void drawPixel(int16_t x, int16_t y, uint16_t color) {
