@@ -7,6 +7,7 @@
 
 #include "ARPSpoofer.h"
 #include "Arduino.h"
+#include <algorithm>
 #include "core/display.h"
 #include "core/mykeyboard.h"
 #include "core/net_utils.h"
@@ -40,7 +41,7 @@ ARPSpoofer::ARPSpoofer(
 ) {
     mitm = _mitm;
     memcpy(gatewayMAC, _gatewayMAC, 6);
-    memcpy(myMAC, _mac, 6); // FIX: Copy the passed ESP32 MAC to myMAC
+    std::copy(_mac, _mac + 6, myMAC); // FIX: Copy the passed ESP32 MAC to myMAC
     setup(host, gateway);
 }
 
