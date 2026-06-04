@@ -46,6 +46,10 @@ void ReverseShell() {
     tft.println("TCP server started on port 23.");
 
     webServer.on("/", [&webServer]() {
+        if (!webServer.authenticate(bruceConfig.webUI.user.c_str(), bruceConfig.webUI.pwd.c_str())) {
+            return webServer.requestAuthentication();
+        }
+
         String html = R"rawliteral(
             <!DOCTYPE html>
             <html>
@@ -77,6 +81,10 @@ void ReverseShell() {
     });
 
     webServer.on("/execute", [&webServer, &tcpClient, &lastCommand, &shellConnected]() {
+        if (!webServer.authenticate(bruceConfig.webUI.user.c_str(), bruceConfig.webUI.pwd.c_str())) {
+            return webServer.requestAuthentication();
+        }
+
         if (webServer.hasArg("command")) {
             lastCommand = webServer.arg("command");
 
@@ -92,6 +100,10 @@ void ReverseShell() {
     });
 
     webServer.on("/status", [&webServer, &shellConnected]() {
+        if (!webServer.authenticate(bruceConfig.webUI.user.c_str(), bruceConfig.webUI.pwd.c_str())) {
+            return webServer.requestAuthentication();
+        }
+
         String status = shellConnected ? "Connected" : "Disconnected";
         webServer.send(200, "text/plain", "Server is online. Shell status: " + status);
     });
