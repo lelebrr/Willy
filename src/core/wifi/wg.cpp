@@ -108,7 +108,7 @@ void read_and_parse_file() {
 **  connect to wireguard tunnel
 **********************************************************************/
 void wg_setup() {
-    if (!wifiConnected) WifiCommon::connectMenu();
+    if (!WifiState::wifiConnected) wifiConnectMenu();
 
     read_and_parse_file();
 

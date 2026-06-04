@@ -27,7 +27,7 @@ uint32_t wifiCallback(cmd *c) {
         WifiCommon::disconnect();
         return true;
     } else if (status == "on") {
-        if (wifiConnected) {
+        if (WifiState::wifiConnected) {
             serialDevice->println("Wifi already connected");
             return true;
         }
@@ -83,7 +83,7 @@ uint32_t snifferCallback(cmd *c) {
 }
 
 uint32_t listenTCPCallback(cmd *c) {
-    if (!wifiConnected) {
+    if (!WifiState::wifiConnected) {
         Serial.println("Connect to a WiFi first.");
         return false;
     }
@@ -95,7 +95,7 @@ uint32_t listenTCPCallback(cmd *c) {
 
 /*
 uint32_t responderCallback(cmd *c) {
-    if (!wifiConnected) {
+    if (!WifiState::wifiConnected) {
         Serial.println("Connect to a WiFi first.");
         return false;
     }

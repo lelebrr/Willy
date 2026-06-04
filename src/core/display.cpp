@@ -876,7 +876,7 @@ void drawStatusBar() {
         drawWifiSmall(tftWidth - (bat_margin + 23 * i), 7);
         i++;
     } // Draw Wifi Symbol beside battery
-    if (isWebUIActive) {
+    if (WifiState::isWebUIActive) {
         drawWebUISmall(tftWidth - (bat_margin + 23 * i), 7);
         i++;
     } // Draw Wifi Symbol beside battery
@@ -918,7 +918,7 @@ void drawMainBorder(bool clear) {
     setTftDisplay(12, 12, bruceConfig.priColor, 1, bruceConfig.bgColor);
     tft.setTextDatum(0);
 
-    // if(wifiConnected) {tft.print(timeStr);} else {tft.print("BRUCE 1.0b");}
+    // if(WifiState::wifiConnected) {tft.print(timeStr);} else {tft.print("BRUCE 1.0b");}
 
     drawStatusBar();
 

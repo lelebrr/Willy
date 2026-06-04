@@ -25,8 +25,8 @@ void ClockMenu::showSubMenu() {
     options = {
         {"Timer",           [=]() { Timer(); }              },
         {"Sincronizar NTP",  [=]() {
-            if (!wifiConnected) {
-                if (!WifiCommon::connectMenu()) return;
+            if (!WifiState::wifiConnected) {
+                if (!wifiConnectMenu()) return;
             }
             displayInfo("Sincronizando...");
             updateClockTimezone();
