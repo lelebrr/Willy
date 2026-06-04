@@ -37,9 +37,10 @@ uint32_t listCallback(cmd *c) {
                 // Serial.printf("File size: %llu bytes\n", file.size());
                 if (file) {
                     serialDevice->print("\t");
-                    serialDevice->println(file.size());
+                    serialDevice->print(file.size());
+                    serialDevice->print("\t");
+                    serialDevice->println(formatTimestamp(file.getLastWrite()));
                     // serialDevice->println(file.path());
-                    // serialDevice->println(formatTimestamp(file.getLastWrite()));
                     file.close();
                 }
             }
