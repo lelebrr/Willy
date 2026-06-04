@@ -89,11 +89,12 @@ bool txSubFile(FS *fs, String filepath, bool hideDefaultUI) {
     databaseFile.close();
 
     // If the signal is complete, send all of the code(s) that were found in it.
-    // TODO: try to minimize the overhead between codes.
     if (selected_code.protocol != "" && selected_code.preset != "" && selected_code.frequency > 0) {
+        bool isFirst = true;
         for (int bit : bitList) {
             selected_code.Bit = bit;
-            sendRfCommand(selected_code, hideDefaultUI);
+            sendRfCommand(selected_code, hideDefaultUI, !isFirst, true);
+            isFirst = false;
             sent++;
             if (!hideDefaultUI) {
                 if (check(EscPress)) break;
@@ -102,7 +103,8 @@ bool txSubFile(FS *fs, String filepath, bool hideDefaultUI) {
         }
         for (int bitRaw : bitRawList) {
             selected_code.Bit = bitRaw;
-            sendRfCommand(selected_code, hideDefaultUI);
+            sendRfCommand(selected_code, hideDefaultUI, !isFirst, true);
+            isFirst = false;
             sent++;
             if (!hideDefaultUI) {
                 if (check(EscPress)) break;
@@ -111,7 +113,8 @@ bool txSubFile(FS *fs, String filepath, bool hideDefaultUI) {
         }
         for (uint64_t key : keyList) {
             selected_code.key = key;
-            sendRfCommand(selected_code, hideDefaultUI);
+            sendRfCommand(selected_code, hideDefaultUI, !isFirst, true);
+            isFirst = false;
             sent++;
             if (!hideDefaultUI) {
                 if (check(EscPress)) break;
@@ -123,10 +126,14 @@ bool txSubFile(FS *fs, String filepath, bool hideDefaultUI) {
         if (rawDataList.size() > 0) sent++;
         for (String rawData : rawDataList) {
             selected_code.data = rawData;
-            sendRfCommand(selected_code, hideDefaultUI);
+            sendRfCommand(selected_code, hideDefaultUI, !isFirst, true);
+            isFirst = false;
             // sent++;
             if (check(EscPress)) break;
             // displayTextLine("Sent " + String(sent) + "/" + String(total));
+        }
+        if (!isFirst) {
+            deinitRfModule();
         }
         addToRecentCodes(selected_code);
     }
@@ -149,7 +156,7 @@ bool txSubFile(FS *fs, String filepath, bool hideDefaultUI) {
     return true;
 }
 
-void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI) {
+void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI, bool skipInit, bool keepAlive) {
     uint32_t frequency = rfcode.frequency;
     String protocol = rfcode.protocol;
     String preset = rfcode.preset;
@@ -223,33 +230,35 @@ void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI) {
     }
 
     // init transmitter
-    if (!initRfModule("", frequency / 1000000.0)) return;
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) { // CC1101 in use
-        // derived from
-        // https://github.com/LSatan/SmartRC-CC1101-Driver-Lib/blob/master/examples/Rc-Switch%20examples%20cc1101/SendDemo_cc1101/SendDemo_cc1101.ino
-        ELECHOUSE_cc1101.setModulation(modulation);
-        if (deviation) ELECHOUSE_cc1101.setDeviation(deviation);
-        if (rxBW)
-            ELECHOUSE_cc1101.setRxBW(
-                rxBW
-            ); // Set the Receive Bandwidth in kHz. Value from 58.03 to 812.50. Default is 812.50 kHz.
-        if (dataRate) ELECHOUSE_cc1101.setDRate(dataRate);
-        pinMode(bruceConfigPins.CC1101_bus.io0, OUTPUT);
-        ELECHOUSE_cc1101.setPA(
-            12
-        ); // set TxPower. The following settings are possible depending on the frequency band.  (-30  -20 -15
-        // -10  -6    0    5    7    10   11   12)   Default is max!
-        ioExpander.turnPinOnOff(IO_EXP_CC_RX, LOW);
-        ioExpander.turnPinOnOff(IO_EXP_CC_TX, HIGH);
-        ELECHOUSE_cc1101.SetTx();
-    } else {
-        // other single-pinned modules in use
-        if (modulation != 2) {
-            Serial.print("unsupported modulation: ");
-            Serial.println(modulation);
-            return;
+    if (!skipInit) {
+        if (!initRfModule("", frequency / 1000000.0)) return;
+        if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) { // CC1101 in use
+            // derived from
+            // https://github.com/LSatan/SmartRC-CC1101-Driver-Lib/blob/master/examples/Rc-Switch%20examples%20cc1101/SendDemo_cc1101/SendDemo_cc1101.ino
+            ELECHOUSE_cc1101.setModulation(modulation);
+            if (deviation) ELECHOUSE_cc1101.setDeviation(deviation);
+            if (rxBW)
+                ELECHOUSE_cc1101.setRxBW(
+                    rxBW
+                ); // Set the Receive Bandwidth in kHz. Value from 58.03 to 812.50. Default is 812.50 kHz.
+            if (dataRate) ELECHOUSE_cc1101.setDRate(dataRate);
+            pinMode(bruceConfigPins.CC1101_bus.io0, OUTPUT);
+            ELECHOUSE_cc1101.setPA(
+                12
+            ); // set TxPower. The following settings are possible depending on the frequency band.  (-30  -20 -15
+            // -10  -6    0    5    7    10   11   12)   Default is max!
+            ioExpander.turnPinOnOff(IO_EXP_CC_RX, LOW);
+            ioExpander.turnPinOnOff(IO_EXP_CC_TX, HIGH);
+            ELECHOUSE_cc1101.SetTx();
+        } else {
+            // other single-pinned modules in use
+            if (modulation != 2) {
+                Serial.print("unsupported modulation: ");
+                Serial.println(modulation);
+                return;
+            }
+            initRfModule("tx", frequency / 1000000.0);
         }
-        initRfModule("tx", frequency / 1000000.0);
     }
 
     if (protocol == "RAW") {
@@ -306,27 +315,32 @@ void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI) {
         Serial.println(rcswitch_protocol_no);
         */
         if (!hideDefaultUI) { displayTextLine("Enviando.."); }
-        RCSwitch_send(data_val, bits, pulse, rcswitch_protocol_no, repeat);
+        RCSwitch_send(data_val, bits, pulse, rcswitch_protocol_no, repeat, keepAlive);
     } else if (protocol.startsWith("Princeton")) {
-        RCSwitch_send(rfcode.key, rfcode.Bit, 350, 1, 10);
+        RCSwitch_send(rfcode.key, rfcode.Bit, 350, 1, 10, keepAlive);
     } else {
         Serial.print("unsupported protocol: ");
         Serial.println(protocol);
         Serial.println("Sending RcSwitch 11 protocol");
         // if(protocol.startsWith("CAME") || protocol.startsWith("HOLTEC" || NICE)) {
-        RCSwitch_send(rfcode.key, rfcode.Bit, 270, 11, 10);
+        RCSwitch_send(rfcode.key, rfcode.Bit, 270, 11, 10, keepAlive);
         //}
 
+        if (!keepAlive) {
+            deinitRfModule();
+        }
         return;
     }
 
     willyLogger.logRF(rfcode.key, rfcode.frequency / 1000000.0, (int)rfcode.protocol.toInt(), rfcode.data.c_str());
 
     // digitalWrite(bruceConfigPins.rfTx, LED_OFF);
-    deinitRfModule();
+    if (!keepAlive) {
+        deinitRfModule();
+    }
 }
 
-void RCSwitch_send(uint64_t data, unsigned int bits, int pulse, int protocol, int repeat) {
+void RCSwitch_send(uint64_t data, unsigned int bits, int pulse, int protocol, int repeat, bool keepAlive) {
     // derived from
     // https://github.com/LSatan/SmartRC-CC1101-Driver-Lib/blob/master/examples/Rc-Switch%20examples%20cc1101/SendDemo_cc1101/SendDemo_cc1101.ino
 
@@ -353,7 +367,9 @@ void RCSwitch_send(uint64_t data, unsigned int bits, int pulse, int protocol, in
 
     mySwitch.disableTransmit();
 
-    deinitRfModule();
+    if (!keepAlive) {
+        deinitRfModule();
+    }
 }
 
 // ported from https://github.com/sui77/rc-switch/blob/3a536a172ab752f3c7a58d831c5075ca24fd920b/RCSwitch.cpp
