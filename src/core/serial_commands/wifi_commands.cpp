@@ -123,7 +123,7 @@ void createWifiCommands(SimpleCLI *cli) {
         cli->addCommand("listen", listenTCPCallback); // TODO: make possible to select port to open via Serial
 
     Command snifferCmd =
-        cli->addCommand("sniffer", snifferCallback); // TODO: be able to exit from it from Serial
+        cli->addCommand("sniffer", snifferCallback);
 
 #endif
     // Command responderCmd = cli->addCommand("responder", responderCallback); TODO
