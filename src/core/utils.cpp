@@ -267,9 +267,9 @@ String formatBytes(uint64_t bytes) {
 }
 
 String formatTimestamp(time_t t) {
-    struct tm *timeinfo = localtime(&t);
-    if (!timeinfo) return String("");
-    char buffer[20]; // YYYY-MM-DD HH:MM:SS is 19 chars + null terminator
-    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+    struct tm *tm_info = localtime(&t);
+    if (!tm_info) return String(t);
+    char buffer[26];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
     return String(buffer);
 }

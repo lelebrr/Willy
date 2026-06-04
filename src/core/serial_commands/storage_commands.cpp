@@ -41,6 +41,7 @@ uint32_t listCallback(cmd *c) {
                     serialDevice->print("\t");
                     serialDevice->println(formatTimestamp(file.getLastWrite()));
                     // serialDevice->println(file.path());
+                    // serialDevice->println(formatTimestamp(file.getLastWrite()));
                     file.close();
                 }
             }
