@@ -3,6 +3,9 @@
 # Extract begin_storage function from src/main.cpp using the markers
 sed -n '/^\/\/ --- BEGIN_STORAGE_TEST_EXTRACT ---$/,/^\/\/ --- END_STORAGE_TEST_EXTRACT ---$/p' src/main.cpp | grep -v "BEGIN_STORAGE_TEST_EXTRACT" | grep -v "END_STORAGE_TEST_EXTRACT" > test/sd_functions_extracted.cpp
 
+# Extract getHierarchicalPath from src/core/sd_functions.cpp
+sed -n '/^\/\/ --- BEGIN_GET_HIERARCHICAL_PATH_TEST_EXTRACT ---$/,/^\/\/ --- END_GET_HIERARCHICAL_PATH_TEST_EXTRACT ---$/p' src/core/sd_functions.cpp | grep -v "BEGIN_GET_HIERARCHICAL_PATH_TEST_EXTRACT" | grep -v "END_GET_HIERARCHICAL_PATH_TEST_EXTRACT" > test/sd_functions_get_hierarchical_path_extracted.cpp
+
 # Compile tests
 g++ -I./test test/test_sd_functions.cpp -o test/test_runner
 
@@ -14,6 +17,7 @@ RESULT=$?
 
 # Clean up
 rm -f test/sd_functions_extracted.cpp
+rm -f test/sd_functions_get_hierarchical_path_extracted.cpp
 rm -f test/test_runner
 
 # Exit with test runner result

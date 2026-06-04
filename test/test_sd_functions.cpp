@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cassert>
+#include "Arduino.h"
 
 // --- Mocks ---
 
@@ -47,10 +48,23 @@ BruceConfigMock bruceConfigPins;
 // We will extract just the section marked between BEGIN_STORAGE_TEST_EXTRACT and END_STORAGE_TEST_EXTRACT
 #include "sd_functions_extracted.cpp"
 
+// Mock for sdcardMounted and SD.exists/SD.mkdir
+bool sdcardMounted = true;
+
+struct SDClass {
+    bool exists(String path) { return true; }
+    void mkdir(String path) {}
+};
+
+SDClass SD;
+
+#include "sd_functions_get_hierarchical_path_extracted.cpp"
+
 
 // --- Tests ---
 
 void reset_mocks() {
+    sdcardMounted = true;
     LittleFS.begin_result = true;
     LittleFS.begin_calls = 0;
     LittleFS.format_calls = 0;
@@ -131,12 +145,55 @@ void test_littlefs_fail_format_success() {
     std::cout << "test_littlefs_fail_format_success passed\n";
 }
 
+void test_getHierarchicalPath_no_slash() {
+    reset_mocks();
+    String result = getHierarchicalPath("/baseDir");
+    assert(result == "/baseDir");
+    std::cout << "test_getHierarchicalPath_no_slash passed\n";
+}
+
+void test_getHierarchicalPath_with_slash() {
+    reset_mocks();
+    String result = getHierarchicalPath("/baseDir/");
+    assert(result == "/baseDir");
+    std::cout << "test_getHierarchicalPath_with_slash passed\n";
+}
+
+void test_getHierarchicalPath_empty() {
+    reset_mocks();
+    String result = getHierarchicalPath("");
+    assert(result == "");
+    std::cout << "test_getHierarchicalPath_empty passed\n";
+}
+
+void test_getHierarchicalPath_only_slash() {
+    reset_mocks();
+    String result = getHierarchicalPath("/");
+    assert(result == "");
+    std::cout << "test_getHierarchicalPath_only_slash passed\n";
+}
+
+void test_getHierarchicalPath_not_mounted() {
+    reset_mocks();
+    sdcardMounted = false;
+    String result = getHierarchicalPath("/baseDir/");
+    assert(result == "/baseDir");
+    std::cout << "test_getHierarchicalPath_not_mounted passed\n";
+}
+
 int main() {
     std::cout << "Running storage tests...\n";
 
     test_littlefs_success_sdcard_success();
     test_littlefs_success_sdcard_fail();
     test_littlefs_fail_format_success();
+
+    std::cout << "Running getHierarchicalPath tests...\n";
+    test_getHierarchicalPath_no_slash();
+    test_getHierarchicalPath_with_slash();
+    test_getHierarchicalPath_empty();
+    test_getHierarchicalPath_only_slash();
+    test_getHierarchicalPath_not_mounted();
 
     std::cout << "All storage tests passed!\n";
     return 0;
