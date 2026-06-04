@@ -23,11 +23,6 @@ class RFID125 {
 public:
     enum RFID125_State {
         READ_MODE,
-        // CLONE_MODE,
-        // WRITE_MODE,
-        // WRITE_NDEF_MODE,
-        // ERASE_MODE,
-        // LOAD_MODE,
         SAVE_MODE,
     };
 
@@ -70,25 +65,18 @@ private:
     /////////////////////////////////////////////////////////////////////////////////////
     void read_card();
     bool read_card_data();
-    // void clone_card();
-    // void erase_card();
-    // void write_data();
-    // void write_ndef_data();
     void save_file();
     void clear_stream();
-    // void load_file();
 
     /////////////////////////////////////////////////////////////////////////////////////
     // File handlers
     /////////////////////////////////////////////////////////////////////////////////////
     bool write_file(String filename);
-    // bool load_from_file();
 
     /////////////////////////////////////////////////////////////////////////////////////
     // Converters
     /////////////////////////////////////////////////////////////////////////////////////
     void format_data();
-    // void parse_data();
 };
 
 #endif
