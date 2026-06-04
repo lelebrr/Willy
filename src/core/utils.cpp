@@ -265,3 +265,11 @@ String formatBytes(uint64_t bytes) {
         return String(size, 2) + " " + units[unitIndex];
     }
 }
+
+String formatTimestamp(time_t t) {
+    if (t == 0) return "1970-01-01 00:00:00";
+    struct tm *tm_info = localtime(&t);
+    char buffer[20];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+    return String(buffer);
+}
