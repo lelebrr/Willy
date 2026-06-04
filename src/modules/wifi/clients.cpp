@@ -11,6 +11,7 @@
 #include "clients.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#include "core/scrollableTextArea.h"
 #include "core/wifi/wifi_common.h"
 #include <Arduino.h>
 #include <esp_event.h>
@@ -53,6 +54,27 @@ char *stringTochar(String s) {
 }
 
 bool filterAnsiSequences = true; // Set to false to disable ANSI sequence filtering
+
+String filterAnsi(const String &input, bool &inEscape) {
+    if (!filterAnsiSequences) return input;
+    String output = "";
+    output.reserve(input.length());
+    for (int i = 0; i < input.length(); i++) {
+        char c = input[i];
+        if (c == '\x1B') {
+            inEscape = true;
+            continue;
+        }
+        if (inEscape) {
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                inEscape = false;
+            }
+            continue;
+        }
+        output += c;
+    }
+    return output;
+}
 
 void ssh_setup(String host) {
     if (!WifiState::wifiConnected) wifiConnectMenu();
@@ -197,6 +219,18 @@ void ssh_loop(void *pvParameters) {
     tft.fillScreen(bruceConfig.bgColor);
     tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
     tft.setTextSize(FP);
+
+    // Setup scrollable area for SSH output
+    ScrollableTextArea sshArea(FP, 0, 0, tftWidth, tftHeight - 20, false, true);
+    String lineBuffer = "";
+    bool inEscape = false;
+
+    // Draw initial command prompt line at the bottom
+    tft.fillRect(0, tftHeight - 20, tftWidth, 20, bruceConfig.bgColor);
+    tft.setCursor(0, tftHeight - 16);
+    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+    tft.print(commandBuffer);
+
     char buffer[1024];
     int nbytes;
     keyStroke key;
@@ -207,36 +241,33 @@ void ssh_loop(void *pvParameters) {
             unsigned long currentMillis = millis();
             if (currentMillis - lastKeyPressMillis >= debounceDelay) {
                 lastKeyPressMillis = currentMillis;
+                bool needsRedraw = false;
                 for (auto i : key.word) {
                     commandBuffer += i;
-                    tft.print(i);
-                    cursorY = tft.getCursorY();
+                    needsRedraw = true;
                 }
                 if (key.del && commandBuffer.length() > 2) {
                     commandBuffer.remove(commandBuffer.length() - 1);
-                    tft.setCursor(tft.getCursorX() - 6, tft.getCursorY());
-                    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
-                    tft.print(" ");
-                    tft.setCursor(tft.getCursorX() - 6, tft.getCursorY());
-                    cursorY = tft.getCursorY();
+                    needsRedraw = true;
                 } else if (key.enter) {
-                    tft.setTextColor(TFT_GREEN);
                     commandBuffer.trim();
                     if (commandBuffer.substring(2) == "cls") {
-                        tft.fillScreen(bruceConfig.bgColor);
-                        tft.setCursor(0, 0);
-                        tft.print("> ");
-                        commandBuffer = "> ";
+                        sshArea.clear();
+                        sshArea.draw(true);
                     } else {
                         String message =
                             commandBuffer.substring(2) + "\r"; // Get the command part, exclude the "> "
                         ssh_channel_write(channel_ssh, message.c_str(), message.length()); // Send the command
                     }
-                    cursorY = tft.getCursorY(); // Update cursor position
-                    if (cursorY > tftHeight) {
-                        tft.setCursor(0, tftHeight - 10);
-                        tft.fillRect(0, tftHeight - 11, tftWidth, 11, bruceConfig.bgColor);
-                    }
+                    commandBuffer = "> ";
+                    needsRedraw = true;
+                }
+
+                if (needsRedraw) {
+                    tft.fillRect(0, tftHeight - 20, tftWidth, 20, bruceConfig.bgColor);
+                    tft.setCursor(0, tftHeight - 16);
+                    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+                    tft.print(commandBuffer);
                 }
             }
         }
@@ -248,9 +279,8 @@ void ssh_loop(void *pvParameters) {
             message = keyboard("cls", 76, "Comando SSH: ");
             while (check(SelPress)) { yield(); } // timerless debounce
             if (message == "cls") {
-                tft.fillScreen(bruceConfig.bgColor);
-                tft.setCursor(0, 0);
-                tft.print("> ");
+                sshArea.clear();
+                sshArea.draw(true);
             } else {
                 message += "\r";
                 ssh_channel_write(channel_ssh, message.c_str(), message.length()); // Send the command
@@ -258,7 +288,10 @@ void ssh_loop(void *pvParameters) {
             }
 
             commandBuffer = "> " + message;
-            tft.setCursor(0, 0);
+            tft.fillRect(0, tftHeight - 20, tftWidth, 20, bruceConfig.bgColor);
+            tft.setCursor(0, tftHeight - 16);
+            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.print(commandBuffer);
             tft.setTextSize(FP);
         }
 
@@ -269,29 +302,49 @@ void ssh_loop(void *pvParameters) {
 
         if (nbytes > 0) {
             String msg = "";
-            tft.setTextColor(TFT_WHITE);
             for (int i = 0; i < nbytes; ++i) {
                 msg += char(buffer[i]);
-                if (buffer[i] == '\r') continue; // Ignore carriage return
-                tft.write(buffer[i]);
-                if (tft.getCursorY() > tftHeight) {
-                    tft.fillScreen(bruceConfig.bgColor);
-                    tft.setCursor(0, 0);
-                    tft.setTextColor(TFT_GREEN);
-                    tft.print(commandBuffer); // Move to the next line on display
-                    tft.setTextColor(TFT_WHITE);
-                }
-                cursorY = tft.getCursorY();
             }
             log_d("%s", msg);
 
-            cursorY = tft.getCursorY(); // Update cursor position
-            if (cursorY > tftHeight) {
-                tft.setCursor(0, tftHeight - 10);
-                tft.fillRect(0, tftHeight - 11, tftWidth, 11, bruceConfig.bgColor);
+            String filteredMsg = filterAnsi(msg, inEscape);
+
+            for (int i = 0; i < filteredMsg.length(); i++) {
+                char c = filteredMsg[i];
+                if (c == '\r') continue;
+                if (c == '\n') {
+                    sshArea.addLine(lineBuffer);
+                    lineBuffer = "";
+                } else {
+                    lineBuffer += c;
+                }
             }
-            commandBuffer = "> "; // Reset command buffer
-            tft.setTextColor(TFT_GREEN);
+
+            // Always add the current buffer to the screen so it's visible,
+            // then we'll remove it from area before the next read unless a newline comes.
+            // Wait, ScrollableTextArea.addLine adds it permanently.
+            // A simple way is to just display it when there's a newline.
+            // Let's draw what we have so far, lineBuffer handles incomplete lines.
+            // But if the server prompt doesn't have a newline, it won't show.
+            // So we add it, draw, and then remove the last line if it didn't have a newline?
+            // Actually, for simplicity, we can just add any remaining characters as a line,
+            // and if the next batch doesn't start with newline, we can append to the last line.
+            // But `ScrollableTextArea` doesn't have `appendLastLine`.
+            // Instead, we just keep `lineBuffer` and add it when `\n` is received.
+            // If `lineBuffer` is not empty, we can force it to be drawn via `tft.drawString` ? No, just add it.
+            if (lineBuffer.length() > 0 && nbytes < sizeof(buffer)) {
+                sshArea.addLine(lineBuffer);
+                lineBuffer = "";
+            }
+
+            sshArea.scrollToLine(sshArea.getMaxLines());
+            sshArea.draw(true);
+
+            // Redraw command prompt line
+            tft.fillRect(0, tftHeight - 20, tftWidth, 20, bruceConfig.bgColor);
+            tft.setCursor(0, tftHeight - 16);
+            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.print(commandBuffer);
         }
 
         // Handle channel closure and other conditions
@@ -356,20 +409,24 @@ void telnet_loop() {
     displayTextLine("Conectado servidor TELNET");
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
     tft.fillScreen(bruceConfig.bgColor);
-    tft.setCursor(0, 0);
+
+    ScrollableTextArea telnetArea(FP, 0, 0, tftWidth, tftHeight - 20, false, true);
+    String lineBuffer = "";
+    bool inEscape = false;
 
     String commandInput;
 
     while (1) {
-        tft.print("> ");
         // waitForInput(commandInput);
         commandInput = keyboard("", 76, "COMANDO");
-        const char *command = commandInput.c_str();
-        send(sock, command, strlen(command), 0);
+        if (commandInput.length() > 0) {
+            String toSend = commandInput + "\r\n";
+            send(sock, toSend.c_str(), toSend.length(), 0);
+        }
 
         // You can also receive data from the server
-        char buffer[128];
-        int len = recv(sock, buffer, sizeof(buffer) - 1, 0);
+        char buffer[256];
+        int len = recv(sock, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
         if (len > 0) {
             buffer[len] = '\0';
             // Check for Telnet negotiation commands (IAC)
@@ -379,16 +436,30 @@ if (buffer[0] == 0xFF) {
     continue;
 }
 */
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
             Serial.printf("Received from server %s\n", buffer);
             // tft.printf("Received from server %s\n", buffer);
             for (int i = 0; i < len; i++) { Serial.printf("%02X ", buffer[i]); }
-            tft.printf("%s\n", buffer);
 
-            tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+            String msg = filterAnsi(String(buffer), inEscape);
+
+            for (int i = 0; i < msg.length(); i++) {
+                char c = msg[i];
+                if (c == '\r') continue;
+                if (c == '\n') {
+                    telnetArea.addLine(lineBuffer);
+                    lineBuffer = "";
+                } else {
+                    lineBuffer += c;
+                }
+            }
+            if (lineBuffer.length() > 0) {
+                telnetArea.addLine(lineBuffer);
+            }
+            telnetArea.scrollToLine(telnetArea.getMaxLines());
+            telnetArea.draw(true);
         }
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
