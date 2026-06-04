@@ -147,11 +147,15 @@ bool setupSdCard() {
     }
 }
 
+// --- BEGIN_GET_HIERARCHICAL_PATH_TEST_EXTRACT ---
 /***************************************************************************************
 ** Function name: getHierarchicalPath
 ** Description:   get path in YYYY/MM/DD format
 ***************************************************************************************/
 String getHierarchicalPath(String baseDir) {
+    if (baseDir.endsWith("/")) {
+        baseDir = baseDir.substring(0, baseDir.length() - 1);
+    }
     // Basic implementation using current date if available, or just keeping it organized
     // For now, let's just ensure the base directory exists
     if (!sdcardMounted) return baseDir;
@@ -161,6 +165,7 @@ String getHierarchicalPath(String baseDir) {
     // Future: Add YYYY/MM/DD subfolders here if RTC is available
     return baseDir;
 }
+// --- END_GET_HIERARCHICAL_PATH_TEST_EXTRACT ---
 
 /***************************************************************************************
 ** Function name: closeSdCard
