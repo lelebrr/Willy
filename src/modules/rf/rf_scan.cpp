@@ -46,15 +46,20 @@ void RFScan::loop() {
         if (bruceConfigPins.rfFxdFreq) frequency = bruceConfigPins.rfFreq;
         if (frequency <= 0) init_freqs();
 
-        while (frequency <= 0) { // FastScan
-            if (check(EscPress) || returnToMenu) return;
-            if (check(NextPress)) {
-                select_menu_option();
-                if (returnToMenu) return;
-                return setup();
-            }
+        if (frequency <= 0) { // FastScan
+            frequency = rf_freq_scan([&]() {
+                if (check(NextPress)) {
+                    select_menu_option();
+                    return true;
+                }
+                return false;
+            }, 2);
 
-            if (fast_scan()) return setup(); // frequency found, reset
+            if (check(EscPress) || returnToMenu) return;
+            if (frequency <= 0) return setup(); // frequency check loop aborted (e.g. NextPress -> select_menu_option)
+
+            rcswitch.resetAvailable(); // Specific behavior for rf_scan
+            return setup(); // frequency found, reset
         }
 
         if (rcswitch.available() && !ReadRAW) {
@@ -82,43 +87,6 @@ void RFScan::init_freqs() {
         _freqs[i].rssi = -75;
     }
     _try = 0;
-}
-
-bool RFScan::fast_scan() {
-
-    if (idx < range_limits[bruceConfigPins.rfScanRange][0] ||
-        idx > range_limits[bruceConfigPins.rfScanRange][1]) {
-        idx = range_limits[bruceConfigPins.rfScanRange][0];
-    }
-    float checkFrequency = subghz_frequency_list[idx];
-    setMHZ(checkFrequency);
-    tft.drawPixel(0, 0, 0); // To make sure CC1101 shared with TFT works properly
-    vTaskDelay(5 / portTICK_PERIOD_MS);
-    rssi = ELECHOUSE_cc1101.getRssi();
-    if (rssi > rssiThreshold) {
-        _freqs[_try].freq = checkFrequency;
-        _freqs[_try].rssi = rssi;
-        _try++;
-        if (_try >= _MAX_TRIES) {
-            int max_index = 0;
-            for (int i = 1; i < _MAX_TRIES; ++i) {
-                if (_freqs[i].rssi > _freqs[max_index].rssi) { max_index = i; }
-            }
-
-            bruceConfigPins.setRfFreq(_freqs[max_index].freq, 2); // change to fixed frequency
-            frequency = _freqs[max_index].freq;
-            setMHZ(frequency);
-            Serial.println("Frequencia Enc.: " + String(frequency));
-            rcswitch.resetAvailable();
-            // When changing to fixed frequency, need to restart the module to reset the registers
-            // so we get good signal reception at this frequency
-            deinitRfModule();
-
-            return true;
-        }
-    }
-    ++idx;
-    return false;
 }
 
 void RFScan::read_rcswitch() {
