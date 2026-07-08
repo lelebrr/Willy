@@ -3,7 +3,6 @@
 #include "sd_functions.h"
 #include <algorithm>
 #include <esp_pm.h>
-#include <algorithm>
 
 const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
 const String ENC_PREFIX = "_ENC_";

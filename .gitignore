@@ -18,3 +18,10 @@ pre_build_*.py
 .vscode/ipch
 setup_gpio_impl.cpp
 test_runner
+*.bin
+firmware_dump.txt
+analyze_symbols.py
+deep_scan.py
+scan_calls.py
+patch_libs.py
+symbols.txt

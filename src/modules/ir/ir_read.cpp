@@ -23,8 +23,6 @@
 #include "ys_irtm.h"
 #endif
 
-/* Dont touch this */
-// #define MAX_RAWBUF_SIZE 300
 #define IR_FREQUENCY 38000
 #define DUTY_CYCLE 0.330000
 

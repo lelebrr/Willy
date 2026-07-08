@@ -7,7 +7,7 @@
 #include "modules/wifi/tcp_utils.h"
 #include <globals.h>
 #include <modules/ethernet/ARPScanner.h>
-// #include "modules/wifi/responder.h"
+
 
 uint32_t wifiCallback(cmd *c) {
     Command cmd(c);
@@ -134,5 +134,5 @@ void createWifiCommands(SimpleCLI *cli) {
         cli->addCommand("sniffer", snifferCallback);
 
 #endif
-    // Command responderCmd = cli->addCommand("responder", responderCallback); TODO
+    // Command responderCmd TODO = cli->addCommand("responder", responderCallback);
 }

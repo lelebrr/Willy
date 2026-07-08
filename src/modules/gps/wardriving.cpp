@@ -513,8 +513,8 @@ void Wardriving::loadAlertMACs() {
 
 void Wardriving::create_filename() {
     char timestamp[20];
-    sprintf(
-        timestamp,
+    snprintf(
+        timestamp, sizeof(timestamp),
         "%02d%02d%02d_%02d%02d%02d",
         gps.date.year() % 100,
         gps.date.month() % 100,

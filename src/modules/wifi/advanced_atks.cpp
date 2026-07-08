@@ -392,7 +392,8 @@ void clientBatteryDrain() {
         memset(&record, 0, sizeof(record));
         memcpy(record.bssid, WiFi.BSSID(i), 6);
         record.primary = WiFi.channel(i);
-        strncpy((char*)record.ssid, WiFi.SSID(i).c_str(), 31);
+        strncpy((char*)record.ssid, WiFi.SSID(i).c_str(), sizeof(record.ssid) - 1);
+        record.ssid[sizeof(record.ssid) - 1] = '\0';
         ap_list.push_back(record);
     }
 

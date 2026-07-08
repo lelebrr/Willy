@@ -105,8 +105,8 @@ void ble_scan_setup() {
     esp_read_mac(sta_mac, ESP_MAC_BT);
 #endif
 
-    sprintf(
-        strID,
+    snprintf(
+        strID, sizeof(strID),
         "%02X:%02X:%02X:%02X:%02X:%02X",
         sta_mac[0],
         sta_mac[1],

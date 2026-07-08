@@ -11,12 +11,10 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
-// #include "esp_wifi_internal.h"
 #include "esp_event.h"
 #include "esp_heap_caps.h"
 #include "esp_system.h"
 #include "lwip/err.h"
-// #include "esp_event_loop.h"
 #include "driver/gpio.h"
 #include "nvs_flash.h"
 #include <algorithm>
@@ -38,7 +36,6 @@
 #include <globals.h>
 #if defined(ESP32)
 #include "FS.h"
-// #include "SD.h"
 #else
 #include <SPI.h>
 #include <SdFat.h>

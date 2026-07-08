@@ -7,7 +7,6 @@
 #include <time.h>
 
 #include <MD5Builder.h>
-#include <algorithm> // for std::sort
 #include <esp_rom_crc.h>
 #include "display.h"
 #include "mykeyboard.h"

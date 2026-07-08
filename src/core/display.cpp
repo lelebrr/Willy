@@ -1846,19 +1846,18 @@ bool drawPNG(FS &fs, String filename, int x, int y, bool center) {
     }
 
     // Allocate decoder only while drawing, then release to keep RAM available for Wi-Fi/AP usage
+    bool usedHeapCaps = false;
+    void *mem = nullptr;
 #if defined(ESP32)
-    bool usedHeapCaps = true;
-    void *mem = psramFound() ? heap_caps_malloc(sizeof(PNG), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT)
-                             : heap_caps_malloc(sizeof(PNG), MALLOC_CAP_8BIT);
+    usedHeapCaps = true;
+    mem = psramFound() ? heap_caps_malloc(sizeof(PNG), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT)
+                       : heap_caps_malloc(sizeof(PNG), MALLOC_CAP_8BIT);
     if (!mem) {
         mem = malloc(sizeof(PNG));
         usedHeapCaps = false;
     }
 #else
-    void *mem = malloc(sizeof(PNG));
-#endif
-#if !defined(ESP32)
-    bool usedHeapCaps = false;
+    mem = malloc(sizeof(PNG));
 #endif
 
     if (!mem) {

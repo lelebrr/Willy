@@ -562,7 +562,6 @@ void setup() {
     Serial.println("_post_setup_gpio() completed successfully.");
     // end of post gpio begin
 
-    // #ifndef USE_TFT_eSPI_TOUCH
 #if defined(HAS_SCREEN)
     Serial.println("Opening theme file...");
     bruceConfig.openThemeFile(bruceConfig.themeFS(), bruceConfig.themePath, false);

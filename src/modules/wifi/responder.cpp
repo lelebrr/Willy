@@ -570,14 +570,17 @@ void responder() {
 
   String tmp_name = keyboard("Bruce", 20);
   strncpy(netbiosname_str, tmp_name.c_str(), sizeof(netbiosname_str)-1);
+  netbiosname_str[sizeof(netbiosname_str)-1] = '\0';
   netbiosName = netbiosname_str;
 
   String tmp_domain = keyboard("BRUCEGROUP", 20);
   strncpy(netbiosdomain_str, tmp_domain.c_str(), sizeof(netbiosdomain_str)-1);
+  netbiosdomain_str[sizeof(netbiosdomain_str)-1] = '\0';
   netbiosDomain = netbiosdomain_str;
 
   String tmp_dns = keyboard("Bruce.Local", 20);
   strncpy(dnsdomain_str, tmp_dns.c_str(), sizeof(dnsdomain_str)-1);
+  dnsdomain_str[sizeof(dnsdomain_str)-1] = '\0';
   dnsDomain = dnsdomain_str;
 
   hashCount = 0;

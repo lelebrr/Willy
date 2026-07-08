@@ -47,7 +47,7 @@ uint16_t fm_scan() {
         }
     }
 
-    sprintf(display_freq, "Found %d MHz", freq_candidate);
+    snprintf(display_freq, sizeof(display_freq), "Found %d MHz", freq_candidate);
     tft.fillScreen(bruceConfig.bgColor);
     displayTextLine(display_freq);
     while (!check(EscPress) && !check(SelPress)) { delay(100); }
@@ -76,7 +76,7 @@ void fm_options_frq(uint16_t f_min, bool reserved) {
 
     options = {};
     for (uint16_t f = f_min; f < f_max; f += 10) {
-        sprintf(f_str, "%d Hz", f);
+        snprintf(f_str, sizeof(f_str), "%d Hz", f);
         options.push_back({f_str, [=]() { set_frq(f); }});
     }
     addOptionToMainMenu();
@@ -111,7 +111,7 @@ void fm_options_digit(uint16_t f_min, bool reserved) {
 
     options = {};
     for (uint16_t f = f_min; f < f_max; f += 1) {
-        sprintf(f_str, "%d MHz", f);
+        snprintf(f_str, sizeof(f_str), "%d MHz", f);
         options.push_back({f_str, [=]() { fm_options_frq(f, reserved); }});
     }
     addOptionToMainMenu();
@@ -132,7 +132,7 @@ void fm_options(uint16_t f_min, uint16_t f_max, bool reserved) {
         options.push_back({"Auto", [=]() { set_auto_scan(true); }});
     }
     for (uint16_t f = f_min; f < f_max; f += 10) {
-        sprintf(f_str, "%d MHz", f);
+        snprintf(f_str, sizeof(f_str), "%d MHz", f);
         options.push_back({f_str, [=]() { fm_options_digit(f, reserved); }});
     }
     addOptionToMainMenu();

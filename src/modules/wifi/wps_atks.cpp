@@ -302,7 +302,8 @@ std::vector<WPSNetworkInfo> scanWPSNetworks() {
             WPSNetworkInfo info;
             memset(&info, 0, sizeof(info));
             memcpy(info.bssid, WiFi.BSSID(i), 6);
-            strncpy(info.ssid, WiFi.SSID(i).c_str(), 32);
+            strncpy(info.ssid, WiFi.SSID(i).c_str(), sizeof(info.ssid) - 1);
+            info.ssid[sizeof(info.ssid) - 1] = '\0';
             info.channel = WiFi.channel(i);
             info.rssi = WiFi.RSSI(i);
             info.wps_enabled = (auth != WIFI_AUTH_OPEN);
@@ -314,7 +315,10 @@ std::vector<WPSNetworkInfo> scanWPSNetworks() {
             // Verifica se já foi quebrada
             char saved_pin[9] = {0};
             info.cracked = wpsIsCracked(info.bssid, saved_pin);
-            if (info.cracked) strncpy(info.cracked_pin, saved_pin, 8);
+            if (info.cracked) {
+                strncpy(info.cracked_pin, saved_pin, sizeof(info.cracked_pin) - 1);
+                info.cracked_pin[sizeof(info.cracked_pin) - 1] = '\0';
+            }
 
             results.push_back(info);
         }

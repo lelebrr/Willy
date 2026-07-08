@@ -348,7 +348,7 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
     if (!stream) return;
     String lineContent = "";
     String Command = "";
-    char Cmd[25];
+    char Cmd[128];
     String Argument = "";
     String RepeatTmp = "";
 
@@ -420,7 +420,8 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
                 Command = lineContent;
                 Argument = "";
             }
-            strcpy(Cmd, Command.c_str());
+            strncpy(Cmd, Command.c_str(), sizeof(Cmd) - 1);
+            Cmd[sizeof(Cmd) - 1] = '\0';
             RepeatTmp = "1";
         }
 

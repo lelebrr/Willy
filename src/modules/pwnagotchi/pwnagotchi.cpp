@@ -149,8 +149,8 @@ void brucegotchi_start() {
             // Serial.println("<<---- Starting Deauthentication Process ---->>");
             for (auto registeredBeacon : registeredBeacons) {
                 char _MAC[20];
-                sprintf(
-                    _MAC,
+                snprintf(
+                    _MAC, sizeof(_MAC),
                     "%02X:%02X:%02X:%02X:%02X:%02X",
                     registeredBeacon.MAC[0],
                     registeredBeacon.MAC[1],
