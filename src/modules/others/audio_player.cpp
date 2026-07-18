@@ -274,34 +274,25 @@ bool showVolumeControl(uint8_t &currentVolume) {
 }
 // ===== MAIN PLAYER UI =====
 
-void musicPlayerUI(FS *fs, const String &filepath) {
-    if (!fs || filepath.isEmpty() || !fs->exists(filepath)) {
-        displayError("File Invalid", true);
-        return;
-    }
 
+class MusicPlayerController {
+private:
+    FS *fs;
+    String filepath;
     UILayout ui;
-    ui.calculate();
-
     PlayerState player;
-    player.isPlaying = false;
-    player.isPaused = false;
-    player.loopEnabled = false;
-    player.filename = extractFilename(filepath);
-    player.lastUpdate = 0;
-    player.scrollOffset = 0;
-    player.lastPauseAction = 0;
+    int selectedButton;
+    unsigned long currentPosition;
+    unsigned long duration;
+    uint8_t currentVolume;
+    unsigned long lastPosUpdate;
+    bool controlsNeedRedraw;
+    bool progressNeedsRedraw;
+    bool infoNeedsRedraw;
 
     enum ControlButton { BTN_PREV = 0, BTN_PLAY = 1, BTN_VOLUME = 2, BTN_LOOP = 3, BTN_COUNT = 4 };
-    int selectedButton = BTN_PLAY;
 
-    unsigned long currentPosition = 0;
-    unsigned long duration = 0;
-    uint8_t currentVolume = bruceConfig.soundVolume;
-
-    // --- Draw functions ---
-
-    auto drawHeader = [&]() {
+    void drawHeader() {
         tft.fillRect(0, 0, tftWidth, ui.HEADER_HEIGHT, bruceConfig.priColor);
         tft.setTextColor(bruceConfig.bgColor, bruceConfig.priColor);
         tft.setTextSize(ui.TEXT_SIZE_LARGE);
@@ -311,8 +302,9 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         int w = title.length() * 6 * ui.TEXT_SIZE_LARGE;
         tft.setCursor((tftWidth - w) / 2, (ui.HEADER_HEIGHT - (8 * ui.TEXT_SIZE_LARGE)) / 2);
         tft.print(title);
-    };
-    auto drawTrackInfo = [&]() {
+    }
+
+    void drawTrackInfo() {
         int y = ui.HEADER_HEIGHT + ui.MARGIN_Y;
 
         // Background area info
@@ -363,9 +355,9 @@ void musicPlayerUI(FS *fs, const String &filepath) {
 
         tft.setCursor(textX, y + (ui.DISPLAY_HEIGHT / 2) - 8);
         tft.print(displayText);
-    };
+    }
 
-    auto drawTimers = [&]() {
+    void drawTimers() {
         int y = ui.HEADER_HEIGHT + ui.MARGIN_Y + ui.DISPLAY_HEIGHT + 2;
         tft.setTextSize(ui.TEXT_SIZE_SMALL);
         tft.setTextColor(TFT_LIGHTGREY, bruceConfig.bgColor);
@@ -380,8 +372,9 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         int w = totalStr.length() * 6;
         tft.setCursor(tftWidth - ui.MARGIN_X - w, y);
         tft.print(totalStr);
-    };
-    auto drawControls = [&]() {
+    }
+
+    void drawControls() {
         int startY = tftHeight - ui.CONTROLS_HEIGHT - ui.MARGIN_Y;
         int totalWidth = tftWidth - (2 * ui.MARGIN_X);
         int gap = (totalWidth - (BTN_COUNT * ui.BUTTON_SIZE)) / (BTN_COUNT - 1);
@@ -403,33 +396,9 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         // LOOP button
         IconType loopIcon = player.loopEnabled ? ICON_LOOP_ON : ICON_LOOP_OFF;
         drawButton(x, startY, ui.BUTTON_SIZE, loopIcon, selectedButton == BTN_LOOP, true);
-    };
+    }
 
-    // Initial Draw
-    tft.fillScreen(bruceConfig.bgColor);
-    drawHeader();
-    drawTrackInfo();
-    drawTimers();
-    drawProgressBar(
-        ui.MARGIN_X,
-        ui.HEADER_HEIGHT + ui.DISPLAY_HEIGHT + 20,
-        tftWidth - 2 * ui.MARGIN_X,
-        ui.PROGRESS_HEIGHT,
-        0,
-        1
-    );
-    drawControls();
-
-    unsigned long lastPosUpdate = 0;
-    // MAIN LOOP
-    while (true) {
-        InputHandler();
-        wakeUpScreen();
-
-        bool controlsNeedRedraw = false;
-        bool progressNeedsRedraw = false;
-        bool infoNeedsRedraw = false;
-
+    void updateState() {
         AudioPlaybackInfo info = getAudioPlaybackInfo();
 
         // Playback state check
@@ -456,7 +425,9 @@ void musicPlayerUI(FS *fs, const String &filepath) {
             playAudioFile(fs, filepath, PLAYBACK_ASYNC);
             controlsNeedRedraw = true;
         }
+    }
 
+    bool handleEvents() {
         // INPUT HANDLING
         if (check(PrevPress)) {
             selectedButton = (selectedButton - 1 + BTN_COUNT) % BTN_COUNT;
@@ -519,29 +490,91 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         }
         if (check(EscPress)) {
             stopAudioPlayback();
-            break;
+            return false;
         }
 
-        // REDRAWS
-        if (infoNeedsRedraw) drawTrackInfo();
-
-        if (progressNeedsRedraw) {
-            drawTimers();
-            drawProgressBar(
-                ui.MARGIN_X,
-                ui.HEADER_HEIGHT + ui.DISPLAY_HEIGHT + 20,
-                tftWidth - 2 * ui.MARGIN_X,
-                ui.PROGRESS_HEIGHT,
-                currentPosition,
-                duration
-            );
-        }
-
-        if (controlsNeedRedraw) drawControls();
-
-        delay(30); // Loop for responsive input
+        return true;
     }
 
-    tft.fillScreen(bruceConfig.bgColor);
+public:
+    MusicPlayerController(FS *fs, const String &filepath)
+        : fs(fs), filepath(filepath), selectedButton(BTN_PLAY), currentPosition(0), duration(0),
+          lastPosUpdate(0), controlsNeedRedraw(false), progressNeedsRedraw(false), infoNeedsRedraw(false) {
+        ui.calculate();
+
+        player.isPlaying = false;
+        player.isPaused = false;
+        player.loopEnabled = false;
+        player.filename = extractFilename(filepath);
+        player.lastUpdate = 0;
+        player.scrollOffset = 0;
+        player.lastPauseAction = 0;
+
+        currentVolume = bruceConfig.soundVolume;
+    }
+
+    void run() {
+        // Initial Draw
+        tft.fillScreen(bruceConfig.bgColor);
+        drawHeader();
+        drawTrackInfo();
+        drawTimers();
+        drawProgressBar(
+            ui.MARGIN_X,
+            ui.HEADER_HEIGHT + ui.DISPLAY_HEIGHT + 20,
+            tftWidth - 2 * ui.MARGIN_X,
+            ui.PROGRESS_HEIGHT,
+            0,
+            1
+        );
+        drawControls();
+
+        // MAIN LOOP
+        while (true) {
+            InputHandler();
+            wakeUpScreen();
+
+            controlsNeedRedraw = false;
+            progressNeedsRedraw = false;
+            infoNeedsRedraw = false;
+
+            updateState();
+
+            if (!handleEvents()) {
+                break;
+            }
+
+            // REDRAWS
+            if (infoNeedsRedraw) drawTrackInfo();
+
+            if (progressNeedsRedraw) {
+                drawTimers();
+                drawProgressBar(
+                    ui.MARGIN_X,
+                    ui.HEADER_HEIGHT + ui.DISPLAY_HEIGHT + 20,
+                    tftWidth - 2 * ui.MARGIN_X,
+                    ui.PROGRESS_HEIGHT,
+                    currentPosition,
+                    duration
+                );
+            }
+
+            if (controlsNeedRedraw) drawControls();
+
+            delay(30); // Loop for responsive input
+        }
+
+        tft.fillScreen(bruceConfig.bgColor);
+    }
+};
+
+void musicPlayerUI(FS *fs, const String &filepath) {
+    if (!fs || filepath.isEmpty() || !fs->exists(filepath)) {
+        displayError("File Invalid", true);
+        return;
+    }
+
+    MusicPlayerController controller(fs, filepath);
+    controller.run();
 }
 #endif
