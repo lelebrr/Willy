@@ -362,20 +362,7 @@ static bool startMdnsResponder() {
 **  Function: configureWebServer
 **  configure web server
 **********************************************************************/
-void configureWebServer() {
-    mdnsRunning = startMdnsResponder();
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-    server->onNotFound(notFound);
-    setupWillyWeb(server);
-    willyLogger.info(COMP_WEBUI, "Server configured with Willy endpoints");
-
-    // Index
-    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        if (checkUserWebAuth(request, true)) {
-            serveWebUIFile(request, "index.html", "text/html", true, index_html, index_html_size);
-        }
-    });
-
+static void configureAuthRoutes() {
     // Login
     server->on("/login", HTTP_POST, [](AsyncWebServerRequest *request) {
         if (request->hasParam("username", true) && request->hasParam("password", true)) {
@@ -417,6 +404,15 @@ void configureWebServer() {
         response->addHeader("Set-Cookie", "WILLYSESSION=0; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
         request->send(response);
     });
+}
+
+static void configureStaticRoutes() {
+    // Index
+    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (checkUserWebAuth(request, true)) {
+            serveWebUIFile(request, "index.html", "text/html", true, index_html, index_html_size);
+        }
+    });
 
     // Static files
     server->on("/theme.css", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -428,7 +424,9 @@ void configureWebServer() {
     server->on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         serveWebUIFile(request, "index.js", "text/javascript", true, index_js, index_js_size);
     });
+}
 
+static void configureSystemRoutes() {
     // System Info
     server->on("/systeminfo", HTTP_GET, [](AsyncWebServerRequest *request) {
         if (checkUserWebAuth(request)) {
@@ -487,30 +485,6 @@ void configureWebServer() {
         }
     });
 
-    // Rename file or folder
-    auto renameHandler = [](AsyncWebServerRequest *request) {
-        if (checkUserWebAuth(request)) {
-            if (request->hasArg("fileName") && request->hasArg("filePath")) {
-                String fs = request->arg("fs").c_str();
-                String fileName = request->arg("fileName").c_str();
-                String filePath = request->arg("filePath").c_str();
-                String filePath2 = filePath.substring(0, filePath.lastIndexOf('/') + 1) + fileName;
-                // Rename the file or folder
-                if (fs == "SD") {
-                    if (SD.rename(filePath, filePath2))
-                        request->send(200, "text/plain", filePath + " renamed to " + filePath2);
-                    else request->send(200, "text/plain", "Fail renaming file.");
-                } else {
-                    if (LittleFS.rename(filePath, filePath2))
-                        request->send(200, "text/plain", filePath + " renamed to " + filePath2);
-                    else request->send(200, "text/plain", "Fail renaming file.");
-                }
-            }
-        }
-    };
-    server->on("/rename", HTTP_POST, renameHandler);
-    server->on("/api/fs/rename", HTTP_POST, renameHandler);
-
     // Route to send a generic command (Tasmota compatible API)
     // https://tasmota.github.io/docs/Commands/#with-web-requests
     server->on("/cm", HTTP_POST, [](AsyncWebServerRequest *request) {
@@ -553,6 +527,46 @@ void configureWebServer() {
     server->on("/reboot", HTTP_GET, [](AsyncWebServerRequest *request) {
         if (checkUserWebAuth(request)) { ESP.restart(); }
     });
+
+    // Wi-Fi configuration
+    server->on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
+        if (checkUserWebAuth(request)) {
+            if (request->hasArg("usr") && request->hasArg("pwd")) {
+                const char *usr = request->arg("usr").c_str();
+                const char *pwd = request->arg("pwd").c_str();
+                bruceConfig.setWebUICreds(usr, pwd);
+                request->send(
+                    200, "text/plain", "User: " + String(usr) + " configured with password: " + String(pwd)
+                );
+            }
+        }
+    });
+}
+
+static void configureFileSystemRoutes() {
+    // Rename file or folder
+    auto renameHandler = [](AsyncWebServerRequest *request) {
+        if (checkUserWebAuth(request)) {
+            if (request->hasArg("fileName") && request->hasArg("filePath")) {
+                String fs = request->arg("fs").c_str();
+                String fileName = request->arg("fileName").c_str();
+                String filePath = request->arg("filePath").c_str();
+                String filePath2 = filePath.substring(0, filePath.lastIndexOf('/') + 1) + fileName;
+                // Rename the file or folder
+                if (fs == "SD") {
+                    if (SD.rename(filePath, filePath2))
+                        request->send(200, "text/plain", filePath + " renamed to " + filePath2);
+                    else request->send(200, "text/plain", "Fail renaming file.");
+                } else {
+                    if (LittleFS.rename(filePath, filePath2))
+                        request->send(200, "text/plain", filePath + " renamed to " + filePath2);
+                    else request->send(200, "text/plain", "Fail renaming file.");
+                }
+            }
+        }
+    };
+    server->on("/rename", HTTP_POST, renameHandler);
+    server->on("/api/fs/rename", HTTP_POST, renameHandler);
 
     // List files
     auto listFilesHandler = [](AsyncWebServerRequest *request) {
@@ -698,20 +712,20 @@ void configureWebServer() {
         [](AsyncWebServerRequest *request) { request->send(200, "text/plain", "File upload completed"); },
         handleUpload
     );
+}
 
-    // Wi-Fi configuration
-    server->on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
-        if (checkUserWebAuth(request)) {
-            if (request->hasArg("usr") && request->hasArg("pwd")) {
-                const char *usr = request->arg("usr").c_str();
-                const char *pwd = request->arg("pwd").c_str();
-                bruceConfig.setWebUICreds(usr, pwd);
-                request->send(
-                    200, "text/plain", "User: " + String(usr) + " configured with password: " + String(pwd)
-                );
-            }
-        }
-    });
+void configureWebServer() {
+    mdnsRunning = startMdnsResponder();
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    server->onNotFound(notFound);
+    setupWillyWeb(server);
+    willyLogger.info(COMP_WEBUI, "Server configured with Willy endpoints");
+
+    configureAuthRoutes();
+    configureStaticRoutes();
+    configureSystemRoutes();
+    configureFileSystemRoutes();
+
     server->begin();
     Serial.println("Webserver started");
 }
