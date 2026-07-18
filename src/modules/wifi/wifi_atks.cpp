@@ -752,10 +752,11 @@ void generateRandomWiFiMac(uint8_t *mac) {
 
 String randomSSID() {
     const char *charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    int len = (rand() % 22) + 7;
+    int len = (esp_random() % 22) + 7;
     String res = "";
+    size_t charset_len = strlen(charset);
     for (int i = 0; i < len; ++i) {
-        res += charset[rand() % strlen(charset)];
+        res += charset[esp_random() % charset_len];
     }
     return res;
 }
