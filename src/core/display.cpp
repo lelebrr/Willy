@@ -734,8 +734,6 @@ Opt_Coord drawOptions(
     int menuSize = options.size();
     if (options.size() > MAX_MENU_SIZE) { menuSize = MAX_MENU_SIZE; }
 
-    // Uncomment to update the statusBar (causes flickering)
-    // drawStatusBar();
 
     int32_t optionsTopY = tftHeight / 2 - menuSize * (FM * 8 + 4) / 2 - 5;
     tft.drawPixel(0, 0, bruceConfig.bgColor);
