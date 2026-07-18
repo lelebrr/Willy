@@ -224,21 +224,36 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
     if (fgcolor == bgcolor && fgcolor == TFT_WHITE) fgcolor = TFT_BLACK;
     if (text.length() * LW * FM < (tftWidth - 2 * FM * LW)) size = FM;
     else size = FP;
-    tft.drawPixel(0, 0, 0);
-    tft.fillRoundRect(10, tftHeight / 2 - 13, tftWidth - 20, 26, 7, bgcolor);
-    tft.setTextColor(fgcolor, bgcolor);
-    if (size == FM) {
-        tft.setTextSize(FM);
-        tft.drawCentreString(text, tftWidth / 2, tftHeight / 2 - 8);
-    } else {
-        tft.setTextSize(FP);
-        int text_size = text.length();
-        if (text_size < (tftWidth - 20) / (LW * FP))
-            tft.drawCentreString(text, tftWidth / 2, tftHeight / 2 - 8);
-        else {
-            tft.drawCentreString(text.substring(0, text_size / 2), tftWidth / 2, tftHeight / 2 - 9);
-            tft.drawCentreString(text.substring(text_size / 2), tftWidth / 2, tftHeight / 2 + 1);
+
+    int maxCharsPerLine = (tftWidth - 20) / (LW * size);
+    std::vector<String> lines;
+    String currentLine = "";
+
+    // Split text into lines, handling existing newlines and length wrapping
+    for (int i = 0; i < text.length(); i++) {
+        if (text[i] == '\n') {
+            lines.push_back(currentLine);
+            currentLine = "";
+        } else {
+            currentLine += text[i];
+            if (currentLine.length() >= maxCharsPerLine) {
+                lines.push_back(currentLine);
+                currentLine = "";
+            }
         }
+    }
+    if (currentLine.length() > 0) lines.push_back(currentLine);
+
+    int boxHeight = (lines.size() * LH * size) + 10;
+    int startY = (tftHeight - boxHeight) / 2;
+
+    tft.drawPixel(0, 0, 0);
+    tft.fillRoundRect(10, startY, tftWidth - 20, boxHeight, 7, bgcolor);
+    tft.setTextColor(fgcolor, bgcolor);
+    tft.setTextSize(size);
+
+    for (int i = 0; i < lines.size(); i++) {
+        tft.drawCentreString(lines[i], tftWidth / 2, startY + 5 + (i * LH * size));
     }
 }
 
@@ -368,7 +383,6 @@ void displayWarning(String txt, bool waitKeyPress) {
 }
 
 void displayInfo(String txt, bool waitKeyPress) {
-    // todo: add newlines to txt if too long
     displayRedStripe(txt, TFT_WHITE, TFT_BLUE);
 #ifndef HAS_SCREEN
     Serial.println("INFO: " + txt);
@@ -380,7 +394,6 @@ void displayInfo(String txt, bool waitKeyPress) {
 }
 
 void displaySuccess(String txt, bool waitKeyPress) {
-    // todo: add newlines to txt if too long
     displayRedStripe(txt, TFT_WHITE, TFT_DARKGREEN);
 #ifndef HAS_SCREEN
     Serial.println("SUCCESS: " + txt);
@@ -391,7 +404,6 @@ void displaySuccess(String txt, bool waitKeyPress) {
 }
 
 void displayTextLine(String txt, bool waitKeyPress) {
-    // todo: add newlines to txt if too long
     displayRedStripe(txt, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
 #ifndef HAS_SCREEN
     Serial.println("MESSAGE: " + txt);
