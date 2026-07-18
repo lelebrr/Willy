@@ -216,29 +216,86 @@ bool wakeUpScreen() {
 ** Function name: displayRedStripe
 ** Description:   Display Red Stripe with information
 ***************************************************************************************/
+
+void addTextNewlines(String& txt) {
+    if (txt.indexOf('\n') != -1) return; // Already has newlines
+
+    int maxChars = (tftWidth - 20) / (LW * FP);
+    if (txt.length() <= (unsigned int)maxChars) return;
+
+    int currentPos = 0;
+    while (currentPos + maxChars < txt.length()) {
+        int spaceIndex = -1;
+        // Search backwards from currentPos + maxChars to currentPos
+        for (int i = currentPos + maxChars; i > currentPos; i--) {
+            if (txt[i] == ' ') {
+                spaceIndex = i;
+                break;
+            }
+        }
+
+        if (spaceIndex != -1) {
+            txt[spaceIndex] = '\n';
+            currentPos = spaceIndex + 1; // Move past the newline
+        } else {
+            // No space found, inject a newline at maxChars
+            txt = txt.substring(0, currentPos + maxChars) + "\n" + txt.substring(currentPos + maxChars);
+            currentPos += maxChars + 1; // Move past the injected newline
+        }
+    }
+}
+
 void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
     // detect if not running in interactive mode -> show nothing onscreen and return immediately
     // if (server || isSleeping || isScreenOff) return; // webui is running
 
     int size;
     if (fgcolor == bgcolor && fgcolor == TFT_WHITE) fgcolor = TFT_BLACK;
-    if (text.length() * LW * FM < (tftWidth - 2 * FM * LW)) size = FM;
+    if (text.length() * LW * FM < (tftWidth - 2 * FM * LW) && text.indexOf('\n') == -1) size = FM;
     else size = FP;
+
     tft.drawPixel(0, 0, 0);
-    tft.fillRoundRect(10, tftHeight / 2 - 13, tftWidth - 20, 26, 7, bgcolor);
+
+    // Count newlines to determine box height
+    int lines = 1;
+    for (int i = 0; i < text.length(); i++) {
+        if (text[i] == '\n') lines++;
+    }
+
+    int boxHeight = 26;
+    if (size == FP && lines > 1) {
+        boxHeight = 10 + (lines * LH * FP); // e.g. padding + lines * height
+    }
+    int boxY = tftHeight / 2 - (boxHeight / 2);
+
+    tft.fillRoundRect(10, boxY, tftWidth - 20, boxHeight, 7, bgcolor);
     tft.setTextColor(fgcolor, bgcolor);
-    if (size == FM) {
-        tft.setTextSize(FM);
-        tft.drawCentreString(text, tftWidth / 2, tftHeight / 2 - 8);
-    } else {
-        tft.setTextSize(FP);
-        int text_size = text.length();
-        if (text_size < (tftWidth - 20) / (LW * FP))
+    tft.setTextSize(size);
+
+    if (lines == 1) {
+        if (size == FM) {
             tft.drawCentreString(text, tftWidth / 2, tftHeight / 2 - 8);
-        else {
-            tft.drawCentreString(text.substring(0, text_size / 2), tftWidth / 2, tftHeight / 2 - 9);
-            tft.drawCentreString(text.substring(text_size / 2), tftWidth / 2, tftHeight / 2 + 1);
+        } else {
+            int text_size = text.length();
+            if (text_size < (tftWidth - 20) / (LW * FP))
+                tft.drawCentreString(text, tftWidth / 2, tftHeight / 2 - 8);
+            else {
+                tft.drawCentreString(text.substring(0, text_size / 2), tftWidth / 2, tftHeight / 2 - 9);
+                tft.drawCentreString(text.substring(text_size / 2), tftWidth / 2, tftHeight / 2 + 1);
+            }
         }
+    } else {
+        int y = boxY + 5; // starting Y with some padding
+        int start = 0;
+        int end = text.indexOf('\n');
+
+        while (end != -1) {
+            tft.drawCentreString(text.substring(start, end), tftWidth / 2, y);
+            y += LH * size;
+            start = end + 1;
+            end = text.indexOf('\n', start);
+        }
+        tft.drawCentreString(text.substring(start), tftWidth / 2, y);
     }
 }
 
@@ -368,7 +425,7 @@ void displayWarning(String txt, bool waitKeyPress) {
 }
 
 void displayInfo(String txt, bool waitKeyPress) {
-    // todo: add newlines to txt if too long
+    addTextNewlines(txt);
     displayRedStripe(txt, TFT_WHITE, TFT_BLUE);
 #ifndef HAS_SCREEN
     Serial.println("INFO: " + txt);
@@ -380,7 +437,7 @@ void displayInfo(String txt, bool waitKeyPress) {
 }
 
 void displaySuccess(String txt, bool waitKeyPress) {
-    // todo: add newlines to txt if too long
+    addTextNewlines(txt);
     displayRedStripe(txt, TFT_WHITE, TFT_DARKGREEN);
 #ifndef HAS_SCREEN
     Serial.println("SUCCESS: " + txt);
@@ -391,7 +448,7 @@ void displaySuccess(String txt, bool waitKeyPress) {
 }
 
 void displayTextLine(String txt, bool waitKeyPress) {
-    // todo: add newlines to txt if too long
+    addTextNewlines(txt);
     displayRedStripe(txt, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
 #ifndef HAS_SCREEN
     Serial.println("MESSAGE: " + txt);
