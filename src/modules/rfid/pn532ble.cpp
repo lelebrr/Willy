@@ -1471,7 +1471,7 @@ String Pn532ble::saveHfDumpBinFile(std::vector<uint8_t> data, String uid, String
     String filePath = "/rfid/hf/" + fileName;
     File file = (*fs).open(filePath, FILE_WRITE);
     if (!file) { return ""; }
-    for (size_t i = 0; i < data.size(); i++) { file.write(data[i]); }
+    file.write((const uint8_t*)data.data(), data.size());
     file.close();
     return fileName;
 }
