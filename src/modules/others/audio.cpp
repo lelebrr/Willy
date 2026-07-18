@@ -10,6 +10,7 @@
 #include "AudioOutputI2SNoDAC.h"
 #include <ESP8266Audio.h>
 #include <ESP8266SAM.h>
+#include <cctype>
 
 void _setup_codec_speaker(bool enable) __attribute__((weak));
 void _setup_codec_speaker(bool enable) {}
@@ -17,6 +18,22 @@ void _setup_codec_speaker(bool enable) {}
 // Volume control constants
 static const float AUDIO_VOLUME_SCALE = 0.1f;
 static const float AUDIO_VOLUME_MAX = 100.0f;
+
+// Helper function to check string ends with case insensitive without allocation
+static bool endsWithIgnoreCase(const String& str, const char* suffix) {
+    size_t strLen = str.length();
+    size_t suffixLen = strlen(suffix);
+
+    if (suffixLen > strLen) return false;
+
+    const char* strEnd = str.c_str() + strLen - suffixLen;
+    for (size_t i = 0; i < suffixLen; i++) {
+        if (std::tolower((unsigned char)strEnd[i]) != std::tolower((unsigned char)suffix[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 
 // Task configuration
 static const uint32_t AUDIO_TASK_STACK_SIZE = 16384; // 16KB - increased for complex MP3 files
@@ -448,7 +465,7 @@ static bool startAsyncPlayback(
 
 // ===== CORE PLAYBACK FUNCTIONS =====
 
-bool playAudioFile(FS *fs, String filepath, PlaybackMode mode) {
+bool playAudioFile(FS *fs, const String& filepath, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
     if (!validateAudioFile(fs, filepath)) { return false; }
@@ -474,14 +491,13 @@ bool playAudioFile(FS *fs, String filepath, PlaybackMode mode) {
 
     AudioGenerator *generator = NULL;
 
-    filepath.toLowerCase();
-    if (filepath.endsWith(".txt") || filepath.endsWith(".rtttl")) generator = new AudioGeneratorRTTTL();
-    else if (filepath.endsWith(".wav")) generator = new AudioGeneratorWAV();
-    else if (filepath.endsWith(".mod")) generator = new AudioGeneratorMOD();
-    else if (filepath.endsWith(".opus")) generator = new AudioGeneratorOpus();
-    else if (filepath.endsWith(".aac")) generator = new AudioGeneratorAAC();
-    else if (filepath.endsWith(".flac")) generator = new AudioGeneratorFLAC();
-    else if (filepath.endsWith(".mp3")) {
+    if (endsWithIgnoreCase(filepath, ".txt") || endsWithIgnoreCase(filepath, ".rtttl")) generator = new AudioGeneratorRTTTL();
+    else if (endsWithIgnoreCase(filepath, ".wav")) generator = new AudioGeneratorWAV();
+    else if (endsWithIgnoreCase(filepath, ".mod")) generator = new AudioGeneratorMOD();
+    else if (endsWithIgnoreCase(filepath, ".opus")) generator = new AudioGeneratorOpus();
+    else if (endsWithIgnoreCase(filepath, ".aac")) generator = new AudioGeneratorAAC();
+    else if (endsWithIgnoreCase(filepath, ".flac")) generator = new AudioGeneratorFLAC();
+    else if (endsWithIgnoreCase(filepath, ".mp3")) {
         generator = new AudioGeneratorMP3();
         source = new AudioFileSourceID3(source);
     }
@@ -528,11 +544,20 @@ bool playAudioFile(FS *fs, String filepath, PlaybackMode mode) {
     return startAsyncPlayback(generator, source, audioout, filepath);
 }
 
-bool playAudioRTTTLString(String song, PlaybackMode mode) {
+bool playAudioRTTTLString(const String& song, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
-    song.trim();
-    if (song == "") {
+    const char* ptr = song.c_str();
+    while (*ptr && std::isspace((unsigned char)*ptr)) ptr++;
+
+    size_t len = 0;
+    if (*ptr != '\0') {
+        const char* end = song.c_str() + song.length() - 1;
+        while (end > ptr && std::isspace((unsigned char)*end)) end--;
+        len = end - ptr + 1;
+    }
+
+    if (len == 0) {
         Serial.println("ERROR: Empty RTTTL string");
         return false;
     }
@@ -554,7 +579,7 @@ bool playAudioRTTTLString(String song, PlaybackMode mode) {
         return false;
     }
 
-    AudioFileSource *source = new AudioFileSourcePROGMEM(song.c_str(), song.length());
+    AudioFileSource *source = new AudioFileSourcePROGMEM(ptr, len);
     if (!source) {
         delete generator;
         delete audioout;
@@ -595,11 +620,13 @@ bool playAudioRTTTLString(String song, PlaybackMode mode) {
     Serial.println("Start RTTTL (async)");
     return startAsyncPlayback(generator, source, audioout, "RTTTL");
 }
-bool tts(String text, PlaybackMode mode) {
+bool tts(const String& text, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
-    text.trim();
-    if (text == "") {
+    const char* ptr = text.c_str();
+    while (*ptr && std::isspace((unsigned char)*ptr)) ptr++;
+
+    if (*ptr == '\0') {
         Serial.println("ERROR: Empty TTS text");
         return false;
     }
@@ -633,7 +660,7 @@ bool tts(String text, PlaybackMode mode) {
     }
 
     // TTS synthesis (always blocking)
-    sam->Say(audioout, text.c_str());
+    sam->Say(audioout, ptr);
 
     delete sam;
     delete audioout;
@@ -642,10 +669,10 @@ bool tts(String text, PlaybackMode mode) {
     return true;
 }
 
-bool isAudioFile(String filepath) {
-    return filepath.endsWith(".opus") || filepath.endsWith(".rtttl") || filepath.endsWith(".txt") ||
-           filepath.endsWith(".wav") || filepath.endsWith(".mod") || filepath.endsWith(".mp3") ||
-           filepath.endsWith(".aac") || filepath.endsWith(".flac");
+bool isAudioFile(const String& filepath) {
+    return endsWithIgnoreCase(filepath, ".opus") || endsWithIgnoreCase(filepath, ".rtttl") || endsWithIgnoreCase(filepath, ".txt") ||
+           endsWithIgnoreCase(filepath, ".wav") || endsWithIgnoreCase(filepath, ".mod") || endsWithIgnoreCase(filepath, ".mp3") ||
+           endsWithIgnoreCase(filepath, ".aac") || endsWithIgnoreCase(filepath, ".flac");
 }
 
 void playTone(unsigned int frequency, unsigned long duration, short waveType) {
