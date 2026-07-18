@@ -953,13 +953,8 @@ static std::vector<String> recentSsidsOnChannel(uint8_t channel, size_t maxItems
 }
 
 //===== SETUP =====//
-void sniffer_setup() {
-    FS *Fs;
-    int redraw = true;
-    bool clearScreen = true;
-    String FileSys = "LittleFS";
-    bool deauth = false;
-    unsigned long lastLittleFsCheck = 0;
+
+bool sniffer_initialize(FS *&Fs, String &FileSys) {
     start_time = millis();
     drawMainBorderWithTitle("pcap sniffer");
     lastRedraw = millis();
@@ -978,7 +973,7 @@ void sniffer_setup() {
     deauthFileIndex = 0;
     if (!sniffer_prepare_storage(Fs, !isLittleFS)) {
         displayError("Erro na fila do Sniffer", true);
-        return;
+        return false;
     }
 
     SnifferMode startMode = sniffer_full_mode_available() ? SnifferMode::Full : SnifferMode::HandshakesOnly;
@@ -993,6 +988,10 @@ void sniffer_setup() {
     beaconSsidCache.clear();
     beaconLastSeen.clear(); // ensure starts empty
 
+    return true;
+}
+
+void sniffer_configure() {
     /* setup wifi */
     WifiCommon::ensurePlatform();
     nvs_flash_init();
@@ -1015,6 +1014,9 @@ void sniffer_setup() {
     // Configura o modo AP
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
+}
+
+bool sniffer_startup(unsigned long &lastLittleFsCheck) {
     ESP_ERROR_CHECK(esp_wifi_start());
     esp_wifi_set_promiscuous(true);
     esp_wifi_set_promiscuous_rx_cb(sniffer);
@@ -1026,7 +1028,7 @@ void sniffer_setup() {
 
     if (isLittleFS && !checkLittleFsSize()) {
         littleFsWasFull = true; // storage triggered exit
-        goto Exit;
+        return false;
     }
     littleFsSpaceAvailable = !isLittleFS || checkLittleFsSizeNM();
     littleFsWasFull = !littleFsSpaceAvailable && isLittleFS;
@@ -1037,6 +1039,26 @@ void sniffer_setup() {
     deauth_tmp = millis();
     // Prepare deauth frame for each AP record
     memcpy(deauth_frame, deauth_frame_default, sizeof(deauth_frame_default));
+    return true;
+}
+
+void sniffer_setup() {
+    FS *Fs;
+    int redraw = true;
+    bool clearScreen = true;
+    String FileSys = "LittleFS";
+    bool deauth = false;
+    unsigned long lastLittleFsCheck = 0;
+
+    if (!sniffer_initialize(Fs, FileSys)) {
+        return;
+    }
+
+    sniffer_configure();
+
+    if (!sniffer_startup(lastLittleFsCheck)) {
+        goto Exit;
+    }
     // Main sniffer loop
 
     static String serialCmdBuffer = "";
