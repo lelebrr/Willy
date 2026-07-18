@@ -155,7 +155,7 @@ void wsl_bypasser_send_raw_frame(const wifi_ap_record_t *ap_record, uint8_t chan
 ** function: wifi_atk_info
 ** @brief: Open Wifi information screen
 ***************************************************************************************/
-void wifi_atk_info(String tssid, String mac, uint8_t channel) {
+void wifi_atk_info(const String& tssid, const String& mac, uint8_t channel) {
     // desenhar a tela
     drawMainBorder();
     tft.setTextColor(bruceConfig.priColor);
@@ -379,7 +379,7 @@ ScanNets:
 uint8_t targetBssid[6]; // Just the target AP MAC to pass onto sniff.cpp to filter out EAPOL frames of
                         // unrelated APs
 
-void capture_handshake(String tssid, String mac, uint8_t channel) {
+void capture_handshake(const String& tssid, const String& mac, uint8_t channel) {
 
     hsTracker = HandshakeTracker(); // Reset tracker for each new capture
 
@@ -640,7 +640,7 @@ void capture_handshake(String tssid, String mac, uint8_t channel) {
 ** function: target_atk_menu
 ** @brief: Open menu to choose which AP Attack
 ***************************************************************************************/
-void target_atk_menu(String tssid, String mac, uint8_t channel) {
+void target_atk_menu(const String& tssid, const String& mac, uint8_t channel) {
 AGAIN:
     options = {
         {"Informacao",         [=]() { wifi_atk_info(tssid, mac, channel); }      },
@@ -662,7 +662,7 @@ AGAIN:
 ** function: target_atk
 ** @brief: Deploy Target deauth
 ***************************************************************************************/
-void target_atk(String tssid, String mac, uint8_t channel) {
+void target_atk(const String& tssid, const String& mac, uint8_t channel) {
     // Initialize WiFi attack mode
     if (!wifi_atk_setWifi()) return; // Error messages handled internally
 
@@ -860,7 +860,7 @@ void beaconSpamList(const char list[]) {
     }
 }
 
-void beaconSpamSingle(String baseSSID) {
+void beaconSpamSingle(const String& baseSSID) {
     uint8_t beaconPacket[BEACON_PKT_LEN];
     uint8_t macAddr[6];
     int counter = 1;
