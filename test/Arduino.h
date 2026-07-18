@@ -37,6 +37,22 @@ public:
         return str.length();
     }
 
+    int indexOf(const char* s) const {
+        size_t pos = str.find(s);
+        if (pos == std::string::npos) return -1;
+        return static_cast<int>(pos);
+    }
+
+    int indexOf(char c, int fromIndex) const {
+        size_t pos = str.find(c, fromIndex);
+        if (pos == std::string::npos) return -1;
+        return static_cast<int>(pos);
+    }
+
+    bool isEmpty() const {
+        return str.empty();
+    }
+
     String operator+(const String& s) const {
         return String(str + s.str);
     }
@@ -93,4 +109,3 @@ public:
 };
 extern SerialMock Serial;
 
-#endif
