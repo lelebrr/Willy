@@ -40,8 +40,8 @@ ARPSpoofer::ARPSpoofer(
     const ScanHosts::Host &host, IPAddress gateway, uint8_t _gatewayMAC[6], uint8_t _mac[6], bool _mitm
 ) {
     mitm = _mitm;
-    memcpy(gatewayMAC, _gatewayMAC, 6);
-    std::copy(_mac, _mac + 6, myMAC); // FIX: Copy the passed ESP32 MAC to myMAC
+    std::copy(_gatewayMAC, _gatewayMAC + sizeof(gatewayMAC), gatewayMAC);
+    std::copy(_mac, _mac + sizeof(myMAC), myMAC);
     setup(host, gateway);
 }
 
