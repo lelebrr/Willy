@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <cstdint>
+#include "Arduino.h"
 
 // --- Mocks ---
 
@@ -34,7 +36,40 @@ struct SPIClassMock {
 SPIClassMock sdcardSPI;
 SPIClassMock SPI;
 
-struct FS {}; // Dummy base class or just dummy class to satisfy types
+#define FILE_READ 0
+#define FILE_WRITE 1
+
+struct File {
+    bool is_valid = false;
+    int _size = 0;
+    int _read_calls = 0;
+    int _write_calls = 0;
+
+    operator bool() const { return is_valid; }
+    int size() { return _size; }
+    size_t read(uint8_t* buf, size_t size) {
+        _read_calls++;
+        if (_read_calls == 1) return 10;
+        return 0; // Return bytes read once, then 0
+    }
+    size_t write(const uint8_t* buf, size_t size) {
+        _write_calls++;
+        return size;
+    }
+    void close() {}
+};
+
+struct FS {
+    bool open_result = true;
+    int open_calls = 0;
+    File open(String path, int mode = FILE_READ) {
+        open_calls++;
+        File f;
+        f.is_valid = open_result;
+        f._size = 10; // Some default size
+        return f;
+    }
+}; // Dummy base class or just dummy class to satisfy types
 
 struct SDClassMock : public FS {
     bool begin_result = true;
@@ -63,11 +98,7 @@ struct SDClassMock : public FS {
 
 SDClassMock SD;
 
-struct SerialMock {
-    void println(const char* str) {}
-    void println(const std::string& str) {}
-    void printf(const char* fmt, ...) {}
-};
+// SerialMock and Serial are defined in Arduino.h
 SerialMock Serial;
 
 struct BusPin {
@@ -120,11 +151,24 @@ struct FSMock : public FS {
 
 FSMock LittleFS;
 
-void displayError(const char* msg, bool flag) {}
+int displayError_calls = 0;
+void displayError(const char* msg, bool flag) {
+    displayError_calls++;
+}
+
+struct TFTMock {
+    void drawArc(int, int, int, int, int, int, uint32_t, uint32_t, bool) {}
+};
+TFTMock tft;
+
+uint32_t ALCOLOR = 0;
+int tftWidth = 320;
+int tftHeight = 240;
 
 struct BruceConfigMock {
     int fromFile_calls = 0;
     bool last_checkFS = false;
+    uint32_t bgColor = 0;
 
     void fromFile(bool checkFS) {
         fromFile_calls++;
@@ -150,6 +194,7 @@ int setupSdCard_calls = 0;
 // Oh wait, `sd_functions_extracted.cpp` (which is `begin_storage`) calls `setupSdCard()`.
 
 #include "sd_functions_extracted.cpp"
+#include "sd_copy_to_fs_extracted.cpp"
 
 // --- Tests ---
 
@@ -179,6 +224,35 @@ void reset_mocks() {
 
     bruceConfigPins.fromFile_calls = 0;
     bruceConfigPins.last_checkFS = false;
+
+    displayError_calls = 0;
+}
+
+void test_copyToFs_sdcard_mount_fails() {
+    reset_mocks();
+    sdcardMounted = false;
+    bruceConfigPins.SDCARD_bus.sck = -1; // Force setupSdCard to fail
+
+    bool result = copyToFs(SD, LittleFS, "/test.txt", false);
+
+    assert(result == false);
+    assert(sdcardMounted == false);
+    std::cout << "test_copyToFs_sdcard_mount_fails passed\n";
+}
+
+void test_copyToFs_success() {
+    reset_mocks();
+    sdcardMounted = true;
+    LittleFS.begin_result = true;
+    SD.open_result = true;
+    LittleFS.open_result = true;
+    LittleFS.totalBytes_val = 10000;
+    LittleFS.usedBytes_val = 0;
+
+    bool result = copyToFs(SD, LittleFS, "/test.txt", false);
+
+    assert(result == true);
+    std::cout << "test_copyToFs_success passed\n";
 }
 
 // Storage extraction tests
@@ -376,6 +450,10 @@ int main() {
 
     std::cout << "Running getFsStorage tests...\n";
     test_getFsStorage();
+
+    std::cout << "Running copyToFs tests...\n";
+    test_copyToFs_sdcard_mount_fails();
+    test_copyToFs_success();
 
     std::cout << "All tests passed!\n";
     return 0;
