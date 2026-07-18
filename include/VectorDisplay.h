@@ -345,8 +345,8 @@ public:
 
     int16_t fontHeight(void) { return 8 * gfxFontSize; }
 
-    int16_t textWidth(const char *string) { return 5 * gfxFontSize; }
-    int16_t textWidth(const char *string, uint8_t font) { return 5 * gfxFontSize; }
+    int16_t textWidth(const char *string) { return 5 * gfxFontSize * strlen(string); }
+    int16_t textWidth(const char *string, uint8_t font) { return 5 * gfxFontSize * strlen(string); }
 
     uint8_t sumBytes(void *data, int length) {
         uint8_t *p = (uint8_t *)data;
@@ -867,8 +867,22 @@ public:
     void setTextWrap(bool x, bool wrapY = false) { wrap = x; }
 
     int16_t drawRightString(const char *string, int32_t x, int32_t y, uint8_t font) {
-        // TODO: add spaces
-        return drawString(string, x, y);
+        int strWidth = textWidth(string, font);
+        int spaceWidth = 5 * gfxFontSize;
+
+        int leftPx = x - strWidth;
+        if (leftPx < 0) leftPx = 0;
+
+        int padSpaces = leftPx / spaceWidth;
+        int remX = leftPx % spaceWidth;
+
+        String padded = "";
+        for (int i = 0; i < padSpaces; i++) {
+            padded += " ";
+        }
+        padded += string;
+
+        return drawString(padded.c_str(), remX, y);
     }
 
     int16_t drawRightString(const String &string, int32_t x, int32_t y, uint8_t font) {
@@ -876,8 +890,31 @@ public:
     }
 
     int16_t drawCentreString(const char *string, int32_t x, int32_t y, uint8_t font) {
-        // TODO: add spaces
-        return drawString(string, x, y);
+        int strWidth = textWidth(string, font);
+        int spaceWidth = 5 * gfxFontSize;
+
+        int leftPx = x - (strWidth / 2);
+        if (leftPx < 0) leftPx = 0;
+
+        int padSpaces = leftPx / spaceWidth;
+        int remX = leftPx % spaceWidth;
+
+        int rightPx = width() - (leftPx + strWidth);
+        int padRight = 0;
+        if (rightPx > 0) {
+            padRight = rightPx / spaceWidth;
+        }
+
+        String padded = "";
+        for (int i = 0; i < padSpaces; i++) {
+            padded += " ";
+        }
+        padded += string;
+        for (int i = 0; i < padRight; i++) {
+            padded += " ";
+        }
+
+        return drawString(padded.c_str(), remX, y);
     }
 
     int16_t drawCentreString(const String &string, int32_t x, int32_t y, uint8_t font) {
@@ -890,14 +927,14 @@ public:
 
     int16_t drawString(const char *string, int32_t x, int32_t y) {
         setCursor(x, y);
-        return 0;
         write(string);
+        return textWidth(string);
     };
 
     int16_t drawChar(uint16_t uniCode, int32_t x, int32_t y) {
         setCursor(x, y);
-        return 0;
         write(uniCode);
+        return 5 * gfxFontSize;
     }
 
     size_t write(uint8_t c) override {
