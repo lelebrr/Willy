@@ -48,8 +48,17 @@ void setupWillyWeb(AsyncWebServer* server) {
         if (file.size() > 5000) {
             file.seek(file.size() - 5000);
         }
-        while (file.available()) {
-            tail += (char)file.read();
+
+        size_t availableBytes = file.available();
+        if (availableBytes > 0) {
+            tail.reserve(availableBytes);
+            uint8_t buffer[512];
+            while (file.available()) {
+                size_t bytesRead = file.read(buffer, sizeof(buffer) - 1);
+                if (bytesRead == 0) break;
+                buffer[bytesRead] = '\0';
+                tail += (const char*)buffer;
+            }
         }
         file.close();
         request->send(200, "text/plain", tail);
