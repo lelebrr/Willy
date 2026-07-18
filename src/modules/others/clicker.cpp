@@ -75,10 +75,8 @@ void initClickerUSB() {
 void cleanupClickerUSB() {
     // Serial.println("[USB] Starting cleanup...");
     Mouse.end();
-    USB.~ESPUSB(); // Explicit destructor call
     delay(100);
-    USB.enableDFU(); // Re-enable DFU for future uploads
-    delay(100);
+    Serial.begin(115200); // Safely restore serial console
     // Serial.println("[USB] Cleanup complete");
 }
 // ===== UI DRAWING FUNCTIONS =====
@@ -844,9 +842,6 @@ void clicker_setup() {
         }
         if (check(EscPress)) {
             delay(600);
-            displayWarning(
-                "Turn-off to restore USB", true
-            ); // BUG (?) - Need to restore Usb without Power-Off (reboot seems uneffective)
             restart = false;
             userChoice = true;
         }

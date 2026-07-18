@@ -230,9 +230,6 @@ void ducky_stopKb(HIDInterface *&hid, bool ble) {
             hid = nullptr;
         }
 #if defined(USB_as_HID)
-        USB.~ESPUSB(); // Explicit destructor call
-        delay(100);
-        USB.enableDFU(); // Re-enable DFU for future uploads
         delay(100);
         Serial.begin(115200);
 #else
