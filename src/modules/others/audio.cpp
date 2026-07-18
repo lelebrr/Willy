@@ -595,11 +595,12 @@ bool playAudioRTTTLString(String song, PlaybackMode mode) {
     Serial.println("Start RTTTL (async)");
     return startAsyncPlayback(generator, source, audioout, "RTTTL");
 }
-bool tts(String text, PlaybackMode mode) {
+bool tts(const String& text, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
-    text.trim();
-    if (text == "") {
+    String textCopy = text;
+    textCopy.trim();
+    if (textCopy == "") {
         Serial.println("ERROR: Empty TTS text");
         return false;
     }
@@ -633,7 +634,7 @@ bool tts(String text, PlaybackMode mode) {
     }
 
     // TTS synthesis (always blocking)
-    sam->Say(audioout, text.c_str());
+    sam->Say(audioout, textCopy.c_str());
 
     delete sam;
     delete audioout;
