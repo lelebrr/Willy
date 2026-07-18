@@ -268,7 +268,6 @@ uint32_t navCallback(cmd *c) {
         );
         return false;
     }
-    // wakeUpScreen(); // Do not wakeup screen if it is dimmed and using Remote control
     unsigned long tmp = millis();
     while (millis() <= tmp + dur) {
         if (*var == false) {
