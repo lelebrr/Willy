@@ -95,9 +95,7 @@ String humanReadableSize(uint64_t bytes) {
 **  list all of the files, if ishtml=true, return html rather than simple text
 **********************************************************************/
 String listFiles(FS &fs, String folder) {
-    // log_i("Listfiles Start");
     String returnText = "pa:" + folder + ":0\n";
-    // Serial.println("Listing files stored on SD");
 
     _webFS = fs;
 
@@ -109,17 +107,13 @@ String listFiles(FS &fs, String folder) {
         String fullPath = root.getNextFileName(&isDir);
         String nameOnly = fullPath.substring(fullPath.lastIndexOf("/") + 1);
         if (fullPath == "") { break; }
-        // Serial.printf("Path: %s (isDir: %d)\n", fullPath.c_str(), isDir);
 
         if (esp_get_free_heap_size() > (String("Fo:" + nameOnly + ":0\n").length()) + 1024) {
             if (isDir) {
-                // Serial.printf("Directory: %s\n", fullPath.c_str());
                 returnText += "Fo:" + nameOnly + ":0\n";
             } else {
                 // For files, we need to get the size, so we open the file briefly
-                // Serial.printf("Opening file for size check: %s\n", fullPath.c_str());
                 File file = fs.open(fullPath);
-                // Serial.printf("File size: %llu bytes\n", file.size());
                 if (file) {
                     returnText += "Fi:" + nameOnly + ":" + humanReadableSize(file.size()) + "\n";
                     file.close();
@@ -129,7 +123,6 @@ String listFiles(FS &fs, String folder) {
         esp_task_wdt_reset();
     }
     root.close();
-    // log_i("ListFiles End");
     return returnText;
 }
 
