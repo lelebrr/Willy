@@ -819,9 +819,10 @@ void BruceConfig::addMifareKey(String value) { MifareKeysManager::addKey(mifareK
 void BruceConfig::validateMifareKeysItems() { MifareKeysManager::validateKeys(mifareKeys); }
 
 void BruceConfig::addDisabledMenu(String value) {
-    // TODO: check if duplicate
-    disabledMenus.push_back(value);
-    saveFile();
+    if (std::find(disabledMenus.begin(), disabledMenus.end(), value) == disabledMenus.end()) {
+        disabledMenus.push_back(value);
+        saveFile();
+    }
 }
 
 void BruceConfig::removeDisabledMenu(String value) {
