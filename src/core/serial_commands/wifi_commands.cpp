@@ -100,19 +100,6 @@ uint32_t listenTCPCallback(cmd *c) {
     return true;
 }
 
-/*
-uint32_t responderCallback(cmd *c) {
-    if (!WifiState::wifiConnected) {
-        Serial.println("Connect to a WiFi first.");
-        return false;
-    }
-
-    responder();
-
-    return true;
-}
-*/
-
 void createWifiCommands(SimpleCLI *cli) {
     Command webuiCmd = cli->addCommand("webui", webuiCallback);
     webuiCmd.addFlagArg("noAp");
@@ -134,5 +121,4 @@ void createWifiCommands(SimpleCLI *cli) {
         cli->addCommand("sniffer", snifferCallback);
 
 #endif
-    // Command responderCmd TODO = cli->addCommand("responder", responderCallback);
 }
