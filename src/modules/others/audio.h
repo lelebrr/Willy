@@ -29,7 +29,7 @@ struct AudioPlaybackInfo {
 // Existing functions
 bool playAudioFile(FS *fs, String filepath, PlaybackMode mode = PLAYBACK_BLOCKING);
 bool playAudioRTTTLString(String song, PlaybackMode mode = PLAYBACK_BLOCKING);
-bool tts(String text, PlaybackMode mode = PLAYBACK_BLOCKING);
+bool tts(const String& text, PlaybackMode mode = PLAYBACK_BLOCKING);
 bool isAudioFile(String filePath);
 void playTone(unsigned int frequency, unsigned long duration = 0UL, short waveType = 0);
 void _tone(unsigned int frequency, unsigned long duration = 0UL);
