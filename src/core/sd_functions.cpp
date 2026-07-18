@@ -934,7 +934,6 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                         options.insert(options.begin(), Option{"Play Audio", [&]() {
                                                              delay(200);
                                                              check(AnyKeyPress);
-                                                             // playAudioFile(&fs, filepath);
                                                              musicPlayerUI(&fs, filepath);
                                                          }});
 #endif
