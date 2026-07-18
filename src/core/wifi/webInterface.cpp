@@ -437,8 +437,9 @@ void configureWebServer() {
             uint64_t LittleFSUsedBytes = LittleFS.usedBytes();
             uint64_t SDTotalBytes = SD.totalBytes();
             uint64_t SDUsedBytes = SD.usedBytes();
-            sprintf(
+            snprintf(
                 response_body,
+                sizeof(response_body),
                 "{\"%s\":\"%s\",\"SD\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"},"
                 "\"LittleFS\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}",
                 "BRUCE_VERSION",
