@@ -342,10 +342,18 @@ static int wpsInternalSelectTarget(const std::vector<WPSNetworkInfo>& networks, 
 
     // Constroi labels como Strings persistentes
     std::vector<String> labels;
+    labels.reserve(networks.size());
     for (size_t i = 0; i < networks.size(); i++) {
-        String label = String(networks[i].ssid);
-        if (label.length() == 0) label = "<Hidden>";
-        label += " " + String(networks[i].rssi) + "dB";
+        String label;
+        label.reserve(32);
+        if (networks[i].ssid[0] == '\0') {
+            label = "<Hidden>";
+        } else {
+            label = networks[i].ssid;
+        }
+        label += " ";
+        label += String(networks[i].rssi);
+        label += "dB";
         if (networks[i].cracked) label += " [Q]";
         labels.push_back(label.substring(0, 25));
     }
