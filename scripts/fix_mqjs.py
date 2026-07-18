@@ -44,9 +44,8 @@ JSSTDLibraryDef bruce_stdlib_def = {
 code = code.replace('void js_bruce_init(JSContext *ctx) {', enum_str + array_str + stdlib_def_str + '\nvoid js_bruce_init(JSContext *ctx) {')
 
 # One more fix: JS_FreeValue and JS_DupValue are not in mquickjs.
-code = code.replace('JS_FreeValue(ctx, global_obj);', '')
-code = code.replace('JS_FreeValue(ctx, val);', '')
-code = code.replace('JS_DupValue(ctx, display)', 'display')
+code = re.sub(r'JS_FreeValue\s*\([^,]+,\s*[^)]+\)\s*;?', '', code)
+code = re.sub(r'JS_DupValue\s*\([^,]+,\s*([^)]+)\)', r'\1', code)
 
 with open("src/modules/bjs_interpreter/mqjs_bindings.cpp", "w") as f:
     f.write(code)
