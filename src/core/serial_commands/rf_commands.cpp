@@ -149,7 +149,7 @@ uint32_t rfTxBufferCallback(cmd *c) {
     if (!(_setupPsramFs())) return false;
 
     char *txt = _readFileFromSerial();
-    String tmpfilepath = "/tmpramfile"; // TODO: Change to use char *txt directly
+    String tmpfilepath = "/tmpramfile";
     File f = PSRamFS.open(tmpfilepath, FILE_WRITE);
     if (!f) return false;
 
