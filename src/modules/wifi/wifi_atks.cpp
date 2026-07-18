@@ -430,8 +430,9 @@ void capture_handshake(String tssid, String mac, uint8_t channel) {
     // If SSID was hidden/empty, use BSSID appended to filename so it's unique and descriptive
     if (sanitizedSsid.length() == 0) {
         char bssidHex[32];
-        sprintf(
+        snprintf(
             bssidHex,
+            sizeof(bssidHex),
             "%02X%02X%02X%02X%02X%02X",
             bssid_array[0],
             bssid_array[1],
@@ -444,8 +445,9 @@ void capture_handshake(String tssid, String mac, uint8_t channel) {
     }
 
     char hsFileName[128];
-    sprintf(
+    snprintf(
         hsFileName,
+        sizeof(hsFileName),
         "/WillyPCAP/handshakes/HS_%02X%02X%02X%02X%02X%02X_%s.pcap",
         bssid_array[0],
         bssid_array[1],

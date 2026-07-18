@@ -1450,8 +1450,9 @@ void setMacAddressMenu() {
              uint8_t randomMac[6];
              for (int i = 0; i < 6; i++) randomMac[i] = random(0x00, 0xFF);
              char buf[18];
-             sprintf(
+             snprintf(
                  buf,
+                 sizeof(buf),
                  "%02X:%02X:%02X:%02X:%02X:%02X",
                  randomMac[0],
                  randomMac[1],

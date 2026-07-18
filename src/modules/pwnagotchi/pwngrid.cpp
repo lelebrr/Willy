@@ -220,8 +220,9 @@ typedef struct {
 } wifi_ieee80211_packet_t;
 
 void getMAC(char *addr, uint8_t *data, uint16_t offset) {
-    sprintf(
+    snprintf(
         addr,
+        18,
         "%02x:%02x:%02x:%02x:%02x:%02x",
         data[offset + 0],
         data[offset + 1],
