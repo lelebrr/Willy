@@ -727,11 +727,23 @@ void target_atk(String tssid, String mac, uint8_t channel) {
         if (check(SelPress) || EscPress) {
             EscPress = false;
             displayTextLine("Deauth Pausado");
-            delay(500); // Debouncing
 
-            // Wait for user input
-            while (!check(SelPress)) {
+            uint32_t pauseStartTime = millis();
+
+            // Wait for user input, incorporating non-blocking debounce
+            while (true) {
                 vTaskDelay(10 / portTICK_PERIOD_MS);
+
+                if (millis() - pauseStartTime < 500) {
+                    // Consume and discard inputs during debounce period
+                    check(SelPress);
+                    check(EscPress);
+                    continue;
+                }
+
+                if (check(SelPress)) {
+                    break;
+                }
                 if (check(EscPress)) {
                     attackActive = false; // Exit main loop
                     break;
