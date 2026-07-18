@@ -638,6 +638,126 @@ void readFs(FS fs, String folder, String allowed_ext) {
     fileList.push_back(object);
 }
 
+void populateFileOptions(std::vector<Option>& options, FS &fs, const String& filepath, const String& Folder, bool &exit) {
+    // custom file formats commands added in front
+    if (filepath.endsWith(".jpg") || filepath.endsWith(".gif") || filepath.endsWith(".bmp") ||
+        filepath.endsWith(".png"))
+        options.insert(options.begin(), Option{"Ver Imagem", [=, &fs]() {
+                             drawImg(fs, filepath, 0, 0, true, -1);
+                             delay(750);
+                             while (!check(AnyKeyPress))
+                                 vTaskDelay(10 / portTICK_PERIOD_MS);
+                         }});
+    if (filepath.endsWith(".ir")) {
+        options.insert(options.begin(), Option{"Escolher cmd IR", [=, &fs]() {
+                             delay(200);
+                             chooseCmdIrFile(&fs, filepath);
+                         }});
+        options.insert(options.begin(), Option{"IR Tx SpamTodos", [=, &fs]() {
+                             delay(200);
+                             txIrFile(&fs, filepath);
+                         }});
+    }
+    if (filepath.endsWith(".sub"))
+        options.insert(options.begin(), Option{"Subghz Tx", [=, &fs]() {
+                             delay(200);
+                             txSubFile(&fs, filepath);
+                         }});
+    if (filepath.endsWith(".csv")) {
+        options.insert(options.begin(), Option{"Upload Wigle", [=, &fs]() {
+                             delay(200);
+                             Wigle wigle;
+                             wigle.upload(&fs, filepath);
+                         }});
+        options.insert(options.begin(), Option{"Upload Wigle Tudo", [=, &fs]() {
+                             delay(200);
+                             Wigle wigle;
+                             wigle.upload_all(&fs, Folder);
+                         }});
+    }
+#if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
+    if (filepath.endsWith(".bjs") || filepath.endsWith(".js")) {
+        options.insert(options.begin(), Option{"Executar Script JS", [=, &fs, &exit]() {
+                             delay(200);
+                              run_js_script_headless(fs, filepath);
+                             exit = true;
+                         }});
+    }
+#endif
+#if defined(USB_as_HID)
+    if (filepath.endsWith(".txt")) {
+        options.push_back(Option{"Executar BadUSB", [=, &fs]() {
+                               ducky_startKb(hid_usb, false);
+                               key_input(fs, filepath, hid_usb);
+                               ducky_stopKb(hid_usb, false);
+                           }});
+        options.push_back(Option{"USB HID Digitar", [=, &fs]() {
+                               String t = readSmallFile(fs, filepath);
+                               displayRedStripe("Digitando");
+                               key_input_from_string(t);
+                           }});
+    }
+    if (filepath.endsWith(".enc")) { // encrypted files
+        options.insert(
+            options.begin(), Option{"Descript+Digitar", [=, &fs]() {
+                                  String plaintext = readDecryptedFile(fs, filepath);
+                                  if (plaintext.length() == 0)
+                                      return displayError(
+                                          "Falha na descriptografia", true
+                                      ); // file is too big or cannot read, or cancelled
+                                  // else
+                                  plaintext.trim(); // remove newlines
+                                  key_input_from_string(plaintext);
+                              }}
+        );
+    }
+#endif
+    if (filepath.endsWith(".enc")) { // encrypted files
+        options.insert(
+            options.begin(), Option{"Decrypt+Show", [=, &fs]() {
+                                  String plaintext = readDecryptedFile(fs, filepath);
+                                  delay(200);
+                                  if (plaintext.length() == 0)
+                                      return displayError("Decryption failed", true);
+                                  plaintext.trim(); // remove newlines
+                                  if (plaintext.length() < 64) {
+                                      displaySuccess(plaintext, true);
+                                  } else {
+                                      ScrollableTextArea area = ScrollableTextArea("DECRYPTED TEXT");
+                                      area.fromString(plaintext);
+                                      area.show();
+                                  }
+                              }}
+        );
+    }
+#if defined(HAS_NS4168_SPKR)
+    if (isAudioFile(filepath))
+        options.insert(options.begin(), Option{"Play Audio", [=, &fs]() {
+                             delay(200);
+                             check(AnyKeyPress);
+                             // playAudioFile(&fs, filepath);
+                             musicPlayerUI(&fs, filepath);
+                         }});
+#endif
+    // generate qr codes from small files (<3K)
+    size_t filesize = getFileSize(fs, filepath);
+    // Serial.println(filesize);
+    if (filesize < SAFE_STACK_BUFFER_SIZE && filesize > 0) {
+        options.push_back(Option{"QR code", [=, &fs]() {
+                               delay(200);
+                               qrcode_display(readSmallFile(fs, filepath));
+                           }});
+        options.push_back(Option{"CRC32", [=, &fs]() {
+                               delay(200);
+                               displaySuccess(crc32File(fs, filepath), true);
+                           }});
+        options.push_back(Option{"MD5", [=, &fs]() {
+                               delay(200);
+                               displaySuccess(md5File(fs, filepath), true);
+                           }});
+    }
+}
+
 /*********************************************************************
 **  Function: loopSD
 **  Where you choose what to do with your SD Files
@@ -838,123 +958,8 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                     if (&fs == &LittleFS && sdcardMounted)
                         options.push_back(Option{"Copiar->SD", [=]() { copyToFs(LittleFS, SD, filepath); }});
 
-                    // custom file formats commands added in front
-                    if (filepath.endsWith(".jpg") || filepath.endsWith(".gif") || filepath.endsWith(".bmp") ||
-                        filepath.endsWith(".png"))
-                        options.insert(options.begin(), Option{"Ver Imagem", [&]() {
-                                                             drawImg(fs, filepath, 0, 0, true, -1);
-                                                             delay(750);
-                                                             while (!check(AnyKeyPress))
-                                                                 vTaskDelay(10 / portTICK_PERIOD_MS);
-                                                         }});
-                    if (filepath.endsWith(".ir")) {
-                        options.insert(options.begin(), Option{"Escolher cmd IR", [&]() {
-                                                             delay(200);
-                                                             chooseCmdIrFile(&fs, filepath);
-                                                         }});
-                        options.insert(options.begin(), Option{"IR Tx SpamTodos", [&]() {
-                                                             delay(200);
-                                                             txIrFile(&fs, filepath);
-                                                         }});
-                    }
-                    if (filepath.endsWith(".sub"))
-                        options.insert(options.begin(), Option{"Subghz Tx", [&]() {
-                                                             delay(200);
-                                                             txSubFile(&fs, filepath);
-                                                         }});
-                    if (filepath.endsWith(".csv")) {
-                        options.insert(options.begin(), Option{"Upload Wigle", [&]() {
-                                                             delay(200);
-                                                             Wigle wigle;
-                                                             wigle.upload(&fs, filepath);
-                                                         }});
-                        options.insert(options.begin(), Option{"Upload Wigle Tudo", [&]() {
-                                                             delay(200);
-                                                             Wigle wigle;
-                                                             wigle.upload_all(&fs, Folder);
-                                                         }});
-                    }
-#if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
-                    if (filepath.endsWith(".bjs") || filepath.endsWith(".js")) {
-                        options.insert(options.begin(), Option{"Executar Script JS", [&]() {
-                                                             delay(200);
-                                                              run_js_script_headless(fs, filepath);
-                                                             exit = true;
-                                                         }});
-                    }
-#endif
-#if defined(USB_as_HID)
-                    if (filepath.endsWith(".txt")) {
-                        options.push_back(Option{"Executar BadUSB", [&]() {
-                                               ducky_startKb(hid_usb, false);
-                                               key_input(fs, filepath, hid_usb);
-                                               ducky_stopKb(hid_usb, false);
-                                           }});
-                        options.push_back(Option{"USB HID Digitar", [&]() {
-                                               String t = readSmallFile(fs, filepath);
-                                               displayRedStripe("Digitando");
-                                               key_input_from_string(t);
-                                           }});
-                    }
-                    if (filepath.endsWith(".enc")) { // encrypted files
-                        options.insert(
-                            options.begin(), Option{"Descript+Digitar", [&]() {
-                                                  String plaintext = readDecryptedFile(fs, filepath);
-                                                  if (plaintext.length() == 0)
-                                                      return displayError(
-                                                          "Falha na descriptografia", true
-                                                      ); // file is too big or cannot read, or cancelled
-                                                  // else
-                                                  plaintext.trim(); // remove newlines
-                                                  key_input_from_string(plaintext);
-                                              }}
-                        );
-                    }
-#endif
-                    if (filepath.endsWith(".enc")) { // encrypted files
-                        options.insert(
-                            options.begin(), Option{"Decrypt+Show", [&]() {
-                                                  String plaintext = readDecryptedFile(fs, filepath);
-                                                  delay(200);
-                                                  if (plaintext.length() == 0)
-                                                      return displayError("Decryption failed", true);
-                                                  plaintext.trim(); // remove newlines
-                                                  if (plaintext.length() < 64) {
-                                                      displaySuccess(plaintext, true);
-                                                  } else {
-                                                      ScrollableTextArea area = ScrollableTextArea("DECRYPTED TEXT");
-                                                      area.fromString(plaintext);
-                                                      area.show();
-                                                  }
-                                              }}
-                        );
-                    }
-#if defined(HAS_NS4168_SPKR)
-                    if (isAudioFile(filepath))
-                        options.insert(options.begin(), Option{"Play Audio", [&]() {
-                                                             delay(200);
-                                                             check(AnyKeyPress);
-                                                             // playAudioFile(&fs, filepath);
-                                                             musicPlayerUI(&fs, filepath);
-                                                         }});
-#endif
-                    // generate qr codes from small files (<3K)
-                    size_t filesize = getFileSize(fs, filepath);
-                    // Serial.println(filesize);
-                    if (filesize < SAFE_STACK_BUFFER_SIZE && filesize > 0) {
-                        options.push_back(Option{"QR code", [&]() {
-                                               delay(200);
-                                               qrcode_display(readSmallFile(fs, filepath));
-                                           }});
-                        options.push_back(Option{"CRC32", [&]() {
-                                               delay(200);
-                                               displaySuccess(crc32File(fs, filepath), true);
-                                           }});
-                        options.push_back(Option{"MD5", [&]() {
-                                               delay(200);
-                                               displaySuccess(md5File(fs, filepath), true);
-                                           }});
-                    }
+                    populateFileOptions(options, fs, filepath, Folder, exit);
+
                     options.push_back(Option{"Close Menu", [&]() { yield(); }});
                     options.push_back({"Main Menu", [&]() { exit = true; }});
                     if (!filePicker) loopOptions(options);
