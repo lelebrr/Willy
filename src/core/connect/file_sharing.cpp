@@ -10,7 +10,7 @@ void FileSharing::sendFile() {
 
     File file = selectFile();
     if (!file) {
-        displayError("Error selecting file");
+        displayError("Erro ao escolher arquivo");
         delay(1000);
         return;
     }
@@ -33,7 +33,7 @@ void FileSharing::sendFile() {
             message.done = true;
             message.dataSize = 0;
             esp_now_send(dstAddress, (uint8_t *)&message, sizeof(message));
-            displayError("Error sending file");
+            displayError("Erro ao enviar arquivo");
             break;
         }
 
@@ -75,7 +75,7 @@ void FileSharing::receiveFile() {
         if (check(EscPress)) recvStatus = ABORTED;
 
         if (recvStatus == ABORTED || recvStatus == FAILED) {
-            displayError("Error receiving file");
+            displayError("Erro ao receber arquivo");
             break;
         }
         if (recvStatus == SUCCESS) {
@@ -110,7 +110,7 @@ void FileSharing::receiveFile() {
         padprintln("File received: ");
         padprintln(recvFileName);
         padprintln("\n");
-        padprintln("Press any key to leave");
+        padprintln("Qualquer tecla p/ sair");
         while (!check(AnyKeyPress)) vTaskDelay(50 / portTICK_PERIOD_MS);
         ;
     }

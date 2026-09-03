@@ -22,6 +22,19 @@ static void sd_cb(lv_event_t *e);
 
 volatile int pending_cyber_menu_action = -1; // -1 means no action pending
 
+// Resolve o indice do menu pelo NOME (imune a ordem do main_menu,
+// defines LITE/NO_* e menus ocultos). Retorna -1 se nao existir.
+static void set_cyber_action(const char *menuName) {
+    auto items = mainMenu.getItems();
+    for (int i = 0; i < (int)items.size(); i++) {
+        if (items[i] && items[i]->getName() == menuName) {
+            pending_cyber_menu_action = i;
+            return;
+        }
+    }
+    pending_cyber_menu_action = -1;
+}
+
 // Struct to track top bar labels for real-time updates safely
 typedef struct {
     lv_obj_t *time_label;
@@ -31,28 +44,21 @@ typedef struct {
 static CyberMenuData *menu_data = NULL;
 static lv_obj_t *tileview_obj = NULL;
 
-// Implementation of icon callbacks routing to backend IDs
-// Indexes match main_menu.cpp options.push_back order for standard menus
-// 0: WiFi, 1: BLE, 2: Ethernet (if not lite), 3: RF, 4: RFID, 5: IR
-// 6: FM (if defined), 7: Files, 8: GPS, 9: NRF24, 10: Scripts, 11: LoRa
-// Note: Depending on hardware, index mapping shifts. Let's use simple IDs and we will refine the mapping later or rely on the static index.
-// Based on current MainMenu in main_menu.cpp:
-// 0=WiFi, 1=BLE, 2=Eth, 3=RF, 4=RFID, 5=IR, 6=FM, 7=Files, 8=GPS, 9=NRF24, 10=Scripts, 11=LoRa.
-// We will assign them properly.
-static void wifi_cb(lv_event_t *e) { pending_cyber_menu_action = 0; }
-static void ble_cb(lv_event_t *e) { pending_cyber_menu_action = 1; }
-static void sub_cb(lv_event_t *e) { pending_cyber_menu_action = 3; } // RF
-static void rfid_cb(lv_event_t *e) { pending_cyber_menu_action = 4; } // RFID
-static void ir_cb(lv_event_t *e) { pending_cyber_menu_action = 5; }
-static void sd_cb(lv_event_t *e) { pending_cyber_menu_action = 7; } // Files
-static void gps_cb(lv_event_t *e) { pending_cyber_menu_action = 8; }
-static void nrf_cb(lv_event_t *e) { pending_cyber_menu_action = 9; }
+// Mapeamento por NOME do menu (ver MenuItemInterface). Sem indices magicos.
+static void wifi_cb(lv_event_t *e) { set_cyber_action("WiFi"); }
+static void ble_cb(lv_event_t *e) { set_cyber_action("Bluetooth"); }
+static void sub_cb(lv_event_t *e) { set_cyber_action("RF"); } // Sub-GHz
+static void rfid_cb(lv_event_t *e) { set_cyber_action("RFID"); }
+static void ir_cb(lv_event_t *e) { set_cyber_action("IR"); }
+static void sd_cb(lv_event_t *e) { set_cyber_action("Arquivos"); }
+static void gps_cb(lv_event_t *e) { set_cyber_action("GPS"); }
+static void nrf_cb(lv_event_t *e) { set_cyber_action("NRF24"); }
 
-// Using remaining indexes logically.
-static void nfc_cb(lv_event_t *e) { pending_cyber_menu_action = 4; } // Redirect NFC to RFID
-static void attacks_cb(lv_event_t *e) { pending_cyber_menu_action = 0; } // Temp redirect to wifi
-static void core_cb(lv_event_t *e) { pending_cyber_menu_action = 14; } // Config
-static void logs_cb(lv_event_t *e) { pending_cyber_menu_action = 20; } // Temp
+// Tiles sem menu dedicado: roteiam p/ o menu mais proximo.
+static void nfc_cb(lv_event_t *e) { set_cyber_action("RFID"); }
+static void attacks_cb(lv_event_t *e) { set_cyber_action("WiFi"); } // ataques ficam no menu WiFi
+static void core_cb(lv_event_t *e) { set_cyber_action("Configuração"); }
+static void logs_cb(lv_event_t *e) { set_cyber_action("Arquivos"); } // logs vivem no SD
 
 // Arrow navigation callbacks
 static void arrow_event_cb(lv_event_t *e) {
@@ -254,8 +260,14 @@ static void update_bar_timer_cb(lv_timer_t *timer) {
         lv_label_set_text(data->time_label, "--:--");
     }
 
-    // Battery level handling - if Bruce battery API is available
-    // For now we leave it as visual placeholder, or implement basic reading later.
+    // Battery level (real via getBattery(); "--%" sem monitor)
+    int batLevel = getBattery();
+    if (batLevel > 0) {
+        if (batLevel > 100) batLevel = 100;
+        lv_label_set_text_fmt(data->battery_label, "%d%%", batLevel);
+    } else {
+        lv_label_set_text(data->battery_label, "--%");
+    }
 }
 
 void setup_cyber_menu(lv_obj_t *menu) {

@@ -1,5 +1,6 @@
 #if !defined(LITE_VERSION)
 #include "BatteryService.hpp"
+#include "core/utils.h"
 #include <NimBLEDevice.h>
 #include <NimBLEUtils.h>
 #include <WiFi.h>
@@ -12,7 +13,8 @@ BatteryService::~BatteryService() {}
 void battery_handler_task(void *params) {
     NimBLECharacteristic *battery_char = static_cast<NimBLECharacteristic *>(params);
     while (true) {
-        uint8_t val = 0;
+        int b = getBattery();
+        uint8_t val = (b < 0) ? 0 : (b > 100 ? 100 : (uint8_t)b);
         battery_char->setValue(&val, 1);
 
         vTaskDelay(pdMS_TO_TICKS(60000)); // Update battery every minute
@@ -28,8 +30,8 @@ void BatteryService::setup(BLEServer *pServer) {
         NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
     );
 
-    // const uint8_t batLevel = getBattery();
-    const uint8_t batLevel = 0;
+    int b0 = getBattery();
+    const uint8_t batLevel = (b0 < 0) ? 0 : (b0 > 100 ? 100 : (uint8_t)b0);
     battery_char->setValue(&batLevel, 1); // initial value
 
     pService->start();

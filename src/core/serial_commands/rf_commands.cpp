@@ -5,6 +5,8 @@
 #include "modules/rf/rf_scan.h"
 #include "modules/rf/rf_send.h"
 #include "modules/rf/rf_utils.h"
+#include "modules/rf/protocols/rf_encoder.h"
+#include "modules/rf/protocols/rf_keeloq.h"
 #include <ArduinoJson.h>
 #include <globals.h>
 
@@ -252,6 +254,30 @@ void createRfTxBufferCommand(Command *rfCmd) {
     Command cmd = rfCmd->addCommand("tx_from_buffer", rfTxBufferCallback);
 }
 
+uint32_t rfSelftestCallback(cmd *c) {
+    bool ok = rf_encoder_selftest();
+    serialDevice->println(ok ? "rf encoder selftest: PASS" : "rf encoder selftest: FAIL");
+    return ok;
+}
+
+uint32_t rfKeeloqTestCallback(cmd *c) {
+    bool ok = rf_keeloq_selftest();
+    serialDevice->println(ok ? "rf keeloq selftest: PASS" : "rf keeloq selftest: FAIL");
+    return ok;
+}
+
+uint32_t rfKeeloqFiletestCallback(cmd *c) {
+    bool ok = rf_keeloq_filetest();
+    serialDevice->println(ok ? "rf keeloq filetest: PASS" : "rf keeloq filetest: FAIL");
+    return ok;
+}
+
+void createRfSelftestCommands(Command *rfCmd) {
+    rfCmd->addCommand("selftest", rfSelftestCallback);
+    rfCmd->addCommand("keeloqtest", rfKeeloqTestCallback);
+    rfCmd->addCommand("keeloqfiletest", rfKeeloqFiletestCallback);
+}
+
 void createRfCommands(SimpleCLI *cli) {
     Command cmd = cli->addCompositeCmd("rf,subghz");
 
@@ -260,6 +286,7 @@ void createRfCommands(SimpleCLI *cli) {
     createRfScanCommand(&cmd);
     createRfTxFileCommand(&cmd);
     createRfTxBufferCommand(&cmd);
+    createRfSelftestCommands(&cmd);
 
     cli->addSingleArgCmd("RfSend", rfSendCallback);
 }

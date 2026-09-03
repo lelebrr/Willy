@@ -7,6 +7,9 @@
 #include "modules/ble/ble_ninebot.h"
 #include "modules/ble/ble_spam.h"
 #include "modules/ble/advanced_ble_atks.h"
+#ifndef LITE_VERSION
+#include "modules/ble/BLE_Suite.h"
+#endif
 #include <globals.h>
 
 void BleMenu::optionsMenu() {
@@ -46,6 +49,7 @@ void BleMenu::optionsMenu() {
     options.push_back({"Ataques Avancados", advancedBLEAtksMenu});
     options.push_back({"BLE Sniffers", bleSniffersMenu});
     options.push_back({"BLE Spam Avancado", bleSpamMenu});
+    options.push_back({"BLE Suite", [=]() { BleSuiteMenu(); }});
 #endif
     options.push_back({"Config", [this]() { configMenu(); }});
     addOptionToMainMenu();

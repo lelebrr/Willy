@@ -1,6 +1,18 @@
-# Guia Completo de Hardware: Willy (CYD-2432S028R)
+# ⚠️ DOCUMENTAÇÃO LEGADA - Apenas para Referência
 
-Este documento detalha a instalação de todos os módulos suportados no projeto, incluindo pinagem, cores dos fios e diagrama de alimentação.
+**Este documento descreve a configuração para a placa CYD-2432S028R (M5Stack CYD).**
+
+**Para a placa principal ESP32-S3-WROOM-1-N8R2, consulte:**
+- [`willy_hardware_bible.md`](./willy_hardware_bible.md)
+- [`pinout_master_s3_n8r2.md`](./pinout_master_s3_n8r2.md)
+
+---
+
+# Guia de Hardware Legado: Willy (CYD-2432S028R)
+
+Este documento detalha a instalação de todos os módulos suportados no projeto **CYD-2432S028R**, incluindo pinagem, cores dos fios e diagrama de alimentação.
+
+**⚠️ NÃO USE esta configuração para ESP32-S3-WROOM-1-N8R2.**
 
 ## Índice
 1. [GPS NEO-6M](#1-gps-neo-6m)

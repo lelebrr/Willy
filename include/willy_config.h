@@ -10,7 +10,8 @@ struct WillyConfig {
     uint32_t corPrimaria = 0x9B00FF; // Roxo neon
 };
 
-void load_willy_config();
+// Retorna true se existe /willy_splash.conf salva (caller pode ignorar)
+bool load_willy_config();
 void save_willy_config();
 WillyConfig& getWillyCfg();
 

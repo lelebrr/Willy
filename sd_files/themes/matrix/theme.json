@@ -1,0 +1,12 @@
+{
+  "name": "Matrix",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Verde hacker sobre preto puro.",
+  "priColor": "07E0",
+  "secColor": "0620",
+  "bgColor": "0000",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0
+}

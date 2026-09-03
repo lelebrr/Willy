@@ -177,3 +177,8 @@ O módulo GPS gera os seguintes arquivos no cartão SD ou LittleFS:
 
 - [Documentação WiGLE](https://wigle.net/)
 - [u-blox NEO-6M Datasheet](https://www.u-blox.com/en/product/neo-6-series)
+---
+
+## Upload WDGWars (pós-unificação)
+
+Menu **GPS → Enviar p/ WDGWars**: exige WiFi, envia os CSVs de `/WillyWardriving` (SD ou LittleFS) para `wdgwars.pl` usando a chave de `wdgwarsApiKey`. Detalhes em `wardriving_wdgwars.md`.

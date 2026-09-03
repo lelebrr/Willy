@@ -2,6 +2,8 @@
 
 #include "core/display.h"
 #include "core/utils.h"
+#include "core/config.h"
+#include "core/settings.h"
 #include "modules/badusb_ble/ducky_typer.h"
 #include "modules/bjs_interpreter/interpreter.h"
 #include "modules/others/clicker.h"
@@ -9,6 +11,7 @@
 #include "modules/others/mic.h"
 #include "modules/others/qrcode_menu.h"
 #include "modules/others/tururururu.h"
+#include "modules/others/u2f.h"
 #ifdef USB_as_HID
 #include "modules/badusb_ble/advanced_usb_attacks.h"
 #endif
@@ -18,6 +21,40 @@ void OthersMenu::optionsMenu() {
     options = {
         {"Códigos QR",   qrcode_menu                  },
         {"Orca",    shark_setup                  },
+        {"Sobre o Willy", []() {
+             drawMainBorderWithTitle("Sobre");
+             padprintln("");
+             padprintln("Willy " + String(BRUCE_VERSION));
+             padprintln(ESP.getChipModel());
+             padprintln("Flash: " + String(ESP.getFlashChipSize() / 1048576) + "MB");
+         }},
+#if defined(JOY_X_PIN) && defined(JOY_Y_PIN)
+        {"Testar Joystick", []() {
+#if defined(JOY_BTN_PIN)
+             pinMode(JOY_BTN_PIN, INPUT_PULLUP);
+#endif
+             analogReadResolution(12);
+             drawMainBorderWithTitle("Joystick");
+             while (!check(EscPress)) {
+                 int x = analogRead(JOY_X_PIN);
+                 int y = analogRead(JOY_Y_PIN);
+#if defined(JOY_BTN_PIN)
+                 int btn = digitalRead(JOY_BTN_PIN);
+#else
+                 int btn = HIGH;
+#endif
+                 tft.fillRect(10, 40, tftWidth - 20, 60, bruceConfig.bgColor);
+                 tft.setCursor(10, 40);
+                 tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                 tft.setTextSize(FM);
+                 tft.println("X: " + String(x));
+                 tft.println("Y: " + String(y));
+                 tft.println("BTN: " + String(btn == LOW ? "ON" : "OFF"));
+                 vTaskDelay(100 / portTICK_PERIOD_MS);
+             }
+             returnToMenu = true;
+         }},
+#endif
 
 #if defined(MIC_SPM1423) || defined(MIC_INMP441)
         {"Microfone",    [this]() { micMenu(); }      }, //@deveclipse
@@ -44,10 +81,12 @@ void OthersMenu::badUsbHidMenu() {
 #ifndef LITE_VERSION
         {"BadUSB",       [=]() { ducky_setup(hid_usb, false); }   },
         {"Teclado USB",  [=]() { ducky_keyboard(hid_usb, false); }},
+        {"Layout Teclado", [=]() { setBadUSBBLEMenu(); }         },
 #endif
 
 #ifdef USB_as_HID
         {"Clicker USB",  clicker_setup                            },
+        {"U2F USB",      u2f_setup                                },
         {"Atks Avancados", advancedUsbAtksMenu                    },
 #endif
 

@@ -11,7 +11,7 @@ bool rf_raw_save(RawRecording recorded) {
 
     if (!fs->exists("/WillyRF")) {
         if (!fs->mkdir("/WillyRF")) {
-            displayError("Error creating directory", true);
+            displayError("Erro ao criar pasta", true);
             return false;
         }
     }
@@ -20,7 +20,7 @@ bool rf_raw_save(RawRecording recorded) {
 
     File file = fs->open(filename, FILE_APPEND, true);
     if (!file) {
-        displayError("Error creating file", true);
+        displayError("Erro ao criar arquivo", true);
         return false;
     }
 

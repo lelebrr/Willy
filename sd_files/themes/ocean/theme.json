@@ -1,0 +1,12 @@
+{
+  "name": "Ocean",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Ciano-azulado sobre fundo escuro.",
+  "priColor": "04FF",
+  "secColor": "0210",
+  "bgColor": "0008",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0
+}

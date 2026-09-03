@@ -290,6 +290,7 @@ static JSValue func_wifi_scan(JSContext *ctx, JSValue *this_val, int argc, JSVal
     for (int i = 0; i < n; i++) {
         JS_SetPropertyUint32(ctx, arr, i, JS_NewString(ctx, WiFi.SSID(i).c_str()));
     }
+    WiFi.scanDelete(); // libera heap do scan (SSIDs copiados p/ array JS)
     return arr;
 }
 

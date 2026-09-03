@@ -1,6 +1,7 @@
 #include "core/main_menu.h"
 #include <globals.h>
 
+#include "core/bus_HAL.h"
 #include "core/powerSave.h"
 #include "core/serial_commands/cli.h"
 #include "core/utils.h"
@@ -59,10 +60,19 @@ TouchPoint touchPoint;
 keyStroke KeyStroke;
 
 TaskHandle_t xHandle;
+extern volatile bool lvgl_rendering_active;
 void __attribute__((weak)) taskInputHandler(void *parameter) {
     Serial.println("[DBG] taskInputHandler started");
+    unsigned long _busWdLast = 0;
     while (true) {
         checkPowerSaveTime();
+
+        // Watchdog do barramento sys_i2c (~1s): recupera SDA/SCL travado sem transacionar
+        unsigned long _now = millis();
+        if (_now - _busWdLast > 1000) {
+            _busWdLast = _now;
+            checkAndRecoverSysI2CBus();
+        }
 
         // Input detection
         InputHandler();
@@ -146,7 +156,7 @@ volatile int tftHeight = VECTOR_DISPLAY_DEFAULT_WIDTH;
 #include "modules/others/audio.h"                // for playAudioFile
 #include "modules/rf/rf_utils.h"                 // for initCC1101once
 #include <Wire.h>
-#include "willy_logger.h"                        // Sistema de logging centralizado
+#include "core/willy_logger.h"                        // Sistema de logging centralizado
 #include "ui/willy_splash.h"                     // Splash screen Willy
 
 // --- BEGIN_STORAGE_TEST_EXTRACT ---
@@ -663,6 +673,7 @@ void loop() {
 
         // Upon return, we re-arm LVGL menu initialization
         menu_initialized = false;
+        lvgl_rendering_active = false;
         tft.fillScreen(bruceConfig.bgColor); // clear old Bruce rendering
     }
 

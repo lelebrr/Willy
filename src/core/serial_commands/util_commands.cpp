@@ -21,6 +21,40 @@ uint32_t uptimeCallback(cmd *c) {
     return true;
 }
 
+uint32_t versionCallback(cmd *c) {
+    serialDevice->println("Willy " + String(BRUCE_VERSION));
+    serialDevice->println("Chip: " + String(ESP.getChipModel()) + " rev " + String(ESP.getChipRevision()));
+    serialDevice->println(
+        "Flash: " + String(ESP.getFlashChipSize() / 1024 / 1024) + "MB  PSRAM: " +
+        String(ESP.getPsramSize() / 1024) + "KB"
+    );
+    serialDevice->println("Heap livre: " + String(ESP.getFreeHeap() / 1024) + "KB");
+    return true;
+}
+
+uint32_t tasksCallback(cmd *c) {
+    char buf[640];
+    vTaskList(buf);
+    serialDevice->println("Nome            Estado Prio  Stack  Num");
+    serialDevice->println(buf);
+    return true;
+}
+
+uint32_t echoCallback(cmd *c) {
+    Command cmd(c);
+    serialDevice->println(cmd.getArgument("text").getValue());
+    return true;
+}
+
+uint32_t sleepMsCallback(cmd *c) {
+    Command cmd(c);
+    int ms = cmd.getArgument("ms").getValue().toInt();
+    if (ms < 0) ms = 0;
+    if (ms > 5000) ms = 5000;
+    vTaskDelay(pdMS_TO_TICKS(ms));
+    return true;
+}
+
 uint32_t dateCallback(cmd *c) {
     if (!clock_set) {
         serialDevice->println("Clock not set");
@@ -420,6 +454,12 @@ uint32_t loaderCallback(cmd *c) {
 
 void createUtilCommands(SimpleCLI *cli) {
     cli->addCommand("uptime", uptimeCallback);
+    cli->addCommand("version", versionCallback);
+    cli->addCommand("tasks", tasksCallback);
+    Command echoCmd = cli->addCommand("echo", echoCallback);
+    echoCmd.addPosArg("text", "");
+    Command sleepCmd = cli->addCommand("sleep_ms", sleepMsCallback);
+    sleepCmd.addPosArg("ms", "100");
     cli->addCommand("date", dateCallback);
     cli->addCommand("i2c", i2cCallback);
     cli->addCommand("free", freeCallback);

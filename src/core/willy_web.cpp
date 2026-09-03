@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include "config.h"
 #include "utils.h"
-#include "willy_logger.h"
+#include "core/willy_logger.h"
 
 extern BruceConfig bruceConfig;
 
@@ -15,9 +15,10 @@ void setupWillyWeb(AsyncWebServer* server) {
     // Live device status endpoint (JSON)
     server->on("/api/status", HTTP_GET, [](AsyncWebServerRequest *request) {
         StaticJsonDocument<512> doc;
-        doc["battery"] = 0;
+        doc["battery"] = getBattery();
         doc["uptime"] = millis() / 1000;
         doc["free_heap"] = ESP.getFreeHeap();
+        doc["psram_free"] = ESP.getFreePsram();
         doc["cpu_freq"] = ESP.getCpuFreqMHz();
         doc["wifi_rssi"] = WiFi.RSSI();
         doc["ip"] = WiFi.localIP().toString();
@@ -32,6 +33,19 @@ void setupWillyWeb(AsyncWebServer* server) {
         request->send(200, "text/plain", "Rebooting...");
         delay(500);
         ESP.restart();
+    });
+
+    // Firmware version endpoint (usado pelo painel p/ exibir versao)
+    server->on("/api/version", HTTP_GET, [](AsyncWebServerRequest *request) {
+        StaticJsonDocument<256> doc;
+        doc["firmware"] = "Willy";
+        doc["version"] = BRUCE_VERSION;
+        doc["chip"] = ESP.getChipModel();
+        doc["flash_kb"] = ESP.getFlashChipSize() / 1024;
+
+        String response;
+        serializeJson(doc, response);
+        request->send(200, "application/json", response);
     });
 
     // Log retrieval endpoint (last portion of the current CSV log)
@@ -53,5 +67,17 @@ void setupWillyWeb(AsyncWebServer* server) {
         }
         file.close();
         request->send(200, "text/plain", tail);
+    });
+
+    // Clear current log file (trunca; usado pelo painel WillyWebUI)
+    server->on("/api/logs/clear", HTTP_POST, [](AsyncWebServerRequest *request) {
+        String logFile = willyLogger.getCurrentLogFile();
+        File file = SD.open(logFile, FILE_WRITE);
+        if (!file) {
+            request->send(500, "text/plain", "Falha ao limpar " + logFile);
+            return;
+        }
+        file.close();
+        request->send(200, "text/plain", "Logs limpos");
     });
 }

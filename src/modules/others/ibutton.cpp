@@ -15,7 +15,7 @@ Reset:
     setiButtonPinMenu();
     drawMainBorderWithTitle("iButton");
     tft.setCursor(10, 50);
-    padprintln("Waiting for signal");
+    padprintln("Aguardando sinal");
     padprintln("press [Next] to setup");
     delay(100);
 
@@ -139,7 +139,7 @@ void write_ibutton() {
     tft.fillScreen(TFT_BLACK);
     drawMainBorderWithTitle("iButton");
     tft.setCursor(10, 60);
-    displayTextLine("Waiting iButton...");
+    displayTextLine("Aguardando iButton...");
 }
 
 void read_ibutton() {

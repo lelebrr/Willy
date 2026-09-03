@@ -1,3 +1,13 @@
+# ⚠️ DOCUMENTAÇÃO LEGADA - Apenas para CYD-2432S028R
+
+**Este guia é específico para a placa CYD-2432S028R (M5Stack CYD).**
+
+**Para a placa principal ESP32-S3-WROOM-1-N8R2, consulte:**
+- [`willy_hardware_bible.md`](./willy_hardware_bible.md)
+- [`pinout_master_s3_n8r2.md`](./pinout_master_s3_n8r2.md)
+
+---
+
 # Hardware Externo & Conexões no CYD (Willy Project)
 
 Este documento detalha como conectar módulos externos de hardware (RF, IR, CC1101, etc.) à placa **CYD-2432S028R (Variante 2USB)**, conforme suportado pelo firmware Willy.

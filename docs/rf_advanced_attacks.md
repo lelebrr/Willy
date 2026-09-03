@@ -630,3 +630,10 @@ Esta seção documenta os 10 novos ataques de rádio implementados na suíte Wil
 - KeeLoq Protocol Documentation
 - Sub-GHz RF Analysis
 - RFCat Project
+
+---
+
+## Novos (pós-unificação)
+
+- Stack `rf/protocols/`: registro central, decoder/encoder, presets e **Keeloq** — ver `rf_protocols_keeloq.md`.
+- **Autotestes RF** no menu + `subghz selftest|keeloqtest|keeloqfiletest` no serial.

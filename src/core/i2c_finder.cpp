@@ -17,7 +17,7 @@ void find_i2c_addresses() {
     padprintln("Checking I2C addresses ...\n\n");
     delay(300);
 
-    padprint("Found: ");
+    padprint("Encontrados: ");
 
     for (uint8_t i = FIRST_I2C_ADDRESS; i <= LAST_I2C_ADDRESS; i++) {
         Wire.beginTransmission(i);

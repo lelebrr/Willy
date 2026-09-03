@@ -262,7 +262,7 @@ bool txIrBuffer(const char *buffer, bool hideDefaultUI) {
             }
             while (check(SelPress)) { yield(); }
             if (endingEarly) break; // Cancels  custom IR Spam
-            if (!hideDefaultUI) { displayTextLine("Running, Wait"); }
+            if (!hideDefaultUI) { displayTextLine("Executando, aguarde"); }
         }
     } // end while file has lines to process
     Serial.println("EXTRA finished");
@@ -442,7 +442,7 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
             }
             while (check(SelPress)) { yield(); }
             if (endingEarly) break; // Cancels  custom IR Spam
-            if (!hideDefaultUI) { displayTextLine("Running, Wait"); }
+            if (!hideDefaultUI) { displayTextLine("Executando, aguarde"); }
         }
     } // end while file has lines to process
     databaseFile.close();
@@ -837,7 +837,7 @@ bool sendDecodedCommand(String protocol, String value, uint8_t bits, bool hideDe
     digitalWrite(bruceConfigPins.irTx, LED_OFF);
     return success;
 #else
-    if (!hideDefaultUI) { displayTextLine("Unavailable on this Version"); }
+    if (!hideDefaultUI) { displayTextLine("Indisponível nesta versão"); }
     delay(1000);
     return false;
 #endif

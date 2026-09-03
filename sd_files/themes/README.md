@@ -421,3 +421,23 @@ Para informações sobre licenciamento ou suporte, entre em contato através dos
 ---
 
 **⚠️ AVISO LEGAL**: O uso destes temas implica concordância total com os termos de licença proprietária. Qualquer violação resultará em ações legais cabíveis.
+
+---
+
+## Pacotes de cor do firmware (theme.json)
+
+Temas só-cor no schema que o firmware lê (`priColor`/`secColor`/`bgColor` hex RGB565 sem `#`, mais `border`, `label`, `gifDuration`). Copie a pasta para o SD e ative em **Config → Tema UI**:
+
+| Pasta | Nome | Cores |
+|---|---|---|
+| `cyberpunk/` | Cyberpunk | magenta F81F / roxo 7819 |
+| `matrix/` | Matrix | verde 07E0 sobre preto 0000 |
+| `ocean/` | Ocean | ciano-azul 04FF / 0210 |
+| `sunset/` | Sunset | laranja FBE0 / A800 |
+| `blood/` | Blood | vermelho E004 / 9802 |
+| `gold/` | Gold | dourado FE60 / A500 |
+| `ice/` | Ice | gelo DFFF / 841F |
+| `dracula/` | Dracula | roxo-rosa C8FF / 601F sobre 0842 |
+| `neon_cyber/` | Neon Cyber | agora também com chaves de firmware (07FF/F81F/0841) |
+
+Os mesmos 8 nomes existem embutidos em **Config → Cor UI** (sem precisar de SD).

@@ -1245,6 +1245,12 @@ pio run -e CYD-2USB --target upload
 
 # Ou usar a variável de ambiente
 pio run --target upload
+
+```bash
+# Envs dedicados ESP32-S3 N8R2 (8MB)
+pio run -e willy_release
+pio run -e willy_release --target upload
+```
 ```
 
 ---
@@ -1265,6 +1271,21 @@ pio run --target upload
 | [BadUSB](docs/badusb_hid_attacks.md) | Payloads de ataque HID |
 | [Configuração GPS](docs/gps_neo6m.md) | Setup de wardriving GPS |
 | [Wiring CC1101](docs/cc1101_nrf24_wiring.md) | Conexões de módulos RF |
+| [BLE Suite](docs/ble_suite.md) | Suite BLE avancada |
+| [ST25R3916](docs/st25r3916_rfid.md) | Leitor NFC ST25R3916 |
+| [Protocolos RF + Keeloq](docs/rf_protocols_keeloq.md) | Stack Sub-GHz e Keeloq |
+| [NetCut/SOCKS4](docs/wifi_netcut_socks.md) | Ferramentas de rede WiFi |
+| [U2F USB](docs/u2f_usb.md) | Chave de seguranca FIDO |
+| [Wardriving + WDGWars](docs/wardriving_wdgwars.md) | GPS, Wigle e upload |
+| [CLI Serial](docs/serial_cli.md) | Referencia completa de comandos |
+| [Barramentos](docs/hardware_buses.md) | I2C/SPI/SD |
+| [Interpretador JS](docs/js_interpreter.md) | API JavaScript |
+| [ML + Plugins](docs/ml_plugins.md) | Frameworks |
+| [Build e envs](docs/build_envs.md) | PlatformIO e placas |
+| [Changelog](docs/changelog.md) | Historico da unificacao |
+| [Evil Portal](docs/evil_portal.md) | Portal captivo e credenciais |
+| [Bateria](docs/battery.md) | Monitoramento real por placa |
+| [Pinos e conflitos](docs/pinout_conflitos.md) | Mapa N8R2 e regras |
 
 ---
 

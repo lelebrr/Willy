@@ -38,6 +38,16 @@ uint32_t wifiCallback(cmd *c) {
     } else if (status == "add" && ssid != "" && pwd != "") {
         bruceConfig.addWifiCredential(ssid, pwd);
         return true;
+    } else if (status == "scan") {
+        int nets = WiFi.scanNetworks();
+        for (int i = 0; i < nets; i++) {
+            serialDevice->println(
+                WiFi.SSID(i) + " | " + String(WiFi.RSSI(i)) + "dBm | ch" + String(WiFi.channel(i))
+            );
+        }
+        serialDevice->println(String(nets) + " rede(s)");
+        WiFi.scanDelete();
+        return true;
     } else {
         serialDevice->println(
             "Invalid status: " + status +
@@ -45,7 +55,8 @@ uint32_t wifiCallback(cmd *c) {
             "Possible commands: \n"
             "-> wifi off (Disconnects Wifi)\n"
             "-> wifi on  (Connects to a known Wifi network. if there's no known network, starts in AP Mode)\n"
-            "-> wifi add SSID Password (adds a network to the list)"
+            "-> wifi add SSID Password (adds a network to the list)\n"
+            "-> wifi scan (lists nearby networks)"
         );
         return false;
     }

@@ -372,8 +372,8 @@ int wpsSelectTarget(const std::vector<WPSNetworkInfo>& networks) {
 
 void wpsAttacksMenu() {
     options.clear();
-    options.push_back(Option("WPS Scan",         []() { wpsScan(); }));
-    options.push_back(Option("Auto All (WPS)",    []() { wpsAutoAll(); }));
+    options.push_back(Option("Escanear WPS",         []() { wpsScan(); }));
+    options.push_back(Option("Auto Tudo (WPS)",    []() { wpsAutoAll(); }));
     options.push_back(Option("PIN Brute (Native)",[]() { wpsPinBruteForceNative(); }));
     options.push_back(Option("PIN Brute (Raw)",   []() { wpsPinBruteForceRaw(); }));
     options.push_back(Option("Pixie Dust (Native)",[]() { wpsPixieDustNative(); }));
@@ -393,14 +393,14 @@ void wpsAttacksMenu() {
 //================================================================================
 
 void wpsScan() {
-    drawMainBorderWithTitle("WPS Scan");
+    drawMainBorderWithTitle("Escanear WPS");
     padprintln("");
     padprintln("Escaneando redes...");
 
     auto networks = scanWPSNetworks();
 
     if (networks.empty()) {
-        drawMainBorderWithTitle("WPS Scan");
+        drawMainBorderWithTitle("Escanear WPS");
         padprintln("");
         padprintln("Nenhuma rede WPS encontrada.");
         padprintln("");
@@ -416,7 +416,7 @@ void wpsScan() {
     bool viewing = true;
 
     while (viewing) {
-        drawMainBorderWithTitle("WPS Scan");
+        drawMainBorderWithTitle("Escanear WPS");
         tft.setTextColor(bruceConfig.priColor);
         padprintln("");
         padprintln("Redes: " + String(networks.size()) +
@@ -888,7 +888,7 @@ void wpsPixieDustRaw() {
             padprintln("E-Hash1/2      [M3]: OK");
             padprintln("");
             padprintln("Passe os logs do UART para");
-            padprintln("o Hashcat. Auto-crack OFF.");
+            padprintln("o Hashcat. Auto-crack DESL.");
             vTaskDelay(pdMS_TO_TICKS(1000));
             wps_attack_running = false;
 

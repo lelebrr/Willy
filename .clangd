@@ -1,5 +1,10 @@
 CompileFlags:
-  CompilationDatabase: .
-  Remove: [-m*, -f*]
+  Remove:
+    - -mlongcalls
+    - -mdisable-hardware-atomics
+    - -fstrict-volatile-bitfields
+    - -fno-tree-switch-conversion
+
 Diagnostics:
-  UnusedIncludes: None
+  Suppress:
+    - pp_file_not_found*

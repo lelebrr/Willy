@@ -62,6 +62,6 @@ Esta página contém **informações completas e massivas** sobre todos os dispo
 
 ## 📚 Referências
 
-* [Guia de Hardware Externo – docs/hardware_externo.md](docs/hardware_externo.md)
+* [Guia de Hardware Externo – docs/hardware_externo.md](hardware_externo.md)
 * [Especificações Técnicas – datasheets dos módulos ESP32]
 * [Catálogo de Módulos RF – CC1101, NRF24L01+, PN532]

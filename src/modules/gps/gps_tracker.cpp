@@ -8,7 +8,7 @@
 
 #include "gps_tracker.h"
 #include "core/display.h"
-#include "willy_logger.h"
+#include "core/willy_logger.h"
 #include "core/mykeyboard.h"
 #include "core/sd_functions.h"
 #include "current_year.h"

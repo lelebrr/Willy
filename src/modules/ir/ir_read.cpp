@@ -9,7 +9,7 @@
 
 #include "ir_read.h"
 #include "core/display.h"
-#include "willy_logger.h"
+#include "core/willy_logger.h"
 #include "core/mykeyboard.h"
 #include "core/sd_functions.h"
 #include "core/serialcmds.h"

@@ -766,3 +766,18 @@ Redes clonadas:
 - WPA3 Specification
 - WiFi Alliance Documentation
 - Aircrack-ng Documentation
+---
+
+## Novos (pós-unificação)
+
+- **NetCut** (`netcutMenu`): poisoning/restauração ARP + modo Troll + lista VIP — ver `wifi_netcut_socks.md`.
+- **Proxy SOCKS4** (`socks4Proxy(1080)`): servidor SOCKS4 para tunelar o PC pelo ESP.
+- **Analisador de Canais** e **Detectar Jam**: ver `wifi_netcut_socks.md`.
+- **Status da Conexão** no menu WiFi: SSID/IP/RSSI/canal/MAC.
+- Higiene de heap: `WiFi.scanDelete()` após todo scan (menus, ataques, JS).
+
+---
+
+## Reverse Shell (menu WiFi)
+
+**WiFi → Reverse Shell**: sobe AP `WillyShell` + servidor TCP na porta 23 (servidor HTTP na 80 p/ apoio). Conecte com o BruceC2, saia com ESC (servidores parados e WiFi desconectado ao sair).

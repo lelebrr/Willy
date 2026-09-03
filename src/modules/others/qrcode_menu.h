@@ -5,6 +5,7 @@
 
 void qrcode_display(String qrcodeUrl);
 void pix_qrcode();
+void wifi_qrcode();
 void qrcode_menu();
 void custom_qrcode_menu();
 void display_custom_qrcode();

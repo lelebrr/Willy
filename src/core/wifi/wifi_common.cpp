@@ -1,4 +1,5 @@
 #include "core/wifi/wifi_common.h"
+#include "core/wifi/wg.h" // reset isConnectedWireguard no disconnect
 #include "core/display.h"    // using displayRedStripe  and loop options
 #include "core/mykeyboard.h" // usinf keyboard when calling rename
 #include "core/powerSave.h"
@@ -79,8 +80,9 @@ bool WifiCommon::_wifiConnect(const String &ssid, int encryption) {
 bool WifiCommon::_connectToWifiNetwork(const String &ssid, const String &pwd) {
     drawMainBorderWithTitle("WiFi Connect");
     padprintln("");
-    padprint("Connecting to: " + ssid + ".");
+    padprint("Conectando: " + ssid + ".");
     WiFi.mode(WIFI_MODE_STA);
+    WiFi.setHostname(bruceConfig.hostname.c_str());
     vTaskDelay(10 / portTICK_PERIOD_MS);
     WiFi.begin(ssid, pwd);
 
@@ -124,6 +126,8 @@ void WifiCommon::disconnect() {
     WiFi.disconnect(true, true); // turn off STA mode
     WiFi.mode(WIFI_OFF);         // enforces WIFI_OFF mode
     WifiState::wifiConnected = false;
+    WifiState::wifiIP = "";
+    isConnectedWireguard = false;
     returnToMenu = true;
 }
 
@@ -175,6 +179,7 @@ bool WifiCommon::connectMenu(wifi_mode_t mode) {
                                            }});
                     }
                 }
+                WiFi.scanDelete(); // libera heap do scan (SSIDs copiados p/ lambdas)
                 options.push_back({"Hidden SSID", [=]() {
                                        String __ssid = keyboard("", 32, "Your SSID");
                                        _wifiConnect(__ssid.c_str(), 8);
@@ -250,7 +255,7 @@ bool WifiCommon::connectToKnownNet(void) {
     bool result = false;
     int nets;
     // WiFi.mode(WIFI_MODE_STA);
-    displayTextLine("Scanning Networks..");
+    displayTextLine("Escaneando redes...");
     WiFi.disconnect(true, true);
     vTaskDelay(10 / portTICK_PERIOD_MS);
     nets = WiFi.scanNetworks();
@@ -259,7 +264,7 @@ bool WifiCommon::connectToKnownNet(void) {
         String ssid = WiFi.SSID(i);
         String password = bruceConfig.getWifiPassword(ssid);
         if (password != "") {
-            Serial.println("Connecting to: " + ssid);
+            Serial.println("Conectando: " + ssid);
             result = _connectToWifiNetwork(ssid, password);
         }
         // Maybe it finds a known network and can't connect, then try the next
@@ -269,6 +274,7 @@ bool WifiCommon::connectToKnownNet(void) {
             break;
         }
     }
+    WiFi.scanDelete(); // libera heap do scan
     if (WiFi.status() == WL_CONNECTED) {
         WifiState::wifiConnected = true;
         WifiState::wifiIP = WiFi.localIP().toString();

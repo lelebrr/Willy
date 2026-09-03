@@ -47,15 +47,15 @@ void EvilPortal::CaptiveRequestHandler::handleRequest(AsyncWebServerRequest *req
 }
 bool EvilPortal::setup() {
     options = {
-        {"Html Customizado", [this]() { loadCustomHtml(); }}
+        {"HTML Personalizado", [this]() { loadCustomHtml(); }}
     };
     addOptionToMainMenu();
 
     if (!_verifyPwd) {
         // Insert Options
-        options.insert(options.begin(), {"Padrao", [this]() { loadDefaultHtml(); }});
+        options.insert(options.begin(), {"Padrão", [this]() { loadDefaultHtml(); }});
     } else {
-        options.insert(options.begin(), {"Padrao", [this]() { loadDefaultHtml_one(); }});
+        options.insert(options.begin(), {"Padrão", [this]() { loadDefaultHtml_one(); }});
     }
 
     loopOptions(options);
@@ -70,7 +70,7 @@ bool EvilPortal::setup() {
             apName_from_keyboard();
         } else {
             options = {
-                {"Wifi Customizado", [this]() { apName_from_keyboard(); }}
+                {"WiFi Personalizado", [this]() { apName_from_keyboard(); }}
             };
 
             for (const auto &_wifi : bruceConfig.evilWifiNames) {
@@ -84,6 +84,15 @@ bool EvilPortal::setup() {
     options = {
         {"172.0.0.1",   [this]() { apGateway = IPAddress(172, 0, 0, 1); }  },
         {"192.168.4.1", [this]() { apGateway = IPAddress(192, 168, 4, 1); }},
+        {"Personalizado", [this]() {
+             String ip = keyboard("192.168.4.1", 15, "IP do portal:");
+             IPAddress custom;
+             if (ip != "\x1B" && !ip.isEmpty() && custom.fromString(ip)) {
+                 apGateway = custom;
+             } else {
+                 displayError("IP invalido", true);
+             }
+         }},
     };
 
     loopOptions(options);

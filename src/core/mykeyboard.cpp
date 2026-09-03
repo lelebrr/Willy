@@ -1119,7 +1119,7 @@ String num_keyboard(String current_text, int max_size, String textbox_title, boo
     );
 }
 
-void powerOff() { displayWarning("Not available", true); }
+void powerOff() { displayWarning("Indisponível", true); }
 void goToDeepSleep() {
 #if DEEPSLEEP_WAKEUP_PIN >= 0
 
@@ -1130,7 +1130,7 @@ void goToDeepSleep() {
 #endif
     esp_deep_sleep_start();
 #else
-    displayWarning("Not available", true);
+    displayWarning("Indisponível", true);
 #endif
 }
 

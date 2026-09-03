@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <!-- Tela de Primeiro Acesso / Setup -->
   <div class="setup-screen hidden" id="setup-screen">
@@ -27,11 +29,12 @@
         <div class="setup-body">
           <h2><i class="fas fa-user-plus"></i> Primeiro Acesso</h2>
           <p class="setup-info">Crie suas credenciais de administrador para acessar o sistema.</p>
-          
+
           <form id="setup-form" class="setup-form">
             <div class="form-group">
               <label><i class="fas fa-user"></i> Usuário</label>
-              <input type="text" id="setup-username" placeholder="Digite o nome de usuário" required minlength="3" maxlength="20">
+              <input type="text" id="setup-username" placeholder="Digite o nome de usuário" required minlength="3"
+                maxlength="20">
             </div>
             <div class="form-group">
               <label><i class="fas fa-key"></i> Senha</label>
@@ -66,6 +69,7 @@
   <div class="login-screen hidden" id="login-screen">
     <div class="login-bg">
       <div class="cyber-grid"></div>
+      <div class="aurora"></div>
       <div class="floating-particles" id="particles"></div>
     </div>
     <div class="login-container">
@@ -90,7 +94,8 @@
           <div class="form-group">
             <label><i class="fas fa-key"></i> Senha</label>
             <div class="password-input">
-              <input type="password" id="login-password" placeholder="Digite sua senha" required autocomplete="current-password">
+              <input type="password" id="login-password" placeholder="Digite sua senha" required
+                autocomplete="current-password">
               <button type="button" class="toggle-password" onclick="togglePasswordVisibility('login-password')">
                 <i class="fas fa-eye"></i>
               </button>
@@ -119,7 +124,7 @@
         </div>
         <span class="version-badge">v2.1</span>
       </div>
-      
+
       <nav class="sidebar-nav">
         <ul class="nav-list">
           <li class="nav-item active" data-page="dashboard">
@@ -178,7 +183,7 @@
           </li>
         </ul>
       </nav>
-      
+
       <div class="sidebar-footer">
         <div class="system-status">
           <div class="status-item">
@@ -222,6 +227,18 @@
       <div class="page-container">
         <!-- Dashboard / Painel -->
         <section class="page active" id="page-dashboard">
+          <!-- Willy Logo Display -->
+          <div class="hero-logo"
+            style="text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(0, 255, 255, 0.05); border-radius: 12px; border: 1px solid var(--primary); box-shadow: 0 0 15px var(--primary-glow);">
+            <div
+              style="display: inline-block; width: 80px; height: 60px; background-image: url('data:image/svg+xml,%3Csvg viewBox=\'0 0 120 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cdefs%3E%3ClinearGradient id=\'willyGrad\' x1=\'0%25\' y1=\'0%25\' x2=\'100%25\' y2=\'100%25\'%3E%3Cstop offset=\'0%25\' style=\'stop-color:%2300FFFF;stop-opacity:1\' /%3E%3Cstop offset=\'100%25\' style=\'stop-color:%2300B8B8;stop-opacity:1\' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d=\'M 20 40 Q 30 25 50 25 Q 70 25 85 35 Q 95 42 90 50 Q 85 58 70 55 Q 55 52 40 55 Q 25 58 20 50 Z\' fill=\'url(%23willyGrad)\' stroke=\'%2300FFFF\' stroke-width=\'1.5\'/%3E%3Cpath d=\'M 55 25 L 65 15 L 70 25 Z\' fill=\'%2300FFFF\' opacity=\'0.8\'/%3E%3Cpath d=\'M 85 40 L 100 35 L 100 45 Z\' fill=\'%2300FFFF\' opacity=\'0.8\'/%3E%3Ccircle cx=\'42\' cy=\'38\' r=\'3\' fill=\'%23FFFFFF\'/%3E%3Ccircle cx=\'42\' cy=\'38\' r=\'1.5\' fill=\'%2300FFFF\'/%3E%3Cline x1=\'30\' y1=\'50\' x2=\'25\' y2=\'55\' stroke=\'%2300FFFF\' stroke-width=\'0.8\' opacity=\'0.6\'/%3E%3Cline x1=\'70\' y1=\'50\' x2=\'75\' y2=\'55\' stroke=\'%2300FFFF\' stroke-width=\'0.8\' opacity=\'0.6\'/%3E%3Cline x1=\'50\' y1=\'25\' x2=\'55\' y2=\'15\' stroke=\'%2300FFFF\' stroke-width=\'0.8\' opacity=\'0.6\'/%3E%3C/svg%3E'); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 0 8px var(--primary-glow)); animation: logoPulse 2s ease-in-out infinite;">
+            </div>
+            <h3 style="color: var(--primary); margin: 10px 0 5px 0; font-weight: 600; letter-spacing: 2px;">WILLY 2.1
+            </h3>
+            <p style="color: var(--primary-light); margin: 0; font-size: 0.85rem; opacity: 0.8;">Hub de Segurança
+              Ofensiva</p>
+          </div>
+
           <!-- Stats Cards -->
           <div class="stats-row">
             <div class="stat-card">
@@ -231,7 +248,9 @@
               <div class="stat-content">
                 <h3>Memória RAM</h3>
                 <span class="stat-value" id="stat-ram">-- KB</span>
-                <div class="stat-bar"><div id="ram-bar"></div></div>
+                <div class="stat-bar">
+                  <div id="ram-bar"></div>
+                </div>
               </div>
             </div>
             <div class="stat-card">
@@ -241,7 +260,9 @@
               <div class="stat-content">
                 <h3>Cartão SD</h3>
                 <span class="stat-value" id="stat-sd">-- GB</span>
-                <div class="stat-bar"><div id="sd-bar"></div></div>
+                <div class="stat-bar">
+                  <div id="sd-bar"></div>
+                </div>
               </div>
             </div>
             <div class="stat-card">
@@ -251,7 +272,9 @@
               <div class="stat-content">
                 <h3>Memória Flash</h3>
                 <span class="stat-value" id="stat-flash">-- KB</span>
-                <div class="stat-bar"><div id="flash-bar"></div></div>
+                <div class="stat-bar">
+                  <div id="flash-bar"></div>
+                </div>
               </div>
             </div>
             <div class="stat-card">
@@ -526,7 +549,8 @@
               <div class="module-body-detail">
                 <div class="module-controls">
                   <button onclick="executarComando('wifi scan')"><i class="fas fa-search"></i> Escanear</button>
-                  <button onclick="executarComando('wifi ap on')"><i class="fas fa-broadcast-tower"></i> Modo AP</button>
+                  <button onclick="executarComando('wifi ap on')"><i class="fas fa-broadcast-tower"></i> Modo
+                    AP</button>
                   <button onclick="executarComando('wifi off')"><i class="fas fa-power-off"></i> Desligar</button>
                 </div>
                 <div class="module-attacks">
@@ -540,7 +564,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- RF Module -->
             <div class="module-detail-card">
               <div class="module-header-detail rf">
@@ -564,7 +588,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- IR Module -->
             <div class="module-detail-card">
               <div class="module-header-detail ir">
@@ -579,7 +603,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- BadUSB Module -->
             <div class="module-detail-card">
               <div class="module-header-detail usb">
@@ -593,7 +617,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- BLE Module -->
             <div class="module-detail-card">
               <div class="module-header-detail ble">
@@ -608,7 +632,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- GPS Module -->
             <div class="module-detail-card">
               <div class="module-header-detail gps">
@@ -627,7 +651,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- NFC Module -->
             <div class="module-detail-card">
               <div class="module-header-detail nfc">
@@ -642,7 +666,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- NRF24 Module -->
             <div class="module-detail-card">
               <div class="module-header-detail nrf">
@@ -808,7 +832,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Logo Willy -->
             <div class="settings-section">
               <h3><i class="fas fa-palette"></i> Logo Willy (Splash Screen)</h3>
@@ -848,6 +872,19 @@
                     <span class="color-preview" id="logo-cor-preview">#00f0ff</span>
                   </div>
                 </div>
+                <div class="form-group">
+                  <label>Modo de Animação</label>
+                  <select id="animation-mode">
+                    <option value="classic">Clássico (Orca)</option>
+                    <option value="quantum">Quantum Flow</option>
+                    <option value="circuit">Circuit Flow</option>
+                    <option value="neon">Neon Pulse</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Intensidade dos Efeitos</label>
+                  <input type="range" id="effect-intensity" min="1" max="10" value="5" style="width: 100%;">
+                </div>
                 <button class="btn-save" onclick="salvarConfigLogo()">
                   <i class="fas fa-save"></i> Salvar Configurações do Logo
                 </button>
@@ -856,7 +893,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Tela -->
             <div class="settings-section">
               <h3><i class="fas fa-display"></i> Configurações de Tela</h3>
@@ -876,7 +913,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Sistema -->
             <div class="settings-section">
               <h3><i class="fas fa-server"></i> Sistema</h3>
@@ -889,7 +926,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Sobre -->
             <div class="settings-section">
               <h3><i class="fas fa-info-circle"></i> Sobre</h3>
@@ -924,10 +961,11 @@
       <div class="dialog-footer">
         <button onclick="fecharDialog()">Cancelar</button>
         <button class="btn-primary" onclick="salvarArquivo()"><i class="fas fa-save"></i> Salvar</button>
-        <button class="btn-success" id="btn-executar" onclick="executarArquivo()"><i class="fas fa-play"></i> Executar</button>
+        <button class="btn-success" id="btn-executar" onclick="executarArquivo()"><i class="fas fa-play"></i>
+          Executar</button>
       </div>
     </div>
-    
+
     <div class="dialog hidden" id="dialog-confirm">
       <div class="dialog-header">
         <span id="confirm-title">Confirmar</span>
@@ -958,4 +996,5 @@
 
   <script src="/index.js"></script>
 </body>
+
 </html>

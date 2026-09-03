@@ -113,18 +113,13 @@ void wg_setup() {
     read_and_parse_file();
 
     Serial.println("Adjusting system time...");
-    configTime(9 * 60 * 60, 0, "ntp.jst.mfeed.ad.jp", "ntp.nict.jp");
+    configTime(bruceConfig.tmz * 3600, bruceConfig.dst ? 3600 : 0, "pool.ntp.org");
     tft.fillScreen(bruceConfig.bgColor);
     tft.setCursor(0, 0);
 
     Serial.println("Connected. Initializing WireGuard...");
-    // tft.println("Connecting to\nwireguard...");
+    // (chaves e IPs nao sao impressos: segredo permanece fora dos logs)
     wg.begin(local_ip, private_key, endpoint_address, public_key, endpoint_port);
-    Serial.println(local_ip);
-    Serial.println(private_key);
-    Serial.println(endpoint_address);
-    Serial.println(public_key);
-    Serial.println(endpoint_port);
 
     tft.fillScreen(bruceConfig.bgColor);
     tft.setCursor(0, 0);

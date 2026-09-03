@@ -152,6 +152,7 @@ void ledEffectTask(void *pvParameters) {
 #if LED_COUNT > 1
         } else if (ledEffect == LED_EFFECT_CHASE || ledEffect == LED_EFFECT_CHASE_TAIL) {
             uint8_t cycleFrames = 11 - ledEffectSpeed;
+            if (cycleFrames == 0) cycleFrames = 1; // sem encoder: evita divisao por zero
 
 #ifdef HAS_ENCODER_LED
             if ((ledEffectSpeed == 11 && EncoderLedChange != 0) ||

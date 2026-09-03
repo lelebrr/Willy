@@ -336,3 +336,18 @@ Este projeto é open source. Consulte o arquivo LICENSE para mais detalhes.
 **Willy 2.1** - Hub de Segurança Ofensiva para Pentest
 
 *Use com responsabilidade. Apenas em ambientes autorizados.*
+---
+
+## WillyWebUI (`/Willy/`, painel alternativo)
+
+Servido de `/WillyWebUI/` no SD (override) ou embutido; endpoints registrados por `setupWillyWeb()`:
+
+| Endpoint | Método | Resposta |
+|---|---|---|
+| `/api/status` | GET | `battery`, `uptime`, `free_heap`, `psram_free`, `cpu_freq`, `wifi_rssi`, `ip` |
+| `/api/reboot` | POST | reinicia |
+| `/api/logs` | GET | cauda (5 KB) do log atual |
+| `/api/logs/clear` | POST | trunca o log atual |
+| `/api/version` | GET | `firmware`, `version`, `chip`, `flash_kb` |
+
+Dashboard em PT-BR com status (heap/PSRAM/CPU/RSSI/IP), logs ao vivo, versão dinâmica e pausa de polling com a aba oculta.

@@ -490,7 +490,7 @@ void SRIXTool::read_uid() {
     padprintln("");
 
     tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
-    padprintln("Press [OK] for Main Menu");
+    padprintln("[OK] p/ menu principal");
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
 
     _lastReadTime = millis();
@@ -828,8 +828,8 @@ void SRIXTool::load_file_data(FS *fs, String filepath) {
     tft.setTextSize(FP);
 
     tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
-    padprintln("Press [OK] to open menu");
-    padprintln("Select 'Write tag' to write");
+    padprintln("[OK] p/ abrir menu");
+    padprintln("Use 'Write tag' p/ gravar");
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
 
     _lastReadTime = millis();

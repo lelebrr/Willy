@@ -121,13 +121,13 @@ bool startLoraRadio(float bandMHz) {
     const int irqPin = getLoraIrqPin();
     if (getLoraCsPin() == GPIO_NUM_NC || bruceConfigPins.LoRa_bus.mosi == GPIO_NUM_NC ||
         bruceConfigPins.LoRa_bus.miso == GPIO_NUM_NC || bruceConfigPins.LoRa_bus.sck == GPIO_NUM_NC) {
-        Serial.println("LoRa pins not configured!");
-        displayError("LoRa pins not configured!", true);
+        Serial.println("Pinos LoRa não configurados!");
+        displayError("Pinos LoRa não configurados!", true);
         return false;
     }
     if (irqPin == GPIO_NUM_NC) {
-        Serial.println("LoRa IRQ pin not configured!");
-        displayError("LoRa IRQ pin not configured!", true);
+        Serial.println("Pino IRQ LoRa não configurado!");
+        displayError("Pino IRQ LoRa não configurado!", true);
         return false;
     }
 
@@ -162,7 +162,7 @@ bool startLoraRadio(float bandMHz) {
 
     if (state != RADIOLIB_ERR_NONE) {
         Serial.printf("Starting LoRa failed! Err %d\n", state);
-        displayError("LoRa Init Failed", true);
+        displayError("Falha LoRa", true);
         clearLoraRadio();
         return false;
     }
@@ -229,7 +229,7 @@ void render() {
     tft.setTextSize(1);
     tft.fillScreen(TFT_BLACK);
     tft.setTextColor(0x6DFC);
-    if (!intlora) { tft.drawString("Lora Init Failed", 10, 13); }
+    if (!intlora) { tft.drawString("Falha LoRa", 10, 13); }
     Serial.println(String(displayName));
     tft.drawString("USRN: " + String(displayName), 10, 25);
 
@@ -271,7 +271,7 @@ void sendmsg() {
         tft.setCursor(10, tftHeight / 2 - 10);
         tft.print("LoRa not init!");
 
-        tft.drawCentreString("LoRa not initialized!", tftWidth / 2, tftHeight / 2, 2);
+        tft.drawCentreString("LoRa não iniciado!", tftWidth / 2, tftHeight / 2, 2);
         delay(1500);
         update = true;
         return;
@@ -421,7 +421,7 @@ void lorachat() {
     selectRadioVariant(doc);
     float bandMHz = (BAND > 1000) ? BAND / 1000000.0f : BAND;
     if (bandMHz <= 0) {
-        displayError("Invalid LoRa frequency", true);
+        displayError("Frequência LoRa inválida", true);
         return;
     }
     tft.fillScreen(TFT_BLACK);
@@ -476,10 +476,10 @@ void chfreq() {
     String freq = num_keyboard(buf, 12, "in Mhz");
     dfreq = freq.toDouble();
     if (dfreq == 0) {
-        displayError("Invalid value");
+        displayError("Valor inválido");
         return;
     } else if (dfreq > 1000) {
-        displayError("Invalid value, Exceeds 1Ghz");
+        displayError("Valor inválido (>1GHz)");
         return;
     }
     dfreq = dfreq * 1000000;

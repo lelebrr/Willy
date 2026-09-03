@@ -6,6 +6,5 @@
 #if !defined(LITE_VERSION)
 #include "HWCDC.h"
 void lorachat();
-void loraconf();
 #endif
 #endif

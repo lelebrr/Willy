@@ -15,8 +15,8 @@ WillyConfig& getWillyCfg() {
     return willyCfg;
 }
 
-void load_willy_config() {
-    if (!LittleFS.begin()) return;
+bool load_willy_config() {
+    if (!LittleFS.begin()) return false;
     File f = LittleFS.open("/willy_splash.conf", "r");
     if (f) {
         willyCfg.velocidade = f.readStringUntil('\n').toInt();
@@ -24,7 +24,9 @@ void load_willy_config() {
         willyCfg.tipoSom = f.readStringUntil('\n').toInt();
         willyCfg.corPrimaria = strtol(f.readStringUntil('\n').c_str(), NULL, 16);
         f.close();
+        return true;
     }
+    return false;
 }
 
 void save_willy_config() {

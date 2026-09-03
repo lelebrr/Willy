@@ -276,7 +276,7 @@ bool showVolumeControl(uint8_t &currentVolume) {
 
 void musicPlayerUI(FS *fs, const String &filepath) {
     if (!fs || filepath.isEmpty() || !fs->exists(filepath)) {
-        displayError("File Invalid", true);
+        displayError("Arquivo inválido", true);
         return;
     }
 

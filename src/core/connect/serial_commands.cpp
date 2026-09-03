@@ -136,13 +136,13 @@ void EspSerialCmd::displayRecvCommand(bool success) {
 
 void EspSerialCmd::displayRecvError() {
     displayBanner();
-    padprintln("Error receiving command");
+    padprintln("Erro ao receber comando");
     displayRecvFooter();
 }
 
 void EspSerialCmd::displayRecvFooter() {
     padprintln("\n");
-    padprintln("Press [ESC] to leave");
+    padprintln("[ESC] p/ sair");
 }
 
 void EspSerialCmd::displaySentCommand(const char *command) {
@@ -154,13 +154,13 @@ void EspSerialCmd::displaySentCommand(const char *command) {
 
 void EspSerialCmd::displaySentError() {
     displayBanner();
-    padprintln("Error sending command");
+    padprintln("Erro ao enviar comando");
     displaySentFooter();
 }
 
 void EspSerialCmd::displaySentFooter() {
     padprintln("\n");
-    padprintln("Press [OK] to send another command");
+    padprintln("[OK] p/ outro comando");
     padprintln("");
-    padprintln("Press [ESC] to leave");
+    padprintln("[ESC] p/ sair");
 }

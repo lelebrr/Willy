@@ -41,7 +41,7 @@ bool validateMACFormat(const String &mac) {
 
 bool setCustomMAC(const String &mac) {
     if (!validateMACFormat(mac)) {
-        displayError("Invalid MAC Format!");
+        displayError("MAC inválido!");
         return false;
     }
     bruceConfig.wifiMAC = mac;
@@ -75,7 +75,7 @@ void wifiMACMenu() {
     options.push_back({"MAC Padrão", []() {
                            bruceConfig.wifiMAC = "";
                            bruceConfig.saveFile();
-                           displayTextLine("Default MAC set");
+                           displayTextLine("MAC padrão ativo");
                        }});
 
     options.push_back({"Definir MAC", []() {

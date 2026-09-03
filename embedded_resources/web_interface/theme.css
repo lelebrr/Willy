@@ -5,11 +5,18 @@
 
 :root {
   /* Cores Primárias - Customize aqui */
-  --primary: #00f0ff;
-  --primary-dark: #00b8c4;
-  --primary-light: #66f7ff;
-  --primary-glow: rgba(0, 240, 255, 0.5);
-  
+  --primary: #00FFFF;
+  /* Neon Aqua */
+  --primary-dark: #00B8B8;
+  /* Neon Aqua Darker */
+  --primary-light: #66FFFF;
+  /* Neon Aqua Lighter */
+  --primary-glow: rgba(0, 255, 255, 0.6);
+  --primary-glow-strong: rgba(0, 255, 255, 0.8);
+  --secondary: #8D5BFF;
+  --secondary-glow: rgba(141, 91, 255, 0.55);
+  /* Neon Aqua Glow */
+
   /* Cores de Status */
   --success: #00ff88;
   --warning: #ffaa00;
@@ -93,3 +100,95 @@
   --primary-glow: rgba(255, 51, 51, 0.5);
 }
 */
+
+/*
+ * TEMA DRACULA - Roxo Rosado Sombrio
+ */
+/*
+:root {
+  --primary: #bd93f9;
+  --primary-dark: #7a5fb5;
+  --primary-light: #d6b4fe;
+  --primary-glow: rgba(189, 147, 249, 0.5);
+}
+*/
+
+/*
+ * TEMA NORD - Azul Gelo Nordico
+ */
+/*
+:root {
+  --primary: #88c0d0;
+  --primary-dark: #5e81ac;
+  --primary-light: #eceff4;
+  --primary-glow: rgba(136, 192, 208, 0.5);
+}
+*/
+
+/*
+ * TEMA OURO - Dourado Premium
+ */
+/*
+:root {
+  --primary: #ffd700;
+  --primary-dark: #b8860b;
+  --primary-light: #ffec8b;
+  --primary-glow: rgba(255, 215, 0, 0.45);
+}
+*/
+
+/* Willy Logo - Geometric/Circuitry Minimalist (Web UI) */
+/* Utiliza um SVG embutido como background para os elementos de logo */
+.sidebar-logo .fas,
+.setup-logo .fas,
+.login-logo .fas {
+  /* Oculta o ícone Font Awesome original */
+  display: none;
+}
+
+.sidebar-logo,
+.setup-logo,
+.login-logo {
+  /* Define o tamanho e as propriedades do container para o SVG */
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  /* SVG aprimorado com design de baleia/circuitos futurista */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='willyGrad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300FFFF;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300B8B8;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3C!-- Corpo principal da baleia --%3E%3Cpath d='M 20 40 Q 30 25 50 25 Q 70 25 85 35 Q 95 42 90 50 Q 85 58 70 55 Q 55 52 40 55 Q 25 58 20 50 Z' fill='url(%23willyGrad)' stroke='%2300FFFF' stroke-width='1.5'/%3E%3C!-- Barbatana dorsal --%3E%3Cpath d='M 55 25 L 65 15 L 70 25 Z' fill='%2300FFFF' opacity='0.8'/%3E%3C!-- Cauda --%3E%3Cpath d='M 85 40 L 100 35 L 100 45 Z' fill='%2300FFFF' opacity='0.8'/%3E%3C!-- Olho --%3E%3Ccircle cx='42' cy='38' r='3' fill='%23FFFFFF'/%3E%3Ccircle cx='42' cy='38' r='1.5' fill='%2300FFFF'/%3E%3C!-- Circuitos mínimos --%3E%3Cline x1='30' y1='50' x2='25' y2='55' stroke='%2300FFFF' stroke-width='0.8' opacity='0.6'/%3E%3Cline x1='70' y1='50' x2='75' y2='55' stroke='%2300FFFF' stroke-width='0.8' opacity='0.6'/%3E%3Cline x1='50' y1='25' x2='55' y2='15' stroke='%2300FFFF' stroke-width='0.8' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 0 6px var(--primary-glow));
+}
+
+/* Logo maior para telas de login/setup */
+.login-logo,
+.setup-logo {
+  width: 48px;
+  height: 48px;
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--primary-glow));
+  }
+
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+  }
+}
+
+/* Logo SVG para o splash screen do firmware (se necessário) */
+.firmware-logo {
+  width: 80px;
+  height: 60px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='willyGradFirmware' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300FFFF;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300B8B8;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M 20 40 Q 30 25 50 25 Q 70 25 85 35 Q 95 42 90 50 Q 85 58 70 55 Q 55 52 40 55 Q 25 58 20 50 Z' fill='url(%23willyGradFirmware)' stroke='%2300FFFF' stroke-width='2'/%3E%3Cpath d='M 55 25 L 65 15 L 70 25 Z' fill='%2300FFFF'/%3E%3Cpath d='M 85 40 L 100 35 L 100 45 Z' fill='%2300FFFF'/%3E%3Ccircle cx='42' cy='38' r='3' fill='%23FFFFFF'/%3E%3Ccircle cx='42' cy='38' r='1.5' fill='%2300FFFF'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}

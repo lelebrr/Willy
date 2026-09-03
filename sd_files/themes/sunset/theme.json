@@ -1,0 +1,12 @@
+{
+  "name": "Sunset",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Laranja pôr-do-sol sobre marrom escuro.",
+  "priColor": "FBE0",
+  "secColor": "A800",
+  "bgColor": "0008",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0
+}

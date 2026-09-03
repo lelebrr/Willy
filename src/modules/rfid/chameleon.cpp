@@ -180,7 +180,7 @@ void Chameleon::setMode(AppMode mode) {
         case HF_SAVE_MODE:
         case BATTERY_INFO_MODE:
         case FACTORY_RESET_MODE: break;
-        default: padprintln("Mode not supported"); break;
+        default: padprintln("Modo não suportado"); break;
     }
     delayWithReturn(300);
 }
@@ -285,7 +285,7 @@ void Chameleon::factoryReset() {
         displayInfo("Abortando reset fabrica.");
         delayWithReturn(500);
     } else if (chmUltra.cmdFactoryReset()) {
-        displaySuccess("Reset fabrica sucesso");
+        displaySuccess("Reset de fábrica OK");
         delayWithReturn(500);
     } else {
         displayError("Erro reset fabrica", true);
@@ -583,7 +583,7 @@ void Chameleon::customHFUid() {
     displayBanner();
 
     if (custom_uid.length() != 8 && custom_uid.length() != 14) {
-        displayError("Invalid UID", true);
+        displayError("UID inválido", true);
         return setMode(BATTERY_INFO_MODE);
     }
 
@@ -647,7 +647,7 @@ void Chameleon::emulateHF() {
         displaySuccess("Emulation successful.");
         delayWithReturn(1000);
     } else {
-        displayError("Error emulating HF tag.", true);
+        displayError("Erro ao emular tag HF.", true);
     }
 
     setMode(BATTERY_INFO_MODE);

@@ -8,5 +8,6 @@
 
 void rf_raw_record();
 int rf_raw_record_options();
+float rf_freq_scan();
 
 #endif

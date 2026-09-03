@@ -1,7 +1,7 @@
 #if !defined(LITE_VERSION)
 #include "ble_api.hpp"
 #include <NimBLEDevice.h>
-#include <core/USBSerial/USBSerial.h>
+#include <core/USBSerial/WillyUSBSerial.h>
 #include <globals.h>
 
 BLE_API::BLE_API() = default;
@@ -20,7 +20,7 @@ public:
 };
 
 void BLE_API::setup() {
-    NimBLEDevice::init("Bruce");
+    NimBLEDevice::init("Willy");
     NimBLEDevice::setPower(ESP_PWR_LVL_P9); // 9 dBm, tweak if you want
 
     pServer = NimBLEDevice::createServer();
@@ -33,7 +33,7 @@ void BLE_API::setup() {
 
     BLEAdvertising *pAdvertising = pServer->getAdvertising();
     pAdvertising->enableScanResponse(false); // Save some battery
-    pAdvertising->setName("Bruc");           // Bruce is too long for adv packet len
+    pAdvertising->setName("Bruc");           // Willy is too long for adv packet len
     pAdvertising->start();
 }
 
@@ -55,6 +55,6 @@ void BLE_API::end() {
 #else
     BLEDevice::deinit();
 #endif
-    serialDevice = &USBserial;
+    serialDevice = &usbSerial;
 }
 #endif

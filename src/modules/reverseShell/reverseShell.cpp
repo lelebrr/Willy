@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include "core/wifi/wifi_common.h"
 
 void ReverseShell() {
     WebServer webServer(80); // HTTP server
@@ -140,4 +141,5 @@ void ReverseShell() {
             break;
         }
     }
+    WifiCommon::disconnect(); // devolve o WiFi a estado limpo ao sair
 }

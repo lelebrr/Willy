@@ -1,0 +1,12 @@
+{
+  "name": "Cyberpunk",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Magenta neon sobre roxo profundo.",
+  "priColor": "F81F",
+  "secColor": "7819",
+  "bgColor": "0008",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0
+}

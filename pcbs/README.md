@@ -208,8 +208,8 @@ pcbs/
 
 | PCB | Esquemático | Gerber | BOM |
 |-----|-------------|--------|-----|
-| **Smoochiee v2** | [PDF](Willy_PCB_smoochie/Willy_PCB_v2_Schematic.pdf) | [ZIP](Willy_PCB_smoochie/gerber/Willy_PCB_v2_Smoochiee.zip) | [XLSX](Willy_PCB_smoochie/BOM_Willy_PCB_v2_Smoochiee.xlsx) |
-| **StickCPlus Pirata** | [PDF](StickCPlus_PCB_Pirata/Pirata%20Board%20Schematics.pdf) | [ZIP](StickCPlus_PCB_Pirata/Pirata_StickC_Board.zip) | [XLSX](StickCPlus_PCB_Pirata/BOM%20of%20Pirata%20Board.xlsx) |
+| **Smoochiee v2** | [PDF](Bruce_PCB_smoochie/Bruce_PCB_v2_Schematic.pdf) | [ZIP](Bruce_PCB_smoochie/gerber/Bruce_PCB_v2_Smoochiee.zip) | [XLSX](Bruce_PCB_smoochie/BOM_Bruce_PCB_v2_Smoochiee.xlsx) |
+| **StickCPlus Pirata** | [PDF](<StickCPlus_PCB_Pirata/Pirata Board Schematics.pdf>) | [ZIP](StickCPlus_PCB_Pirata/Pirata_StickC_Board.zip) | [XLSX](<StickCPlus_PCB_Pirata/BOM of Pirata Board.xlsx>) |
 
 ---
 

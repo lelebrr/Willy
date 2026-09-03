@@ -806,3 +806,10 @@ target_appearance: 0 (qualquer)
 - NimBLE Documentation
 - BLE Security Guide
 - OWASP IoT Top 10
+---
+
+## Novos (pós-unificação)
+
+- **BLE Suite** (menu Bluetooth): ataques com alvo, FastPair, HFP, áudio, HID, DoS — ver `ble_suite.md`.
+- **Jam BLE via NRF24** (menu NRF24 → Ataques): portadora nos canais ADV com saída por ESC.
+- Sniffer BLE dedicado (`BLE_SnifferMenu`).

@@ -396,6 +396,7 @@ void clientBatteryDrain() {
         record.ssid[sizeof(record.ssid) - 1] = '\0';
         ap_list.push_back(record);
     }
+    WiFi.scanDelete(); // libera heap (registros copiados acima)
 
     if (ap_list.empty()) {
         displayError("Nenhuma rede encontrada", true);
@@ -520,6 +521,7 @@ void visualWifiHeatmap() {
     }
 
     // Limpa pontos anteriores
+    WiFi.scanDelete(); // libera heap do scan inicial (loop usa async)
     heatmap_points.clear();
 
     // Inicializa display
@@ -668,15 +670,21 @@ void wpa3DowngradeAttack() {
     padprintln("Escaneando redes WPA3...");
 
     int nets = WiFi.scanNetworks(false, true);
-    std::vector<int> wpa3_networks;
+    struct Wpa3Net { String ssid; uint8_t bssid[6]; uint8_t ch; };
+    std::vector<Wpa3Net> wpa3_networks;
 
     for (int i = 0; i < nets; i++) {
         wifi_auth_mode_t auth = (wifi_auth_mode_t)WiFi.encryptionType(i);
         // Check for WPA3
         if (auth == WIFI_AUTH_WPA3_PSK || auth == WIFI_AUTH_WPA2_WPA3_PSK) {
-            wpa3_networks.push_back(i);
+            Wpa3Net n;
+            n.ssid = WiFi.SSID(i);
+            memcpy(n.bssid, WiFi.BSSID(i), 6);
+            n.ch = WiFi.channel(i);
+            wpa3_networks.push_back(n);
         }
     }
+    WiFi.scanDelete(); // libera heap (dados copiados acima)
 
     if (wpa3_networks.empty()) {
         displayError("Nenhuma rede WPA3 encontrada", true);
@@ -686,9 +694,10 @@ void wpa3DowngradeAttack() {
     // Menu para selecionar rede
     int sel_idx = -1;
     options.clear();
-    for (int idx : wpa3_networks) {
-        String name = WiFi.SSID(idx);
+    for (size_t k = 0; k < wpa3_networks.size(); k++) {
+        String name = wpa3_networks[k].ssid;
         if (name.length() == 0) name = "<Hidden>";
+        int idx = (int)k;
         options.push_back({name.substring(0, 20).c_str(), [&sel_idx, idx]() { sel_idx = idx; }});
     }
     addOptionToMainMenu();
@@ -698,11 +707,11 @@ void wpa3DowngradeAttack() {
     if (returnToMenu || sel_idx < 0) return;
 
     // Pega informações do AP selecionado
-    int selected = sel_idx;
-    String target_ssid = WiFi.SSID(selected);
+    Wpa3Net target = wpa3_networks[(size_t)sel_idx];
+    String target_ssid = target.ssid;
     uint8_t target_bssid[6];
-    memcpy(target_bssid, WiFi.BSSID(selected), 6);
-    uint8_t target_channel = WiFi.channel(selected);
+    memcpy(target_bssid, target.bssid, 6);
+    uint8_t target_channel = target.ch;
 
     if (!initAdvancedAttackMode()) return;
 
@@ -878,7 +887,8 @@ void iotExploitInjector() {
 
     // Scan networks
     int nets = WiFi.scanNetworks(false, true);
-    std::vector<std::pair<int, OUIEntry>> iot_devices;
+    struct IotTarget { String ssid; uint8_t bssid[6]; int ch; OUIEntry entry; };
+    std::vector<IotTarget> iot_devices;
 
     for (int i = 0; i < nets; i++) {
         uint8_t bssid[6];
@@ -886,9 +896,15 @@ void iotExploitInjector() {
 
         OUIEntry entry;
         if (detectIoTDevice(bssid, entry)) {
-            iot_devices.push_back({i, entry});
+            IotTarget t;
+            t.ssid = WiFi.SSID(i);
+            memcpy(t.bssid, bssid, 6);
+            t.ch = WiFi.channel(i);
+            t.entry = entry;
+            iot_devices.push_back(t);
         }
     }
+    WiFi.scanDelete(); // libera heap (dados copiados acima)
 
     if (iot_devices.empty()) {
         displayError("Nenhum dispositivo IoT encontrado", true);
@@ -899,8 +915,8 @@ void iotExploitInjector() {
     int sel_idx = -1;
     options.clear();
     for (size_t i = 0; i < iot_devices.size(); i++) {
-        String ssid = WiFi.SSID(iot_devices[i].first);
-        String name = ssid.substring(0, 12) + " [" + String(iot_devices[i].second.vendor) + "]";
+        String ssid = iot_devices[i].ssid;
+        String name = ssid.substring(0, 12) + " [" + String(iot_devices[i].entry.vendor) + "]";
         int idx = i;
         options.push_back({name.c_str(), [&sel_idx, idx]() { sel_idx = idx; }});
     }
@@ -911,11 +927,11 @@ void iotExploitInjector() {
     if (returnToMenu || sel_idx < 0) return;
 
     // Seleciona dispositivo escolhido
-    int selected = iot_devices[sel_idx].first;
-    OUIEntry entry = iot_devices[sel_idx].second;
-    String target_ssid = WiFi.SSID(selected);
+    IotTarget target = iot_devices[(size_t)sel_idx];
+    OUIEntry entry = target.entry;
+    String target_ssid = target.ssid;
     uint8_t target_bssid[6];
-    memcpy(target_bssid, WiFi.BSSID(selected), 6);
+    memcpy(target_bssid, target.bssid, 6);
 
     // Menu de exploits
     int sel_exploit = -1;
@@ -1050,6 +1066,7 @@ std::vector<MeshNetwork> detectMeshNetworks() {
             meshes.push_back(mesh);
         }
     }
+    WiFi.scanDelete(); // libera heap (meshes copiados acima)
     return meshes;
 }
 
@@ -1147,6 +1164,17 @@ void smartDeauthScheduler() {
     padprintln("Escaneando redes...");
 
     int nets = WiFi.scanNetworks(false, true);
+    struct DeauthTarget { String ssid; uint8_t bssid[6]; uint8_t ch; };
+    std::vector<DeauthTarget> deauth_targets;
+
+    for (int i = 0; i < nets; i++) {
+        DeauthTarget t;
+        t.ssid = WiFi.SSID(i);
+        memcpy(t.bssid, WiFi.BSSID(i), 6);
+        t.ch = WiFi.channel(i);
+        deauth_targets.push_back(t);
+    }
+    WiFi.scanDelete(); // libera heap (dados copiados acima)
 
     if (nets == 0) {
         displayError("Nenhuma rede encontrada", true);
@@ -1156,11 +1184,11 @@ void smartDeauthScheduler() {
     // Menu para selecionar rede
     int sel_net = -1;
     options.clear();
-    for (int i = 0; i < nets; i++) {
-        String name = WiFi.SSID(i);
+    for (size_t k = 0; k < deauth_targets.size(); k++) {
+        String name = deauth_targets[k].ssid;
         if (name.length() == 0) name = "<Hidden>";
-        name = name.substring(0, 18) + " ch." + String(WiFi.channel(i));
-        int idx = i;
+        name = name.substring(0, 18) + " ch." + String(deauth_targets[k].ch);
+        int idx = (int)k;
         options.push_back({name.c_str(), [&sel_net, idx]() { sel_net = idx; }});
     }
     addOptionToMainMenu();
@@ -1192,10 +1220,10 @@ void smartDeauthScheduler() {
     if (returnToMenu) return;
 
     // Configura alvo
-    int selected = sel_net;
-    active_schedule.target_ssid = WiFi.SSID(selected);
-    memcpy(active_schedule.target_bssid, WiFi.BSSID(selected), 6);
-    active_schedule.channel = WiFi.channel(selected);
+    DeauthTarget target = deauth_targets[(size_t)sel_net];
+    active_schedule.target_ssid = target.ssid;
+    memcpy(active_schedule.target_bssid, target.bssid, 6);
+    active_schedule.channel = target.ch;
 
     if (!initAdvancedAttackMode()) return;
 

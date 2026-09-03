@@ -289,15 +289,19 @@ void wifi_atk_menu() {
             String optionText = encryptionPrefix + displaySSID + " (" + String(rssi) + "|" +
                                 encryptionTypeStr + "|ch." + String(ch) + ")";
 
+            String ssidC = ssid;
+            String bssidC = WiFi.BSSIDstr(i);
+            uint8_t chC = static_cast<uint8_t>(ch);
             options.push_back({optionText.c_str(), [=]() {
                                    ap_record = ap_records[i];
                                    target_atk_menu(
-                                       WiFi.SSID(i).c_str(),
-                                       WiFi.BSSIDstr(i),
-                                       static_cast<uint8_t>(WiFi.channel(i))
+                                       ssidC.c_str(),
+                                       bssidC,
+                                       chC
                                    );
                                }});
         }
+        WiFi.scanDelete(); // libera heap (copias capturadas nos lambdas)
 
         addOptionToMainMenu();
 
@@ -329,6 +333,7 @@ ScanNets:
         }
         ap_records.push_back(record);
     }
+    WiFi.scanDelete(); // libera heap (registros copiados acima)
     // Prepare deauth frame for each AP record
     memcpy(deauth_frame, deauth_frame_default, sizeof(deauth_frame_default));
 

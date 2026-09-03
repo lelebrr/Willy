@@ -11,6 +11,7 @@ struct ThemeEntry {
 void BruceTheme::removeTheme(void) {
     themeInfo t;
     theme = t;
+    themePath = "";
 }
 FS *BruceTheme::themeFS(void) {
     if (theme.fs == 1) return &LittleFS;
@@ -32,7 +33,7 @@ bool BruceTheme::openThemeFile(FS *fs, String filepath, bool overwriteConfigSett
     // Deserialize the JSON document
     JsonDocument jsonDoc;
     if (deserializeJson(jsonDoc, file)) {
-        displayError("5", true);
+        displayError("Tema invalido", true);
         log_e("THEME: %s. Using default theme", "Failed reading theme file");
         removeTheme();
         return false;
@@ -65,7 +66,7 @@ bool BruceTheme::openThemeFile(FS *fs, String filepath, bool overwriteConfigSett
     for (auto &entry : entries) {
         if (!_th[entry.key].isNull()) {
             String path = baseThemePath + _th[entry.key].as<String>();
-            if (fs->exists(path)) {
+            if (fs->exists(path) && validateImgFile(fs, path)) {
                 *entry.flag = true;
                 entry.path = _th[entry.key].as<String>();
                 // Pre-cache PNGs into BIN files to avoid runtime decoding and allocations
@@ -112,9 +113,18 @@ bool BruceTheme::openThemeFile(FS *fs, String filepath, bool overwriteConfigSett
 }
 
 bool BruceTheme::validateImgFile(FS *fs, String filepath) {
-    // Think of a way to check if the images are at maximum height of tftHeight
-    // this size is the maximun value to be shown on screen without overlapping the status bar.
-    return true;
+    // Valida extensao suportada (jpg/png/gif/bmp) e tamanho > 0.
+    // (Altura maxima ideal: tftHeight, p/ nao sobrepor a status bar.)
+    if (fs == nullptr || !fs->exists(filepath)) return false;
+    File f = fs->open(filepath, FILE_READ);
+    if (!f) return false;
+    bool ok = f.size() > 0;
+    f.close();
+    if (!ok) return false;
+    String p = filepath;
+    p.toLowerCase();
+    return p.endsWith(".jpg") || p.endsWith(".jpeg") || p.endsWith(".png") || p.endsWith(".gif") ||
+           p.endsWith(".bmp");
 }
 
 void BruceTheme::_setUiColor(uint16_t primary, uint16_t *secondary, uint16_t *background) {

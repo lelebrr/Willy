@@ -4,6 +4,7 @@
 #include "core/display.h"
 #include "core/i2c_finder.h"
 #include "core/main_menu.h"
+#include "core/mykeyboard.h"
 #include "core/settings.h"
 #include "core/utils.h"
 #include "core/wifi/wifi_common.h"
@@ -195,6 +196,35 @@ void ConfigMenu::advancedMenu() {
             {"BadUSB/BLE",       [this]() { setBadUSBBLEMenu(); }   },
 #endif
             {"Credenciais Rede", [this]() { setNetworkCredsMenu(); }},
+            {"Token Wigle", [this]() {
+                 String tok = keyboard(bruceConfig.wigleBasicToken, 64, "Token Wigle:");
+                 if (tok != "\x1B" && !tok.isEmpty()) {
+                     bruceConfig.setWigleBasicToken(tok);
+                     displaySuccess("Token salvo");
+                 }
+             }},
+            {"Chave WDGWars", [this]() {
+                 String k = keyboard(bruceConfig.wdgwarsApiKey, 64, "Chave WDGWars:");
+                 if (k != "\x1B" && !k.isEmpty()) {
+                     bruceConfig.setWdgwarsApiKey(k);
+                     displaySuccess("Chave salva");
+                 }
+             }},
+            {"Nome do Host", [this]() {
+                 String h = keyboard(bruceConfig.hostname, 24, "Nome do Host:");
+                 if (h != "\x1B" && !h.isEmpty()) {
+                     bruceConfig.setHostname(h);
+                     displaySuccess("Host salvo");
+                 }
+             }},
+            {"Credenciais WebUI", [this]() {
+                 String u = keyboard("", 24, "Usuario WebUI:");
+                 if (u == "\x1B" || u.isEmpty()) return;
+                 String p = keyboard("", 24, "Senha WebUI:");
+                 if (p == "\x1B" || p.isEmpty()) return;
+                 bruceConfig.setWebUICreds(u, p);
+                 displaySuccess("Credenciais salvas");
+             }},
             {"Reset de Fabrica",
                                       []() {
                  // Confirmation dialog for destructive action
@@ -266,6 +296,7 @@ void ConfigMenu::devMenu() {
 #if !defined(LITE_VERSION)
             {"Pinos LoRa",      [this]() { setSPIPinsMenu(bruceConfigPins.LoRa_bus); }  },
             {"Pinos W5500",     [this]() { setSPIPinsMenu(bruceConfigPins.W5500_bus); } },
+            {"Pinos ST25R3916", [this]() { setSPIPinsMenu(bruceConfigPins.ST25R_bus); } },
 #endif
             {"Pinos CartaoSD",  [this]() { setSPIPinsMenu(bruceConfigPins.SDCARD_bus); }},
             {"Pinos I2C",       [this]() { setI2CPinsMenu(bruceConfigPins.i2c_bus); }   },

@@ -80,6 +80,8 @@ JsonDocument BruceConfig::toJson() const {
     setting["startupApp"] = startupApp;
     setting["startupAppLuaScript"] = startupAppLuaScript;
     setting["wigleBasicToken"] = encryptString(wigleBasicToken);
+    setting["wdgwarsApiKey"] = wdgwarsApiKey;
+    setting["hostname"] = hostname;
     setting["devMode"] = devMode;
     setting["colorInverted"] = colorInverted;
 
@@ -397,6 +399,18 @@ void BruceConfig::fromFile(bool checkFS) {
 
     if (!setting["wigleBasicToken"].isNull()) {
         wigleBasicToken = decryptString(setting["wigleBasicToken"].as<String>());
+    } else {
+        count++;
+        log_e("Fail");
+    }
+    if (!setting["wdgwarsApiKey"].isNull()) {
+        wdgwarsApiKey = setting["wdgwarsApiKey"].as<String>();
+    } else {
+        count++;
+        log_e("Fail");
+    }
+    if (!setting["hostname"].isNull()) {
+        hostname = setting["hostname"].as<String>();
     } else {
         count++;
         log_e("Fail");
@@ -770,6 +784,18 @@ void BruceConfig::setWigleBasicToken(String value) {
     saveFile();
 }
 
+void BruceConfig::setWdgwarsApiKey(String value) {
+    wdgwarsApiKey = value;
+    saveFile();
+}
+
+void BruceConfig::setHostname(String value) {
+    value.trim();
+    if (value.length() == 0) return;
+    hostname = value;
+    saveFile();
+}
+
 void BruceConfig::setDevMode(int value) {
     devMode = value;
     validateDevModeValue();
@@ -814,12 +840,14 @@ void BruceConfig::setBadUSBBLEShowOutput(bool value) {
     badUSBBLEShowOutput = value;
     saveFile();
 }
+void BruceConfig::ensureMifareKeysLoaded() { MifareKeysManager::ensureLoaded(mifareKeys); }
+
 void BruceConfig::addMifareKey(String value) { MifareKeysManager::addKey(mifareKeys, value); }
 
 void BruceConfig::validateMifareKeysItems() { MifareKeysManager::validateKeys(mifareKeys); }
 
 void BruceConfig::addDisabledMenu(String value) {
-    // TODO: check if duplicate
+    if (std::find(disabledMenus.begin(), disabledMenus.end(), value) != disabledMenus.end()) return;
     disabledMenus.push_back(value);
     saveFile();
 }
@@ -833,6 +861,13 @@ void BruceConfig::removeDisabledMenu(String value) {
 }
 
 void BruceConfig::addQrCodeEntry(const String &menuName, const String &content) {
+    for (auto &e : qrCodes) {
+        if (e.menuName == menuName) { // atualiza em vez de duplicar
+            e.content = content;
+            saveFile();
+            return;
+        }
+    }
     qrCodes.push_back({menuName, content});
     saveFile();
 }
@@ -959,6 +994,8 @@ bool BruceConfig::setSetting(const String& name, const String& value) {
             );
         }},
         {"wigleBasicToken", [](BruceConfig* cfg, const String& val) { cfg->setWigleBasicToken(val); }},
+        {"wdgwarsApiKey", [](BruceConfig* cfg, const String& val) { cfg->setWdgwarsApiKey(val); }},
+        {"hostname", [](BruceConfig* cfg, const String& val) { cfg->setHostname(val); }},
         {"devMode", [](BruceConfig* cfg, const String& val) { cfg->setDevMode(val.toInt()); }},
         {"disabledMenus", [](BruceConfig* cfg, const String& val) { cfg->addDisabledMenu(val); }}
     };

@@ -421,7 +421,7 @@ void PN532KillerTools::mainMenu() {
     }
     options.push_back({netLabel.c_str(), [&]() { netMenu(); }});
     // check device
-    options.push_back({"Reset", [&]() { resetDevice(); }});
+    options.push_back({"Reiniciar", [&]() { resetDevice(); }});
     options.push_back({"Return", [&]() { returnToMenu = true; }});
     loopOptions(options);
 }
@@ -457,7 +457,7 @@ void PN532KillerTools::failedInitMenu() {
         netLabel = "BLE/TCP/UDP";
     }
     options.push_back({netLabel.c_str(), [&]() { netMenu(); }});
-    options.push_back({"Reset", [&]() {
+    options.push_back({"Reiniciar", [&]() {
                            resetDevice(false);
                            displayInfo("Checking device");
                            hardwareProbe();
@@ -468,7 +468,7 @@ void PN532KillerTools::failedInitMenu() {
                        }});
     options.push_back({"Return", [&]() { returnToMenu = true; }});
 
-    // 默认选择Reset项（倒数第二个选项）
+    // 默认选择Reiniciar项（倒数第二个选项）
     loopOptions(options, options.size() - 2);
 }
 
@@ -927,8 +927,8 @@ void PN532KillerTools::udpWifiSelectMenu() {
                               }
                               enableUdpDataTransfer();
                           }});
-    selOptions.push_back({"AP Mode", [&]() {
-                              displayInfo("Starting AP...");
+    selOptions.push_back({"Modo AP", [&]() {
+                              displayInfo("Iniciando AP...");
                               WiFi.mode(WIFI_AP);
                               WiFi.softAP("BRUCE-UDP", "", 6);
                               delay(200);

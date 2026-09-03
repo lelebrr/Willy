@@ -455,6 +455,9 @@ static String resolveSsidForFrame(FrameInfo &info, const wifi_promiscuous_pkt_t 
     if (!packet) return "";
     if (info.isBeacon) {
         beacon_frames++;
+        // SSID por BSSID quase nunca muda: evita rebuild de String a cada beacon (~10x/s por AP)
+        auto it = beaconSsidCache.find(info.apKey);
+        if (it != beaconSsidCache.end()) return it->second;
         String ssid = extractSsid(packet);
         beaconSsidCache[info.apKey] = ssid;
         return ssid;
@@ -889,27 +892,18 @@ void openFile(FS &Fs) {
 // --- New helper implementations ---
 
 static void cleanupStaleBeacons() {
+    // Passada unica O(n): remove beacons vencidos + entradas de cache (era O(n^2))
     unsigned long now = millis();
-    std::vector<BeaconList> toRemove;
-    for (auto it = registeredBeacons.begin(); it != registeredBeacons.end(); ++it) {
+    for (auto it = registeredBeacons.begin(); it != registeredBeacons.end();) {
         uint64_t key = macToKey(it->MAC);
         auto lastIt = beaconLastSeen.find(key);
         if (lastIt == beaconLastSeen.end() || (now - (unsigned long)lastIt->second) > BEACON_TIMEOUT_MS) {
-            toRemove.push_back(*it);
+            it = registeredBeacons.erase(it);
+            beaconSsidCache.erase(key);
+            beaconLastSeen.erase(key);
+        } else {
+            ++it;
         }
-    }
-    for (const auto &b : toRemove) {
-        // erase by matching MAC bytes
-        for (auto it = registeredBeacons.begin(); it != registeredBeacons.end();) {
-            if (memcmp(it->MAC, b.MAC, 6) == 0) {
-                it = registeredBeacons.erase(it);
-            } else {
-                ++it;
-            }
-        }
-        uint64_t key = macToKey(b.MAC);
-        beaconSsidCache.erase(key);
-        beaconLastSeen.erase(key);
     }
 }
 
@@ -1034,6 +1028,7 @@ void sniffer_setup() {
     num_EAPOL = 0;
     num_HS = 0;
     packet_counter = 0;
+    deauth_counter = 0;
     deauth_tmp = millis();
     // Prepare deauth frame for each AP record
     memcpy(deauth_frame, deauth_frame_default, sizeof(deauth_frame_default));
@@ -1183,6 +1178,7 @@ void sniffer_setup() {
                      packet_counter = 0;
                      num_EAPOL = 0;
                      num_HS = 0;
+                     deauth_counter = 0;
                      start_time = millis();
                      beacon_frames = 0;
                      registeredBeacons.clear();
@@ -1222,7 +1218,7 @@ void sniffer_setup() {
                 activeFile += "handshake pcaps";
             }
             padprintln(activeFile);
-            padprintln("Sniffer Mode: " + currentModeString());
+            padprintln("Modo Sniffer: " + currentModeString());
             if (deauth) {
                 tft.setTextColor(bruceConfig.bgColor, bruceConfig.priColor);
                 padprintln(

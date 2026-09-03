@@ -96,8 +96,8 @@ void Pn532ble::scanTagMenu() {
     };
 
     if (pn532_ble.isPN532Killer()) {
-        options.push_back({"Scan ISO15693", [this]() { setMode(HF_15_SCAN_MODE); }});
-        options.push_back({"Scan EM4100", [this]() { setMode(LF_EM4100_SCAN_MODE); }});
+        options.push_back({"Escanear ISO15693", [this]() { setMode(HF_15_SCAN_MODE); }});
+        options.push_back({"Escanear EM4100", [this]() { setMode(LF_EM4100_SCAN_MODE); }});
     }
 
     options.push_back({"Voltar", [this]() { selectMode(); }});
@@ -223,8 +223,8 @@ void Pn532ble::setMode(AppMode mode) {
 #ifdef HAS_KEYBOARD
             if (pn532_ble.isConnected()) { padprintln("[h] - Scan ISO14443A"); }
             if (pn532_ble.isPN532Killer()) {
-                padprintln("[H] - Scan ISO15693");
-                padprintln("[l] - Scan EM4100");
+                padprintln("[H] - Escanear ISO15693");
+                padprintln("[l] - Escanear EM4100");
             }
             padprintln("");
             if (pn532_ble.isConnected()) {
@@ -289,7 +289,7 @@ void Pn532ble::showDeviceInfo() {
 
 void Pn532ble::hf14aScan() {
     displayBanner();
-    padprintln("HF 14a Scan");
+    padprintln("Scan HF 14a");
     delay(200);
     pn532_ble.setNormalMode();
     PN532_BLE::Iso14aTagInfo tagInfo = pn532_ble.hf14aScan();
@@ -318,7 +318,7 @@ void Pn532ble::hf14aScan() {
 
 void Pn532ble::hf15Scan() {
     displayBanner();
-    padprintln("HF 15 Scan");
+    padprintln("Scan HF 15");
     delay(200);
     if (!pn532_ble.isPN532Killer()) {
         displayError("Nao suportado");
@@ -343,7 +343,7 @@ void Pn532ble::hf15Scan() {
 
 void Pn532ble::lfScan() {
     displayBanner();
-    padprintln("LF Scan");
+    padprintln("Scan LF");
     delay(200);
     if (!pn532_ble.isPN532Killer()) {
         displayError("Nao suportado");
@@ -1031,7 +1031,7 @@ void Pn532ble::loadMifareClassicDumpFile() {
 
     File file = (*fs).open(filePath, FILE_READ);
     if (!file) {
-        padprintln("File open failed");
+        padprintln("Falha ao abrir arquivo");
         return;
     }
     mfd.clear();
@@ -1039,7 +1039,7 @@ void Pn532ble::loadMifareClassicDumpFile() {
     file.close();
     // check dump size if is 320, 1024 or 4096
     if (mfd.size() != 320 && mfd.size() != 1024 && mfd.size() != 4096) {
-        padprintln("Invalid dump size: " + String(mfd.size()));
+        padprintln("Tamanho inválido: " + String(mfd.size()));
         return;
     }
 
@@ -1093,7 +1093,7 @@ void Pn532ble::loadMifareUltralightDumpFile() {
 
     File file = (*fs).open(filePath, FILE_READ);
     if (!file) {
-        padprintln("File open failed");
+        padprintln("Falha ao abrir arquivo");
         return;
     }
     mfd.clear();
@@ -1150,7 +1150,7 @@ void Pn532ble::loadIso15693DumpFile() {
 
     File file = (*fs).open(filePath, FILE_READ);
     if (!file) {
-        padprintln("File open failed");
+        padprintln("Falha ao abrir arquivo");
         return;
     }
     iso15dump.clear();

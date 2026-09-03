@@ -684,7 +684,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
 
     readFs(fs, Folder, allowed_ext);
 
-    maxFiles = fileList.size() - 1; // discount the >back operator
+    maxFiles = fileList.empty() ? 0 : (int)fileList.size() - 1; // discount the >back operator
     LongPress = false;
     unsigned long LongPressTmp = millis();
     while (1) {
@@ -697,10 +697,9 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                 index = 0;
                 tft.fillScreen(bruceConfig.bgColor);
                 tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
-                Serial.println("reload to read: " + Folder);
                 readFs(fs, Folder, allowed_ext);
                 PreFolder = Folder;
-                maxFiles = fileList.size() - 1;
+                maxFiles = fileList.empty() ? 0 : (int)fileList.size() - 1;
                 if (strcmp(PreFolder.c_str(), Folder.c_str()) != 0 || index > maxFiles) index = 0;
                 reload = false;
             }

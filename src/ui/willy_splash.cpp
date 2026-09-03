@@ -97,8 +97,8 @@ static void create_orca(lv_obj_t *parent) {
     lv_obj_set_style_bg_color(orca_glow, lv_color_hex(ACCENT_COLOR), 0);
     lv_obj_set_style_radius(orca_glow, 50, 0);
     lv_obj_set_style_shadow_color(orca_glow, lv_color_hex(ACCENT_COLOR), 0);
-    lv_obj_set_style_shadow_width(orca_glow, 25, 0);
-    lv_obj_set_style_shadow_spread(orca_glow, 8, 0);
+    lv_obj_set_style_shadow_width(orca_glow, 14, 0);
+    lv_obj_set_style_shadow_spread(orca_glow, 4, 0);
 
     // Textos
     willy_text = lv_label_create(parent);
@@ -109,7 +109,7 @@ static void create_orca(lv_obj_t *parent) {
     lv_obj_align(willy_text, LV_ALIGN_CENTER, 0, 78);
 
     version_text = lv_label_create(parent);
-    lv_label_set_text(version_text, "v2.1");
+    lv_label_set_text_fmt(version_text, "BRUCE %s", BRUCE_VERSION);
     lv_obj_set_style_text_color(version_text, lv_color_hex(ACCENT_COLOR), 0);
     lv_obj_set_style_text_font(version_text, &lv_font_montserrat_14, 0);
     lv_obj_set_style_opa(version_text, 0, 0);
@@ -233,8 +233,19 @@ static void finish_splash(lv_timer_t *t) {
 }
 
 // ====================== FUNÇÃO PRINCIPAL ======================
+// Converte RGB565 (bruceConfig.priColor) p/ 0xRRGGBB do lv_color_hex
+static uint32_t rgb565_to_hex(uint16_t c) {
+    uint32_t r = ((c >> 11) & 0x1F) * 255 / 31;
+    uint32_t g = ((c >> 5) & 0x3F) * 255 / 63;
+    uint32_t b = (c & 0x1F) * 255 / 31;
+    return (r << 16) | (g << 8) | b;
+}
+
 void show_willy_splash(lv_obj_t *parent) {
-    load_willy_config();
+    // Sem config salva de splash: espelha a cor do tema atual (sincronia visual)
+    if (!load_willy_config()) {
+        getWillyCfg().corPrimaria = rgb565_to_hex(bruceConfig.priColor);
+    }
 
     lv_obj_clean(parent);
     lv_obj_set_style_bg_color(parent, lv_color_hex(0x0A001F), 0);

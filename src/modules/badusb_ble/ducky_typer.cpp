@@ -177,7 +177,7 @@ void ducky_startKb(HIDInterface *&hid, bool ble) {
         if (ble) {
             // _Ask_for_restart change to 2 when use Disconnect option in BLE menu
             if (_Ask_for_restart == 2) {
-                displayError("Restart your Device");
+                displayError("Reinicie o aparelho");
                 returnToMenu = true;
             }
             hid = new BleKeyboard(bruceConfigPins.bleName, "BruceFW", 100);
@@ -186,13 +186,19 @@ void ducky_startKb(HIDInterface *&hid, bool ble) {
             hid = new USBHIDKeyboard();
             USB.begin();
 
-            // Wait for USB subsystem to be ready
+            // Wait for USB subsystem to be ready (ESC sai, timeout 30s)
+            unsigned long _usb_t0 = millis();
             while (!tud_mounted()) {
+                if (check(EscPress) || millis() - _usb_t0 > 30000) {
+                    printStatusBadUSBBLE("USB sem host - ESC");
+                    returnToMenu = true;
+                    break;
+                }
                 printStatusBadUSBBLE("Waiting USB Host...");
                 delay(500);
             }
 
-            printStatusBadUSBBLE("USB Host Connected");
+            if (tud_mounted()) printStatusBadUSBBLE("USB Host Connected");
 #else
             mySerial.begin(CH9329_DEFAULT_BAUDRATE, SERIAL_8N1, BAD_RX, BAD_TX);
             delay(100);
@@ -247,13 +253,13 @@ void ducky_setup(HIDInterface *&hid, bool ble) {
     Serial.println("Ducky typer begin");
 
     if (ble && bruceConfig.badUSBBLEKeyDelay < 50) {
-        displayWarning("Key delay is below 50ms. You may experience issues with missing keys.", true);
+        displayWarning("Atraso <50ms: teclas podem falhar.", true);
     }
 
     tft.fillScreen(bruceConfig.bgColor);
 
     if (ble && _Ask_for_restart == 2) {
-        displayError("Restart your Device");
+        displayError("Reinicie o aparelho");
         returnToMenu = true;
         return;
     }
@@ -268,7 +274,7 @@ void ducky_setup(HIDInterface *&hid, bool ble) {
         options.push_back({"SD Card", [&]() { fs = &SD; }});
     }
     options.push_back({"LittleFS", [&]() { fs = &LittleFS; }});
-    options.push_back({"Main Menu", [&]() { fs = nullptr; }});
+    options.push_back({"Menu Principal", [&]() { fs = nullptr; }});
 
     loopOptions(options);
 
@@ -298,7 +304,7 @@ void ducky_setup(HIDInterface *&hid, bool ble) {
                         mySerial.write(0x00);
                     } else break;
                     if (check(EscPress)) {
-                        displayError("CH9329 not found"); // Cancel run
+                        displayError("CH9329 não encontrado"); // Cancel run
                         delay(500);
                         goto EXIT;
                     }
@@ -307,7 +313,7 @@ void ducky_setup(HIDInterface *&hid, bool ble) {
                 printStatusBadUSBBLE("Preparing USB");
                 delay(2000); // Time to Computer or device recognize the USB HID
             } else {
-                printStatusBadUSBBLE("Waiting Victim");
+                printStatusBadUSBBLE("Aguardando vítima");
                 while (!hid->isConnected() && !check(EscPress));
                 if (hid->isConnected()) {
                     BLEConnected = true;
@@ -568,7 +574,7 @@ void ducky_keyboard(HIDInterface *&hid, bool ble) {
     if (returnToMenu) return;
 
     if (ble) {
-        displayTextLine("Waiting Victim");
+        displayTextLine("Aguardando vítima");
         while (!hid->isConnected() && !check(EscPress));
         if (hid->isConnected()) {
             BLEConnected = true;
@@ -900,7 +906,7 @@ bool handlePauseResume() {
 // Presenter mode - simple button press to advance slides
 void PresenterMode(HIDInterface *&hid, bool ble) {
     if (_Ask_for_restart == 2) {
-        displayError("Restart your Device");
+        displayError("Reinicie o aparelho");
         delay(1000);
         return;
     }

@@ -1,0 +1,12 @@
+{
+  "name": "Blood",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Vermelho intenso sobre preto.",
+  "priColor": "E004",
+  "secColor": "9802",
+  "bgColor": "0008",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Willy - Painel Ofensivo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="glass-container">
+        <div class="bg-aurora"></div>
+        <header>
+            <div class="logo">
+                <span class="logo-mark" aria-hidden="true"></span>
+                WILLY <span>OFFENSIVE</span>
+            </div>
+            <div class="status-bar">
+                <span id="version">v--</span>
+                <span id="uptime">Ativo: 00:00</span>
+                <span id="battery">Bat: --%</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="card stats">
+                <h2>Status do Sistema</h2>
+                <div class="stat-grid">
+                    <div class="stat-item">Heap: <span id="heap">--</span> KB</div>
+                    <div class="stat-item">PSRAM: <span id="psram">--</span> KB</div>
+                    <div class="stat-item">CPU: <span id="cpu">--</span> MHz</div>
+                    <div class="stat-item">RSSI: <span id="rssi">--</span> dBm</div>
+                    <div class="stat-item">IP: <span id="ip">--</span></div>
+                </div>
+            </section>
+
+            <section class="card terminal">
+                <h2>Logs ao Vivo</h2>
+                <div id="log-window" class="log-area">Inicializando...</div>
+            </section>
+
+            <section class="card actions">
+                <h2>Ações Rápidas</h2>
+                <button class="btn-primary" onclick="reboot()">Reiniciar Aparelho</button>
+                <button class="btn-ghost" onclick="clearLogs()">Limpar Logs</button>
+            </section>
+        </main>
+    </div>
+    <script src="main.js"></script>
+</body>
+
+</html>

@@ -97,3 +97,10 @@ Para o Willy, recomenda-se o uso do PN532 via **I2C** ou **Serial (HSU)**.
 - FeliCa
 - ISO/IEC 18092 (P2P, Target)
 - NDEF (Software layer)
+
+---
+
+## Novos (pós-unificação)
+
+- **ST25R3916** SPI/I2C: seleção no menu, pinos configuráveis, comandos `rfid` — ver `st25r3916_rfid.md`.
+- Chaves MIFARE: adicionar (`Add Chave MIF`), visualizar contagem (`Ver Chaves MIF`), `ensureMifareKeysLoaded()`.

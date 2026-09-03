@@ -11,6 +11,8 @@
 #include "modules/rf/rf_spectrum.h"
 #include "modules/rf/rf_waterfall.h"
 #include "modules/rf/rf_advanced_atks.h"
+#include "modules/rf/protocols/rf_encoder.h"
+#include "modules/rf/protocols/rf_keeloq.h"
 
 void RFMenu::optionsMenu() {
     options = {
@@ -28,15 +30,21 @@ void RFMenu::optionsMenu() {
         {"Ouvir",          rf_listen                 }, // dev_eclipse
 #endif
         {"Força Bruta",      rf_bruteforce             },
+        {"Autotestes RF", [=]() {
+             displayInfo("Testando RF...");
+             bool ok = rf_encoder_selftest() && rf_keeloq_selftest();
+             if (ok) displaySuccess("Autotestes PASS", true);
+             else displayError("Autotestes FAIL", true);
+         }},
         {"Garage Brute P2262", [=]() { PredictiveGarageBrute(); } },
-        {"Stealth L.P. Beacon", [=]() { StealthLowPowerExfilBeacon(); } },
-        {"Coord. Replay Seq", [=]() { MultiDeviceCoordinatedReplay(); } },
-        {"Smart Fuzzer",      [=]() { ProtocolFuzzerSmart(); }          },
-        {"Alarm Trigger",     [=]() { FalseAlarmTriggerLoop(); }        },
-        {"TPMS Spoof",        [=]() { TPMSSpoofChaos(); }               },
-        {"Rolling Learner",   [=]() { RollingCodeLearnerReplay(); }     },
-        {"Spectrum Lock",     [=]() { SpectrumTargetLock(); }           },
-        {"Sensor Drain Flood", [=]() { SensorBatteryDrainFlood(); } },
+        {"Beacon Furtivo LP", [=]() { StealthLowPowerExfilBeacon(); } },
+        {"Replay Coordenado", [=]() { MultiDeviceCoordinatedReplay(); } },
+        {"Fuzzer Inteligente",      [=]() { ProtocolFuzzerSmart(); }          },
+        {"Disparo de Alarme",     [=]() { FalseAlarmTriggerLoop(); }        },
+        {"Falsificação TPMS",        [=]() { TPMSSpoofChaos(); }               },
+        {"Aprendiz Rolling",   [=]() { RollingCodeLearnerReplay(); }     },
+        {"Trava de Espectro",     [=]() { SpectrumTargetLock(); }           },
+        {"Dreno de Bateria", [=]() { SensorBatteryDrainFlood(); } },
         {"Jammer Intermitente",
          [=]() {
              if (displayMessage("AVISO: Jamming pode ser\nilegal. Continuar?", "Não", nullptr, "Sim", TFT_RED) ==

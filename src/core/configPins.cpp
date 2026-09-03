@@ -167,9 +167,27 @@ void BruceConfigPins::fromJson(JsonObject obj) {
         count++;
         log_e("Fail");
     }
+
+    if (!root["ST25R_Pins"].isNull()) {
+        SPIPins def = ST25R_bus;
+        ST25R_bus.fromJson(root["ST25R_Pins"].as<JsonObject>());
+        if (ST25R_bus.sck == GPIO_NUM_NC && def.sck != GPIO_NUM_NC) {
+            ST25R_bus = def;
+            count++;
+        }
+    } else {
+        count++;
+        log_e("Fail");
+    }
 #endif
     if (!root["i2c_bus"].isNull()) {
+#if defined(SOC_HP_I2C_NUM) && SOC_HP_I2C_NUM < 2 && SYS_I2C_SDA >= 0 && SYS_I2C_SCL >= 0 && \
+    !defined(BRUCE_BOARD_HAS_SOFTWARE_I2C)
+        log_e("I2C Pins cannot be changed on this board, using default values");
+        i2c_bus = sys_i2c;
+#else
         i2c_bus.fromJson(root["i2c_bus"].as<JsonObject>());
+#endif
     } else {
         count++;
         log_e("Fail");
@@ -223,9 +241,12 @@ void BruceConfigPins::toJson(JsonObject obj) const {
 
     JsonObject _LoRa = root["LoRa_Pins"].to<JsonObject>();
     LoRa_bus.toJson(_LoRa);
+
+    JsonObject _ST25R = root["ST25R_Pins"].to<JsonObject>();
+    ST25R_bus.toJson(_ST25R);
 #endif
-    // JsonObject _si2c = root["sys_i2c"].as<JsonObject>();
-    // sys_i2c.toJson(_si2c);
+    JsonObject _si2c = root["sys_i2c"].to<JsonObject>();
+    sys_i2c.toJson(_si2c);
     JsonObject _di2c = root["i2c_bus"].to<JsonObject>();
     i2c_bus.toJson(_di2c);
     JsonObject _uart = root["uart_bus"].to<JsonObject>();
@@ -338,12 +359,14 @@ void BruceConfigPins::validateConfig() {
     validateRfidModuleValue();
     validateGpsBaudrateValue();
 #if !defined(LITE_VERSION)
+    validateSpiPins(ST25R_bus);
     validateSpiPins(LoRa_bus);
     validateSpiPins(W5500_bus);
 #endif
     validateSpiPins(CC1101_bus);
     validateSpiPins(NRF24_bus);
     validateSpiPins(SDCARD_bus);
+    validateI2CPins(sys_i2c);
     validateI2CPins(i2c_bus);
     validateUARTPins(uart_bus);
     validateUARTPins(gps_bus);
@@ -357,6 +380,11 @@ void BruceConfigPins::setLoRaPins(SPIPins value) {
 void BruceConfigPins::setW5500Pins(SPIPins value) {
     W5500_bus = value;
     validateSpiPins(W5500_bus);
+    saveFile();
+}
+void BruceConfigPins::setSR25RPins(SPIPins value) {
+    ST25R_bus = value;
+    validateSpiPins(ST25R_bus);
     saveFile();
 }
 #endif
@@ -491,7 +519,11 @@ void BruceConfigPins::setRfidModule(RFIDModules value) {
 
 void BruceConfigPins::validateRfidModuleValue() {
     if (rfidModule != M5_RFID2_MODULE && rfidModule != PN532_I2C_MODULE && rfidModule != PN532_SPI_MODULE &&
-        rfidModule != RC522_SPI_MODULE && rfidModule != PN532_I2C_SPI_MODULE) {
+        rfidModule != RC522_SPI_MODULE && rfidModule != PN532_I2C_SPI_MODULE
+#if !defined(LITE_VERSION)
+        && rfidModule != ST25R3916_SPI_MODULE && rfidModule != ST25R3916_I2C_MODULE
+#endif
+    ) {
         rfidModule = M5_RFID2_MODULE;
     }
 }

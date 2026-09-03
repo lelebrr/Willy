@@ -1,36 +1,25 @@
-# Cyber Menu UI (Willy v2.1 Evolution)
+# Cyber Menu UI (Willy)
 
-The Willy Cyber Menu is an advanced, high-performance UI designed for embedded displays (like the CYD 2.8"). It integrates advanced LVGL animations and real-time system monitoring.
+Menu alternativo em LVGL 8.3 (`src/ui/cyber_menu.{cpp,h}`), com tiles por página (`lv_tileview`), barra de notificação (hora via NTP + ícones WiFi/BLE) e callbacks que roteiam para os menus clássicos.
 
-## Features
+## Acesso
 
-### 1. Advanced Animations
+Menu principal → **Cyber Menu (Exp)**, ou automático no `loop()` (`setup_cyber_menu()` uma vez por retorno ao menu).
 
-- **Cascade Entry**: Icons fade and slide up with an incremental delay, creating a wave effect.
-- **Neon Pulsing**: Button borders subtly pulse with transparency easing.
-- **Interactive Hover**:
-  - **Zoom**: Smooth 1.3x magnification.
-  - **3D Rotation**: 8-degree tilt for depth perception.
-  - **Glow/Shadow**: Accent-colored shadow spread.
+## Roteamento por nome
 
-### 2. Integration & Themes
+Cada tile resolve o índice em `mainMenu.getItems()` comparando `getName()` (`set_cyber_action()`): imune à ordem dos menus, a defines (`LITE_VERSION`, `NO_RF_MODULE`…) e a menus ocultos. Tiles sem menu dedicado roteiam para o mais próximo (NFC→RFID, Attacks→WiFi, Core→Configuração, Logs→Arquivos). Índice não encontrado = ação ignorada.
 
-- **Dynamic Themes**: Uses `WillyConfig.priColor` and `WillyConfig.secColor` to match the system's current theme (Dark, Light, or Cyber).
-- **Core Integration**: Seamlessly calls Willy's existing module callbacks (Wi-Fi, BLE, IR, etc.).
+Tiles: Wi-Fi, BLE, IR, NFC, Sub-GHz, NRF24, GPS, Attacks, Core, Logs, RFID, SD.
 
-### 3. Notification Bar
+## Visual
 
-- **Real-time Status**:
-  - **Time**: Syncs with system time (NTP supported).
-  - **Battery**: Real-time percentage with color-coded alerts (Green > 50%, Yellow > 20%, Red < 20%).
-- **Interactive Symbols**: Visual indicators for WiFi and Bluetooth connectivity.
+`create_cyber_icon()`: botão 90×90 (ampliado p/ 180 na página) com gradiente vertical primária→secundária (`bruceConfig`), borda de destaque ciano, sombra neon pulsante infinita, fade-in + slide-up em cascata, zoom 1.2x no toque. Setas de navegação por toque nas laterais.
 
-## Technical Details
+## Cores
 
-- **Extra Footprint**: < 10KB.
-- **Engine**: LVGL 8.3.11.
-- **Optimization**: Function reuse and minimal vector path points to prevent CPU lag on ESP32.
+Usa `bruceConfig.priColor/secColor` (não `WillyConfig`) — acompanha o tema do sistema automaticamente.
 
-## How to Access
+## Barra superior
 
-Go to the **Main Menu** and select **Cyber Menu (Exp)**.
+Hora (`HH:MM` quando NTP sincronizado, `--:--` senão), bateria (placeholder `--%`: `getBattery()` é stub fraco e retorna 0 sem implementação da placa), ícones WiFi/BLE e popup "System Ready" com fade.

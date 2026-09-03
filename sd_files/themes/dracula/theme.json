@@ -1,0 +1,12 @@
+{
+  "name": "Dracula",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Roxo rosado sobre ardósia escura.",
+  "priColor": "C8FF",
+  "secColor": "601F",
+  "bgColor": "0842",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0
+}

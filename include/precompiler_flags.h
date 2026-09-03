@@ -48,6 +48,12 @@
 #ifndef GROVE_SCL           // Pin to be used in I2C communications
   #define GROVE_SCL -1
 #endif
+#ifndef SYS_I2C_SDA         // Pin used by system peripherals (touch, PMIC, RTC...)
+  #define SYS_I2C_SDA -1
+#endif
+#ifndef SYS_I2C_SCL         // Pin used by system peripherals (touch, PMIC, RTC...)
+  #define SYS_I2C_SCL -1
+#endif
 #ifndef RXLED               // Default RX Infrared LED
   #define RXLED GROVE_SCL
 #endif

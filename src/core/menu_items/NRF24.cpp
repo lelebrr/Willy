@@ -3,6 +3,7 @@
 #include "core/utils.h"
 #include "modules/NRF24/nrf_common.h"
 #include "modules/NRF24/nrf_jammer.h"
+#include "modules/NRF24/nrf_jammer_api.h"
 #include "modules/NRF24/nrf_spectrum.h"
 #include "modules/NRF24/nrf_mousejack.h"
 #include "modules/NRF24/nrf_fuzzer.h"
@@ -45,16 +46,38 @@ void NRF24Menu::optionsMenu() {
 
 void NRF24Menu::attacksMenu() {
     options = {
-        {"MouseJack Inject", nrf_mousejack_injector},
-        {"Smart Fuzzer", nrf_smart_fuzzer},
-        {"Fingerprint", nrf_device_fingerprint},
-        {"Target Jammer", nrf_targeted_jammer},
-        {"Replay Attack", nrf_keystroke_replay},
-        {"Impersonation MITM", nrf_device_impersonation},
-        {"Unifying Exploit", nrf_unifying_exploit},
-        {"Stealth Exfil", nrf_stealth_exfil},
-        {"Mass Pairing Brute", nrf_mass_pairing},
-        {"Geo-Locator", nrf_signal_geolocator},
+        {"Injetor MouseJack", nrf_mousejack_injector},
+        {"Fuzzer Inteligente", nrf_smart_fuzzer},
+        {"Impressao Digital", nrf_device_fingerprint},
+        {"Jammer Direcionado", nrf_targeted_jammer},
+        {"Ataque Replay", nrf_keystroke_replay},
+        {"Falsificacao MITM", nrf_device_impersonation},
+        {"Exploit Unifying", nrf_unifying_exploit},
+        {"Exfiltracao Furtiva", nrf_stealth_exfil},
+        {"Pareamento em Massa", nrf_mass_pairing},
+        {"Geo-Localizador", nrf_signal_geolocator},
+#if !defined(LITE_VERSION)
+        {"Jam BLE (NRF)", [=]() {
+             if (!isNRF24Available()) {
+                 displayError("NRF24 nao encontrado", true);
+                 return;
+             }
+             if (!startBLEJammer(BLE_JAM_ADV_CHANNELS)) {
+                 displayError("Falha ao iniciar", true);
+                 return;
+             }
+             drawMainBorderWithTitle("Jam BLE");
+             padprintln("");
+             padprintln("Atacando ADV 37/38/39");
+             padprintln("ESC para parar");
+             while (!check(EscPress)) {
+                 updateBLEJammer();
+                 vTaskDelay(50 / portTICK_PERIOD_MS);
+             }
+             stopBLEJammer();
+             returnToMenu = true;
+         }},
+#endif
         {"Voltar", [this]() { optionsMenu(); }}
     };
 

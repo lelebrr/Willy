@@ -17,7 +17,8 @@ enum RFIDModules {
     PN532_SPI_MODULE = 2,
     RC522_SPI_MODULE = 3,
     ST25R3916_SPI_MODULE = 4,
-    PN532_I2C_SPI_MODULE = 5
+    PN532_I2C_SPI_MODULE = 5,
+    ST25R3916_I2C_MODULE = 6
 };
 
 enum RFModules {
@@ -104,6 +105,8 @@ public:
         bool checkConflict(uint8_t p) {
             gpio_num_t pin = (gpio_num_t)p;
             if (sck == pin || miso == pin || mosi == pin || cs == pin) return true;
+            if (io0 != GPIO_NUM_NC && io0 == pin) return true;
+            if (io2 != GPIO_NUM_NC && io2 == pin) return true;
             return false;
         }
     };
@@ -135,6 +138,19 @@ public:
     };
 #else
     SPIPins NRF24_bus;
+#endif
+
+#ifdef ST25R_SCLK
+    SPIPins ST25R_bus = {
+        (gpio_num_t)ST25R_SCLK,
+        (gpio_num_t)ST25R_MISO,
+        (gpio_num_t)ST25R_MOSI,
+        (gpio_num_t)ST25R_CS,
+        (gpio_num_t)ST25R_IRQ,
+        GPIO_NUM_NC
+    };
+#else
+    SPIPins ST25R_bus;
 #endif
 
 #ifdef SDCARD_SCK
@@ -172,7 +188,7 @@ public:
     SPIPins LoRa_bus;
 #endif
 #endif
-    // I2CPins sys_i2c = {(gpio_num_t)GROVE_SDA, (gpio_num_t)GROVE_SCL};
+    I2CPins sys_i2c = {(gpio_num_t)SYS_I2C_SDA, (gpio_num_t)SYS_I2C_SCL};
     I2CPins i2c_bus = {(gpio_num_t)GROVE_SDA, (gpio_num_t)GROVE_SCL};
     UARTPins uart_bus = {(gpio_num_t)SERIAL_RX, (gpio_num_t)SERIAL_TX};
     UARTPins gps_bus = {(gpio_num_t)GPS_SERIAL_RX, (gpio_num_t)GPS_SERIAL_TX};
@@ -236,6 +252,7 @@ public:
 #if !defined(LITE_VERSION)
     void setLoRaPins(SPIPins value);
     void setW5500Pins(SPIPins value);
+    void setSR25RPins(SPIPins value);
 #endif
     void setSpiPins(SPIPins value);
     void setI2CPins(I2CPins value);

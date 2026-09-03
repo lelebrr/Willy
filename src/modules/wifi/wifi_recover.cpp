@@ -115,13 +115,13 @@ static bool parse_pcap_handshake(FS &fs, const String &path, HandshakeData &hs) 
     File f = fs.open(path, FILE_READ);
     if (!f) {
         ESP_LOGW(TAG, "Cannot open PCAP: %s", path.c_str());
-        padprintln("Error: Cannot open PCAP file");
+        padprintln("Erro: sem abrir PCAP");
         return false;
     }
 
     pcap_hdr_t gh;
     if (f.read((uint8_t *)&gh, sizeof(gh)) != sizeof(gh)) {
-        padprintln("Error: Cannot read PCAP header");
+        padprintln("Erro: sem ler PCAP");
         f.close();
         return false;
     }
@@ -133,7 +133,7 @@ static bool parse_pcap_handshake(FS &fs, const String &path, HandshakeData &hs) 
         swapped = true;
         gh.network = swap32(gh.network);
     } else {
-        padprintln("Error: Invalid PCAP magic");
+        padprintln("Erro: PCAP inválido");
         f.close();
         return false;
     }

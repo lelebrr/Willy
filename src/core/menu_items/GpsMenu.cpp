@@ -5,6 +5,8 @@
 #include "modules/gps/gps_tracker.h"
 #include "modules/gps/wardriving.h"
 #include "modules/gps/gps_config.h"
+#include "modules/gps/wdgwars.h"
+#include "core/wifi/wifi_common.h"
 #include <math.h>
 
 void GpsMenu::optionsMenu() {
@@ -13,6 +15,38 @@ void GpsMenu::optionsMenu() {
 #if !defined(LITE_VERSION)
         {"Rastreador GPS", [=]() { GPSTracker(); }       },
 #endif
+        {"Enviar p/ WDGWars", [=]() {
+             if (!WifiState::wifiConnected) {
+                 displayInfo("Conecte o WiFi primeiro");
+                 if (!wifiConnectMenu()) return;
+             }
+             FS *fs = nullptr;
+             if (sdcardMounted && SD.exists("/WillyWardriving")) fs = &SD;
+             else if (LittleFS.exists("/WillyWardriving")) fs = &LittleFS;
+             else {
+                 displayError("Sem dados wardriving", true);
+                 return;
+             }
+             WDGoWars().upload_all(fs, "/WillyWardriving", false);
+         }},
+        {"Enviar+Apagar WDGWars", [=]() {
+             if (!WifiState::wifiConnected) {
+                 displayInfo("Conecte o WiFi primeiro");
+                 if (!wifiConnectMenu()) return;
+             }
+             FS *fs = nullptr;
+             if (sdcardMounted && SD.exists("/WillyWardriving")) fs = &SD;
+             else if (LittleFS.exists("/WillyWardriving")) fs = &LittleFS;
+             else {
+                 displayError("Sem dados wardriving", true);
+                 return;
+             }
+             if (displayMessage("Apagar CSVs apos envio?", "Nao", nullptr, "Sim", TFT_YELLOW) == 2) {
+                 WDGoWars().upload_all(fs, "/WillyWardriving", true);
+             } else {
+                 WDGoWars().upload_all(fs, "/WillyWardriving", false);
+             }
+         }},
         {"Config",      [this]() { configMenu(); }    },
     };
     addOptionToMainMenu();

@@ -738,6 +738,14 @@ void setRFIDModuleMenu() {
         {"RC522 em SPI",
          [=]() { bruceConfigPins.setRfidModule(RC522_SPI_MODULE); },
          bruceConfigPins.rfidModule == RC522_SPI_MODULE    },
+#if !defined(LITE_VERSION)
+        {"ST25R3916 em SPI",
+         [=]() { bruceConfigPins.setRfidModule(ST25R3916_SPI_MODULE); },
+         bruceConfigPins.rfidModule == ST25R3916_SPI_MODULE    },
+        {"ST25R3916 em I2C",
+         [=]() { bruceConfigPins.setRfidModule(ST25R3916_I2C_MODULE); },
+         bruceConfigPins.rfidModule == ST25R3916_I2C_MODULE    },
+#endif
     };
     loopOptions(options, bruceConfigPins.rfidModule);
 }
@@ -1403,7 +1411,7 @@ void setBadUSBBLEKeyDelayMenu() {
         if (delayVal <= 500) {
             bruceConfig.setBadUSBBLEKeyDelay(delayVal);
         } else if (delayVal != 0) {
-            displayError("Invalid key delay value (0 to 500)", true);
+            displayError("Atraso invalido (0 a 500)", true);
         }
     }
 }
@@ -1443,7 +1451,7 @@ void setMacAddressMenu() {
              if (newMAC.length() == 17) {
                  bruceConfig.setWifiMAC(newMAC);
              } else {
-                 displayError("Invalid MAC format");
+                 displayError("MAC invalido");
              }
          }, bruceConfig.wifiMAC != ""},
         {"Random MAC", [&]() {
@@ -1699,14 +1707,14 @@ void installAppStoreJS() {
 
     if (!fs->exists("/WillyJS")) {
         if (!fs->mkdir("/WillyJS")) {
-            displayWarning("Failed to create /WillyJS directory", true);
+            displayWarning("Falha ao criar /WillyJS", true);
             return;
         }
     }
 
     if (!fs->exists("/WillyJS/Tools")) {
         if (!fs->mkdir("/WillyJS/Tools")) {
-            displayWarning("Failed to create /WillyJS/Tools directory", true);
+            displayWarning("Falha ao criar /WillyJS/Tools", true);
             return;
         }
     }
@@ -1718,13 +1726,13 @@ void installAppStoreJS() {
     int httpCode = http.GET();
     if (httpCode != 200) {
         http.end();
-        displayWarning("Failed to download App Store", true);
+        displayWarning("Falha ao baixar App Store", true);
         return;
     }
 
     File file = fs->open("/WillyJS/Tools/App Store.js", FILE_WRITE);
     if (!file) {
-        displayWarning("Failed to save App Store", true);
+        displayWarning("Falha ao salvar App Store", true);
         return;
     }
     file.print(http.getString());

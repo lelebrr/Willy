@@ -16,7 +16,15 @@ void EthernetMenu::start_ethernet() {
         eth = nullptr;
         return;
     }
-    while (!eth->is_connected()) { delay(100); }
+    unsigned long _eth_t0 = millis();
+    while (!eth->is_connected()) {
+        if (check(EscPress) || millis() - _eth_t0 > 10000) {
+            delete eth;
+            eth = nullptr;
+            return; // timeout/cancelado: chamador mostra erro via eth==nullptr
+        }
+        delay(100);
+    }
 }
 
 void EthernetMenu::optionsMenu() {

@@ -19,6 +19,24 @@ void FileMenu::optionsMenu() {
     }
 
     options.push_back({"LittleFS", [=]() { loopSD(LittleFS); }});
+    options.push_back({"Info Armazenamento", [=]() {
+        drawMainBorderWithTitle("Armazenamento");
+        padprintln("");
+        padprintf("LittleFS: %lu/%lu KB", LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
+        if (sdcardMounted) {
+            padprintf(
+                "SD: %llu/%llu MB",
+                SD.usedBytes() / 1048576ULL,
+                SD.totalBytes() / 1048576ULL
+            );
+        } else padprintln("SD: nao montado");
+    }});
+    options.push_back({"Recarregar SD", [=]() {
+        SD.end();
+        sdcardMounted = false;
+        if (setupSdCard()) displaySuccess("SD montado", true);
+        else displayError("Falha ao montar SD", true);
+    }});
     options.push_back({"WebUI", loopOptionsWebUi});
 
 #if defined(SOC_USB_OTG_SUPPORTED)

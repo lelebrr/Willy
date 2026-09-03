@@ -187,11 +187,6 @@ struct IoTExploit {
 };
 
 /**
- * @brief Carrega exploits do SD card
- */
-bool loadIoTExploits();
-
-/**
  * @brief Detecta dispositivos IoT por OUI
  */
 bool detectIoTDevice(const uint8_t* mac, OUIEntry& entry);

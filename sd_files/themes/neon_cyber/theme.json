@@ -3,6 +3,12 @@
   "version": "1.0",
   "author": "Willy Team",
   "description": "Tema futurista cyberpunk com efeitos neon e animações",
+  "priColor": "07FF",
+  "secColor": "F81F",
+  "bgColor": "0841",
+  "border": 1,
+  "label": 1,
+  "gifDuration": 0,
   "colors": {
     "primary": "#00ffff",
     "secondary": "#ff00ff",

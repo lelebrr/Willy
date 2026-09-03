@@ -1,0 +1,103 @@
+#include "willy_serial_cmds.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
+#include "freertos/task.h"
+#include "utils.h"
+#include <globals.h>
+
+QueueHandle_t cmdQueue = nullptr;
+QueueHandle_t rspQueue = nullptr;
+TaskHandle_t serialcmdsTaskHandle;
+
+// NÃO declarar serialDevice aqui - já está em globals.h
+
+struct CmdPacket {
+  char text[SAFE_STACK_BUFFER_SIZE];
+};
+
+bool parseSerialCommand(const String &command, bool waitForResponse) {
+  if (!cmdQueue || !rspQueue) {
+    Serial.println("Command or response queue not initialized");
+    return false;
+  }
+  CmdPacket packet;
+  memset(&packet, 0, sizeof(packet));
+  strncpy(packet.text, command.c_str(), sizeof(packet.text) - 1);
+
+  // Enqueue the command packet for processing
+  if (xQueueSend(cmdQueue, &packet, 0) != pdTRUE) {
+    Serial.println("Failed to send command to queue");
+    return false;
+  }
+  if (!waitForResponse) {
+    return true;
+  }
+  // Wait for the response
+  bool result;
+  if (xQueueReceive(rspQueue, &result, pdMS_TO_TICKS(20))) {
+    return result;
+  }
+  Serial.println("Failed to receive command response");
+  return false;
+}
+
+void handleSerialCommands(SerialCli &serialCli) {
+  CmdPacket packet;
+  if (cmdQueue && rspQueue) {
+    if (xQueueReceive(cmdQueue, &packet, 0) == pdTRUE) {
+      String cmdString = String(packet.text);
+      cmdString.trim();
+      bool result = false;
+      if (cmdString.length() > 0) {
+        result = serialCli.parse(cmdString);
+      }
+      xQueueSend(rspQueue, &result, 0);
+      if (cmdString.length() > 0) {
+        Serial.println("COMMAND: " + cmdString);
+        Serial.printf("[CLI] Result: %s\n", result ? "TRUE" : "FALSE");
+      }
+    }
+  }
+  if (!serialDevice->available())
+    return;
+
+  String cmd_str = serialDevice->readStringUntil('\n');
+  cmd_str.trim();
+  if (cmd_str.length() > 0) {
+    Serial.println("COMMAND: " + cmd_str);
+    serialCli.parse(cmd_str);
+  }
+  serialDevice->print("# "); // prompt
+  backToMenu();              // forced menu redrawn
+}
+
+void _serialCmdsTaskLoop(void *pvParameters) {
+  Serial.begin(115200);
+  while (1) {
+    handleSerialCommands(serialCli);
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
+
+void startSerialCommandsHandlerTask(bool initQueues) {
+  if (initQueues) {
+    cmdQueue = xQueueCreate(2, sizeof(CmdPacket));
+    rspQueue = xQueueCreate(2, sizeof(bool));
+  }
+
+  xTaskCreatePinnedToCore(_serialCmdsTaskLoop, // Function to implement the task
+                          "serialcmds",        // Name of the task (any string)
+                          SERIAL_CMDS_TASK_STACK_SIZE, // Stack size in bytes
+                          NULL,                        // Task parameters
+                          1,                           // Priority
+                          &serialcmdsTaskHandle,       // Task handle
+#if SOC_CPU_CORES_NUM > 1
+                          1 // Core 1
+#else
+                          0 // Core 0
+#endif
+  );
+  if (!serialcmdsTaskHandle) {
+    Serial.println("Failed to create Serial Commands Handler task");
+  }
+}

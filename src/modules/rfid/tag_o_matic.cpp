@@ -273,10 +273,10 @@ void TagOMatic::clone_card() {
 
     switch (result) {
         case RFIDInterface::TAG_NOT_PRESENT: return; break;
-        case RFIDInterface::NOT_IMPLEMENTED: displayError("Not implemented for this module."); break;
-        case RFIDInterface::TAG_NOT_MATCH: displayError("Tag types do not match."); break;
+        case RFIDInterface::NOT_IMPLEMENTED: displayError("Não suportado neste módulo."); break;
+        case RFIDInterface::TAG_NOT_MATCH: displayError("Tipos de tag diferentes."); break;
         case RFIDInterface::SUCCESS: displaySuccess("UID written successfully."); break;
-        default: displayError("Error writing UID to tag."); break;
+        default: displayError("Erro ao gravar UID."); break;
     }
 
     delayWithReturn(1000);
@@ -293,7 +293,7 @@ void TagOMatic::write_custom_uid() {
     display_banner();
 
     if (custom_uid.length() != _rfid->uid.size * 2) {
-        displayError("Invalid UID.", true);
+        displayError("UID inválido.", true);
         set_state(READ_MODE);
         return;
     }
@@ -315,7 +315,7 @@ void TagOMatic::erase_card() {
     switch (result) {
         case RFIDInterface::TAG_NOT_PRESENT: return; break;
         case RFIDInterface::SUCCESS: displaySuccess("Tag erased successfully."); break;
-        default: displayError("Error erasing data from tag."); break;
+        default: displayError("Erro ao apagar."); break;
     }
 
     delayWithReturn(1000);
@@ -332,9 +332,9 @@ void TagOMatic::write_data() {
 
     switch (result) {
         case RFIDInterface::TAG_NOT_PRESENT: return; break;
-        case RFIDInterface::TAG_NOT_MATCH: displayError("Tag types do not match."); break;
+        case RFIDInterface::TAG_NOT_MATCH: displayError("Tipos de tag diferentes."); break;
         case RFIDInterface::SUCCESS: displaySuccess("Tag written successfully."); break;
-        default: displayError("Error writing data to tag."); break;
+        default: displayError("Erro ao gravar."); break;
     }
 
     delayWithReturn(1000);
@@ -352,9 +352,9 @@ void TagOMatic::write_ndef_data() {
 
     switch (result) {
         case RFIDInterface::TAG_NOT_PRESENT: return; break;
-        case RFIDInterface::TAG_NOT_MATCH: displayError("Tag is not MIFARE Ultralight."); break;
+        case RFIDInterface::TAG_NOT_MATCH: displayError("Tag não é Ultralight."); break;
         case RFIDInterface::SUCCESS: displaySuccess("Tag written successfully."); break;
-        default: displayError("Error writing data to tag."); break;
+        default: displayError("Erro ao gravar."); break;
     }
 
     delayWithReturn(1000);
@@ -451,7 +451,7 @@ void TagOMatic::load_file() {
     int result = _rfid->load();
 
     if (result == RFIDInterface::SUCCESS) {
-        displaySuccess("File loaded.");
+        displaySuccess("Arquivo lido.");
         delay(500);
         _read_uid = true;
 
@@ -463,7 +463,7 @@ void TagOMatic::load_file() {
 
         loopOptions(options);
     } else {
-        displayError("Error loading file.", true);
+        displayError("Erro ao ler arquivo.", true);
         set_state(READ_MODE);
     }
 }
@@ -478,9 +478,9 @@ void TagOMatic::save_file() {
     int result = _rfid->save(filename);
 
     if (result == RFIDInterface::SUCCESS) {
-        displaySuccess("File saved.");
+        displaySuccess("Arquivo salvo.");
     } else {
-        displayError("Error writing file.");
+        displayError("Erro ao gravar arquivo.");
     }
     delayWithReturn(1000);
     set_state(READ_MODE);

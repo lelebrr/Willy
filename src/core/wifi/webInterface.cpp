@@ -15,7 +15,7 @@
 #include <esp_heap_caps.h>
 #include <globals.h>
 #include "core/willy_web.h"
-#include "willy_logger.h"
+#include "core/willy_logger.h"
 
 File uploadFile;
 FS _webFS = LittleFS;
@@ -26,7 +26,6 @@ const int default_webserverporthttp = 80;
 IPAddress AP_GATEWAY(172, 0, 0, 1); // Gateway
 
 AsyncWebServer *server = nullptr; // initialise webserver
-const char *host = "willy";
 String uploadFolder = "";
 static bool mdnsRunning = false;
 
@@ -350,7 +349,7 @@ static bool startMdnsResponder() {
         return false;
     }
 
-    if (!MDNS.begin(host)) {
+    if (!MDNS.begin(bruceConfig.hostname.c_str())) {
         log_e("Error setting up MDNS responder!");
         return false;
     }

@@ -31,18 +31,18 @@ void RFIDMenu::optionsMenu() {
         {"Amiibolink",  [=]() { Amiibo(); }                             },
 #endif
         {"Chameleon",   [=]() { Chameleon(); }                          },
-        {"NFC Relay MITM",[=]() { NFCRelayMITM(); }                     },
-        {"APDU Fuzzer",   [=]() { APDUCommandFuzzer(); }                },
-        {"UID Collision", [=]() { DynamicUIDCollision(); }              },
-        {"NDEF Exfil",    [=]() { NDEFStealthExfil(); }                 },
+        {"Relay NFC MITM",[=]() { NFCRelayMITM(); }                     },
+        {"Fuzzer APDU",   [=]() { APDUCommandFuzzer(); }                },
+        {"Colisão UID", [=]() { DynamicUIDCollision(); }              },
+        {"Exfiltração NDEF",    [=]() { NDEFStealthExfil(); }                 },
         {"MIFARE Rainbow", [=]() { MifareRainbowTable(); }               },
-        {"Live Injection", [=]() { LiveDataInjectionEmulation(); }      },
+        {"Injeção ao Vivo", [=]() { LiveDataInjectionEmulation(); }      },
         {"Chameleon Ultra", [=]() { MultiSlotChameleonUltra(); }         },
-        {"Skimmer Hunter",  [=]() { RFIDSkimmerHunterPro(); }           },
-        {"UID Obfuscator",  [=]() { UIDObfuscationRandomizer(); }        },
-        {"NFC Worm",        [=]() { NFCWormPropagator(); }               },
-        {"MSRP Sniffer",    [=]() { MobilePaymentSnifferMSRP(); }        },
-        {"Mifare Brute",    [=]() { MifareMasterKeyBrute(); }            },
+        {"Caçador de Skimmer",  [=]() { RFIDSkimmerHunterPro(); }           },
+        {"Ofuscador UID",  [=]() { UIDObfuscationRandomizer(); }        },
+        {"Worm NFC",        [=]() { NFCWormPropagator(); }               },
+        {"Sniffer MSRP",    [=]() { MobilePaymentSnifferMSRP(); }        },
+        {"Força Bruta Mifare",    [=]() { MifareMasterKeyBrute(); }            },
 #ifndef LITE_VERSION
         {"PN532 BLE",   [=]() { Pn532ble(); }                           },
 #if !defined(REMOVE_RFID_HW_INTERFACE)  // Remove Hardware interface menu due to lack of external GPIO
@@ -75,6 +75,8 @@ void RFIDMenu::optionsMenu() {
 #endif
     else if (bruceConfigPins.rfidModule == PN532_SPI_MODULE) txt += " (PN532-SPI)";
     else if (bruceConfigPins.rfidModule == RC522_SPI_MODULE) txt += " (RC522-SPI)";
+    else if (bruceConfigPins.rfidModule == ST25R3916_SPI_MODULE) txt += " (ST25R-SPI)";
+    else if (bruceConfigPins.rfidModule == ST25R3916_I2C_MODULE) txt += " (ST25R-I2C)";
     loopOptions(options, MENU_TYPE_SUBMENU, txt.c_str());
 }
 
@@ -84,6 +86,9 @@ void RFIDMenu::configMenu() {
         {"Modulo RFID", setRFIDModuleMenu          },
 #endif
         {"Add Chave MIF", addMifareKeyMenu           },
+        {"Ver Chaves MIF", [=]() {
+             displayInfo(String(bruceConfig.mifareKeys.size()) + " chave(s)", true);
+         }},
         {"Voltar",        [this]() { optionsMenu(); }},
     };
 

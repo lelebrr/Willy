@@ -59,6 +59,24 @@
 - [Troubleshooting](#-troubleshooting)
 - [FAQ](#-faq)
 
+### 🆕 Novos Módulos (unificação)
+
+- [BLE Suite](ble_suite.md)
+- [ST25R3916 RFID](st25r3916_rfid.md)
+- [Protocolos RF + Keeloq](rf_protocols_keeloq.md)
+- [NetCut / SOCKS4 / Analyzer](wifi_netcut_socks.md)
+- [U2F USB](u2f_usb.md)
+- [Wardriving + WDGWars](wardriving_wdgwars.md)
+- [CLI Serial](serial_cli.md)
+- [Barramentos (I2C/SPI/SD)](hardware_buses.md)
+- [Interpretador JS](js_interpreter.md)
+- [ML + Plugins](ml_plugins.md)
+- [Build e envs](build_envs.md)
+- [Bateria](battery.md)
+- [Pinos e conflitos](pinout_conflitos.md)
+- [Evil Portal](evil_portal.md)
+- [Changelog](changelog.md)
+
 ---
 
 ## 🚀 Introdução

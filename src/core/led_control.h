@@ -5,6 +5,8 @@
 #ifdef HAS_RGB_LED
 #include <Arduino.h>
 #include <FastLED.h>
+using fl::CRGB;
+using fl::CFastLED;
 
 #define LED_EFFECT_SOLID 0
 #define LED_COLOR_BREATHE 1

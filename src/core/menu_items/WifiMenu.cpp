@@ -11,6 +11,7 @@
 #include "modules/wifi/clients.h"
 #include "modules/wifi/evil_portal.h"
 #include "modules/wifi/karma_attack.h"
+#include "modules/wifi/netcut.h"
 #include "modules/wifi/responder.h"
 #include "modules/wifi/scan_hosts.h"
 #include "modules/wifi/sniffer.h"
@@ -23,6 +24,9 @@
 
 #ifndef LITE_VERSION
 #include "modules/wifi/wifi_recover.h"
+#include "modules/wifi/channel_analyzer.h"
+#include "modules/wifi/jam_detect.h"
+#include "modules/wifi/socks4_proxy.h"
 #include "modules/pwnagotchi/pwnagotchi.h"
 #endif
 
@@ -31,6 +35,8 @@
 // 32bit: https://github.com/9dl/Bruce-C2/releases/download/v1.0/BruceC2_windows_386.exe
 // 64bit: https://github.com/9dl/Bruce-C2/releases/download/v1.0/BruceC2_windows_amd64.exe
 #include "modules/wifi/tcp_utils.h"
+#include "core/mykeyboard.h"
+#include "modules/reverseShell/reverseShell.h"
 
 // global toggle - controls whether scanNetworks includes hidden SSIDs
 bool showHiddenNetworks = false;
@@ -67,7 +73,7 @@ void WifiMenu::optionsMenu() {
             if (esp_wifi_sta_get_ap_info(&info) == ESP_OK) {
                 displayAPInfo(info);
             } else {
-                displayError("Failed to get AP info");
+                displayError("Falha ao ler AP");
             }
         }));
     }
@@ -87,7 +93,7 @@ void WifiMenu::optionsMenu() {
                          }
                          advancedAtksMenu();
                      }));
-    options.push_back(Option("WPS Attacks", [=]() {
+    options.push_back(Option("Ataques WPS", [=]() {
                          if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
                              if (displayMessage("Atacar em modo AP pode\ndesconectar clientes.\nContinuar?", "Não",
                                                 nullptr, "Sim", TFT_YELLOW) != 2)
@@ -120,9 +126,30 @@ void WifiMenu::optionsMenu() {
                            EvilPortal();
                        }});
     // options.push_back({"ReverseShell", [=]()       { ReverseShell(); }});
+    options.push_back({"Reverse Shell", [=]() { ReverseShell(); }});
+    options.push_back({"NetCut", [=]() { netcutMenu(); }});
+    options.push_back({"Status da Conexão", [=]() {
+        if (!WifiState::wifiConnected || !WiFi.isConnected()) {
+            displayError("WiFi desconectado", true);
+            return;
+        }
+        drawMainBorderWithTitle("Status WiFi");
+        padprintln("");
+        padprintln("SSID: " + WiFi.SSID());
+        padprintln("IP: " + WiFi.localIP().toString());
+        padprintln("RSSI: " + String(WiFi.RSSI()) + " dBm");
+        padprintln("Canal: " + String(WiFi.channel()));
+        padprintln("MAC: " + WiFi.macAddress());
+    }});
 #ifndef LITE_VERSION
     options.push_back(Option("Ouvir TCP", []() { listenTcpPort(); }));
     options.push_back(Option("Cliente TCP", clientTCP));
+    options.push_back(Option("Proxy SOCKS4", []() {
+        String p = num_keyboard("1080", 5, "Porta SOCKS:");
+        int port = (p == "\x1B" || p.isEmpty()) ? 1080 : p.toInt();
+        if (port <= 0 || port > 65535) port = 1080;
+        socks4Proxy((uint16_t)port);
+    }));
     options.push_back(Option("TelNET", telnet_setup));
     options.push_back(Option("SSH", lambdaHelper(ssh_setup, String(""))));
     options.push_back({"Farejadores", [this]() {
@@ -151,6 +178,8 @@ void WifiMenu::optionsMenu() {
     options.push_back({"Responder", responder});
     options.push_back({"Brucegotchi", brucegotchi_start});
     options.push_back({"Recuperar Senha", wifi_recover_menu});
+    options.push_back({"Analisador de Canais", channel_analyzer_setup});
+    options.push_back({"Detectar Jam", jam_detect_setup});
     options.push_back({"WiFi Heatmap", wifiHeatmap});
     options.push_back({"Traffic Fingerprint", encryptedTrafficFingerprint});
 #endif
@@ -168,8 +197,8 @@ void WifiMenu::configMenu() {
     std::vector<Option> wifiOptions;
 
     wifiOptions.push_back({"Mudar MAC", wifiMACMenu});
-    wifiOptions.push_back({"Add Evil Wifi", addEvilWifiMenu});
-    wifiOptions.push_back({"Remover Evil Wifi", removeEvilWifiMenu});
+    wifiOptions.push_back({"Adicionar Evil WiFi", addEvilWifiMenu});
+    wifiOptions.push_back({"Remover Evil WiFi", removeEvilWifiMenu});
 
     // Evil Wifi Settings submenu (unchanged)
     wifiOptions.push_back({"Config Evil Wifi", [this]() {

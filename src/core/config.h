@@ -82,6 +82,8 @@ public:
     String startupApp = "";
     String startupAppLuaScript = "";
     String wigleBasicToken = "";
+    String wdgwarsApiKey = "your 64-char hex key from wdgwars.pl/profile";
+    String hostname = "willy";
     int devMode = 0;
     int colorInverted = 1;
     int badUSBBLEKeyboardLayout = 0;
@@ -166,6 +168,7 @@ public:
     void validateEvilPasswordMode();
 
     // RFID
+    void ensureMifareKeysLoaded();
     void addMifareKey(String value);
     void validateMifareKeysItems();
 
@@ -173,6 +176,8 @@ public:
     void setStartupApp(String value);
     void setStartupAppLuaScript(String value);
     void setWigleBasicToken(String value);
+    void setWdgwarsApiKey(String value);
+    void setHostname(String value);
     void setDevMode(int value);
     void validateDevModeValue();
     void setColorInverted(int value);

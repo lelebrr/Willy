@@ -59,6 +59,7 @@ void channelAnalyzer() {
         // Simula contagem de pacotes
         channels[current_ch - 1].packet_count += random(10, 100);
         channels[current_ch - 1].noise_level = random(-90, -30);
+        WiFi.scanDelete(); // libera heap (so a contagem foi usada)
 
         // Atualiza display
         if (millis() - last_update > 500) {
@@ -285,6 +286,7 @@ void scanAllNetworks() {
     tft.setTextColor(bruceConfig.priColor);
     padprintln("");
     padprintln("Pressione qualquer tecla");
+    WiFi.scanDelete(); // libera heap do scan (lista ja exibida)
 
     while (!check(EscPress) && !check(SelPress)) {
         vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -778,6 +780,7 @@ void apCloneSpam() {
             channels.push_back(WiFi.channel(i));
         }
     }
+    WiFi.scanDelete(); // libera heap (SSIDs/canais copiados acima)
 
     if (!initAdvancedAttackMode()) return;
 

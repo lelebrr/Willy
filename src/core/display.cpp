@@ -116,10 +116,16 @@ void initLVGL() {
 ***************************************************************************************/
 void displayScrollingText(const String &text, Opt_Coord &coord) {
     int len = text.length();
-    String displayText = text + "        "; // Add spaces for smooth looping
-    int scrollLen = len + 8;                // Full text plus space buffer
+    static String lastText = "";
     static int i = 0;
     static long _lastmillis = 0;
+    if (text != lastText) { // trocou de linha: reinicia o scroll (evita fatia errada)
+        lastText = text;
+        i = 0;
+        _lastmillis = 0;
+    }
+    String displayText = text + "        "; // Add spaces for smooth looping
+    int scrollLen = len + 8;                // Full text plus space buffer
     tft.setTextColor(coord.fgcolor, coord.bgcolor);
     if (len < coord.size) {
         // Text fits within limit, no scrolling needed
@@ -135,7 +141,6 @@ void displayScrollingText(const String &text, Opt_Coord &coord) {
             bruceConfig.bgColor
         ); // Clear display area
         tft.setCursor(coord.x, coord.y);
-        tft.setCursor(coord.x, coord.y);
         tft.print(scrollingPart);
         if (i >= scrollLen - coord.size) i = -1; // Loop back
         _lastmillis = millis();
@@ -150,6 +155,9 @@ void displayScrollingText(const String &text, Opt_Coord &coord) {
 ***************************************************************************************/
 void TouchFooter(uint16_t color) {
     tft.drawRoundRect(5, tftHeight + 2, tftWidth - 10, 43, 5, color);
+    // divisores entre os 3 botoes
+    tft.drawFastVLine(tftWidth / 3, tftHeight + 8, 30, color);
+    tft.drawFastVLine(2 * tftWidth / 3, tftHeight + 8, 30, color);
     tft.setTextColor(color);
     tft.setTextSize(FM);
     tft.drawCentreString("ANT", tftWidth / 6, tftHeight + 4, 1);
@@ -162,6 +170,9 @@ void TouchFooter(uint16_t color) {
 ***************************************************************************************/
 void MegaFooter(uint16_t color) {
     tft.drawRoundRect(5, tftHeight + 2, tftWidth - 10, 43, 5, color);
+    // divisores entre os 3 botoes
+    tft.drawFastVLine(tftWidth / 3, tftHeight + 8, 30, color);
+    tft.drawFastVLine(2 * tftWidth / 3, tftHeight + 8, 30, color);
     tft.setTextColor(color);
     tft.setTextSize(FM);
     tft.drawCentreString("Sair", tftWidth / 6, tftHeight + 4, 1);
@@ -225,6 +236,8 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
     if (text.length() * LW * FM < (tftWidth - 2 * FM * LW)) size = FM;
     else size = FP;
     tft.drawPixel(0, 0, 0);
+    // cartao neon: anel externo + pildora central
+    tft.drawRoundRect(8, tftHeight / 2 - 15, tftWidth - 16, 30, 9, fgcolor);
     tft.fillRoundRect(10, tftHeight / 2 - 13, tftWidth - 20, 26, 7, bgcolor);
     tft.setTextColor(fgcolor, bgcolor);
     if (size == FM) {
@@ -621,7 +634,7 @@ int loopOptions(
 #endif
 
         if (menuType == MENU_TYPE_REGULAR) {
-            String txt = options[index].label;
+            const String &txt = options[index].label; // ref: evita alloc de String a 100Hz
             displayScrollingText(txt, coord);
         }
 
@@ -691,10 +704,10 @@ int loopOptions(
         */
         if (check(SelPress) || forceMenuOption >= 0) {
             uint16_t chosen = index;
+            if (forceMenuOption >= (int)options.size()) forceMenuOption = -1; // indice invalido: ignora
             if (forceMenuOption >= 0) {
                 chosen = forceMenuOption;
                 forceMenuOption = -1; // reset SerialCommand navigation option
-                Serial.print("Forcely ");
             }
             std::function<void()> callback = options[chosen].operation;
             if (callback) callback();
@@ -713,13 +726,17 @@ int loopOptions(
 ** Dependencia: prog_handler =>>    0 - Flash, 1 - LittleFS
 ***************************************************************************************/
 void progressHandler(int progress, size_t total, String message) {
+    if (total == 0) return; // evita divisao por zero no map()
     int barWidth = map(progress, 0, total, 0, tftWidth - 40);
     if (barWidth < 3) {
         tft.fillRect(6, 27, tftWidth - 12, tftHeight - 33, bruceConfig.bgColor);
-        tft.drawRect(18, tftHeight - 47, tftWidth - 36, 17, bruceConfig.priColor);
+        tft.fillRoundRect(18, tftHeight - 47, tftWidth - 36, 17, 8, bruceConfig.bgColor);
+        tft.drawRoundRect(18, tftHeight - 47, tftWidth - 36, 17, 8, bruceConfig.priColor);
         displayRedStripe(message, TFT_WHITE, bruceConfig.priColor);
     }
-    tft.fillRect(20, tftHeight - 45, barWidth, 13, bruceConfig.priColor);
+    if (barWidth > 0) {
+        tft.fillRoundRect(20, tftHeight - 45, barWidth, 13, 6, bruceConfig.priColor);
+    }
 }
 
 /***************************************************************************************
@@ -764,18 +781,23 @@ Opt_Coord drawOptions(
     if (index >= MAX_MENU_SIZE) init = index - MAX_MENU_SIZE + 1;
     for (i = 0; i < menuSize; i++) {
         if (i >= init) {
-            if (options[i].selected) tft.setTextColor(selcolor, bgcolor); // if selected, change Text color
-            else tft.setTextColor(fgcolor, bgcolor);
-
             String text = "";
             if (i == index) {
+                // Linha do cursor: destaque invertido full-bleed
+                int rowY = tft.getCursorY() + 4;
+                tft.fillRect(tftWidth * 0.10 + 1, rowY - 2, tftWidth * 0.8 - 2, FM * 8 + 4, fgcolor);
+                tft.setTextColor(bgcolor, fgcolor);
                 text += ">";
                 coord.x = tftWidth * 0.10 + 5 + FM * LW;
-                coord.y = tft.getCursorY() + 4;
+                coord.y = rowY;
                 coord.size = (tftWidth * 0.8 - 10) / (LW * FM) - 1;
-                coord.fgcolor = fgcolor;
-                coord.bgcolor = bgcolor;
-            } else text += " ";
+                coord.fgcolor = bgcolor;
+                coord.bgcolor = fgcolor;
+            } else {
+                if (options[i].selected) tft.setTextColor(selcolor, bgcolor); // if selected, change Text color
+                else tft.setTextColor(fgcolor, bgcolor);
+                text += " ";
+            }
             text += String(options[i].label) + "              ";
             tft.setCursor(tftWidth * 0.10 + 5, tft.getCursorY() + 4);
             tft.println(text.substring(0, (tftWidth * 0.8 - 10) / (LW * FM) - 1));
@@ -862,6 +884,18 @@ void drawStatusBar() {
     tft.drawString("H:" + String(freeHeap) + "k C:" + String(cpuFreq) + "M", 10, 7);
 
     uint8_t bat_margin = 26;
+    // Bateria com cache de 10s (leitura PMIC via I2C); 0 = sem monitor -> oculta
+    static int cachedBat = -1;
+    static unsigned long cachedBatMs = 0;
+    if (cachedBat < 0 || millis() - cachedBatMs > 10000) {
+        int b = getBattery();
+        cachedBat = (b < 0) ? 0 : (b > 100 ? 100 : b);
+        cachedBatMs = millis();
+    }
+    if (cachedBat > 0) {
+        drawBatteryStatus(tftWidth - bat_margin, 8, (uint8_t)cachedBat);
+        i++;
+    }
     if (sdcardMounted) {
         tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
         tft.setTextSize(FP);
@@ -892,6 +926,7 @@ void drawStatusBar() {
     if (bruceConfig.theme.border) {
         tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
         tft.drawLine(5, 25, tftWidth - 6, 25, bruceConfig.priColor);
+        tft.drawLine(5, 26, tftWidth - 6, 26, getColorVariation(bruceConfig.priColor, 3, -1));
     }
 
     if (clock_set) {
@@ -940,6 +975,12 @@ void printTitle(String title) {
     title.toUpperCase();
     tft.println(title);
 
+    // Sublinhado de destaque centralizado
+    {
+        int barW = 46;
+        tft.fillRect((tftWidth - barW) / 2, tft.getCursorY() + 2, barW, 2, bruceConfig.priColor);
+    }
+
     tft.setTextSize(FP);
 }
 
@@ -975,8 +1016,18 @@ void printCenterFootnote(String text) {
 ** Function name: drawBatteryStatus()
 ** Description:   Draws battery info into the Status bar
 ***************************************************************************************/
-void drawBatteryStatus(uint8_t bat) {
-    // Battery info removed
+void drawBatteryStatus(int x, int y, uint8_t bat) {
+    // Icone de bateria 22x12: moldura + pino + nivel. Vermelho <=15%.
+    if (bat > 100) bat = 100;
+    uint16_t col = TFT_GREEN;
+    if (isCharging()) col = bruceConfig.priColor;
+    else if (bat <= 15) col = TFT_RED;
+    else if (bat <= 50) col = TFT_YELLOW;
+    tft.fillRect(x, y, 22, 12, bruceConfig.bgColor);
+    tft.drawRoundRect(x, y, 18, 12, 2, col);
+    tft.fillRect(x + 18, y + 3, 3, 6, col);
+    int w = 14 * bat / 100;
+    if (w > 0) tft.fillRect(x + 2, y + 2, w, 8, col);
 }
 /***************************************************************************************
 ** Function name: drawWireguardStatus()
