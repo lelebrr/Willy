@@ -1035,7 +1035,11 @@ void Pn532ble::loadMifareClassicDumpFile() {
         return;
     }
     mfd.clear();
-    while (file.available()) { mfd.push_back(file.read()); }
+    size_t fileSize = file.size();
+    if (fileSize > 0) {
+        mfd.resize(fileSize);
+        file.read(mfd.data(), fileSize);
+    }
     file.close();
     // check dump size if is 320, 1024 or 4096
     if (mfd.size() != 320 && mfd.size() != 1024 && mfd.size() != 4096) {
@@ -1097,7 +1101,11 @@ void Pn532ble::loadMifareUltralightDumpFile() {
         return;
     }
     mfd.clear();
-    while (file.available()) { mfd.push_back(file.read()); }
+    size_t fileSize = file.size();
+    if (fileSize > 0) {
+        mfd.resize(fileSize);
+        file.read(mfd.data(), fileSize);
+    }
     file.close();
 
     displayBanner();
@@ -1154,7 +1162,11 @@ void Pn532ble::loadIso15693DumpFile() {
         return;
     }
     iso15dump.clear();
-    while (file.available()) { iso15dump.push_back(file.read()); }
+    size_t fileSize = file.size();
+    if (fileSize > 0) {
+        iso15dump.resize(fileSize);
+        file.read(iso15dump.data(), fileSize);
+    }
     file.close();
 
     displayBanner();
