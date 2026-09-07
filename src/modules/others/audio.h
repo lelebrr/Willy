@@ -31,7 +31,7 @@ bool playAudioFile(FS *fs, String filepath,
                    PlaybackMode mode = PLAYBACK_BLOCKING);
 bool playAudioUrl(String url, PlaybackMode mode = PLAYBACK_BLOCKING);
 bool playAudioRTTTLString(String song, PlaybackMode mode = PLAYBACK_BLOCKING);
-bool tts(String text, PlaybackMode mode = PLAYBACK_BLOCKING);
+bool tts(const String& text, PlaybackMode mode = PLAYBACK_BLOCKING);
 bool isAudioFile(String filePath);
 unsigned long getAudioDuration(String filepath);
 void playTone(unsigned int frequency, unsigned long duration = 0UL,
