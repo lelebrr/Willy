@@ -6,6 +6,7 @@
 #define FIRST_I2C_ADDRESS 0x01
 #define LAST_I2C_ADDRESS 0x7F
 
+// --- BEGIN_I2C_FINDER_TEST_EXTRACT ---
 void find_i2c_addresses() {
     drawMainBorderWithTitle("I2C Finder");
     padprintln("");
@@ -50,3 +51,4 @@ bool check_i2c_address(uint8_t i2c_address) {
     int error = Wire.endTransmission();
     return (error == 0);
 }
+// --- END_I2C_FINDER_TEST_EXTRACT ---
