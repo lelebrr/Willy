@@ -134,19 +134,12 @@ uint32_t irTxFileCallback(cmd *c) {
 
 uint32_t irTxBufferCallback(cmd *c) {
 #ifndef LITE_VERSION
-    if (!(_setupPsramFs())) return false;
-
     char *txt = _readFileFromSerial();
-    String tmpfilepath = "/tmpramfile"; // TODO: Change to use char *txt directly
-    File f = PSRamFS.open(tmpfilepath, FILE_WRITE);
-    if (!f) return false;
+    if (!txt) return false;
 
-    f.write((const uint8_t *)txt, strlen(txt));
-    f.close();
+    bool r = txIrBuffer(txt);
+
     free(txt);
-
-    bool r = txIrFile(&PSRamFS, tmpfilepath);
-    PSRamFS.remove(tmpfilepath);
 
     return r;
 #else
