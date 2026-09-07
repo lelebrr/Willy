@@ -37,15 +37,15 @@ void wsl_bypasser_send_raw_frame(
  */
 void send_raw_frame(const uint8_t *frame_buffer, int size);
 
-void wifi_atk_info(String tssid, String mac, uint8_t channel);
+void wifi_atk_info(const String& tssid, const String& mac, uint8_t channel);
 
 void wifi_atk_menu();
 
-void target_atk_menu(String tssid, String mac, uint8_t channel);
+void target_atk_menu(const String& tssid, const String& mac, uint8_t channel);
 
-void target_atk(String tssid, String mac, uint8_t channel);
+void target_atk(const String& tssid, const String& mac, uint8_t channel);
 
-void capture_handshake(String tssid, String mac, uint8_t channel);
+void capture_handshake(const String& tssid, const String& mac, uint8_t channel);
 
 void beaconAttack();
 
