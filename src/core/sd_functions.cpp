@@ -680,7 +680,6 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
     tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
 
     bool exit = false;
-    // returnToMenu=true;  // make sure menu is redrawn when quitting in any point
 
     readFs(fs, Folder, allowed_ext);
 
@@ -689,7 +688,6 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
     unsigned long LongPressTmp = millis();
     while (1) {
         delay(10);
-        // if(returnToMenu) break; // stop this loop and retur to the previous loop
         if (exit) break; // stop this loop and retur to the previous loop
 
         if (redraw) {
