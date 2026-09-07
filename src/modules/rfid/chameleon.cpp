@@ -977,7 +977,19 @@ void Chameleon::saveScanResult() {
     if (!file) { return; }
 
     file.println("Filetype: Bruce RFID Scan Result");
-    for (ScanResult scanResult : _scanned_tags) { file.println(scanResult.tagType + " | " + scanResult.uid); }
+    size_t num_tags = _scanned_tags.size();
+    if (num_tags > 0) {
+        String output;
+        // Approximate size: tagType (2-4 chars) + " | " (3 chars) + uid (10-14 chars) + "\n" (1 char) ~ 20-25 bytes per tag
+        output.reserve(num_tags * 25);
+        for (const auto& scanResult : _scanned_tags) {
+            output += scanResult.tagType;
+            output += " | ";
+            output += scanResult.uid;
+            output += "\n";
+        }
+        file.print(output);
+    }
 
     file.close();
     vTaskDelay(pdMS_TO_TICKS(100));
