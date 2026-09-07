@@ -239,6 +239,7 @@ bool renameFile(FS fs, String path, String filename) {
         return false;
     }
 }
+// --- BEGIN_COPY_TO_FS_TEST_EXTRACT ---
 /***************************************************************************************
 ** Function name: copyToFs
 ** Description:   copy file from SD or LittleFS to LittleFS or SD
@@ -314,6 +315,7 @@ bool copyToFs(FS from, FS to, String path, bool draw) {
 
     return result;
 }
+// --- END_COPY_TO_FS_TEST_EXTRACT ---
 
 /***************************************************************************************
 ** Function name: copyFile

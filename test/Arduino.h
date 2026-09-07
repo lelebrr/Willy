@@ -33,6 +33,14 @@ public:
         }
     }
 
+    bool startsWith(const String& s) const {
+        if (str.length() >= s.str.length()) {
+            return (0 == str.compare(0, s.str.length(), s.str));
+        } else {
+            return false;
+        }
+    }
+
     int length() const {
         return str.length();
     }
@@ -90,7 +98,8 @@ public:
     void println(const char* s) {
         // std::cout << s << std::endl;
     }
+    void printf(const char* fmt, ...) {
+        // Dummy
+    }
 };
 extern SerialMock Serial;
-
-#endif
