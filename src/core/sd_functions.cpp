@@ -675,8 +675,8 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
     int maxFiles = 0;
     String Folder = rootPath;
     String PreFolder = rootPath;
-    tft.drawPixel(0, 0, 0);
-    tft.fillScreen(bruceConfig.bgColor); // TODO: Does only the T-Embed CC1101 need this?
+    tft.drawPixel(0, 0, 0); // Force TFT communication to avoid SPI ghosting with SD card
+    tft.fillScreen(bruceConfig.bgColor);
     tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
 
     bool exit = false;
