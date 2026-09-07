@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 #include <cstdlib>
+#include <cstdint>
+#include <cstring>
+#define HEX 16
 
 using std::string;
 typedef int gpio_num_t;
@@ -13,6 +16,17 @@ public:
     String(const char* s) : str(s ? s : "") {}
     String(std::string s) : str(s) {}
     String(int num) { str = std::to_string(num); }
+
+    String(int num, int base) {
+        if (base == 16) {
+            char buf[20];
+            snprintf(buf, sizeof(buf), "%X", num);
+            str = buf;
+        } else {
+            str = std::to_string(num);
+        }
+    }
+
 
     int lastIndexOf(char c) const {
         size_t pos = str.find_last_of(c);
@@ -33,6 +47,26 @@ public:
         }
     }
 
+
+    char charAt(int i) const {
+        if (i >= 0 && i < str.length()) return str[i];
+        return '\0';
+    }
+
+    void remove(int index) {
+        if (index >= 0 && index < str.length()) {
+            str.erase(index, 1);
+        }
+    }
+
+    void trim() {
+        // Just mock
+    }
+
+    void toUpperCase() {
+        // Just mock
+    }
+
     int length() const {
         return str.length();
     }
@@ -47,6 +81,12 @@ public:
         str += s.str;
         return *this;
     }
+
+    String& operator+=(char c) {
+        str += c;
+        return *this;
+    }
+
     String& operator+=(const char* s) {
         str += s;
         return *this;
@@ -57,6 +97,14 @@ public:
     bool operator!=(const String& s) const {
         return str != s.str;
     }
+
+    bool operator==(const char* s) const {
+        return str == s;
+    }
+    bool operator!=(const char* s) const {
+        return str != s;
+    }
+
     const char* c_str() const {
         return str.c_str();
     }
@@ -93,4 +141,3 @@ public:
 };
 extern SerialMock Serial;
 
-#endif
