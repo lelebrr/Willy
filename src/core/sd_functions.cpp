@@ -525,7 +525,7 @@ String md5File(FS &fs, String filepath) {
 
     char s[33];
     for (int i = 0; i < 16; i++) {
-        sprintf(&s[i * 2], "%02x", hash[i]);
+        snprintf(&s[i * 2], 3, "%02x", hash[i]);
     }
     return String(s);
 }
