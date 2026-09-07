@@ -161,7 +161,8 @@ void ScrollableTextArea::addLine(const String &text) {
 
         char *newStr = (char *)(psramFound() ? ps_malloc(buff.length() + 1) : malloc(buff.length() + 1));
         if (newStr) {
-            strcpy(newStr, buff.c_str());
+            strncpy(newStr, buff.c_str(), buff.length());
+            newStr[buff.length()] = '\0';
             linesBuffer.push_back(newStr);
         }
         firstLine = false;
