@@ -522,8 +522,7 @@ bool mic_record_wav_to_path(
     return ok;
 }
 
-void mic_record_app() {
-
+static bool run_mic_config_ui(int &time_seconds, float &gain_value, bool &stealth_enabled) {
     // ===== LAYOUT CONSTANTS =====
     const int MARGIN = (tftWidth > 200) ? 10 : 5;
     const int HEADER_HEIGHT = (tftHeight > 200) ? 35 : 25;
@@ -541,16 +540,9 @@ void mic_record_app() {
     const int ITEM_START = 3;
     const int NUM_ITEMS = 4;
 
-    uint8_t originalBrightness = currentScreenBrightness; // ← Backup Brightness value
-
     bool editing = false;
     int prev_selected = 0;
     unsigned long last_input = millis();
-
-    // Valori configurabili
-    int time_seconds = mic_config.record_time_ms / 1000;
-    float gain_value = mic_config.gain;
-    bool stealth_enabled = mic_config.stealth_mode;
 
     // ===== HELPER FOR UI DRAWING =====
 
@@ -689,12 +681,12 @@ void mic_record_app() {
                 last_input = millis();
             }
             if (check(SelPress)) {
-                if (selected_item == ITEM_START) break; // Start
+                if (selected_item == ITEM_START) return true; // Start
                 editing = true;
                 edit_mode_changed = true;
                 last_input = millis();
             }
-            if (check(EscPress)) { goto cleanup_and_exit; }
+            if (check(EscPress)) { return false; }
         } else {
             // Editing mode
             switch (selected_item) {
@@ -751,211 +743,226 @@ void mic_record_app() {
         }
 
         delay(20); // Small delay for stability
-        if (millis() - last_input > 120000) { goto cleanup_and_exit; }
+        if (millis() - last_input > 120000) { return false; }
+    }
+}
+
+static void perform_mic_recording(int time_seconds, float gain_value, bool stealth_enabled) {
+    const int MARGIN = (tftWidth > 200) ? 10 : 5;
+    const int HEADER_HEIGHT = (tftHeight > 200) ? 35 : 25;
+    const int TEXT_SIZE_LARGE = (tftWidth > 200) ? 2 : 1;
+    const int TEXT_SIZE_SMALL = 1;
+
+    mic_config.record_time_ms = time_seconds * 1000;
+    mic_config.gain = gain_value;
+    mic_config.stealth_mode = stealth_enabled;
+
+    FS *fs = nullptr;
+    if (!getFsStorage(fs) || fs == nullptr) {
+        displayError("No storage", true);
+        return;
     }
 
-    // ===== RECORDING BLOCK =====
-    {
-        mic_config.record_time_ms = time_seconds * 1000;
-        mic_config.gain = gain_value;
-        mic_config.stealth_mode = stealth_enabled;
-
-        FS *fs = nullptr;
-        if (!getFsStorage(fs) || fs == nullptr) {
-            displayError("No storage", true);
-            goto cleanup_and_exit;
+    if (!fs->exists("/WillyMIC")) {
+        if (!fs->mkdir("/WillyMIC")) {
+            displayError("Dir creation failed", true);
+            return;
         }
+    }
 
-        if (!fs->exists("/WillyMIC")) {
-            if (!fs->mkdir("/WillyMIC")) {
-                displayError("Dir creation failed", true);
-                goto cleanup_and_exit;
+    char filename[64];
+    int index = 0;
+    do {
+        snprintf(filename, sizeof(filename), "/WillyMIC/recording_%d.wav", index++);
+    } while (fs->exists(filename));
+
+    //===== UI CLEANING AND SETUP =====
+
+    if (stealth_enabled) {
+        setBrightness(10, false);
+        tft.fillScreen(TFT_BLACK);
+        tft.setTextColor(TFT_RED);
+        tft.setTextSize(1);
+        tft.setCursor(5, 5);
+        tft.print(".");
+    } else {
+        // Clean the screen completely
+        tft.fillScreen(bruceConfig.bgColor);
+
+        // ===== HEADER RECORDING =====
+        const int REC_HEADER_HEIGHT = (tftHeight > 200) ? 40 : 30;
+        tft.fillRect(0, 0, tftWidth, REC_HEADER_HEIGHT, TFT_RED);
+        tft.setTextSize((tftWidth > 200) ? 2 : 1);
+        tft.setTextColor(TFT_WHITE, TFT_RED);
+
+        const char *headerText = (tftWidth > 200) ? "● RECORDING" : "● REC";
+        int headerWidth = strlen(headerText) * 6 * ((tftWidth > 200) ? 2 : 1);
+        tft.setCursor((tftWidth - headerWidth) / 2, (REC_HEADER_HEIGHT - 16) / 2);
+        tft.print(headerText);
+
+        // ===== STATIC INFO (Gain, Filename, Instructions) =====
+        const int INFO_START_Y = REC_HEADER_HEIGHT + 10;
+        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextSize(TEXT_SIZE_SMALL);
+
+        // Gain
+        tft.setCursor(MARGIN, INFO_START_Y);
+        tft.print("Gain: ");
+        tft.print(gain_value, 1);
+        tft.print("x");
+
+        // Filename (truncated if too long)
+        tft.setCursor(MARGIN, INFO_START_Y + 12);
+        const char *displayName = filename;
+        int nameLen = strlen(filename);
+        if (nameLen > (tftWidth / 6)) {
+            displayName = filename + (nameLen - (tftWidth / 6) + 3);
+            tft.print("...");
+        }
+        tft.print(displayName);
+
+        // Stop instructions
+        tft.setCursor(MARGIN, INFO_START_Y + 24);
+        tft.print("Press SEL to stop");
+    }
+
+    uint32_t max_ms = mic_config.record_time_ms;
+    uint32_t out_bytes = 0;
+    unsigned long startRecTime = millis();
+
+    // Variables for the display timer
+    const int TIMER_Y = tftHeight / 2 + 20;
+    const int TIMER_SIZE = (tftWidth > 200) ? 3 : 2;
+    unsigned long lastUpdate = 0;
+    String lastTimerStr = "";
+
+    // ===== CALLBACK DURING RECORDING =====
+    auto onRecordingLoop = [&]() -> bool {
+        InputHandler();
+        if (check(SelPress)) return false;
+
+        if (!stealth_enabled) {
+            if (millis() - lastUpdate > 500) {
+                lastUpdate = millis();
+
+                uint32_t elapsedMs = millis() - startRecTime;
+                int elapsedSec = elapsedMs / 1000;
+                int elapsedMin = elapsedSec / 60;
+                int elapsedSecRem = elapsedSec % 60;
+
+                char timerStr[32];
+
+                if (time_seconds == 0) {
+                    snprintf(timerStr, sizeof(timerStr), "%02d:%02d", elapsedMin, elapsedSecRem);
+                } else {
+                    int totalMin = time_seconds / 60;
+                    int totalSec = time_seconds % 60;
+                    snprintf(
+                        timerStr,
+                        sizeof(timerStr),
+                        "%02d:%02d / %02d:%02d",
+                        elapsedMin,
+                        elapsedSecRem,
+                        totalMin,
+                        totalSec
+                    );
+                }
+
+                if (String(timerStr) != lastTimerStr) {
+                    lastTimerStr = String(timerStr);
+
+                    tft.fillRect(0, TIMER_Y - 5, tftWidth, TIMER_SIZE * 8 + 10, bruceConfig.bgColor);
+
+                    tft.setTextSize(TIMER_SIZE);
+                    tft.setTextColor(TFT_RED, bruceConfig.bgColor);
+                    int timerWidth = strlen(timerStr) * 6 * TIMER_SIZE;
+                    tft.setCursor((tftWidth - timerWidth) / 2, TIMER_Y);
+                    tft.print(timerStr);
+
+                    tft.setTextSize(TEXT_SIZE_SMALL);
+                    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                    const char *label = (time_seconds == 0) ? "Elapsed" : "Elapsed / Total";
+                    int labelWidth = strlen(label) * 6;
+                    tft.setCursor((tftWidth - labelWidth) / 2, TIMER_Y + TIMER_SIZE * 8 + 5);
+                    tft.print(label);
+                }
             }
         }
+        return true;
+    };
 
-        char filename[64];
-        int index = 0;
-        do {
-            snprintf(filename, sizeof(filename), "/WillyMIC/recording_%d.wav", index++);
-        } while (fs->exists(filename));
+    bool success =
+        mic_record_wav_to_path(fs, String(filename), max_ms, &out_bytes, gain_value, onRecordingLoop);
 
-        //===== UI CLEANING AND SETUP =====
+    if (success) {
+        Serial.print("Recording saved: ");
+        Serial.println(filename);
+        Serial.print("Size: ");
+        Serial.print(out_bytes);
+        Serial.println(" bytes");
 
-        if (stealth_enabled) {
-            setBrightness(10, false);
-            tft.fillScreen(TFT_BLACK);
-            tft.setTextColor(TFT_RED);
-            tft.setTextSize(1);
-            tft.setCursor(5, 5);
-            tft.print(".");
-        } else {
-            // Clean the screen completely
+        if (!stealth_enabled) {
             tft.fillScreen(bruceConfig.bgColor);
 
-            // ===== HEADER RECORDING =====
-            const int REC_HEADER_HEIGHT = (tftHeight > 200) ? 40 : 30;
-            tft.fillRect(0, 0, tftWidth, REC_HEADER_HEIGHT, TFT_RED);
-            tft.setTextSize((tftWidth > 200) ? 2 : 1);
-            tft.setTextColor(TFT_WHITE, TFT_RED);
+            tft.fillRect(0, 0, tftWidth, HEADER_HEIGHT, TFT_DARKGREEN);
+            tft.setTextColor(TFT_WHITE, TFT_DARKGREEN);
+            tft.setTextSize(TEXT_SIZE_LARGE);
+            const char *successText = "SAVED";
+            int successWidth = strlen(successText) * 6 * TEXT_SIZE_LARGE;
+            tft.setCursor((tftWidth - successWidth) / 2, (HEADER_HEIGHT - 16) / 2);
+            tft.print(successText);
 
-            const char *headerText = (tftWidth > 200) ? "● RECORDING" : "● REC";
-            int headerWidth = strlen(headerText) * 6 * ((tftWidth > 200) ? 2 : 1);
-            tft.setCursor((tftWidth - headerWidth) / 2, (REC_HEADER_HEIGHT - 16) / 2);
-            tft.print(headerText);
-
-            // ===== STATIC INFO (Gain, Filename, Instructions) =====
-            const int INFO_START_Y = REC_HEADER_HEIGHT + 10;
             tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
             tft.setTextSize(TEXT_SIZE_SMALL);
 
-            // Gain
-            tft.setCursor(MARGIN, INFO_START_Y);
-            tft.print("Gain: ");
-            tft.print(gain_value, 1);
-            tft.print("x");
-
-            // Filename (truncated if too long)
-            tft.setCursor(MARGIN, INFO_START_Y + 12);
-            const char *displayName = filename;
-            int nameLen = strlen(filename);
-            if (nameLen > (tftWidth / 6)) {
-                displayName = filename + (nameLen - (tftWidth / 6) + 3);
-                tft.print("...");
+            int infoY = HEADER_HEIGHT + 20;
+            tft.setCursor(MARGIN, infoY);
+            tft.print("File: ");
+            String shortName = String(filename);
+            if (shortName.length() > 25) {
+                shortName = "..." + shortName.substring(shortName.length() - 22);
             }
-            tft.print(displayName);
+            tft.println(shortName);
 
-            // Stop instructions
-            tft.setCursor(MARGIN, INFO_START_Y + 24);
-            tft.print("Press SEL to stop");
+            tft.setCursor(MARGIN, infoY + 15);
+            tft.print("Size: ");
+            if (out_bytes > 0) {
+                float sizeKB = out_bytes / 1024.0f;
+                tft.print(sizeKB, 1);
+                tft.print(" KB");
+            } else {
+                tft.print("Unknown");
+            }
+
+            tft.setCursor(MARGIN, infoY + 30);
+            tft.print("Duration: ");
+            unsigned long totalMs = millis() - startRecTime;
+            int finalSec = (int)(totalMs / 1000);
+            char durStr[16];
+            snprintf(durStr, sizeof(durStr), "%d", finalSec);
+            tft.print(durStr);
+            tft.print("s");
+
+            delay(2500);
         }
 
-        uint32_t max_ms = mic_config.record_time_ms;
-        uint32_t out_bytes = 0;
-        unsigned long startRecTime = millis();
+    } else {
+        displayError("Recording failed", true);
+    }
+}
 
-        // Variables for the display timer
-        const int TIMER_Y = tftHeight / 2 + 20;
-        const int TIMER_SIZE = (tftWidth > 200) ? 3 : 2;
-        unsigned long lastUpdate = 0;
-        String lastTimerStr = "";
+void mic_record_app() {
+    uint8_t originalBrightness = currentScreenBrightness; // ← Backup Brightness value
 
-        // ===== CALLBACK DURING RECORDING =====
-        auto onRecordingLoop = [&]() -> bool {
-            InputHandler();
-            if (check(SelPress)) return false;
+    // Valori configurabili
+    int time_seconds = mic_config.record_time_ms / 1000;
+    float gain_value = mic_config.gain;
+    bool stealth_enabled = mic_config.stealth_mode;
 
-            if (!stealth_enabled) {
-                if (millis() - lastUpdate > 500) {
-                    lastUpdate = millis();
-
-                    uint32_t elapsedMs = millis() - startRecTime;
-                    int elapsedSec = elapsedMs / 1000;
-                    int elapsedMin = elapsedSec / 60;
-                    int elapsedSecRem = elapsedSec % 60;
-
-                    char timerStr[32];
-
-                    if (time_seconds == 0) {
-                        snprintf(timerStr, sizeof(timerStr), "%02d:%02d", elapsedMin, elapsedSecRem);
-                    } else {
-                        int totalMin = time_seconds / 60;
-                        int totalSec = time_seconds % 60;
-                        snprintf(
-                            timerStr,
-                            sizeof(timerStr),
-                            "%02d:%02d / %02d:%02d",
-                            elapsedMin,
-                            elapsedSecRem,
-                            totalMin,
-                            totalSec
-                        );
-                    }
-
-                    if (String(timerStr) != lastTimerStr) {
-                        lastTimerStr = String(timerStr);
-
-                        tft.fillRect(0, TIMER_Y - 5, tftWidth, TIMER_SIZE * 8 + 10, bruceConfig.bgColor);
-
-                        tft.setTextSize(TIMER_SIZE);
-                        tft.setTextColor(TFT_RED, bruceConfig.bgColor);
-                        int timerWidth = strlen(timerStr) * 6 * TIMER_SIZE;
-                        tft.setCursor((tftWidth - timerWidth) / 2, TIMER_Y);
-                        tft.print(timerStr);
-
-                        tft.setTextSize(TEXT_SIZE_SMALL);
-                        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-                        const char *label = (time_seconds == 0) ? "Elapsed" : "Elapsed / Total";
-                        int labelWidth = strlen(label) * 6;
-                        tft.setCursor((tftWidth - labelWidth) / 2, TIMER_Y + TIMER_SIZE * 8 + 5);
-                        tft.print(label);
-                    }
-                }
-            }
-            return true;
-        };
-
-        bool success =
-            mic_record_wav_to_path(fs, String(filename), max_ms, &out_bytes, gain_value, onRecordingLoop);
-
-        if (success) {
-            Serial.print("Recording saved: ");
-            Serial.println(filename);
-            Serial.print("Size: ");
-            Serial.print(out_bytes);
-            Serial.println(" bytes");
-
-            if (!stealth_enabled) {
-                tft.fillScreen(bruceConfig.bgColor);
-
-                tft.fillRect(0, 0, tftWidth, HEADER_HEIGHT, TFT_DARKGREEN);
-                tft.setTextColor(TFT_WHITE, TFT_DARKGREEN);
-                tft.setTextSize(TEXT_SIZE_LARGE);
-                const char *successText = "SAVED";
-                int successWidth = strlen(successText) * 6 * TEXT_SIZE_LARGE;
-                tft.setCursor((tftWidth - successWidth) / 2, (HEADER_HEIGHT - 16) / 2);
-                tft.print(successText);
-
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-                tft.setTextSize(TEXT_SIZE_SMALL);
-
-                int infoY = HEADER_HEIGHT + 20;
-                tft.setCursor(MARGIN, infoY);
-                tft.print("File: ");
-                String shortName = String(filename);
-                if (shortName.length() > 25) {
-                    shortName = "..." + shortName.substring(shortName.length() - 22);
-                }
-                tft.println(shortName);
-
-                tft.setCursor(MARGIN, infoY + 15);
-                tft.print("Size: ");
-                if (out_bytes > 0) {
-                    float sizeKB = out_bytes / 1024.0f;
-                    tft.print(sizeKB, 1);
-                    tft.print(" KB");
-                } else {
-                    tft.print("Unknown");
-                }
-
-                tft.setCursor(MARGIN, infoY + 30);
-                tft.print("Duration: ");
-                unsigned long totalMs = millis() - startRecTime;
-                int finalSec = (int)(totalMs / 1000);
-                char durStr[16];
-                snprintf(durStr, sizeof(durStr), "%d", finalSec);
-                tft.print(durStr);
-                tft.print("s");
-
-                delay(2500);
-            }
-
-        } else {
-            displayError("Recording failed", true);
-        }
+    if (run_mic_config_ui(time_seconds, gain_value, stealth_enabled)) {
+        perform_mic_recording(time_seconds, gain_value, stealth_enabled);
     }
 
-// ===== CLEANUP =====
-cleanup_and_exit:
     if (stealth_enabled) { setBrightness(originalBrightness, false); }
 }
 
