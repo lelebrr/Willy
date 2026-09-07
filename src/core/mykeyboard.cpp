@@ -782,7 +782,6 @@ String generalKeyboard(
                         continue;
                     }
                     LongPress = false;
-                    // delay(10);
                     if (y < 0 && x >= buttons_number) x = 0;
                     if (x >= KeyboardWidth) x = 0;
                     else if (x < 0) x = KeyboardWidth - 1;
