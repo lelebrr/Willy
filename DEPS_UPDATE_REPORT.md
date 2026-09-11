@@ -14,8 +14,11 @@
 | 3 | `242bd88` | chore(deps) | `[env_light]`: pin `ArduinoJson@^7.4.3` + `ESPAsyncWebServer@^3.11.2` + `RF24@^1.6.2` | BAIXO |
 | 4 | `8d8a927` | chore(deps) | `[env]`: `RF24 1.4.11 -> ^1.6.2` (unifica) + `RadioLib 7.4.0 -> ^7.7.1` + `ESPAsyncWebServer@^3.11.2` + dedup `AnimatedGIF` | BAIXO |
 | 5 | `1d8fb92` | chore(deps) | `[env:willy_release]`, `[env:willy_debug]`, `[env:test]`: mesmo lote do `[env]` | BAIXO |
-| 6 | `91d62b8` | chore(ci) | `docker/Dockerfile.ci`: pin `platformio>=6.2,<7` | ZERO |
-| 7 | `b146e37` | revert | Desfaz tentativa de `CONFIG_ETH_USE_ESP32_EMAC=1` (nao resolveu) | ZERO |
+| 6 | `04d98d1` + `3d0159f` | chore(deps) | NimBLE `2.3.7 -> ^2.5.1` (todos os 5 envs) | BAIXO |
+| 7 | `c940781` | chore(deps) | PNGdec `1.0.3 -> ^1.1.2` + LVGL `8.3.11 -> ^8.4.0` | BAIXO |
+| 8 | `5d9ada9` | fix | `display.h`: corrige typo `willyConfig -> wilyConfig` (7 ocorrencias) | ZERO |
+| 9 | `91d62b8` | chore(ci) | `docker/Dockerfile.ci`: pin `platformio>=6.2,<7` | ZERO |
+| 10 | `b146e37` | revert | Desfaz tentativa de `CONFIG_ETH_USE_ESP32_EMAC=1` (nao resolveu) | ZERO |
 
 ---
 
@@ -51,6 +54,22 @@ As libs NimBLE de terceiros usam `std::find_if`/`std::reverse` mas o patch so in
 ### 2.6 AnimatedGIF dedup -- OK
 - Removida entrada duplicada do registry, mantido o zip.
 
+### 2.7 NimBLE `2.3.7 -> 2.5.1` -- COMPILA
+- Bump em todos os 5 pontos do `platformio.ini`.
+- 2.5.1 e o latest (Jul/2026). API 2.x estavel.
+- Fixes relevantes: scan crash, Arduino 3.3.11 build, C5/C6 variants, NimBLEAddress byte-order, use-after-free whiteListRemove.
+- Sem breaking changes na API 2.x.
+
+### 2.8 PNGdec `1.0.3 -> 1.1.2` + LVGL `8.3.11 -> 8.4.0` -- COMPILAM
+- PNGdec: minor bump (latest 1.1.6), API estavel.
+- LVGL: 8.3 -> 8.4 (mesma linha 8.x). `lv_conf.h` v8.3 continua valido. Sem breaking do 9.x.
+- Validados em build CYD-2USB: ambos compilam antes do stop pre-existente.
+
+### 2.9 Typo `willyConfig -> wilyConfig` -- CORRIGIDO
+- `src/core/display.h` tinha 7 ocorrencias de `willyConfig` (typo). O correto e `wilyConfig` (declarado em `globals.h`).
+- Pre-existente desde `89bb0f6`. O compilador ja sugeria o nome correto.
+- **Este typo bloqueava a compilacao** -- foi revelado so agora porque os erros anteriores (ETH.cpp) paravam o build antes de chegar no codigo do projeto.
+
 ---
 
 ## 3. O que foi testado e NAO entrou (com justificativa)
@@ -70,19 +89,27 @@ As libs NimBLE de terceiros usam `std::find_if`/`std::reverse` mas o patch so in
 
 ---
 
-## 4. Bloqueador pre-existente (NAO causado por mim)
+## 4. Bloqueadores pre-existentes (NAO causados por mim)
 
-### ETH.cpp do framework nao compila no CYD-2USB
+### 4.1 ETH.cpp do framework nao compila no CYD-2USB
 ```
 ETH.cpp:213: error: 'ESP32_BUS_TYPE_ETHERNET_RMII' was not declared in this scope
 ```
 - **Causa**: `ETH.cpp` (puxado por `ARPScanner.cpp` e `EthernetHelper.cpp` via `#include <ETH.h>`) usa enums de `esp32-hal-periman.h` condicionais a `#if CONFIG_ETH_USE_ESP32_EMAC`. Sem sdkconfig correto, o enum nao existe.
 - **E pre-existente**: o commit original `89bb0f6` ja falha aqui.
-- **Impacto**: enquanto nao resolvido, **nenhum bump pode ser considerado "verde" no CYD-2USB** -- o build para no `ETH.cpp`.
+- **Impacto**: o build para no `ETH.cpp` (ou em interface.cpp, ver abaixo -- e intermitente por compilacao paralela).
+
+### 4.2 interface.cpp -- conflito C++20 `std::numbers::e`
+```
+error: 'e' was not declared in this scope; did you mean 'std::numbers::e'?
+```
+- **Causa**: codigo nos headers de touch (`TouchDrvGT911.hpp` / `CYD28_TouchscreenC.h` / `CYD28_TouchscreenR.h`) usa `e` como identificador, que conflita com `std::numbers::e` do C++20 (GCC 14.2).
+- **E pre-existente**: nao tem relacao com os bumps de dependencia.
+- **Intermitencia**: como SCons compila em paralelo, as vezes ETH.cpp falha primeiro, as vezes interface.cpp. Os dois erros coexistem.
 
 **Caminhos para resolver** (fora do escopo atual):
-1. `lib_ignore = Ethernet` + prover stub (mas o projeto usa `ETH.netif()`).
-2. sdkconfig custom (`board_build.sdkconfig`) com `CONFIG_ETH_USE_ESP32_EMAC=y` -- forma correta no arduino-esp32.
+1. ETH.cpp: sdkconfig custom (`board_build.sdkconfig`) com `CONFIG_ETH_USE_ESP32_EMAC=y` -- forma correta no arduino-esp32.
+2. interface.cpp: adicionar `#include <numbers>` + qualificar `std::numbers::e` no header de touch, ou renomear o identificador `e` no codigo do touch.
 3. Validar em outro env (ex. S3) que nao puxa ETH.cpp.
 
 ---
