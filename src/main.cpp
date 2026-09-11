@@ -5,6 +5,7 @@
 #include "core/powerSave.h"
 #include "core/serial_commands/cli.h"
 #include "core/utils.h"
+#include "core/wily_boot.h"
 #include "current_year.h"
 #include "esp32-hal-psram.h"
 #include "esp_task_wdt.h"
@@ -483,51 +484,13 @@ void setup() {
     begin_tft();
     Serial.println("begin_tft() completed successfully.");
 
+    Serial.println("Starting Willy Boot System...");
+    wilyBoot();
+    Serial.println("Willy Boot System completed.");
+
     Serial.println("Starting initLVGL()...");
-    initLVGL(); // Initialize LVGL
+    initLVGL(); // Initialize LVGL for main UI
     Serial.println("initLVGL() completed successfully.");
-
-    if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, portMAX_DELAY) == pdTRUE) {
-        show_willy_splash(lv_scr_act()); // Show Willy splash screen
-        xSemaphoreGive(lvgl_mutex);
-    }
-
-    for (int i = 0; i < 55; i++) { // Wait for animation (approx 5.5s)
-        if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-            lv_timer_handler();
-            xSemaphoreGive(lvgl_mutex);
-        }
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
-    // Load a completely new screen to avoid dangling references
-    // from the splash screen animations before InputHandler and loop() take over
-    if (lvgl_mutex && xSemaphoreTake(lvgl_mutex, portMAX_DELAY) == pdTRUE) {
-        lv_anim_del_all();
-        lv_obj_t *new_scr = lv_obj_create(NULL);
-        lv_scr_load_anim(new_scr, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, true);
-        lv_timer_handler(); // process screen load
-        xSemaphoreGive(lvgl_mutex);
-    }
-
-    // SD Card presence check - warn if not found
-    if (!sdcardMounted) {
-        tft.fillScreen(TFT_BLACK);
-        tft.setTextColor(TFT_RED, TFT_BLACK);
-        tft.setTextSize(FM);
-        tft.drawCentreString("AVISO", tftWidth / 2, tftHeight / 2 - 30, 1);
-        tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-        tft.setTextSize(FP);
-        tft.drawCentreString("Cartao SD nao encontrado!", tftWidth / 2, tftHeight / 2, 1);
-        tft.drawCentreString("Insira o cartao e reinicie.", tftWidth / 2, tftHeight / 2 + 16, 1);
-        tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
-        tft.drawCentreString("Pressione qualquer tecla...", tftWidth / 2, tftHeight / 2 + 40, 1);
-        uint32_t warnStart = millis();
-        while (millis() - warnStart < 3000) {
-            if (check(AnyKeyPress)) break;
-            vTaskDelay(pdMS_TO_TICKS(50));
-        }
-        tft.fillScreen(wilyConfig.bgColor);
-    }
 
     Serial.println("Initializing clock...");
     init_clock();
