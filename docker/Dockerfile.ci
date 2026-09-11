@@ -10,7 +10,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # PlatformIO + workflow deps
-RUN pip install --no-cache-dir platformio requests esptool intelhex
+RUN pip install --no-cache-dir "platformio>=6.2,<7" requests esptool intelhex
 
 WORKDIR /work
 
