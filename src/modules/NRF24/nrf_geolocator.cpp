@@ -50,18 +50,18 @@ void nrf_signal_geolocator() {
                 best_channel = current_channel;
             }
 
-            tft.fillRect(10, 90, tftWidth - 20, 20, bruceConfig.bgColor);
+            tft.fillRect(10, 90, tftWidth - 20, 20, wilyConfig.bgColor);
             tft.setCursor(10, 90);
             tft.printf("CH: %d | RPD: %s", current_channel, rpd ? "HIGH" : "LOW");
 
-            tft.fillRect(10, 120, tftWidth - 20, 40, bruceConfig.bgColor);
+            tft.fillRect(10, 120, tftWidth - 20, 40, wilyConfig.bgColor);
             tft.setCursor(10, 120);
             tft.printf("Best CH: %d\nPeak > -64dBm: %s", best_channel, max_signal == 100 ? "YES" : "NO");
 
             // Simple drawing loop
             int bar_w = (strength_score * (tftWidth - 20)) / 100;
             tft.fillRect(10, 160, bar_w, 20, TFT_GREEN);
-            tft.fillRect(10 + bar_w, 160, (tftWidth - 20) - bar_w, 20, bruceConfig.bgColor);
+            tft.fillRect(10 + bar_w, 160, (tftWidth - 20) - bar_w, 20, wilyConfig.bgColor);
             tft.drawRect(10, 160, tftWidth - 20, 20, TFT_WHITE);
 
             current_channel = (current_channel + 1) % 125;

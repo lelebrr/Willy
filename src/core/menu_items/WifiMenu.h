@@ -9,8 +9,8 @@ public:
 
     void optionsMenu(void);
     void drawIcon(float scale);
-    bool hasTheme() { return bruceConfig.theme.wifi; }
-    String themePath() { return bruceConfig.theme.paths.wifi; }
+    bool hasTheme() { return wilyConfig.theme.wifi; }
+    String themePath() { return wilyConfig.theme.paths.wifi; }
 
 private:
     void configMenu(void);

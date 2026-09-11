@@ -15,17 +15,17 @@ TaskHandle_t rf_raw_emit_draw_handle = NULL;
 
 // FreeRTOS task to handle periodic updates
 void rf_raw_emit_draw(void *parameter) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     drawMainBorder();
     tft.setCursor(20, 38);
     tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.print("Emitting: ");
     tft.print(frequency);
     tft.print(" MHz");
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
     tft.println("   Press [OK] to stop ");
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
 
     while (1) {
         previousMillis = millis(); // Prevent screen power-saving
@@ -51,7 +51,7 @@ void rf_raw_emit_draw(void *parameter) {
         int yTop = centerY - barHeight;
 
         // Draw the bar
-        tft.drawFastVLine(x, yTop, barHeight * 2, bruceConfig.priColor);
+        tft.drawFastVLine(x, yTop, barHeight * 2, wilyConfig.priColor);
 
         // Delay for 100ms
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -66,8 +66,8 @@ void rf_raw_emit(RawRecording &recorded, bool &returnToMenu) {
 
     initRfModule("tx", recorded.frequency);
 
-    gpio_num_t txPin = gpio_num_t(bruceConfigPins.rfTx);
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) txPin = gpio_num_t(bruceConfigPins.CC1101_bus.io0);
+    gpio_num_t txPin = gpio_num_t(wilyConfigPins.rfTx);
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) txPin = gpio_num_t(wilyConfigPins.CC1101_bus.io0);
 
     pinMode(txPin, OUTPUT);
 

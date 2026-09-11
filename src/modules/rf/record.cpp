@@ -24,8 +24,8 @@ void sinewave_animation() {
     for (int x = 20; x < tftWidth - 20; x++) {
         int lastY = centerY + amplitude * sin(lastPhase + x * 0.05);
         int y = centerY + amplitude * sin(phase + x * 0.05);
-        tft.drawFastVLine(x, lastY, sinewaveWidth, bruceConfig.bgColor);
-        tft.drawFastVLine(x, y, sinewaveWidth, bruceConfig.priColor);
+        tft.drawFastVLine(x, lastY, sinewaveWidth, wilyConfig.bgColor);
+        tft.drawFastVLine(x, y, sinewaveWidth, wilyConfig.priColor);
     }
 
     lastPhase = phase;
@@ -38,30 +38,30 @@ void rf_raw_record_draw(RawRecordingStatus status) {
     tft.setCursor(20, 38);
     tft.setTextSize(FP);
     if (status.frequency <= 0) {
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.print("Looking for frequency...");
-        tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+        tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
         tft.println("   Press [ESC] to exit  ");
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         // The frequency scan function calls the animation
     } else if (!status.recordingStarted) {
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.print("Waiting for signal...");
         sinewave_animation();
     } else if (status.recordingFinished) {
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.print("Recording finished.");
-        tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+        tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
         tft.println("   Press [OK] to save   ");
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     } else if (status.latestRssi < 0) {
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.print("Recording: ");
         tft.print(status.frequency);
         tft.print(" MHz");
-        tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+        tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
         tft.println("   Press [OK] to stop ");
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         // Calculate bar dimensions
         int centerY = (TFT_WIDTH / 2) + 20;      // Center axis for the bars
         int maxBarHeight = (TFT_WIDTH / 2) - 50; // Maximum height of the bars
@@ -76,7 +76,7 @@ void rf_raw_record_draw(RawRecordingStatus status) {
         int yTop = centerY - barHeight;
 
         // Draw the bar
-        tft.drawFastVLine(x, yTop, barHeight * 2, bruceConfig.priColor);
+        tft.drawFastVLine(x, yTop, barHeight * 2, wilyConfig.priColor);
     }
 }
 
@@ -86,14 +86,14 @@ void rf_raw_record_create(RawRecording &recorded, bool &returnToMenu) {
 
     bool fakeRssiPresent = false;
     bool rssiFeature = false;
-    rssiFeature = bruceConfigPins.rfModule == CC1101_SPI_MODULE;
+    rssiFeature = wilyConfigPins.rfModule == CC1101_SPI_MODULE;
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     drawMainBorder();
 
-    if (rssiFeature) rf_range_selection(bruceConfigPins.rfFreq);
+    if (rssiFeature) rf_range_selection(wilyConfigPins.rfFreq);
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     drawMainBorder();
     rf_raw_record_draw(status);
 
@@ -104,10 +104,10 @@ void rf_raw_record_create(RawRecording &recorded, bool &returnToMenu) {
     Serial.println("RF Module Initialized");
 
     // Set frequency if fixed frequency mode is enabled
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
-        if (bruceConfigPins.rfFxdFreq || !rssiFeature) status.frequency = bruceConfigPins.rfFreq;
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
+        if (wilyConfigPins.rfFxdFreq || !rssiFeature) status.frequency = wilyConfigPins.rfFreq;
         else status.frequency = rf_freq_scan([](){ sinewave_animation(); return false; }, 0);
-    } else status.frequency = bruceConfigPins.rfFreq;
+    } else status.frequency = wilyConfigPins.rfFreq;
 
     // Something went wrong with scan, probably it was cancelled
     if (status.frequency < 300) return;
@@ -116,7 +116,7 @@ void rf_raw_record_create(RawRecording &recorded, bool &returnToMenu) {
 
     // Erase sinewave animation
     tft.drawPixel(0, 0, 0);
-    tft.fillRect(10, 30, tftWidth - 20, tftHeight - 40, bruceConfig.bgColor);
+    tft.fillRect(10, 30, tftWidth - 20, tftHeight - 40, wilyConfig.bgColor);
     rf_raw_record_draw(status);
 
     // Start recording
@@ -175,7 +175,7 @@ void rf_raw_record_create(RawRecording &recorded, bool &returnToMenu) {
                     status.recordingStarted = true;
                     // Erase sinewave animation
                     tft.drawPixel(0, 0, 0);
-                    tft.fillRect(10, 30, tftWidth - 20, tftHeight - 40, bruceConfig.bgColor);
+                    tft.fillRect(10, 30, tftWidth - 20, tftHeight - 40, wilyConfig.bgColor);
                 }
                 status.lastSignalTime = receivedTime;
             }

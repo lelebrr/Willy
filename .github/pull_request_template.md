@@ -1,10 +1,10 @@
-#### Proposed Changes ####
+﻿#### Proposed Changes ####
 
 <!-- Describe the big picture of your changes here to communicate to the maintainers why we should accept this pull request. -->
 
 #### Types of Changes ####
 
-<!-- What types of changes does your code introduce to Bruce? Bugfix, New Feature, Breaking Change, etc -->
+<!-- What types of changes does your code introduce to Wily? Bugfix, New Feature, Breaking Change, etc -->
 
 #### Verification ####
 

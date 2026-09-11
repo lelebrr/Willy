@@ -10,6 +10,8 @@
 #include "modules/rfid/srix_tool.h" //added for srix Tool
 #include "modules/rfid/tag_o_matic.h"
 #include "modules/rfid/nfc_advanced_atks.h"
+#include "modules/rfid/nfc_advanced.h"
+#include "modules/rfid/rfid_advanced.h"
 
 #ifndef LITE_VERSION
 #include "modules/rfid/emv_reader.hpp"
@@ -49,12 +51,16 @@ void RFIDMenu::optionsMenu() {
         {"PN532 UART",  [=]() { PN532KillerTools(); }                   },
 #endif
 #endif
+        {"NFC Suite Avancada", [=]() { nfcAdvancedSuiteMenu(); }},
+#ifndef LITE_VERSION
+        {"RFID Suite Avancada", [=]() { rfidAdvancedSuiteMenu(); }},
+#endif
         {"Config",      [this]() { configMenu(); }                      },
     };
 
 #if !defined(REMOVE_RFID_HW_INTERFACE)
 #ifndef LITE_VERSION
-    if (bruceConfigPins.rfidModule == PN532_I2C_MODULE) {
+    if (wilyConfigPins.rfidModule == PN532_I2C_MODULE) {
         // Added SRIX Menu only if PN is set to i2c mode
         options.insert(options.begin() + 3, {"Ferramenta SRIX", [=]() { PN532_SRIX(); }});
     }
@@ -66,17 +72,17 @@ void RFIDMenu::optionsMenu() {
     vTaskDelay(pdMS_TO_TICKS(200));
 
     String txt = "RFID";
-    if (bruceConfigPins.rfidModule == M5_RFID2_MODULE) txt += " (RFID2)";
+    if (wilyConfigPins.rfidModule == M5_RFID2_MODULE) txt += " (RFID2)";
 #ifdef M5STICK
-    else if (bruceConfigPins.rfidModule == PN532_I2C_MODULE) txt += " (PN532-G33)";
-    else if (bruceConfigPins.rfidModule == PN532_I2C_SPI_MODULE) txt += " (PN532-G36)";
+    else if (wilyConfigPins.rfidModule == PN532_I2C_MODULE) txt += " (PN532-G33)";
+    else if (wilyConfigPins.rfidModule == PN532_I2C_SPI_MODULE) txt += " (PN532-G36)";
 #else
-    else if (bruceConfigPins.rfidModule == PN532_I2C_MODULE) txt += " (PN532-I2C)";
+    else if (wilyConfigPins.rfidModule == PN532_I2C_MODULE) txt += " (PN532-I2C)";
 #endif
-    else if (bruceConfigPins.rfidModule == PN532_SPI_MODULE) txt += " (PN532-SPI)";
-    else if (bruceConfigPins.rfidModule == RC522_SPI_MODULE) txt += " (RC522-SPI)";
-    else if (bruceConfigPins.rfidModule == ST25R3916_SPI_MODULE) txt += " (ST25R-SPI)";
-    else if (bruceConfigPins.rfidModule == ST25R3916_I2C_MODULE) txt += " (ST25R-I2C)";
+    else if (wilyConfigPins.rfidModule == PN532_SPI_MODULE) txt += " (PN532-SPI)";
+    else if (wilyConfigPins.rfidModule == RC522_SPI_MODULE) txt += " (RC522-SPI)";
+    else if (wilyConfigPins.rfidModule == ST25R3916_SPI_MODULE) txt += " (ST25R-SPI)";
+    else if (wilyConfigPins.rfidModule == ST25R3916_I2C_MODULE) txt += " (ST25R-I2C)";
     loopOptions(options, MENU_TYPE_SUBMENU, txt.c_str());
 }
 
@@ -87,7 +93,7 @@ void RFIDMenu::configMenu() {
 #endif
         {"Add Chave MIF", addMifareKeyMenu           },
         {"Ver Chaves MIF", [=]() {
-             displayInfo(String(bruceConfig.mifareKeys.size()) + " chave(s)", true);
+             displayInfo(String(wilyConfig.mifareKeys.size()) + " chave(s)", true);
          }},
         {"Voltar",        [this]() { optionsMenu(); }},
     };
@@ -109,15 +115,15 @@ void RFIDMenu::drawIcon(float scale) {
         iconSize,
         iconSize,
         iconRadius,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
-    tft.fillRect(iconCenterX - iconSize / 2, iconCenterY, iconSize / 2, iconSize / 2, bruceConfig.bgColor);
+    tft.fillRect(iconCenterX - iconSize / 2, iconCenterY, iconSize / 2, iconSize / 2, wilyConfig.bgColor);
 
     tft.drawCircle(
         iconCenterX - iconSize / 2 + deltaRadius,
         iconCenterY + iconSize / 2 - deltaRadius,
         iconRadius,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 
     tft.drawArc(
@@ -127,8 +133,8 @@ void RFIDMenu::drawIcon(float scale) {
         2 * iconRadius,
         180,
         270,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX - iconSize / 2 + deltaRadius,
@@ -137,8 +143,8 @@ void RFIDMenu::drawIcon(float scale) {
         2 * iconRadius + deltaRadius,
         180,
         270,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX - iconSize / 2 + deltaRadius,
@@ -147,7 +153,7 @@ void RFIDMenu::drawIcon(float scale) {
         2 * iconRadius + 2 * deltaRadius,
         180,
         270,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
 }

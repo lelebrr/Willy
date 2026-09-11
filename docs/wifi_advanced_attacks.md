@@ -1,4 +1,4 @@
-# 📡 WiFi Avançado - Documentação Completa
+﻿# 📡 WiFi Avançado - Documentação Completa
 
 > **AVISO LEGAL:** Este documento é fornecido exclusivamente para fins educacionais e de pesquisa em segurança. O uso indevido pode ser ilegal. Use apenas em ambientes controlados e com autorização.
 

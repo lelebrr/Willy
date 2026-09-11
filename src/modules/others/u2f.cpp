@@ -937,9 +937,9 @@ private:
             mbedtls_x509write_crt_set_version(&crt, MBEDTLS_X509_CRT_VERSION_3);
             rc = mbedtls_x509write_crt_set_serial_raw(&crt, serialRaw, sizeof(serialRaw));
             if (rc != 0) break;
-            rc = mbedtls_x509write_crt_set_subject_name(&crt, "CN=Bruce U2F Attestation,O=BruceDevices,C=US");
+            rc = mbedtls_x509write_crt_set_subject_name(&crt, "CN=Wily U2F Attestation,O=BruceDevices,C=US");
             if (rc != 0) break;
-            rc = mbedtls_x509write_crt_set_issuer_name(&crt, "CN=Bruce U2F Attestation,O=BruceDevices,C=US");
+            rc = mbedtls_x509write_crt_set_issuer_name(&crt, "CN=Wily U2F Attestation,O=BruceDevices,C=US");
             if (rc != 0) break;
             rc = mbedtls_x509write_crt_set_validity(&crt, "20260101000000", "20360101000000");
             if (rc != 0) break;
@@ -1668,9 +1668,9 @@ U2fHidDevice &u2fDevice() {
 }
 
 void drawU2fStatusScreen() {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setTextSize(2);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.setCursor(6, 8);
     tft.print("USB U2F");
 
@@ -1684,7 +1684,7 @@ void drawU2fStatusScreen() {
 }
 
 void updateU2fRuntimeInfo(const U2fHidDevice &device) {
-    tft.fillRect(0, 84, tftWidth, tftHeight - 84, bruceConfig.bgColor);
+    tft.fillRect(0, 84, tftWidth, tftHeight - 84, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setCursor(6, 94);
     tft.print(device.waitingForPresence() ? "Confirm now" : "Waiting...");

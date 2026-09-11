@@ -1,6 +1,6 @@
 #pragma once
 #if !defined(LITE_VERSION)
-#include "BruceBLEService.hpp"
+#include "WilyBLEService.hpp"
 
 #include <SerialDevice.h>
 
@@ -8,7 +8,7 @@
 
 class BLESerialCallbacks;
 
-class BLESerialService : public BruceBLEService, public SerialDevice {
+class BLESerialService : public WilyBLEService, public SerialDevice {
     NimBLECharacteristic *serial_char = nullptr;
     BLESerialCallbacks *callbacks = nullptr;
 

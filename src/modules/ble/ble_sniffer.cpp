@@ -114,7 +114,7 @@ void BLE_Sniffer() {
             isCapturing = !isCapturing;
             if (isCapturing) {
                 if (firstRun) {
-                    NimBLEDevice::init("BruceSniffer");
+                    NimBLEDevice::init("WilySniffer");
                     vTaskDelay(10 / portTICK_PERIOD_MS);
                     pSnifferScan = NimBLEDevice::getScan();
                     if (!pSnifferScan) {
@@ -179,7 +179,7 @@ void BLE_Sniffer() {
                     break;
                 }
 
-                tft.fillScreen(bruceConfig.bgColor);
+                tft.fillScreen(wilyConfig.bgColor);
                 drawMainBorderWithTitle("CAPTURED PACKETS");
 
                 int y = BORDER_PAD_Y + FM * LH + 4;
@@ -187,7 +187,7 @@ void BLE_Sniffer() {
                 int visibleItems = (tftHeight - y - 50) / lineH;
 
                 tft.setTextSize(FP);
-                tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                 tft.setCursor(10, y);
                 tft.println("Packets: " + String(snifferPacketCount));
                 y += lineH;
@@ -196,8 +196,8 @@ void BLE_Sniffer() {
                     int idx = scrollOffset + i;
                     SnifferPacket &pkt = snifferPackets[idx];
                     bool selectedItem = (idx == selected);
-                    uint16_t fg = selectedItem ? bruceConfig.bgColor : TFT_WHITE;
-                    uint16_t bg = selectedItem ? bruceConfig.priColor : bruceConfig.bgColor;
+                    uint16_t fg = selectedItem ? wilyConfig.bgColor : TFT_WHITE;
+                    uint16_t bg = selectedItem ? wilyConfig.priColor : wilyConfig.bgColor;
 
                     tft.fillRect(10, y, tftWidth - 20, lineH - 2, bg);
                     tft.setTextColor(fg, bg);
@@ -209,7 +209,7 @@ void BLE_Sniffer() {
                 }
 
                 if (snifferPacketCount > visibleItems) {
-                    tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                     tft.setCursor(tftWidth - 30, BORDER_PAD_Y + FM * LH + 4 + lineH);
                     if (scrollOffset > 0)
                         tft.drawString("^", tftWidth - 25, BORDER_PAD_Y + FM * LH + 4 + lineH, 1);
@@ -220,7 +220,7 @@ void BLE_Sniffer() {
                     }
                 }
 
-                tft.setTextColor(TFT_DARKGREY, bruceConfig.bgColor);
+                tft.setTextColor(TFT_DARKGREY, wilyConfig.bgColor);
                 tft.setCursor(10, tftHeight - 20);
                 tft.drawString("PREV/NEXT: Navigate  SEL: View Details  ESC: Back", 10, tftHeight - 20, 1);
 
@@ -245,7 +245,7 @@ void BLE_Sniffer() {
                     int dy = BORDER_PAD_Y + FM * LH + 4;
                     int dlh = max(12, tftHeight / 14);
                     tft.setTextSize(FP);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
 
                     tft.setCursor(10, dy);
                     tft.println("Device: " + pkt.name);
@@ -262,16 +262,16 @@ void BLE_Sniffer() {
                     dy += dlh;
 
                     String parsed = parseManufacturerData(pkt.payload);
-                    tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                     tft.println(parsed);
                     dy += dlh;
 
-                    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
                     String hexDump = pkt.payloadHex;
                     if (hexDump.length() > 400) hexDump = hexDump.substring(0, 400) + "...\n(truncated)";
                     tft.println(hexDump);
 
-                    tft.setTextColor(TFT_DARKGREY, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_DARKGREY, wilyConfig.bgColor);
                     tft.setCursor(10, tftHeight - 20);
                     tft.drawString("Press any key to continue", 10, tftHeight - 20, 1);
 
@@ -295,9 +295,9 @@ void BLE_Sniffer() {
             }
 
             if (fs && !storageType.isEmpty()) {
-                if (!fs->exists("/BruceSniffer")) fs->mkdir("/BruceSniffer");
+                if (!fs->exists("/WilySniffer")) fs->mkdir("/WilySniffer");
 
-                String filename = "/BruceSniffer/sniffer_" + String(millis()) + ".txt";
+                String filename = "/WilySniffer/sniffer_" + String(millis()) + ".txt";
                 File file = fs->open(filename, FILE_WRITE);
                 if (file) {
                     file.println("=== BLE SNIFFER CAPTURE ===");

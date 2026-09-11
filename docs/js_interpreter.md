@@ -1,10 +1,10 @@
-# Interpretador JavaScript (`src/modules/bjs_interpreter/`)
+﻿# Interpretador JavaScript (`src/modules/bjs_interpreter/`)
 
-Motor mQuickJS. Menu **Interpretador JS**: lista `.js` de `/scripts`, `/WillyJS` ou `/BruceScripts` (SD ou LittleFS), "Carregar..." para escolher arquivo, app de boot configurável.
+Motor mQuickJS. Menu **Interpretador JS**: lista `.js` de `/scripts`, `/WillyJS` ou `/WillyScripts` (SD ou LittleFS), "Carregar..." para escolher arquivo, app de boot configurável.
 
 ## Runtime
 
-256 KB de arena com PSRAM (64 KB sem), `js_bruce_init()` registra a API `bruce`, timers (`setTimeout`/`setInterval` via `globals_js`), `run_timers()` após `JS_Eval`. Cabeçalhos gerados no build (`GEN_MQJS_HEADERS` + `lib/mquickjs_headers/mqjs_stdlib_generator.exe`); `mqjs_stdlib.c` é excluído do build e regenerado.
+256 KB de arena com PSRAM (64 KB sem), `js_wily_init()` registra a API `wily`, timers (`setTimeout`/`setInterval` via `globals_js`), `run_timers()` após `JS_Eval`. Cabeçalhos gerados no build (`GEN_MQJS_HEADERS` + `lib/mquickjs_headers/mqjs_stdlib_generator.exe`); `mqjs_stdlib.c` é excluído do build e regenerado.
 
 ## Bindings nativos (`*_js.cpp`)
 

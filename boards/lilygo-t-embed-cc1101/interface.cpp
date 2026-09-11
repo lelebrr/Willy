@@ -76,10 +76,10 @@ void _setup_gpio() {
     }
     if (bq.getDesignCap() != BATTERY_DESIGN_CAPACITY) { bq.setDesignCap(BATTERY_DESIGN_CAPACITY); }
     // Start with default IR, RF and RFID Configs, replace old
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.rfidModule = PN532_I2C_MODULE;
-    bruceConfigPins.irRx = 1;
-    bruceConfigPins.irTx = 2;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.rfidModule = PN532_I2C_MODULE;
+    wilyConfigPins.irRx = 1;
+    wilyConfigPins.irTx = 2;
 #else
     Wire.begin(SYS_I2C_SDA, SYS_I2C_SCL);
     Wire.beginTransmission(0x40);
@@ -88,15 +88,15 @@ void _setup_gpio() {
         Wire.end();
     } else {
         Serial.println("Probably CC1101 exists");
-        bruceConfigPins.CC1101_bus.cs = GPIO_NUM_17;
-        bruceConfigPins.CC1101_bus.io0 = GPIO_NUM_18;
-        bruceConfigPins.rfModule = CC1101_SPI_MODULE;
+        wilyConfigPins.CC1101_bus.cs = GPIO_NUM_17;
+        wilyConfigPins.CC1101_bus.io0 = GPIO_NUM_18;
+        wilyConfigPins.rfModule = CC1101_SPI_MODULE;
 
         //* If it does not exist, then the CC1101 shield may exist, so there is no need for Wire to exist.
         Wire.endTransmission();
         Wire.end();
     }
-    bruceConfigPins.rfidModule = PN532_SPI_MODULE;
+    wilyConfigPins.rfidModule = PN532_SPI_MODULE;
 
 #endif
 
@@ -224,7 +224,7 @@ void powerDownNFC() {
 }
 
 void powerDownCC1101() {
-    if (!initRfModule("rx", bruceConfigPins.rfFreq)) { Serial.println("Can't init CC1101"); }
+    if (!initRfModule("rx", wilyConfigPins.rfFreq)) { Serial.println("Can't init CC1101"); }
 
     ELECHOUSE_cc1101.goSleep();
 }
@@ -254,11 +254,11 @@ void checkReboot() {
     const int bannerHeight = tft.fontHeight(1);
 
     // Helper function to clear banner area
-    auto clearBanner = [&]() { tft.fillRect(bannerX, 7, bannerWidth, 18, bruceConfig.bgColor); };
+    auto clearBanner = [&]() { tft.fillRect(bannerX, 7, bannerWidth, 18, wilyConfig.bgColor); };
 
     // Helper function to clear text line only
     auto clearTextLine = [&]() {
-        tft.fillRect(bannerX, bannerY, bannerWidth, bannerHeight, bruceConfig.bgColor);
+        tft.fillRect(bannerX, bannerY, bannerWidth, bannerHeight, wilyConfig.bgColor);
     };
 
     uint32_t time_count = millis();
@@ -315,15 +315,15 @@ void checkReboot() {
                 // RESTART MODE: 5 seconds
                 if (countDown >= RESTART_TIMEOUT + 1) {
                     // Execute restart
-                    tft.fillScreen(bruceConfig.bgColor);
-                    tft.setTextColor(bruceConfig.secColor, bruceConfig.bgColor);
+                    tft.fillScreen(wilyConfig.bgColor);
+                    tft.setTextColor(wilyConfig.secColor, wilyConfig.bgColor);
                     tft.drawCentreString("RESTARTING...", tftWidth / 2, tftHeight / 2, 2);
                     delay(1000);
                     ESP.restart();
                 }
 
                 // Display countdown
-                tft.setTextColor(bruceConfig.secColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.secColor, wilyConfig.bgColor);
                 clearTextLine();
                 tft.drawCentreString(
                     "RESTART IN " + String(countDown) + "/" + String(RESTART_TIMEOUT),
@@ -336,7 +336,7 @@ void checkReboot() {
                 // DEEP SLEEP MODE: Normal text, 3 seconds
                 if (countDown >= SLEEP_TIMEOUT + 1) {
                     // Execute deep sleep
-                    tft.fillScreen(bruceConfig.bgColor);
+                    tft.fillScreen(wilyConfig.bgColor);
                     while (digitalRead(BK_BTN) == BTN_ACT);
                     delay(200);
                     powerDownNFC();
@@ -349,7 +349,7 @@ void checkReboot() {
                 }
 
                 // Display countdown
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                 clearTextLine();
                 tft.drawCentreString(
                     "DEEP SLEEP IN " + String(countDown) + "/" + String(SLEEP_TIMEOUT),

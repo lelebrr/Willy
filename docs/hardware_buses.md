@@ -1,4 +1,4 @@
-# Barramentos de hardware (`bus_HAL`, SPI, SD)
+﻿# Barramentos de hardware (`bus_HAL`, SPI, SD)
 
 ## I2C (`src/core/bus_HAL.{cpp,h}`)
 
@@ -16,6 +16,6 @@ Instâncias: `SPI` (padrão), `sdcardSPI` (SD em barramento próprio), `CC_NRF_S
 
 Cascata por barramento: padrão → 4 MHz → 1 MHz; barramento compartilhado com o TFT usa a instância do display. `SD.end()` + `setupSdCard()` no menu **Arquivos → Recarregar SD** permite trocar o cartão sem reboot.
 
-## Pinos persistidos (`brucePins.conf`)
+## Pinos persistidos (`wilyPins.conf`)
 
 `CC1101_bus`, `NRF24_bus`, `PN532_bus`, `SDCARD_bus`, `ST25R_bus` (+ `W5500_bus`, `LoRa_bus` fora do LITE), `sys_i2c`, `i2c_bus`, `uart_bus`, `gps_bus`, rotação, BLE name, IR/RF/RFID/GPS. Editáveis em **Config → Modo Dev** (pinos) e via serial `settings`. Fallbacks de compilação em `include/precompiler_flags.h` (`GROVE_*`, `SYS_I2C_*` = -1 quando a placa não define).

@@ -1,5 +1,5 @@
 /**
- * SOCKS4 / SOCKS4a proxy **server** for Bruce (ESP32 as proxy).
+ * SOCKS4 / SOCKS4a proxy **server** for Wily (ESP32 as proxy).
  *
  * Protocol: https://www.openssh.com/txt/socks4.protocol
  *
@@ -89,7 +89,7 @@ void socks4Proxy(uint16_t port) {
 
     drawMainBorderWithTitle("SOCKS4 PROXY");
     tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.setCursor(10, BORDER_PAD_Y + FM * LH);
     tft.println("Port: " + String(port));
     tft.setCursor(10, tft.getCursorY());

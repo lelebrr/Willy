@@ -109,7 +109,7 @@ static void create_orca(lv_obj_t *parent) {
     lv_obj_align(willy_text, LV_ALIGN_CENTER, 0, 78);
 
     version_text = lv_label_create(parent);
-    lv_label_set_text_fmt(version_text, "BRUCE %s", BRUCE_VERSION);
+    lv_label_set_text_fmt(version_text, "WILLY %s", WILLY_VERSION);
     lv_obj_set_style_text_color(version_text, lv_color_hex(ACCENT_COLOR), 0);
     lv_obj_set_style_text_font(version_text, &lv_font_montserrat_14, 0);
     lv_obj_set_style_opa(version_text, 0, 0);
@@ -233,7 +233,7 @@ static void finish_splash(lv_timer_t *t) {
 }
 
 // ====================== FUNÇÃO PRINCIPAL ======================
-// Converte RGB565 (bruceConfig.priColor) p/ 0xRRGGBB do lv_color_hex
+// Converte RGB565 (wilyConfig.priColor) p/ 0xRRGGBB do lv_color_hex
 static uint32_t rgb565_to_hex(uint16_t c) {
     uint32_t r = ((c >> 11) & 0x1F) * 255 / 31;
     uint32_t g = ((c >> 5) & 0x3F) * 255 / 63;
@@ -244,7 +244,7 @@ static uint32_t rgb565_to_hex(uint16_t c) {
 void show_willy_splash(lv_obj_t *parent) {
     // Sem config salva de splash: espelha a cor do tema atual (sincronia visual)
     if (!load_willy_config()) {
-        getWillyCfg().corPrimaria = rgb565_to_hex(bruceConfig.priColor);
+        getWillyCfg().corPrimaria = rgb565_to_hex(wilyConfig.priColor);
     }
 
     lv_obj_clean(parent);

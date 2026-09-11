@@ -27,12 +27,12 @@ void _setBrightness(uint8_t brightval) {}
 **  set brightness value
 **********************************************************************/
 void setBrightness(uint8_t brightval, bool save) {
-    if (bruceConfig.bright > 100) bruceConfig.setBright(100);
+    if (wilyConfig.bright > 100) wilyConfig.setBright(100);
     _setBrightness(brightval);
     delay(10);
 
     currentScreenBrightness = brightval;
-    if (save) { bruceConfig.setBright(brightval); }
+    if (save) { wilyConfig.setBright(brightval); }
 }
 
 /*********************************************************************
@@ -40,17 +40,17 @@ void setBrightness(uint8_t brightval, bool save) {
 **  get brightness value
 **********************************************************************/
 void getBrightness() {
-    if (bruceConfig.bright > 100) {
-        bruceConfig.setBright(100);
-        _setBrightness(bruceConfig.bright);
+    if (wilyConfig.bright > 100) {
+        wilyConfig.setBright(100);
+        _setBrightness(wilyConfig.bright);
         delay(10);
         setBrightness(100);
     }
 
-    _setBrightness(bruceConfig.bright);
+    _setBrightness(wilyConfig.bright);
     delay(10);
 
-    currentScreenBrightness = bruceConfig.bright;
+    currentScreenBrightness = wilyConfig.bright;
 }
 
 /*********************************************************************
@@ -58,7 +58,7 @@ void getBrightness() {
 **  get/set rotation value
 **********************************************************************/
 int gsetRotation(bool set) {
-    int getRot = bruceConfigPins.rotation;
+    int getRot = wilyConfigPins.rotation;
     int result = ROTATION;
     int mask = ROTATION > 1 ? -2 : 2;
 
@@ -80,7 +80,7 @@ int gsetRotation(bool set) {
         set = true;
     }
     if (set) {
-        bruceConfigPins.setRotation(result);
+        wilyConfigPins.setRotation(result);
         tft.setRotation(result);
         tft.setRotation(result); // must repeat, sometimes ESP32S3 miss one SPI command and it just
                                  // jumps this step and don't rotate
@@ -111,44 +111,44 @@ int gsetRotation(bool set) {
 **********************************************************************/
 void setBrightnessMenu() {
     int idx = 0;
-    if (bruceConfig.bright == 100) idx = 0;
-    else if (bruceConfig.bright == 75) idx = 1;
-    else if (bruceConfig.bright == 50) idx = 2;
-    else if (bruceConfig.bright == 25) idx = 3;
-    else if (bruceConfig.bright == 1) idx = 4;
+    if (wilyConfig.bright == 100) idx = 0;
+    else if (wilyConfig.bright == 75) idx = 1;
+    else if (wilyConfig.bright == 50) idx = 2;
+    else if (wilyConfig.bright == 25) idx = 3;
+    else if (wilyConfig.bright == 1) idx = 4;
 
     options = {
         {"100%",
          [=]() { setBrightness((uint8_t)100); },
-         bruceConfig.bright == 100,
+         wilyConfig.bright == 100,
          [](void *pointer, bool shouldRender) {
              setBrightness((uint8_t)100, false);
              return false;
          }},
         {"75 %",
          [=]() { setBrightness((uint8_t)75); },
-         bruceConfig.bright == 75,
+         wilyConfig.bright == 75,
          [](void *pointer, bool shouldRender) {
              setBrightness((uint8_t)75, false);
              return false;
          }},
         {"50 %",
          [=]() { setBrightness((uint8_t)50); },
-         bruceConfig.bright == 50,
+         wilyConfig.bright == 50,
          [](void *pointer, bool shouldRender) {
              setBrightness((uint8_t)50, false);
              return false;
          }},
         {"25 %",
          [=]() { setBrightness((uint8_t)25); },
-         bruceConfig.bright == 25,
+         wilyConfig.bright == 25,
          [](void *pointer, bool shouldRender) {
              setBrightness((uint8_t)25, false);
              return false;
          }},
         {" 1 %",
          [=]() { setBrightness((uint8_t)1); },
-         bruceConfig.bright == 1,
+         wilyConfig.bright == 1,
          [](void *pointer, bool shouldRender) {
              setBrightness((uint8_t)1, false);
              return false;
@@ -156,7 +156,7 @@ void setBrightnessMenu() {
     };
     addOptionToMainMenu(); // this one bugs the brightness selection
     loopOptions(options, MENU_TYPE_REGULAR, "", idx);
-    setBrightness(bruceConfig.bright, false);
+    setBrightness(wilyConfig.bright, false);
 }
 
 /*********************************************************************
@@ -180,17 +180,17 @@ void setSleepMode() {
 **********************************************************************/
 void setDimmerTimeMenu() {
     int idx = 0;
-    if (bruceConfig.dimmerSet == 10) idx = 0;
-    else if (bruceConfig.dimmerSet == 20) idx = 1;
-    else if (bruceConfig.dimmerSet == 30) idx = 2;
-    else if (bruceConfig.dimmerSet == 60) idx = 3;
-    else if (bruceConfig.dimmerSet == 0) idx = 4;
+    if (wilyConfig.dimmerSet == 10) idx = 0;
+    else if (wilyConfig.dimmerSet == 20) idx = 1;
+    else if (wilyConfig.dimmerSet == 30) idx = 2;
+    else if (wilyConfig.dimmerSet == 60) idx = 3;
+    else if (wilyConfig.dimmerSet == 0) idx = 4;
     options = {
-        {"10s",      [=]() { bruceConfig.setDimmer(10); }, bruceConfig.dimmerSet == 10},
-        {"20s",      [=]() { bruceConfig.setDimmer(20); }, bruceConfig.dimmerSet == 20},
-        {"30s",      [=]() { bruceConfig.setDimmer(30); }, bruceConfig.dimmerSet == 30},
-        {"60s",      [=]() { bruceConfig.setDimmer(60); }, bruceConfig.dimmerSet == 60},
-        {"Desativado", [=]() { bruceConfig.setDimmer(0); },  bruceConfig.dimmerSet == 0 },
+        {"10s",      [=]() { wilyConfig.setDimmer(10); }, wilyConfig.dimmerSet == 10},
+        {"20s",      [=]() { wilyConfig.setDimmer(20); }, wilyConfig.dimmerSet == 20},
+        {"30s",      [=]() { wilyConfig.setDimmer(30); }, wilyConfig.dimmerSet == 30},
+        {"60s",      [=]() { wilyConfig.setDimmer(60); }, wilyConfig.dimmerSet == 60},
+        {"Desativado", [=]() { wilyConfig.setDimmer(0); },  wilyConfig.dimmerSet == 0 },
     };
     loopOptions(options, idx);
 }
@@ -206,8 +206,8 @@ void setUIColor() {
         int idx = UI_COLOR_COUNT;
         int i = 0;
         for (const auto &mapping : UI_COLORS) {
-            if (bruceConfig.priColor == mapping.priColor && bruceConfig.secColor == mapping.secColor &&
-                bruceConfig.bgColor == mapping.bgColor) {
+            if (wilyConfig.priColor == mapping.priColor && wilyConfig.secColor == mapping.secColor &&
+                wilyConfig.bgColor == mapping.bgColor) {
                 idx = i;
             }
 
@@ -216,7 +216,7 @@ void setUIColor() {
                 [=, &mapping]() {
                     uint16_t secColor = mapping.secColor;
                     uint16_t bgColor = mapping.bgColor;
-                    bruceConfig.setUiColor(mapping.priColor, &secColor, &bgColor);
+                    wilyConfig.setUiColor(mapping.priColor, &secColor, &bgColor);
                 },
                 idx == i
             );
@@ -226,20 +226,20 @@ void setUIColor() {
         options.push_back(
             {"Cor Customizada",
              [=]() {
-                 uint16_t oldPriColor = bruceConfig.priColor;
-                 uint16_t oldSecColor = bruceConfig.secColor;
-                 uint16_t oldBgColor = bruceConfig.bgColor;
+                 uint16_t oldPriColor = wilyConfig.priColor;
+                 uint16_t oldSecColor = wilyConfig.secColor;
+                 uint16_t oldBgColor = wilyConfig.bgColor;
 
                  if (setCustomUIColorMenu()) {
-                     bruceConfig.setUiColor(
-                         bruceConfig.priColor, &bruceConfig.secColor, &bruceConfig.bgColor
+                     wilyConfig.setUiColor(
+                         wilyConfig.priColor, &wilyConfig.secColor, &wilyConfig.bgColor
                      );
                  } else {
-                     bruceConfig.priColor = oldPriColor;
-                     bruceConfig.secColor = oldSecColor;
-                     bruceConfig.bgColor = oldBgColor;
+                     wilyConfig.priColor = oldPriColor;
+                     wilyConfig.secColor = oldSecColor;
+                     wilyConfig.bgColor = oldBgColor;
                  }
-                 tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                 tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
              },
              idx == UI_COLOR_COUNT}
         );
@@ -247,10 +247,10 @@ void setUIColor() {
         options.push_back(
             {"Inverter Cores",
              [=]() {
-                 bruceConfig.setColorInverted(!bruceConfig.colorInverted);
-                 tft.invertDisplay(bruceConfig.colorInverted);
+                 wilyConfig.setColorInverted(!wilyConfig.colorInverted);
+                 tft.invertDisplay(wilyConfig.colorInverted);
              },
-             bruceConfig.colorInverted > 0}
+             wilyConfig.colorInverted > 0}
         );
 
         addOptionToMainMenu();
@@ -338,30 +338,30 @@ constexpr const char *rgbNames[] = {
 void setCustomUIColorSettingMenu(
     int colorType, int rgb, std::function<uint16_t(uint16_t, int)> colorGenerator
 ) {
-    uint16_t color = (colorType == 1)   ? bruceConfig.priColor
-                     : (colorType == 2) ? bruceConfig.secColor
-                                        : bruceConfig.bgColor;
+    uint16_t color = (colorType == 1)   ? wilyConfig.priColor
+                     : (colorType == 2) ? wilyConfig.secColor
+                                        : wilyConfig.bgColor;
 
     options.clear();
 
     static auto hoverFunctionPriColor = [](void *pointer, bool shouldRender) -> bool {
         uint16_t colorToSet = *static_cast<uint16_t *>(pointer);
         // Serial.printf("Setting primary color to: %04X\n", colorToSet);
-        bruceConfig.priColor = colorToSet;
+        wilyConfig.priColor = colorToSet;
         return false;
     };
     static auto hoverFunctionSecColor = [](void *pointer, bool shouldRender) -> bool {
         uint16_t colorToSet = *static_cast<uint16_t *>(pointer);
         // Serial.printf("Setting secondary color to: %04X\n", colorToSet);
-        bruceConfig.secColor = colorToSet;
+        wilyConfig.secColor = colorToSet;
         return false;
     };
 
     static auto hoverFunctionBgColor = [](void *pointer, bool shouldRender) -> bool {
         uint16_t colorToSet = *static_cast<uint16_t *>(pointer);
         // Serial.printf("Setting bg color to: %04X\n", colorToSet);
-        bruceConfig.bgColor = colorToSet;
-        tft.fillScreen(bruceConfig.bgColor);
+        wilyConfig.bgColor = colorToSet;
+        tft.fillScreen(wilyConfig.bgColor);
         return false;
     };
 
@@ -386,9 +386,9 @@ void setCustomUIColorSettingMenu(
             options.emplace_back(
                 String(i),
                 [colorType, updatedColor]() {
-                    if (colorType == 1) bruceConfig.priColor = updatedColor;
-                    else if (colorType == 2) bruceConfig.secColor = updatedColor;
-                    else bruceConfig.bgColor = updatedColor;
+                    if (colorType == 1) wilyConfig.priColor = updatedColor;
+                    else if (colorType == 2) wilyConfig.secColor = updatedColor;
+                    else wilyConfig.bgColor = updatedColor;
                 },
                 selectedIndex == i,
                 (colorType == 1 ? hoverFunctionPriColor
@@ -412,11 +412,11 @@ void setCustomUIColorSettingMenu(
     );
     if (selectedOption == -1 || selectedOption == options.size() - 1) {
         if (colorType == 1) {
-            bruceConfig.priColor = color;
+            wilyConfig.priColor = color;
         } else if (colorType == 2) {
-            bruceConfig.secColor = color;
+            wilyConfig.secColor = color;
         } else {
-            bruceConfig.bgColor = color;
+            wilyConfig.bgColor = color;
         }
         return;
     }
@@ -429,10 +429,10 @@ void setCustomUIColorSettingMenu(
 **********************************************************************/
 void setSoundConfig() {
     options = {
-        {"Som Desligado", [=]() { bruceConfig.setSoundEnabled(0); }, bruceConfig.soundEnabled == 0},
-        {"Som Ligado",  [=]() { bruceConfig.setSoundEnabled(1); }, bruceConfig.soundEnabled == 1},
+        {"Som Desligado", [=]() { wilyConfig.setSoundEnabled(0); }, wilyConfig.soundEnabled == 0},
+        {"Som Ligado",  [=]() { wilyConfig.setSoundEnabled(1); }, wilyConfig.soundEnabled == 1},
     };
-    loopOptions(options, bruceConfig.soundEnabled);
+    loopOptions(options, wilyConfig.soundEnabled);
 }
 
 /*********************************************************************
@@ -441,18 +441,18 @@ void setSoundConfig() {
 **********************************************************************/
 void setSoundVolume() {
     options = {
-        {"10%",  [=]() { bruceConfig.setSoundVolume(10); },  bruceConfig.soundVolume == 10 },
-        {"20%",  [=]() { bruceConfig.setSoundVolume(20); },  bruceConfig.soundVolume == 20 },
-        {"30%",  [=]() { bruceConfig.setSoundVolume(30); },  bruceConfig.soundVolume == 30 },
-        {"40%",  [=]() { bruceConfig.setSoundVolume(40); },  bruceConfig.soundVolume == 40 },
-        {"50%",  [=]() { bruceConfig.setSoundVolume(50); },  bruceConfig.soundVolume == 50 },
-        {"60%",  [=]() { bruceConfig.setSoundVolume(60); },  bruceConfig.soundVolume == 60 },
-        {"70%",  [=]() { bruceConfig.setSoundVolume(70); },  bruceConfig.soundVolume == 70 },
-        {"80%",  [=]() { bruceConfig.setSoundVolume(80); },  bruceConfig.soundVolume == 80 },
-        {"90%",  [=]() { bruceConfig.setSoundVolume(90); },  bruceConfig.soundVolume == 90 },
-        {"100%", [=]() { bruceConfig.setSoundVolume(100); }, bruceConfig.soundVolume == 100},
+        {"10%",  [=]() { wilyConfig.setSoundVolume(10); },  wilyConfig.soundVolume == 10 },
+        {"20%",  [=]() { wilyConfig.setSoundVolume(20); },  wilyConfig.soundVolume == 20 },
+        {"30%",  [=]() { wilyConfig.setSoundVolume(30); },  wilyConfig.soundVolume == 30 },
+        {"40%",  [=]() { wilyConfig.setSoundVolume(40); },  wilyConfig.soundVolume == 40 },
+        {"50%",  [=]() { wilyConfig.setSoundVolume(50); },  wilyConfig.soundVolume == 50 },
+        {"60%",  [=]() { wilyConfig.setSoundVolume(60); },  wilyConfig.soundVolume == 60 },
+        {"70%",  [=]() { wilyConfig.setSoundVolume(70); },  wilyConfig.soundVolume == 70 },
+        {"80%",  [=]() { wilyConfig.setSoundVolume(80); },  wilyConfig.soundVolume == 80 },
+        {"90%",  [=]() { wilyConfig.setSoundVolume(90); },  wilyConfig.soundVolume == 90 },
+        {"100%", [=]() { wilyConfig.setSoundVolume(100); }, wilyConfig.soundVolume == 100},
     };
-    loopOptions(options, bruceConfig.soundVolume);
+    loopOptions(options, wilyConfig.soundVolume);
 }
 
 #ifdef HAS_RGB_LED
@@ -463,10 +463,10 @@ void setSoundVolume() {
 **********************************************************************/
 void setLedBlinkConfig() {
     options = {
-        {"Piscar LED Off", [=]() { bruceConfig.setLedBlinkEnabled(0); }, bruceConfig.ledBlinkEnabled == 0},
-        {"Piscar LED On",  [=]() { bruceConfig.setLedBlinkEnabled(1); }, bruceConfig.ledBlinkEnabled == 1},
+        {"Piscar LED Off", [=]() { wilyConfig.setLedBlinkEnabled(0); }, wilyConfig.ledBlinkEnabled == 0},
+        {"Piscar LED On",  [=]() { wilyConfig.setLedBlinkEnabled(1); }, wilyConfig.ledBlinkEnabled == 1},
     };
-    loopOptions(options, bruceConfig.ledBlinkEnabled);
+    loopOptions(options, wilyConfig.ledBlinkEnabled);
 }
 #endif
 
@@ -476,10 +476,10 @@ void setLedBlinkConfig() {
 **********************************************************************/
 void setWifiStartupConfig() {
     options = {
-        {"Desativar", [=]() { bruceConfig.setWifiAtStartup(0); }, bruceConfig.wifiAtStartup == 0},
-        {"Ativar",  [=]() { bruceConfig.setWifiAtStartup(1); }, bruceConfig.wifiAtStartup == 1},
+        {"Desativar", [=]() { wilyConfig.setWifiAtStartup(0); }, wilyConfig.wifiAtStartup == 0},
+        {"Ativar",  [=]() { wilyConfig.setWifiAtStartup(1); }, wilyConfig.wifiAtStartup == 1},
     };
-    loopOptions(options, bruceConfig.wifiAtStartup);
+    loopOptions(options, wilyConfig.wifiAtStartup);
 }
 
 /*********************************************************************
@@ -488,7 +488,7 @@ void setWifiStartupConfig() {
 **********************************************************************/
 void addEvilWifiMenu() {
     String apName = keyboard("", 30, "Evil Portal SSID");
-    if (apName != "\x1B") bruceConfig.addEvilWifiName(apName);
+    if (apName != "\x1B") wilyConfig.addEvilWifiName(apName);
 }
 
 /*********************************************************************
@@ -498,8 +498,8 @@ void addEvilWifiMenu() {
 void removeEvilWifiMenu() {
     options = {};
 
-    for (const auto &wifi_name : bruceConfig.evilWifiNames) {
-        options.push_back({wifi_name.c_str(), [wifi_name]() { bruceConfig.removeEvilWifiName(wifi_name); }});
+    for (const auto &wifi_name : wilyConfig.evilWifiNames) {
+        options.push_back({wifi_name.c_str(), [wifi_name]() { wilyConfig.removeEvilWifiName(wifi_name); }});
     }
 
     options.push_back({"Cancelar", [=]() { backToMenu(); }});
@@ -512,8 +512,8 @@ void removeEvilWifiMenu() {
 **  Handles menu for changing the endpoint to access captured creds
 **********************************************************************/
 void setEvilEndpointCreds() {
-    String userInput = keyboard(bruceConfig.evilPortalEndpoints.getCredsEndpoint, 30, "Evil creds endpoint");
-    if (userInput != "\x1B") bruceConfig.setEvilEndpointCreds(userInput);
+    String userInput = keyboard(wilyConfig.evilPortalEndpoints.getCredsEndpoint, 30, "Evil creds endpoint");
+    if (userInput != "\x1B") wilyConfig.setEvilEndpointCreds(userInput);
 }
 
 /*********************************************************************
@@ -521,8 +521,8 @@ void setEvilEndpointCreds() {
 **  Handles menu for changing the endpoint to change evilSsid
 **********************************************************************/
 void setEvilEndpointSsid() {
-    String userInput = keyboard(bruceConfig.evilPortalEndpoints.setSsidEndpoint, 30, "Evil creds endpoint");
-    if (userInput != "\x1B") bruceConfig.setEvilEndpointSsid(userInput);
+    String userInput = keyboard(wilyConfig.evilPortalEndpoints.setSsidEndpoint, 30, "Evil creds endpoint");
+    if (userInput != "\x1B") wilyConfig.setEvilEndpointSsid(userInput);
 }
 
 /*********************************************************************
@@ -533,13 +533,13 @@ void setEvilEndpointSsid() {
 void setEvilAllowGetCreds() {
     options = {
         {"Bloquear",
-         [=]() { bruceConfig.setEvilAllowGetCreds(false); },
-         bruceConfig.evilPortalEndpoints.allowGetCreds == false},
+         [=]() { wilyConfig.setEvilAllowGetCreds(false); },
+         wilyConfig.evilPortalEndpoints.allowGetCreds == false},
         {"Permitir",
-         [=]() { bruceConfig.setEvilAllowGetCreds(true); },
-         bruceConfig.evilPortalEndpoints.allowGetCreds == true },
+         [=]() { wilyConfig.setEvilAllowGetCreds(true); },
+         wilyConfig.evilPortalEndpoints.allowGetCreds == true },
     };
-    loopOptions(options, bruceConfig.evilPortalEndpoints.allowGetCreds);
+    loopOptions(options, wilyConfig.evilPortalEndpoints.allowGetCreds);
 }
 
 /*********************************************************************
@@ -550,13 +550,13 @@ void setEvilAllowGetCreds() {
 void setEvilAllowSetSsid() {
     options = {
         {"Bloquear",
-         [=]() { bruceConfig.setEvilAllowSetSsid(false); },
-         bruceConfig.evilPortalEndpoints.allowSetSsid == false},
+         [=]() { wilyConfig.setEvilAllowSetSsid(false); },
+         wilyConfig.evilPortalEndpoints.allowSetSsid == false},
         {"Permitir",
-         [=]() { bruceConfig.setEvilAllowSetSsid(true); },
-         bruceConfig.evilPortalEndpoints.allowSetSsid == true },
+         [=]() { wilyConfig.setEvilAllowSetSsid(true); },
+         wilyConfig.evilPortalEndpoints.allowSetSsid == true },
     };
-    loopOptions(options, bruceConfig.evilPortalEndpoints.allowSetSsid);
+    loopOptions(options, wilyConfig.evilPortalEndpoints.allowSetSsid);
 }
 
 /*********************************************************************
@@ -567,13 +567,13 @@ void setEvilAllowSetSsid() {
 void setEvilAllowEndpointDisplay() {
     options = {
         {"Bloquear",
-         [=]() { bruceConfig.setEvilAllowEndpointDisplay(false); },
-         bruceConfig.evilPortalEndpoints.showEndpoints == false},
+         [=]() { wilyConfig.setEvilAllowEndpointDisplay(false); },
+         wilyConfig.evilPortalEndpoints.showEndpoints == false},
         {"Permitir",
-         [=]() { bruceConfig.setEvilAllowEndpointDisplay(true); },
-         bruceConfig.evilPortalEndpoints.showEndpoints == true },
+         [=]() { wilyConfig.setEvilAllowEndpointDisplay(true); },
+         wilyConfig.evilPortalEndpoints.showEndpoints == true },
     };
-    loopOptions(options, bruceConfig.evilPortalEndpoints.showEndpoints);
+    loopOptions(options, wilyConfig.evilPortalEndpoints.showEndpoints);
 }
 
 /*********************************************************************
@@ -583,19 +583,19 @@ void setEvilAllowEndpointDisplay() {
 void setEvilPasswordMode() {
     options = {
         {"Save 'password'",
-         [=]() { bruceConfig.setEvilPasswordMode(FULL_PASSWORD); },
-         bruceConfig.evilPortalPasswordMode == FULL_PASSWORD  },
+         [=]() { wilyConfig.setEvilPasswordMode(FULL_PASSWORD); },
+         wilyConfig.evilPortalPasswordMode == FULL_PASSWORD  },
         {"Save 'p******d'",
-         [=]() { bruceConfig.setEvilPasswordMode(FIRST_LAST_CHAR); },
-         bruceConfig.evilPortalPasswordMode == FIRST_LAST_CHAR},
+         [=]() { wilyConfig.setEvilPasswordMode(FIRST_LAST_CHAR); },
+         wilyConfig.evilPortalPasswordMode == FIRST_LAST_CHAR},
         {"Save '*hidden*'",
-         [=]() { bruceConfig.setEvilPasswordMode(HIDE_PASSWORD); },
-         bruceConfig.evilPortalPasswordMode == HIDE_PASSWORD  },
+         [=]() { wilyConfig.setEvilPasswordMode(HIDE_PASSWORD); },
+         wilyConfig.evilPortalPasswordMode == HIDE_PASSWORD  },
         {"Save length",
-         [=]() { bruceConfig.setEvilPasswordMode(SAVE_LENGTH); },
-         bruceConfig.evilPortalPasswordMode == SAVE_LENGTH    },
+         [=]() { wilyConfig.setEvilPasswordMode(SAVE_LENGTH); },
+         wilyConfig.evilPortalPasswordMode == SAVE_LENGTH    },
     };
-    loopOptions(options, bruceConfig.evilPortalPasswordMode);
+    loopOptions(options, wilyConfig.evilPortalPasswordMode);
 }
 
 /*********************************************************************
@@ -606,11 +606,11 @@ void setRFModuleMenu() {
     int result = 0;
     int idx = 0;
     uint8_t pins_setup = 0;
-    if (bruceConfigPins.rfModule == M5_RF_MODULE) idx = 0;
-    else if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
+    if (wilyConfigPins.rfModule == M5_RF_MODULE) idx = 0;
+    else if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
         idx = 1;
 #if defined(ARDUINO_M5STICK_C_PLUS) || defined(ARDUINO_M5STICK_C_PLUS2)
-        if (bruceConfigPins.CC1101_bus.mosi == GPIO_NUM_26) idx = 2;
+        if (wilyConfigPins.CC1101_bus.mosi == GPIO_NUM_26) idx = 2;
 #endif
     }
 
@@ -633,7 +633,7 @@ void setRFModuleMenu() {
         // This setting is meant to StickCPlus and StickCPlus2 to setup the ports from RF Menu
         if (pins_setup == 1) {
             result = CC1101_SPI_MODULE;
-            bruceConfigPins.setCC1101Pins(
+            wilyConfigPins.setCC1101Pins(
                 {(gpio_num_t)CC1101_SCK_PIN,
                  (gpio_num_t)CC1101_MISO_PIN,
                  (gpio_num_t)CC1101_MOSI_PIN,
@@ -641,7 +641,7 @@ void setRFModuleMenu() {
                  (gpio_num_t)CC1101_GDO0_PIN,
                  GPIO_NUM_NC}
             );
-            bruceConfigPins.setNrf24Pins(
+            wilyConfigPins.setNrf24Pins(
                 {(gpio_num_t)CC1101_SCK_PIN,
                  (gpio_num_t)CC1101_MISO_PIN,
                  (gpio_num_t)CC1101_MOSI_PIN,
@@ -652,7 +652,7 @@ void setRFModuleMenu() {
         } else if (pins_setup == 2) {
 #if CONFIG_SOC_GPIO_OUT_RANGE_MAX > 30
             result = CC1101_SPI_MODULE;
-            bruceConfigPins.setCC1101Pins(
+            wilyConfigPins.setCC1101Pins(
                 {(gpio_num_t)SDCARD_SCK,
                  (gpio_num_t)SDCARD_MISO,
                  (gpio_num_t)SDCARD_MOSI,
@@ -660,7 +660,7 @@ void setRFModuleMenu() {
                  GPIO_NUM_32,
                  GPIO_NUM_NC}
             );
-            bruceConfigPins.setNrf24Pins(
+            wilyConfigPins.setNrf24Pins(
                 {(gpio_num_t)SDCARD_SCK,
                  (gpio_num_t)SDCARD_MISO,
                  (gpio_num_t)SDCARD_MOSI,
@@ -671,7 +671,7 @@ void setRFModuleMenu() {
 #endif
         }
         if (initRfModule()) {
-            bruceConfigPins.setRfModule(CC1101_SPI_MODULE);
+            wilyConfigPins.setRfModule(CC1101_SPI_MODULE);
             deinitRfModule();
             if (pins_setup == 1) CC_NRF_SPI.end();
             return;
@@ -687,7 +687,7 @@ void setRFModuleMenu() {
         while (!check(AnyKeyPress)) vTaskDelay(50 / portTICK_PERIOD_MS);
     }
     // fallback to "M5 RF433T/R" on errors
-    bruceConfigPins.setRfModule(M5_RF_MODULE);
+    wilyConfigPins.setRfModule(M5_RF_MODULE);
 }
 
 /*********************************************************************
@@ -696,18 +696,18 @@ void setRFModuleMenu() {
 **********************************************************************/
 void setRFFreqMenu() {
     float result = 433.92;
-    String freq_str = num_keyboard(String(bruceConfigPins.rfFreq), 10, "Frequencia Padrao:");
+    String freq_str = num_keyboard(String(wilyConfigPins.rfFreq), 10, "Frequencia Padrao:");
     if (freq_str == "\x1B") return;
     if (freq_str.length() > 1) {
         result = freq_str.toFloat();          // returns 0 if not valid
-        if (isValidFrequency(result, bruceConfigPins.rfModule)) {
-            bruceConfigPins.setRfFreq(result);
+        if (isValidFrequency(result, wilyConfigPins.rfModule)) {
+            wilyConfigPins.setRfFreq(result);
             return;
         }
     }
     // else
     displayError("Frequencia Invalida");
-    bruceConfigPins.setRfFreq(433.92); // reset to default
+    wilyConfigPins.setRfFreq(433.92); // reset to default
     delay(1000);
 }
 
@@ -718,36 +718,36 @@ void setRFFreqMenu() {
 void setRFIDModuleMenu() {
     options = {
         {"M5 RFID2",
-         [=]() { bruceConfigPins.setRfidModule(M5_RFID2_MODULE); },
-         bruceConfigPins.rfidModule == M5_RFID2_MODULE     },
+         [=]() { wilyConfigPins.setRfidModule(M5_RFID2_MODULE); },
+         wilyConfigPins.rfidModule == M5_RFID2_MODULE     },
 #ifdef M5STICK
         {"PN532 I2C G33",
-         [=]() { bruceConfigPins.setRfidModule(PN532_I2C_MODULE); },
-         bruceConfigPins.rfidModule == PN532_I2C_MODULE    },
+         [=]() { wilyConfigPins.setRfidModule(PN532_I2C_MODULE); },
+         wilyConfigPins.rfidModule == PN532_I2C_MODULE    },
         {"PN532 I2C G36",
-         [=]() { bruceConfigPins.setRfidModule(PN532_I2C_SPI_MODULE); },
-         bruceConfigPins.rfidModule == PN532_I2C_SPI_MODULE},
+         [=]() { wilyConfigPins.setRfidModule(PN532_I2C_SPI_MODULE); },
+         wilyConfigPins.rfidModule == PN532_I2C_SPI_MODULE},
 #else
         {"PN532 em I2C",
-         [=]() { bruceConfigPins.setRfidModule(PN532_I2C_MODULE); },
-         bruceConfigPins.rfidModule == PN532_I2C_MODULE},
+         [=]() { wilyConfigPins.setRfidModule(PN532_I2C_MODULE); },
+         wilyConfigPins.rfidModule == PN532_I2C_MODULE},
 #endif
         {"PN532 em SPI",
-         [=]() { bruceConfigPins.setRfidModule(PN532_SPI_MODULE); },
-         bruceConfigPins.rfidModule == PN532_SPI_MODULE    },
+         [=]() { wilyConfigPins.setRfidModule(PN532_SPI_MODULE); },
+         wilyConfigPins.rfidModule == PN532_SPI_MODULE    },
         {"RC522 em SPI",
-         [=]() { bruceConfigPins.setRfidModule(RC522_SPI_MODULE); },
-         bruceConfigPins.rfidModule == RC522_SPI_MODULE    },
+         [=]() { wilyConfigPins.setRfidModule(RC522_SPI_MODULE); },
+         wilyConfigPins.rfidModule == RC522_SPI_MODULE    },
 #if !defined(LITE_VERSION)
         {"ST25R3916 em SPI",
-         [=]() { bruceConfigPins.setRfidModule(ST25R3916_SPI_MODULE); },
-         bruceConfigPins.rfidModule == ST25R3916_SPI_MODULE    },
+         [=]() { wilyConfigPins.setRfidModule(ST25R3916_SPI_MODULE); },
+         wilyConfigPins.rfidModule == ST25R3916_SPI_MODULE    },
         {"ST25R3916 em I2C",
-         [=]() { bruceConfigPins.setRfidModule(ST25R3916_I2C_MODULE); },
-         bruceConfigPins.rfidModule == ST25R3916_I2C_MODULE    },
+         [=]() { wilyConfigPins.setRfidModule(ST25R3916_I2C_MODULE); },
+         wilyConfigPins.rfidModule == ST25R3916_I2C_MODULE    },
 #endif
     };
-    loopOptions(options, bruceConfigPins.rfidModule);
+    loopOptions(options, wilyConfigPins.rfidModule);
 }
 
 /*********************************************************************
@@ -766,7 +766,7 @@ void addMifareKeyMenu() {
                 }
             }
             if (isHex) {
-                bruceConfig.addMifareKey(key);
+                wilyConfig.addMifareKey(key);
                 displaySuccess("Chave adicionada");
             } else {
                 displayError("Apenas caracteres HEX", true);
@@ -802,16 +802,16 @@ void setClock() {
     }
 
     options = {
-        {"Via NTP Definir Fuso",                                                 [&]() { bruceConfig.setAutomaticTimeUpdateViaNTP(true); } },
-        {"Definir Hora Manualmente",                                                    [&]() { bruceConfig.setAutomaticTimeUpdateViaNTP(false); }},
-        {("Horario Verao " + String(bruceConfig.dst ? "On" : "Off")).c_str(),
+        {"Via NTP Definir Fuso",                                                 [&]() { wilyConfig.setAutomaticTimeUpdateViaNTP(true); } },
+        {"Definir Hora Manualmente",                                                    [&]() { wilyConfig.setAutomaticTimeUpdateViaNTP(false); }},
+        {("Horario Verao " + String(wilyConfig.dst ? "On" : "Off")).c_str(),
          [&]() {
-             bruceConfig.setDST(!bruceConfig.dst);
+             wilyConfig.setDST(!wilyConfig.dst);
              updateClockTimezone();
              returnToMenu = true;
          }                                                                                                                                 },
-        {(bruceConfig.clock24hr ? "Formato 24H" : "Formato 12H"),          [&]() {
-             bruceConfig.setClock24Hr(!bruceConfig.clock24hr);
+        {(wilyConfig.clock24hr ? "Formato 24H" : "Formato 12H"),          [&]() {
+             wilyConfig.setClock24Hr(!wilyConfig.clock24hr);
              returnToMenu = true;
          }                                                          }
     };
@@ -821,7 +821,7 @@ void setClock() {
 
     if (returnToMenu) return;
 
-    if (bruceConfig.automaticTimeUpdateViaNTP) {
+    if (wilyConfig.automaticTimeUpdateViaNTP) {
         if (!WifiState::wifiConnected) wifiConnectMenu();
 
         options.clear();
@@ -877,10 +877,10 @@ void setClock() {
         int idx = 0;
         int i = 0;
         for (const auto &mapping : timezoneMappings) {
-            if (bruceConfig.tmz == mapping.offset) { idx = i; }
+            if (wilyConfig.tmz == mapping.offset) { idx = i; }
 
             options.emplace_back(
-                mapping.name, [=, &mapping]() { bruceConfig.setTmz(mapping.offset); }, idx == i
+                mapping.name, [=, &mapping]() { wilyConfig.setTmz(mapping.offset); }, idx == i
             );
             ++i;
         }
@@ -894,12 +894,12 @@ void setClock() {
         int idx = 0;
         int i = 0;
         for (const auto &offset : timezoneOffsets) {
-            if (bruceConfig.tmz == offset) idx = i;
+            if (wilyConfig.tmz == offset) idx = i;
 
             options.emplace_back(
                 ("UTC" + String(offset >= 0 ? "+" : "") + String(offset)).c_str(),
-                [=]() { bruceConfig.setTmz(offset); },
-                bruceConfig.tmz == offset
+                [=]() { wilyConfig.setTmz(offset); },
+                wilyConfig.tmz == offset
             );
             ++i;
         }
@@ -983,7 +983,7 @@ void runClockLoop(bool showMenuHint) {
 #endif
 
     // Delay due to SelPress() detected on run
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     delay(300);
 
     for (;;) {
@@ -995,13 +995,13 @@ void runClockLoop(bool showMenuHint) {
 #endif
             Serial.print("Current time: ");
             Serial.println(timeStr);
-            tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+            tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
             tft.drawRect(
                 BORDER_PAD_X,
                 BORDER_PAD_X,
                 tftWidth - 2 * BORDER_PAD_X,
                 tftHeight - 2 * BORDER_PAD_X,
-                bruceConfig.priColor
+                wilyConfig.priColor
             );
             uint8_t f_size = 4;
             for (uint8_t i = 4; i > 0; i--) {
@@ -1024,7 +1024,7 @@ void runClockLoop(bool showMenuHint) {
                     tftHeight / 2 + 20,
                     tftWidth - 2 * BORDER_PAD_X - 2,
                     20,
-                    bruceConfig.bgColor
+                    wilyConfig.bgColor
                 );
                 hintVisible = false;
             }
@@ -1033,7 +1033,7 @@ void runClockLoop(bool showMenuHint) {
 
         // Checks to exit the loop
         if (check(SelPress)) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             if (showMenuHint) {
                 // Exits the loop to return to the caller (ClockMenu)
                 break;
@@ -1045,7 +1045,7 @@ void runClockLoop(bool showMenuHint) {
         }
 
         if (check(EscPress)) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             returnToMenu = true;
             break;
         }
@@ -1059,9 +1059,9 @@ void runClockLoop(bool showMenuHint) {
 **  get or set IR Tx Pin
 **********************************************************************/
 int gsetIrTxPin(bool set) {
-    int result = bruceConfigPins.irTx;
+    int result = wilyConfigPins.irTx;
 
-    if (result > 50) bruceConfigPins.setIrTxPin(TXLED);
+    if (result > 50) wilyConfigPins.setIrTxPin(TXLED);
     if (set) {
         options.clear();
         std::vector<std::pair<const char *, int>> pins;
@@ -1069,7 +1069,7 @@ int gsetIrTxPin(bool set) {
         int idx = 100;
         int j = 0;
         for (auto pin : pins) {
-            if (pin.second == bruceConfigPins.irTx && idx == 100) idx = j;
+            if (pin.second == wilyConfigPins.irTx && idx == 100) idx = j;
             j++;
 #ifdef ALLOW_ALL_GPIO_FOR_IR_RF
             int i = pin.second;
@@ -1078,19 +1078,19 @@ int gsetIrTxPin(bool set) {
 #endif
                 options.push_back(
                     {pin.first,
-                     [=]() { bruceConfigPins.setIrTxPin(pin.second); },
-                     pin.second == bruceConfigPins.irTx}
+                     [=]() { wilyConfigPins.setIrTxPin(pin.second); },
+                     pin.second == wilyConfigPins.irTx}
                 );
         }
 
         loopOptions(options, idx);
         options.clear();
 
-        Serial.println("Saved pin: " + String(bruceConfigPins.irTx));
+        Serial.println("Saved pin: " + String(wilyConfigPins.irTx));
     }
 
     returnToMenu = true;
-    return bruceConfigPins.irTx;
+    return wilyConfigPins.irTx;
 }
 
 void setIrTxRepeats() {
@@ -1103,7 +1103,7 @@ void setIrTxRepeats() {
         {"Custom",           [&]() {
              // up to 99 repeats
              String rpt =
-                 num_keyboard(String(bruceConfigPins.irTxRepeats), 2, "Nbr of Repeats (+ 1 initial)");
+                 num_keyboard(String(wilyConfigPins.irTxRepeats), 2, "Nbr of Repeats (+ 1 initial)");
              chRpts = static_cast<uint8_t>(rpt.toInt());
          }                       },
     };
@@ -1113,16 +1113,16 @@ void setIrTxRepeats() {
 
     if (returnToMenu) return;
 
-    bruceConfigPins.setIrTxRepeats(chRpts);
+    wilyConfigPins.setIrTxRepeats(chRpts);
 }
 /*********************************************************************
 **  Function: gsetIrRxPin
 **  get or set IR Rx Pin
 **********************************************************************/
 int gsetIrRxPin(bool set) {
-    int result = bruceConfigPins.irRx;
+    int result = wilyConfigPins.irRx;
 
-    if (result > 45) bruceConfigPins.setIrRxPin(GROVE_SCL);
+    if (result > 45) wilyConfigPins.setIrRxPin(GROVE_SCL);
     if (set) {
         options.clear();
         std::vector<std::pair<const char *, int>> pins;
@@ -1130,7 +1130,7 @@ int gsetIrRxPin(bool set) {
         int idx = -1;
         int j = 0;
         for (auto pin : pins) {
-            if (pin.second == bruceConfigPins.irRx && idx < 0) idx = j;
+            if (pin.second == wilyConfigPins.irRx && idx < 0) idx = j;
             j++;
 #ifdef ALLOW_ALL_GPIO_FOR_IR_RF
             int i = pin.second;
@@ -1139,8 +1139,8 @@ int gsetIrRxPin(bool set) {
 #endif
                 options.push_back(
                     {pin.first,
-                     [=]() { bruceConfigPins.setIrRxPin(pin.second); },
-                     pin.second == bruceConfigPins.irRx}
+                     [=]() { wilyConfigPins.setIrRxPin(pin.second); },
+                     pin.second == wilyConfigPins.irRx}
                 );
         }
 
@@ -1148,7 +1148,7 @@ int gsetIrRxPin(bool set) {
     }
 
     returnToMenu = true;
-    return bruceConfigPins.irRx;
+    return wilyConfigPins.irRx;
 }
 
 /*********************************************************************
@@ -1156,9 +1156,9 @@ int gsetIrRxPin(bool set) {
 **  get or set RF Tx Pin
 **********************************************************************/
 int gsetRfTxPin(bool set) {
-    int result = bruceConfigPins.rfTx;
+    int result = wilyConfigPins.rfTx;
 
-    if (result > 45) bruceConfigPins.setRfTxPin(GROVE_SDA);
+    if (result > 45) wilyConfigPins.setRfTxPin(GROVE_SDA);
     if (set) {
         options.clear();
         std::vector<std::pair<const char *, int>> pins;
@@ -1166,7 +1166,7 @@ int gsetRfTxPin(bool set) {
         int idx = -1;
         int j = 0;
         for (auto pin : pins) {
-            if (pin.second == bruceConfigPins.rfTx && idx < 0) idx = j;
+            if (pin.second == wilyConfigPins.rfTx && idx < 0) idx = j;
             j++;
 #ifdef ALLOW_ALL_GPIO_FOR_IR_RF
             int i = pin.second;
@@ -1175,8 +1175,8 @@ int gsetRfTxPin(bool set) {
 #endif
                 options.push_back(
                     {pin.first,
-                     [=]() { bruceConfigPins.setRfTxPin(pin.second); },
-                     pin.second == bruceConfigPins.rfTx}
+                     [=]() { wilyConfigPins.setRfTxPin(pin.second); },
+                     pin.second == wilyConfigPins.rfTx}
                 );
         }
 
@@ -1185,7 +1185,7 @@ int gsetRfTxPin(bool set) {
     }
 
     returnToMenu = true;
-    return bruceConfigPins.rfTx;
+    return wilyConfigPins.rfTx;
 }
 
 /*********************************************************************
@@ -1193,9 +1193,9 @@ int gsetRfTxPin(bool set) {
 **  get or set FR Rx Pin
 **********************************************************************/
 int gsetRfRxPin(bool set) {
-    int result = bruceConfigPins.rfRx;
+    int result = wilyConfigPins.rfRx;
 
-    if (result > 36) bruceConfigPins.setRfRxPin(GROVE_SCL);
+    if (result > 36) wilyConfigPins.setRfRxPin(GROVE_SCL);
     if (set) {
         options.clear();
         std::vector<std::pair<const char *, int>> pins;
@@ -1203,7 +1203,7 @@ int gsetRfRxPin(bool set) {
         int idx = -1;
         int j = 0;
         for (auto pin : pins) {
-            if (pin.second == bruceConfigPins.rfRx && idx < 0) idx = j;
+            if (pin.second == wilyConfigPins.rfRx && idx < 0) idx = j;
             j++;
 #ifdef ALLOW_ALL_GPIO_FOR_IR_RF
             int i = pin.second;
@@ -1212,8 +1212,8 @@ int gsetRfRxPin(bool set) {
 #endif
                 options.push_back(
                     {pin.first,
-                     [=]() { bruceConfigPins.setRfRxPin(pin.second); },
-                     pin.second == bruceConfigPins.rfRx}
+                     [=]() { wilyConfigPins.setRfRxPin(pin.second); },
+                     pin.second == wilyConfigPins.rfRx}
                 );
         }
 
@@ -1222,7 +1222,7 @@ int gsetRfRxPin(bool set) {
     }
 
     returnToMenu = true;
-    return bruceConfigPins.rfRx;
+    return wilyConfigPins.rfRx;
 }
 
 /*********************************************************************
@@ -1231,19 +1231,19 @@ int gsetRfRxPin(bool set) {
 **********************************************************************/
 void setStartupApp() {
     int idx = 0;
-    if (bruceConfig.startupApp == "") idx = 0;
+    if (wilyConfig.startupApp == "") idx = 0;
 
     options = {
-        {"None", [=]() { bruceConfig.setStartupApp(""); }, bruceConfig.startupApp == ""}
+        {"None", [=]() { wilyConfig.setStartupApp(""); }, wilyConfig.startupApp == ""}
     };
 
     int index = 0;
     for (String appName : startupApp.getAppNames()) {
         index++;
-        if (bruceConfig.startupApp == appName) idx = index;
+        if (wilyConfig.startupApp == appName) idx = index;
 
         options.push_back({appName.c_str(), [=]() {
-                               bruceConfig.setStartupApp(appName);
+                               wilyConfig.setStartupApp(appName);
 #if !defined(LITE_VERSION) && !defined(DISABLE_INTERPRETER)
                                if (appName == "JS Interpreter") {
                                    options = getScriptsOptionsList("", true);
@@ -1263,16 +1263,16 @@ void setStartupApp() {
 **********************************************************************/
 void setGpsBaudrateMenu() {
     options = {
-        {"9600 bps",   [=]() { bruceConfigPins.setGpsBaudrate(9600); },  bruceConfigPins.gpsBaudrate == 9600 },
-        {"19200 bps",  [=]() { bruceConfigPins.setGpsBaudrate(19200); }, bruceConfigPins.gpsBaudrate == 19200},
-        {"38400 bps",  [=]() { bruceConfigPins.setGpsBaudrate(38400); }, bruceConfigPins.gpsBaudrate == 38400},
-        {"57600 bps",  [=]() { bruceConfigPins.setGpsBaudrate(57600); }, bruceConfigPins.gpsBaudrate == 57600},
+        {"9600 bps",   [=]() { wilyConfigPins.setGpsBaudrate(9600); },  wilyConfigPins.gpsBaudrate == 9600 },
+        {"19200 bps",  [=]() { wilyConfigPins.setGpsBaudrate(19200); }, wilyConfigPins.gpsBaudrate == 19200},
+        {"38400 bps",  [=]() { wilyConfigPins.setGpsBaudrate(38400); }, wilyConfigPins.gpsBaudrate == 38400},
+        {"57600 bps",  [=]() { wilyConfigPins.setGpsBaudrate(57600); }, wilyConfigPins.gpsBaudrate == 57600},
         {"115200 bps",
-         [=]() { bruceConfigPins.setGpsBaudrate(115200); },
-         bruceConfigPins.gpsBaudrate == 115200                                                               },
+         [=]() { wilyConfigPins.setGpsBaudrate(115200); },
+         wilyConfigPins.gpsBaudrate == 115200                                                               },
     };
 
-    loopOptions(options, bruceConfigPins.gpsBaudrate);
+    loopOptions(options, wilyConfigPins.gpsBaudrate);
 }
 
 /*********************************************************************
@@ -1280,18 +1280,18 @@ void setGpsBaudrateMenu() {
 **  Handles Menu to set the WiFi AP SSID
 **********************************************************************/
 void setWifiApSsidMenu() {
-    const String defaultSsid = bruceConfig.getDefaultWifiApSsid();
-    const bool isDefault = bruceConfig.wifiAp.ssid == defaultSsid;
+    const String defaultSsid = wilyConfig.getDefaultWifiApSsid();
+    const bool isDefault = wilyConfig.wifiAp.ssid == defaultSsid;
 
     options = {
         {"Default (" + defaultSsid + ")",
-         [=]() { bruceConfig.setWifiApCreds(defaultSsid, bruceConfig.wifiAp.pwd); },
+         [=]() { wilyConfig.setWifiApCreds(defaultSsid, wilyConfig.wifiAp.pwd); },
          isDefault                                                                            },
         {"Custom",
          [=]() {
-             String newSsid = keyboard(bruceConfig.wifiAp.ssid, 32, "WiFi AP SSID:");
+             String newSsid = keyboard(wilyConfig.wifiAp.ssid, 32, "WiFi AP SSID:");
              if (newSsid != "\x1B") {
-                 if (!newSsid.isEmpty()) bruceConfig.setWifiApCreds(newSsid, bruceConfig.wifiAp.pwd);
+                 if (!newSsid.isEmpty()) wilyConfig.setWifiApCreds(newSsid, wilyConfig.wifiAp.pwd);
                  else displayError("SSID cannot be empty", true);
              }
          },                                                                         !isDefault},
@@ -1306,18 +1306,18 @@ void setWifiApSsidMenu() {
 **  Handles Menu to set the WiFi AP Password
 **********************************************************************/
 void setWifiApPasswordMenu() {
-    const String defaultPwd = bruceConfig.getDefaultWifiApPwd();
-    const bool isDefault = bruceConfig.wifiAp.pwd == defaultPwd;
+    const String defaultPwd = wilyConfig.getDefaultWifiApPwd();
+    const bool isDefault = wilyConfig.wifiAp.pwd == defaultPwd;
 
     options = {
         {"Default (" + defaultPwd + ")",
-         [=]() { bruceConfig.setWifiApCreds(bruceConfig.wifiAp.ssid, defaultPwd); },
+         [=]() { wilyConfig.setWifiApCreds(wilyConfig.wifiAp.ssid, defaultPwd); },
          isDefault                                                                             },
         {"Custom",
          [=]() {
-             String newPassword = keyboard(bruceConfig.wifiAp.pwd, 32, "WiFi AP Password:", true);
+             String newPassword = keyboard(wilyConfig.wifiAp.pwd, 32, "WiFi AP Password:", true);
              if (newPassword != "\x1B") {
-                 if (!newPassword.isEmpty()) bruceConfig.setWifiApCreds(bruceConfig.wifiAp.ssid, newPassword);
+                 if (!newPassword.isEmpty()) wilyConfig.setWifiApCreds(wilyConfig.wifiAp.ssid, newPassword);
                  else displayError("Password cannot be empty", true);
              }
          },                                                                          !isDefault},
@@ -1374,7 +1374,7 @@ void setBadUSBBLEMenu() {
 **  Main Menu for setting Bad USB/BLE Keyboard Layout
 **********************************************************************/
 void setBadUSBBLEKeyboardLayoutMenu() {
-    uint8_t opt = bruceConfig.badUSBBLEKeyboardLayout;
+    uint8_t opt = wilyConfig.badUSBBLEKeyboardLayout;
 
     options.clear();
     options = {
@@ -1397,7 +1397,7 @@ void setBadUSBBLEKeyboardLayoutMenu() {
 
     loopOptions(options, opt);
 
-    if (opt != bruceConfig.badUSBBLEKeyboardLayout) { bruceConfig.setBadUSBBLEKeyboardLayout(opt); }
+    if (opt != wilyConfig.badUSBBLEKeyboardLayout) { wilyConfig.setBadUSBBLEKeyboardLayout(opt); }
 }
 
 /*********************************************************************
@@ -1405,11 +1405,11 @@ void setBadUSBBLEKeyboardLayoutMenu() {
 **  Main Menu for setting Bad USB/BLE Keyboard Key Delay
 **********************************************************************/
 void setBadUSBBLEKeyDelayMenu() {
-    String delayStr = num_keyboard(String(bruceConfig.badUSBBLEKeyDelay), 3, "Key Delay (ms):");
+    String delayStr = num_keyboard(String(wilyConfig.badUSBBLEKeyDelay), 3, "Key Delay (ms):");
     if (delayStr != "\x1B") {
         uint16_t delayVal = static_cast<uint16_t>(delayStr.toInt());
         if (delayVal <= 500) {
-            bruceConfig.setBadUSBBLEKeyDelay(delayVal);
+            wilyConfig.setBadUSBBLEKeyDelay(delayVal);
         } else if (delayVal != 0) {
             displayError("Atraso invalido (0 a 500)", true);
         }
@@ -1423,12 +1423,12 @@ void setBadUSBBLEKeyDelayMenu() {
 void setBadUSBBLEShowOutputMenu() {
     options.clear();
     options = {
-        {"Enable",  [&]() { bruceConfig.setBadUSBBLEShowOutput(true); } },
-        {"Disable", [&]() { bruceConfig.setBadUSBBLEShowOutput(false); }},
+        {"Enable",  [&]() { wilyConfig.setBadUSBBLEShowOutput(true); } },
+        {"Disable", [&]() { wilyConfig.setBadUSBBLEShowOutput(false); }},
     };
     addOptionToMainMenu();
 
-    loopOptions(options, bruceConfig.badUSBBLEShowOutput ? 0 : 1);
+    loopOptions(options, wilyConfig.badUSBBLEShowOutput ? 0 : 1);
 }
 
 /*********************************************************************
@@ -1436,24 +1436,24 @@ void setBadUSBBLEShowOutputMenu() {
 **  Handles Menu to configure WiFi MAC Address
 **********************************************************************/
 void setMacAddressMenu() {
-    String currentMAC = bruceConfig.wifiMAC;
+    String currentMAC = wilyConfig.wifiMAC;
     if (currentMAC == "") currentMAC = WiFi.macAddress();
 
     options.clear();
     options = {
         {"Default MAC (" + WiFi.macAddress() + ")",
-         [&]() { bruceConfig.setWifiMAC(""); },
-         bruceConfig.wifiMAC == ""},
+         [&]() { wilyConfig.setWifiMAC(""); },
+         wilyConfig.wifiMAC == ""},
         {"Set Custom MAC",
          [&]() {
-             String newMAC = keyboard(bruceConfig.wifiMAC, 17, "XX:YY:ZZ:AA:BB:CC");
+             String newMAC = keyboard(wilyConfig.wifiMAC, 17, "XX:YY:ZZ:AA:BB:CC");
              if (newMAC == "\x1B") return;
              if (newMAC.length() == 17) {
-                 bruceConfig.setWifiMAC(newMAC);
+                 wilyConfig.setWifiMAC(newMAC);
              } else {
                  displayError("MAC invalido");
              }
-         }, bruceConfig.wifiMAC != ""},
+         }, wilyConfig.wifiMAC != ""},
         {"Random MAC", [&]() {
              uint8_t randomMac[6];
              for (int i = 0; i < 6; i++) randomMac[i] = random(0x00, 0xFF);
@@ -1468,7 +1468,7 @@ void setMacAddressMenu() {
                  randomMac[4],
                  randomMac[5]
              );
-             bruceConfig.setWifiMAC(String(buf));
+             wilyConfig.setWifiMAC(String(buf));
          }}
     };
 
@@ -1480,10 +1480,10 @@ void setMacAddressMenu() {
 **  Function: setSPIPins
 **  Main Menu to manually set SPI Pins
 **********************************************************************/
-void setSPIPinsMenu(BruceConfigPins::SPIPins &value) {
+void setSPIPinsMenu(WilyConfigPins::SPIPins &value) {
     uint8_t opt = 0;
     bool changed = false;
-    BruceConfigPins::SPIPins points = value;
+    WilyConfigPins::SPIPins points = value;
 
 RELOAD:
     options = {
@@ -1502,7 +1502,7 @@ RELOAD:
     else if (opt == 7) {
         if (changed) {
             value = points;
-            bruceConfigPins.setSpiPins(value);
+            wilyConfigPins.setSpiPins(value);
         }
     } else {
         options = {};
@@ -1535,10 +1535,10 @@ RELOAD:
 **  Function: setUARTPins
 **  Main Menu to manually set SPI Pins
 **********************************************************************/
-void setUARTPinsMenu(BruceConfigPins::UARTPins &value) {
+void setUARTPinsMenu(WilyConfigPins::UARTPins &value) {
     uint8_t opt = 0;
     bool changed = false;
-    BruceConfigPins::UARTPins points = value;
+    WilyConfigPins::UARTPins points = value;
 
 RELOAD:
     options = {
@@ -1553,7 +1553,7 @@ RELOAD:
     else if (opt == 7) {
         if (changed) {
             value = points;
-            bruceConfigPins.setUARTPins(value);
+            wilyConfigPins.setUARTPins(value);
         }
     } else {
         options = {};
@@ -1578,10 +1578,10 @@ RELOAD:
 **  Function: setI2CPins
 **  Main Menu to manually set SPI Pins
 **********************************************************************/
-void setI2CPinsMenu(BruceConfigPins::I2CPins &value) {
+void setI2CPinsMenu(WilyConfigPins::I2CPins &value) {
     uint8_t opt = 0;
     bool changed = false;
-    BruceConfigPins::I2CPins points = value;
+    WilyConfigPins::I2CPins points = value;
 
 RELOAD:
     options = {
@@ -1596,7 +1596,7 @@ RELOAD:
     else if (opt == 7) {
         if (changed) {
             value = points;
-            bruceConfigPins.setI2CPins(value);
+            wilyConfigPins.setI2CPins(value);
         }
     } else {
         options = {};
@@ -1627,21 +1627,21 @@ void setTheme() {
         {"Little FS", [&]() { fs = &LittleFS; }},
         {"Default",
          [&]() {
-             bruceConfig.removeTheme();
-             bruceConfig.themePath = "";
-             bruceConfig.theme.fs = 0;
-             bruceConfig.secColor = DEFAULT_SECCOLOR;
-             bruceConfig.bgColor = TFT_BLACK;
-             bruceConfig.setUiColor(DEFAULT_PRICOLOR);
+             wilyConfig.removeTheme();
+             wilyConfig.themePath = "";
+             wilyConfig.theme.fs = 0;
+             wilyConfig.secColor = DEFAULT_SECCOLOR;
+             wilyConfig.bgColor = TFT_BLACK;
+             wilyConfig.setUiColor(DEFAULT_PRICOLOR);
 #ifdef HAS_RGB_LED
-             bruceConfig.ledBright = 50;
-             bruceConfig.ledColor = 0x960064;
-             bruceConfig.ledEffect = 0;
-             bruceConfig.ledEffectSpeed = 5;
-             bruceConfig.ledEffectDirection = 1;
+             wilyConfig.ledBright = 50;
+             wilyConfig.ledColor = 0x960064;
+             wilyConfig.ledEffect = 0;
+             wilyConfig.ledEffectSpeed = 5;
+             wilyConfig.ledEffectDirection = 1;
              ledSetup();
 #endif
-             bruceConfig.saveFile();
+             wilyConfig.saveFile();
              fs = nullptr;
          }                                     },
         {"Main Menu", [&]() { fs = nullptr; }  }
@@ -1653,13 +1653,13 @@ void setTheme() {
     if (fs == nullptr) return;
 
     String filepath = loopSD(*fs, true, "JSON");
-    if (bruceConfig.openThemeFile(fs, filepath, true)) {
-        bruceConfig.themePath = filepath;
-        if (fs == &LittleFS) bruceConfig.theme.fs = 1;
-        else if (fs == &SD) bruceConfig.theme.fs = 2;
-        else bruceConfig.theme.fs = 0;
+    if (wilyConfig.openThemeFile(fs, filepath, true)) {
+        wilyConfig.themePath = filepath;
+        if (fs == &LittleFS) wilyConfig.theme.fs = 1;
+        else if (fs == &SD) wilyConfig.theme.fs = 2;
+        else wilyConfig.theme.fs = 0;
 
-        bruceConfig.saveFile();
+        wilyConfig.saveFile();
     }
 }
 #if !defined(LITE_VERSION)

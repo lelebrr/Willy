@@ -9,6 +9,7 @@
 #include "modules/ble/advanced_ble_atks.h"
 #ifndef LITE_VERSION
 #include "modules/ble/BLE_Suite.h"
+#include "modules/ble/ble_advanced.h"
 #endif
 #include <globals.h>
 
@@ -50,6 +51,7 @@ void BleMenu::optionsMenu() {
     options.push_back({"BLE Sniffers", bleSniffersMenu});
     options.push_back({"BLE Spam Avancado", bleSpamMenu});
     options.push_back({"BLE Suite", [=]() { BleSuiteMenu(); }});
+    options.push_back({"BLE Suite Avancada", [=]() { bleAdvancedSuiteMenu(); }});
 #endif
     options.push_back({"Config", [this]() { configMenu(); }});
     addOptionToMainMenu();
@@ -84,8 +86,8 @@ void BleMenu::drawIcon(float scale) {
         iconCenterX - iconW,
         iconCenterY - iconH / 4,
         lineWidth,
-        bruceConfig.priColor,
-        bruceConfig.priColor
+        wilyConfig.priColor,
+        wilyConfig.priColor
     );
     tft.drawWideLine(
         iconCenterX,
@@ -93,8 +95,8 @@ void BleMenu::drawIcon(float scale) {
         iconCenterX - iconW,
         iconCenterY + iconH / 4,
         lineWidth,
-        bruceConfig.priColor,
-        bruceConfig.priColor
+        wilyConfig.priColor,
+        wilyConfig.priColor
     );
     tft.drawWideLine(
         iconCenterX,
@@ -102,8 +104,8 @@ void BleMenu::drawIcon(float scale) {
         iconCenterX - iconW / 2,
         iconCenterY + iconH / 2,
         lineWidth,
-        bruceConfig.priColor,
-        bruceConfig.priColor
+        wilyConfig.priColor,
+        wilyConfig.priColor
     );
     tft.drawWideLine(
         iconCenterX,
@@ -111,8 +113,8 @@ void BleMenu::drawIcon(float scale) {
         iconCenterX - iconW / 2,
         iconCenterY - iconH / 2,
         lineWidth,
-        bruceConfig.priColor,
-        bruceConfig.priColor
+        wilyConfig.priColor,
+        wilyConfig.priColor
     );
 
     tft.drawWideLine(
@@ -121,8 +123,8 @@ void BleMenu::drawIcon(float scale) {
         iconCenterX - iconW / 2,
         iconCenterY + iconH / 2,
         lineWidth,
-        bruceConfig.priColor,
-        bruceConfig.priColor
+        wilyConfig.priColor,
+        wilyConfig.priColor
     );
 
     tft.drawArc(
@@ -132,8 +134,8 @@ void BleMenu::drawIcon(float scale) {
         2 * radius,
         210,
         330,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -142,8 +144,8 @@ void BleMenu::drawIcon(float scale) {
         2 * radius + deltaRadius,
         210,
         330,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -152,8 +154,8 @@ void BleMenu::drawIcon(float scale) {
         2 * radius + 2 * deltaRadius,
         210,
         330,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
 }
 
@@ -164,16 +166,16 @@ void BleMenu::drawIcon(float scale) {
 void BleMenu::setBleNameMenu() {
     const String defaultBleName = "Keyboard_" + String((uint8_t)(ESP.getEfuseMac() >> 32), HEX);
 
-    const bool isDefault = bruceConfigPins.bleName == defaultBleName;
+    const bool isDefault = wilyConfigPins.bleName == defaultBleName;
 
     options = {
-        {"Padrao", [=]() { bruceConfigPins.setBleName(defaultBleName); }, isDefault },
+        {"Padrao", [=]() { wilyConfigPins.setBleName(defaultBleName); }, isDefault },
         {"Custom",
          [=]() {
-             String newBleName = keyboard(bruceConfigPins.bleName, 30, "Nome Disp BLE:");
+             String newBleName = keyboard(wilyConfigPins.bleName, 30, "Nome Disp BLE:");
              if (newBleName != "\x1B") {
                  if (newBleName.length() > 0 && newBleName.length() <= 30) {
-                     bruceConfigPins.setBleName(newBleName);
+                     wilyConfigPins.setBleName(newBleName);
                  } else if (newBleName.isEmpty()) {
                      displayError("Nome BLE nao pode ser vazio", true);
                  } else {

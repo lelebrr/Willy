@@ -23,41 +23,41 @@ static bool connected = false;
 /** Select the proper SPI bus for the W5500, reusing existing shared buses when possible. */
 static SPIClass *selectEthernetSPIBus() {
     SPIClass *selectedSPI = &SPI;
-    if (bruceConfigPins.W5500_bus.mosi == (gpio_num_t)TFT_MOSI &&
-        bruceConfigPins.W5500_bus.mosi != GPIO_NUM_NC) {
+    if (wilyConfigPins.W5500_bus.mosi == (gpio_num_t)TFT_MOSI &&
+        wilyConfigPins.W5500_bus.mosi != GPIO_NUM_NC) {
 #if TFT_MOSI > 0
         selectedSPI = &tft.getSPIinstance();
         Serial.println("Using TFT SPI for Ethernet");
 #else
         Serial.println("TFT SPI unavailable, falling back to default SPI for Ethernet");
 #endif
-    } else if (bruceConfigPins.W5500_bus.mosi == bruceConfigPins.SDCARD_bus.mosi &&
-               bruceConfigPins.W5500_bus.mosi != GPIO_NUM_NC) {
+    } else if (wilyConfigPins.W5500_bus.mosi == wilyConfigPins.SDCARD_bus.mosi &&
+               wilyConfigPins.W5500_bus.mosi != GPIO_NUM_NC) {
         selectedSPI = &sdcardSPI;
         sdcardSPI.begin(
-            (int8_t)bruceConfigPins.W5500_bus.sck,
-            (int8_t)bruceConfigPins.W5500_bus.miso,
-            (int8_t)bruceConfigPins.W5500_bus.mosi,
-            (int8_t)bruceConfigPins.W5500_bus.cs
+            (int8_t)wilyConfigPins.W5500_bus.sck,
+            (int8_t)wilyConfigPins.W5500_bus.miso,
+            (int8_t)wilyConfigPins.W5500_bus.mosi,
+            (int8_t)wilyConfigPins.W5500_bus.cs
         );
         Serial.println("Using SDCard SPI for Ethernet");
-    } else if ((bruceConfigPins.W5500_bus.mosi == bruceConfigPins.NRF24_bus.mosi ||
-                bruceConfigPins.W5500_bus.mosi == bruceConfigPins.CC1101_bus.mosi) &&
-               bruceConfigPins.W5500_bus.mosi != GPIO_NUM_NC) {
+    } else if ((wilyConfigPins.W5500_bus.mosi == wilyConfigPins.NRF24_bus.mosi ||
+                wilyConfigPins.W5500_bus.mosi == wilyConfigPins.CC1101_bus.mosi) &&
+               wilyConfigPins.W5500_bus.mosi != GPIO_NUM_NC) {
         selectedSPI = &CC_NRF_SPI;
         CC_NRF_SPI.begin(
-            (int8_t)bruceConfigPins.W5500_bus.sck,
-            (int8_t)bruceConfigPins.W5500_bus.miso,
-            (int8_t)bruceConfigPins.W5500_bus.mosi,
-            (int8_t)bruceConfigPins.W5500_bus.cs
+            (int8_t)wilyConfigPins.W5500_bus.sck,
+            (int8_t)wilyConfigPins.W5500_bus.miso,
+            (int8_t)wilyConfigPins.W5500_bus.mosi,
+            (int8_t)wilyConfigPins.W5500_bus.cs
         );
         Serial.println("Using CC/NRF SPI for Ethernet");
     } else {
         SPI.begin(
-            (int8_t)bruceConfigPins.W5500_bus.sck,
-            (int8_t)bruceConfigPins.W5500_bus.miso,
-            (int8_t)bruceConfigPins.W5500_bus.mosi,
-            (int8_t)bruceConfigPins.W5500_bus.cs
+            (int8_t)wilyConfigPins.W5500_bus.sck,
+            (int8_t)wilyConfigPins.W5500_bus.miso,
+            (int8_t)wilyConfigPins.W5500_bus.mosi,
+            (int8_t)wilyConfigPins.W5500_bus.cs
         );
         Serial.println("Using dedicated SPI for Ethernet");
     }
@@ -128,8 +128,8 @@ void EthernetHelper::generate_mac() {
 }
 
 bool EthernetHelper::setup() {
-    if (bruceConfigPins.W5500_bus.cs == GPIO_NUM_NC || bruceConfigPins.W5500_bus.sck == GPIO_NUM_NC ||
-        bruceConfigPins.W5500_bus.miso == GPIO_NUM_NC || bruceConfigPins.W5500_bus.mosi == GPIO_NUM_NC) {
+    if (wilyConfigPins.W5500_bus.cs == GPIO_NUM_NC || wilyConfigPins.W5500_bus.sck == GPIO_NUM_NC ||
+        wilyConfigPins.W5500_bus.miso == GPIO_NUM_NC || wilyConfigPins.W5500_bus.mosi == GPIO_NUM_NC) {
         displayError("W5500 Pins not set", true);
         Serial.println("W5500 pins not configured, skipping Ethernet setup.");
         return false;
@@ -145,11 +145,11 @@ bool EthernetHelper::setup() {
     ethEventId = Network.onEvent(ethernet_event_handler);
 
     ethSpi = selectEthernetSPIBus();
-    const int csPin = static_cast<int>(bruceConfigPins.W5500_bus.cs);
+    const int csPin = static_cast<int>(wilyConfigPins.W5500_bus.cs);
     const int irqPin =
-        (bruceConfigPins.W5500_bus.io0 == GPIO_NUM_NC) ? -1 : static_cast<int>(bruceConfigPins.W5500_bus.io0);
+        (wilyConfigPins.W5500_bus.io0 == GPIO_NUM_NC) ? -1 : static_cast<int>(wilyConfigPins.W5500_bus.io0);
     const int rstPin =
-        (bruceConfigPins.W5500_bus.io2 == GPIO_NUM_NC) ? -1 : static_cast<int>(bruceConfigPins.W5500_bus.io2);
+        (wilyConfigPins.W5500_bus.io2 == GPIO_NUM_NC) ? -1 : static_cast<int>(wilyConfigPins.W5500_bus.io2);
 
     if (!ETH.begin(ETH_PHY_W5500, 1, csPin, irqPin, rstPin, *ethSpi)) {
         displayError("Ethernet start failed", true);

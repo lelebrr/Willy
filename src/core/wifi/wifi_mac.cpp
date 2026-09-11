@@ -6,10 +6,10 @@
 #include <esp_wifi.h>
 
 void applyConfiguredMAC() {
-    if (bruceConfig.wifiMAC.length() == 17 && validateMACFormat(bruceConfig.wifiMAC)) {
+    if (wilyConfig.wifiMAC.length() == 17 && validateMACFormat(wilyConfig.wifiMAC)) {
         uint8_t newMAC[6];
         if (sscanf(
-            bruceConfig.wifiMAC.c_str(),
+            wilyConfig.wifiMAC.c_str(),
             "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
             &newMAC[0],
             &newMAC[1],
@@ -19,7 +19,7 @@ void applyConfiguredMAC() {
             &newMAC[5]
         ) == 6) {
             if (esp_wifi_set_mac(WIFI_IF_STA, newMAC) == ESP_OK) {
-                Serial.println("[WiFi] Custom MAC applied: " + bruceConfig.wifiMAC);
+                Serial.println("[WiFi] Custom MAC applied: " + wilyConfig.wifiMAC);
             } else {
                 Serial.println("[WiFi] Failed to apply custom MAC, using default");
             }
@@ -44,8 +44,8 @@ bool setCustomMAC(const String &mac) {
         displayError("MAC inválido!");
         return false;
     }
-    bruceConfig.wifiMAC = mac;
-    bruceConfig.saveFile();
+    wilyConfig.wifiMAC = mac;
+    wilyConfig.saveFile();
     return true;
 }
 
@@ -62,8 +62,8 @@ String generateRandomMAC() {
 void wifiMACMenu() {
     String currentMAC;
 
-    if (bruceConfig.wifiMAC != "" && validateMACFormat(bruceConfig.wifiMAC)) {
-        currentMAC = bruceConfig.wifiMAC + " (Custom)";
+    if (wilyConfig.wifiMAC != "" && validateMACFormat(wilyConfig.wifiMAC)) {
+        currentMAC = wilyConfig.wifiMAC + " (Custom)";
     } else {
         currentMAC = WiFi.macAddress() + " (Default)";
     }
@@ -73,8 +73,8 @@ void wifiMACMenu() {
 
     options.clear();
     options.push_back({"MAC Padrão", []() {
-                           bruceConfig.wifiMAC = "";
-                           bruceConfig.saveFile();
+                           wilyConfig.wifiMAC = "";
+                           wilyConfig.saveFile();
                            displayTextLine("MAC padrão ativo");
                        }});
 

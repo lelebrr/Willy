@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// Part of Bruce (AGPL-3.0-or-later). The OOK protocol timing table is DERIVED
+// Part of Wily (AGPL-3.0-or-later). The OOK protocol timing table is DERIVED
 // FROM and modified after rc-switch (LGPL-2.1-or-later), (C) 2011 Suat Ozgur
 // and contributors; the Flipper-name mapping mirrors the Flipper Zero firmware
 // (GPL-3.0-or-later). See THIRD_PARTY.md for full attribution.
@@ -62,7 +62,7 @@ static const RfProtocolDef rf_protocols[] = {
 
 static const int rf_protocols_count = sizeof(rf_protocols) / sizeof(rf_protocols[0]);
 
-// Flipper Zero protocol name <-> Bruce canonical registry name. Only the entries
+// Flipper Zero protocol name <-> Wily canonical registry name. Only the entries
 // that differ in spelling are listed; names that already match (Princeton, CAME,
 // Linear, Clemsa, Mastercode, Ansonic, GateTX, Holtek, KeeLoq...) need no alias.
 struct RfProtoAlias {

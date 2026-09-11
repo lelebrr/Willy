@@ -17,7 +17,7 @@ WDGoWars::WDGoWars() {}
 WDGoWars::~WDGoWars() {}
 
 bool WDGoWars::_check_api_key() {
-    if (bruceConfig.wdgwarsApiKey.length() != 64) {
+    if (wilyConfig.wdgwarsApiKey.length() != 64) {
         displayError("Defina a chave (Config)\nVeja em wdgwars.pl", true);
         return false;
     }
@@ -43,9 +43,9 @@ void WDGoWars::_send_upload_headers(
     client.print("Host: ");
     client.println(host);
     client.println("Connection: close");
-    client.println("User-Agent: bruce.wardriving");
+    client.println("User-Agent: wily.wardriving");
     client.print("X-API-Key: ");
-    client.println(bruceConfig.wdgwarsApiKey);
+    client.println(wilyConfig.wdgwarsApiKey);
     client.print("Content-Type: multipart/form-data; boundary=");
     client.println(boundary);
     client.print("Content-Length: ");
@@ -143,7 +143,7 @@ bool WDGoWars::_upload_file(File file, const String &upload_message) {
 
     String filename = file.name();
     int filesize = file.size();
-    String boundary = "BRUCE";
+    String boundary = "WILLY";
     boundary.concat(esp_random());
 
     _send_upload_headers(client, filename, filesize, boundary);

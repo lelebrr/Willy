@@ -18,11 +18,11 @@ void ReverseShell() {
     options.clear();
 
     // Display initialization messages
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setTextSize(FM);
-    tft.setTextColor(TFT_RED, bruceConfig.bgColor);
+    tft.setTextColor(TFT_RED, wilyConfig.bgColor);
     tft.drawCentreString("Reverse Shell", tftWidth / 2, 10, 1);
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(FP);
     tft.setCursor(15, 33);
     tft.println("Developed by Fourier (github.com/9dl)");
@@ -47,7 +47,7 @@ void ReverseShell() {
     tft.println("TCP server started on port 23.");
 
     webServer.on("/", [&webServer]() {
-        if (!webServer.authenticate(bruceConfig.webUI.user.c_str(), bruceConfig.webUI.pwd.c_str())) {
+        if (!webServer.authenticate(wilyConfig.webUI.user.c_str(), wilyConfig.webUI.pwd.c_str())) {
             return webServer.requestAuthentication();
         }
 
@@ -82,7 +82,7 @@ void ReverseShell() {
     });
 
     webServer.on("/execute", [&webServer, &tcpClient, &lastCommand, &shellConnected]() {
-        if (!webServer.authenticate(bruceConfig.webUI.user.c_str(), bruceConfig.webUI.pwd.c_str())) {
+        if (!webServer.authenticate(wilyConfig.webUI.user.c_str(), wilyConfig.webUI.pwd.c_str())) {
             return webServer.requestAuthentication();
         }
 
@@ -101,7 +101,7 @@ void ReverseShell() {
     });
 
     webServer.on("/status", [&webServer, &shellConnected]() {
-        if (!webServer.authenticate(bruceConfig.webUI.user.c_str(), bruceConfig.webUI.pwd.c_str())) {
+        if (!webServer.authenticate(wilyConfig.webUI.user.c_str(), wilyConfig.webUI.pwd.c_str())) {
             return webServer.requestAuthentication();
         }
 

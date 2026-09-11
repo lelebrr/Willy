@@ -299,7 +299,7 @@ void ledBlinkExfilChannel() {
             uint8_t val = random(0, 255);
             tft.setTextColor(TFT_GREEN);
             tft.printf(" [%02X] ", val);
-            tft.setTextColor(bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.priColor);
         }
         delay(200);
     }
@@ -395,7 +395,7 @@ void ransomwareSimulationDemo() {
 
     String script = "cd $HOME\\Desktop; "
                     "New-Item -Path 'READ_ME_NOW.txt' -ItemType File -Force; "
-                    "Set-Content -Path 'READ_ME_NOW.txt' -Value 'SIMULACAO BRUCE TEAM: Seus arquivos poderiam estar criptografados neste momento. Treine sua equipe!'; "
+                    "Set-Content -Path 'READ_ME_NOW.txt' -Value 'SIMULACAO WILLY TEAM: Seus arquivos poderiam estar criptografados neste momento. Treine sua equipe!'; "
                     "notepad.exe 'READ_ME_NOW.txt'";
 
     sendString(script.c_str());
@@ -419,10 +419,10 @@ void persistentHidBackdoor() {
     openPowershell();
 
     // Powershell script to schedule a task that runs invisible - Educational demo
-    String psTarget = "$A = New-ScheduledTaskAction -Execute 'notepad.exe' -Argument 'C:\\Users\\Public\\BRUCE_WAS_HERE.txt';"
+    String psTarget = "$A = New-ScheduledTaskAction -Execute 'notepad.exe' -Argument 'C:\\Users\\Public\\WILLY_WAS_HERE.txt';"
                       "$T = New-ScheduledTaskTrigger -AtLogOn;"
-                      "Register-ScheduledTask -TaskName 'BruceSecurityDemo' -Action $A -Trigger $T -Force;"
-                      "Set-Content -Path 'C:\\Users\\Public\\BRUCE_WAS_HERE.txt' -Value 'DEMO: Esta tarefa foi agendada pelo Bruce ESP32 para fins educativos.'";
+                      "Register-ScheduledTask -TaskName 'WilySecurityDemo' -Action $A -Trigger $T -Force;"
+                      "Set-Content -Path 'C:\\Users\\Public\\WILLY_WAS_HERE.txt' -Value 'DEMO: Esta tarefa foi agendada pelo Wily ESP32 para fins educativos.'";
 
     sendString(psTarget.c_str());
     usbKeyboard.press(KEY_RETURN);

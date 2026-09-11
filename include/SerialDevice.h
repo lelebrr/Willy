@@ -1,5 +1,5 @@
-#ifndef BRUCE_SERIALDEVICE_H
-#define BRUCE_SERIALDEVICE_H
+#ifndef WILLY_SERIALDEVICE_H
+#define WILLY_SERIALDEVICE_H
 
 #include <Arduino.h>
 
@@ -28,4 +28,4 @@ public:
     virtual ~SerialDevice() = default;
 };
 
-#endif // BRUCE_SERIALDEVICE_H
+#endif // WILLY_SERIALDEVICE_H

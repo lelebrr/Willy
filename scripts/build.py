@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import csv
 from SCons.Script import Import
 
@@ -33,7 +33,7 @@ boot_bin = build_dir / "bootloader.bin"
 part_bin = build_dir / "partitions.bin"
 app_bin  = build_dir / "firmware.bin"
 
-out_bin  = proj_dir / f"Bruce-{pioenv}.bin"
+out_bin  = proj_dir / f"Wily-{pioenv}.bin"
 
 # Esptool from PlatformIO + Python executable
 esptool_pkg = senv.PioPlatform().get_package_dir("tool-esptoolpy")
@@ -92,7 +92,7 @@ def _merge_bins_callback(target, source, env):
         filled = int(bar_len * fw_size / ota_size)
         bar = "=" * filled + " " * (bar_len - filled)
         print(
-            f"BRUCE: [{bar}] {percent:.1f}% (used 0x{fw_size:X} bytes of 0x{ota_size:X} of OTA partition)"
+            f"WILLY: [{bar}] {percent:.1f}% (used 0x{fw_size:X} bytes of 0x{ota_size:X} of OTA partition)"
         )
         if fw_size > ota_size:
             print("[merge_bin] Error: firmware.bin exceeds OTA partition size")

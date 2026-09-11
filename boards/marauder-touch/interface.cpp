@@ -16,8 +16,8 @@ void pollEncoder(void) { encoder->poll(); }
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() {
-    bruceConfig.colorInverted = 0;
-    bruceConfigPins.rotation = 0; // portrait mode for Phantom
+    wilyConfig.colorInverted = 0;
+    wilyConfigPins.rotation = 0; // portrait mode for Phantom
     pinMode(TFT_BL, OUTPUT);
 #ifdef WAVESENTRY
     pinMode(ENCODER_KEY, INPUT);
@@ -68,21 +68,21 @@ void InputHandler(void) {
             auto t = touch.getPointScaled();
             t = touch.getPointScaled();
             tm = millis();
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 t.y = (tftHeight + 20) - t.y;
                 t.x = tftWidth - t.x;
             }
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 int tmp = t.x;
                 t.x = tftWidth - t.y;
                 t.y = tmp;
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 int tmp = t.x;
                 t.x = t.y;
                 t.y = (tftHeight + 20) - tmp;
             }
-            Serial.printf("Touched at x=%d, y=%d, rot=%d\n", t.x, t.y, bruceConfigPins.rotation);
+            Serial.printf("Touched at x=%d, y=%d, rot=%d\n", t.x, t.y, wilyConfigPins.rotation);
 
             if (!wakeUpScreen()) AnyKeyPress = true;
             else return;

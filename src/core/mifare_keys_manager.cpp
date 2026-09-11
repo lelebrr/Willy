@@ -259,7 +259,7 @@ bool MifareKeysManager::writeToFS(FS *fs, const char *fsName, const std::set<Str
         return false;
     }
 
-    file.println("//BRUCE MIFARE KEYS FILE");
+    file.println("//WILLY MIFARE KEYS FILE");
     file.println("//ADD YOUR KEYS ONE PER LINE");
     file.println("//");
     file.println("//STANDARD MIFARE KEYS");

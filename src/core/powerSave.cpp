@@ -14,11 +14,11 @@ void fadeOutScreen(int startValue) {
 }
 
 void checkPowerSaveTime() {
-    if (bruceConfig.dimmerSet == 0) return;
+    if (wilyConfig.dimmerSet == 0) return;
 
     unsigned long elapsed = millis() - previousMillis;
-    int startDimmerBright = bruceConfig.bright / 3;
-    int dimmerSetMs = bruceConfig.dimmerSet * 1000;
+    int startDimmerBright = wilyConfig.bright / 3;
+    int dimmerSetMs = wilyConfig.dimmerSet * 1000;
 
     if (elapsed >= dimmerSetMs && !dimmer && !isSleeping) {
         dimmer = true;
@@ -33,7 +33,7 @@ void sleepModeOn() {
     isSleeping = true;
     setCpuFrequencyMhz(80);
 
-    int startDimmerBright = bruceConfig.bright / 3;
+    int startDimmerBright = wilyConfig.bright / 3;
 
     fadeOutScreen(startDimmerBright);
 

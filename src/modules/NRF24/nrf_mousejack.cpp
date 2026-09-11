@@ -54,7 +54,7 @@ void nrf_mousejack_injector() {
             bool success = NRFradio.write(payload, sizeof(payload));
             if (success) {
                 injected_count++;
-                tft.fillRect(10, 90, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 90, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 90);
                 tft.printf("Injected! Total: %d", injected_count);
             }

@@ -98,9 +98,9 @@ void SensorBatteryDrainFlood() {
     padprintln("Alvo: " + String(selected_code.frequency / 1000000.0) + " MHz");
     padprintln("Pacotes a cada 200ms");
     padprintln("");
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
     padprintln("Pressione [ESC] para sair.");
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
 
     uint32_t packetsSent = 0;
 
@@ -113,7 +113,7 @@ void SensorBatteryDrainFlood() {
         packetsSent++;
 
         // Print progress
-        tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
+        tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, wilyConfig.bgColor);
         tft.setCursor(10, tftHeight / 2 + 20);
         tft.print("Enviados: ");
         tft.print(packetsSent);
@@ -151,7 +151,7 @@ void PredictiveGarageBrute() {
     uint32_t endKey = 0xFFFFFF;
     uint32_t currentKey = startKey;
 
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
     uint32_t atkStart = millis();
 
     // Disable default UI in sendRfCommand so it doesn't redraw screen
@@ -163,7 +163,7 @@ void PredictiveGarageBrute() {
 
         // Print progress
         if (currentKey % 10 == 0) {
-            tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
+            tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, wilyConfig.bgColor);
             tft.setCursor(10, tftHeight / 2 + 20);
             tft.print("Testando Chave: 0x");
             tft.print(currentKey, HEX);
@@ -187,10 +187,10 @@ void StealthLowPowerExfilBeacon() {
     beaconCode.frequency = 433920000;
     beaconCode.protocol = "RAW";
     beaconCode.preset = "FuriHalSubGhzPresetOok270Async";
-    // Simulated Manchester encoded payload "BRUCE" (simplified lengths)
+    // Simulated Manchester encoded payload "WILLY" (simplified lengths)
     beaconCode.data = "350 -350 350 -1050 1050 -350 350 -350 350 -1050 1050 -350";
 
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
 
     uint32_t beaconsSent = 0;
     uint32_t atkStart = millis();
@@ -211,7 +211,7 @@ void StealthLowPowerExfilBeacon() {
         beaconsSent++;
 
         // Print progress
-        tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
+        tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, wilyConfig.bgColor);
         tft.setCursor(10, tftHeight / 2 + 20);
         tft.print("Beacons Enviados: ");
         tft.print(beaconsSent);
@@ -285,7 +285,7 @@ void ProtocolFuzzerSmart() {
     uint8_t fuzzBits = 8;
     uint32_t fuzzedDone = 0;
 
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
 
     while (fuzzedDone < (1 << fuzzBits)) {
         if (check(EscPress)) break;
@@ -296,7 +296,7 @@ void ProtocolFuzzerSmart() {
         fuzzedDone++;
 
         if (fuzzedDone % 5 == 0) {
-            tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
+            tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, wilyConfig.bgColor);
             tft.setCursor(10, tftHeight / 2 + 20);
             tft.print("Fuzz: 0x");
             tft.print(baseCode.key, HEX);
@@ -370,7 +370,7 @@ void TPMSSpoofChaos() {
         uint32_t randomId = random(0x100000, 0xFFFFFF);
         tpmsFrame.data = randomId;
 
-        tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, bruceConfig.bgColor);
+        tft.fillRect(10, tftHeight / 2 + 20, tftWidth - 20, 20, wilyConfig.bgColor);
         tft.setCursor(10, tftHeight / 2 + 20);
         tft.print("ID: 0x");
         tft.print(randomId, HEX);
@@ -400,7 +400,7 @@ void RollingCodeLearnerReplay() {
 
         if (!capturedSignal) {
             // Mocking a capture for the demonstration logic
-            // In Bruce, we'd call the receiver logic here
+            // In Wily, we'd call the receiver logic here
             tft.setCursor(10, tftHeight / 2);
             tft.print("Status: Escaneando...");
 
@@ -416,7 +416,7 @@ void RollingCodeLearnerReplay() {
             capturedSignal = true;
             captureTime = millis();
 
-            tft.fillRect(10, tftHeight / 2, tftWidth - 20, 20, bruceConfig.bgColor);
+            tft.fillRect(10, tftHeight / 2, tftWidth - 20, 20, wilyConfig.bgColor);
             tft.setCursor(10, tftHeight / 2);
             tft.print("SINAL CAPTURADO!");
             padprintln("Aguardando 5s p/ Replay...");
@@ -474,7 +474,7 @@ void SpectrumTargetLock() {
         tft.setCursor(x_start + peak_x - 20, y_base - height - 15);
         tft.setTextColor(TFT_RED);
         tft.print("LOCK");
-        tft.setTextColor(bruceConfig.priColor);
+        tft.setTextColor(wilyConfig.priColor);
 
         delay(100);
     }

@@ -223,9 +223,9 @@ JSValue native_rfid_AddMifareKey(JSContext *ctx, JSValue *this_val, int argc, JS
         return obj;
     }
 
-    // Use bruceConfig instead of tagReader
+    // Use wilyConfig instead of tagReader
     String keyStr = String(key_str);
-    bruceConfig.addMifareKey(keyStr);
+    wilyConfig.addMifareKey(keyStr);
 
     JSValue obj = JS_NewObject(ctx);
     JS_SetPropertyStr(ctx, obj, "success", JS_NewBool(true));

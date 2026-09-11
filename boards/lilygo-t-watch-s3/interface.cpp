@@ -22,7 +22,7 @@ void _setup_gpio() {
     pinMode(16, INPUT); // Touch IRQ
     // NOTE: this board permanently reserves BOTH hardware I2C controllers for system peripherals
     // (sensors/PMU/RTC on Wire, touch on Wire1) — bus_HAL only tracks one "sys" bus, so
-    // bruceConfigPins.i2c_bus only has a real hardware bus free if its pins match one of these two.
+    // wilyConfigPins.i2c_bus only has a real hardware bus free if its pins match one of these two.
     setSysI2CBus(&Wire);
     Wire.begin(10, 11); // sensors
     delay(10);
@@ -95,8 +95,8 @@ void _setup_gpio() {
     touch.interruptPolling();
 
     // Disable RF and NRF Menus for default
-    bruceConfig.disabledMenus.push_back("RF");
-    bruceConfig.disabledMenus.push_back("NRF24");
+    wilyConfig.disabledMenus.push_back("RF");
+    wilyConfig.disabledMenus.push_back("NRF24");
 
     // Haptic driver
     if (!drv.begin(Wire, 10, 11)) {
@@ -112,7 +112,7 @@ void _setup_gpio() {
         drv.setWaveform(1, 0);
         drv.run();
     }
-    bruceConfigPins.gpsBaudrate = 38400;
+    wilyConfigPins.gpsBaudrate = 38400;
 }
 
 /***************************************************************************************
@@ -172,21 +172,21 @@ void InputHandler(void) {
         if (getTouched()) {
             touch.getPoint(t.x, t.y, 1);
             // Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d",t.x, t.y);
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 t.y[0] = (tftHeight + 20) - t.y[0];
                 t.x[0] = t.x[0];
             }
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 int tmp = t.x[0];
                 t.x[0] = tftWidth - t.y[0];
                 t.y[0] = tftHeight - tmp;
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 int tmp = t.x[0];
                 t.x[0] = t.y[0];
                 t.y[0] = tmp;
             }
-            if (bruceConfigPins.rotation == 1) { t.x[0] = tftWidth - t.x[0]; }
+            if (wilyConfigPins.rotation == 1) { t.x[0] = tftWidth - t.x[0]; }
             // Serial.printf("\nROT: Touch Pressed on x=%d, y=%d\n",t.x[0], t.y[0]);
 
             if (!wakeUpScreen()) AnyKeyPress = true;

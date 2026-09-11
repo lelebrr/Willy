@@ -1,4 +1,4 @@
-# Pinouts diagram to use Bruce
+﻿# Pinouts diagram to use Wily
 This board can´t use SDCard Sniffer, as used in other boards, because the SDCard CS Pin is physically grounded, so the bus will be always unavailable.
 
 For this board you must solder the MISO/MOSI/SCK pins to the touchscreen SPI line, which can lead to navigation problems, in some ways, so it needs to be tested.

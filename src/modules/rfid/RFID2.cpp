@@ -19,7 +19,7 @@
 RFID2::RFID2(bool use_i2c) : _use_i2c(use_i2c) {
     if (use_i2c)
         _driver =
-            new MFRC522DriverI2C{RFID2_I2C_ADDRESS, bruceConfigPins.i2c_bus.sda, bruceConfigPins.i2c_bus.scl};
+            new MFRC522DriverI2C{RFID2_I2C_ADDRESS, wilyConfigPins.i2c_bus.sda, wilyConfigPins.i2c_bus.scl};
     else _driver = new MFRC522DriverSPI{ss_pin, SPI_SCK_PIN, SPI_MISO_PIN, SPI_MOSI_PIN};
     mfrc522.SetDriver(*_driver);
 }
@@ -162,7 +162,7 @@ int RFID2::save(String filename) {
 
     if (!file) { return FAILURE; }
 
-    file.println("Filetype: Bruce RFID File");
+    file.println("Filetype: Wily RFID File");
     file.println("Version 1");
     file.println("Device type: " + printableUID.picc_type);
     file.println("# UID, ATQA and SAK are common for all formats");
@@ -372,7 +372,7 @@ int RFID2::authenticate_mifare_classic(byte block) {
     }
 
     if (statusA != MFRC522::StatusCode::STATUS_OK) {
-        for (const auto &mifKey : bruceConfig.mifareKeys) {
+        for (const auto &mifKey : wilyConfig.mifareKeys) {
             for (size_t i = 0; i < mifKey.length(); i += 2) {
                 keyA.keyByte[i / 2] = strtoul(mifKey.substring(i, i + 2).c_str(), NULL, 16);
             }
@@ -398,7 +398,7 @@ int RFID2::authenticate_mifare_classic(byte block) {
     }
 
     if (statusB != MFRC522::StatusCode::STATUS_OK) {
-        for (const auto &mifKey : bruceConfig.mifareKeys) {
+        for (const auto &mifKey : wilyConfig.mifareKeys) {
             for (size_t i = 0; i < mifKey.length(); i += 2) {
                 keyB.keyByte[i / 2] = strtoul(mifKey.substring(i, i + 2).c_str(), NULL, 16);
             }

@@ -14,10 +14,10 @@
 
 #if __has_include(<M5Unified.h>)
 #include <M5Unified.h>
-#define BRUCE_HAS_M5UNIFIED 1
+#define WILLY_HAS_M5UNIFIED 1
 #endif
 
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
 // Guards every sys_i2c transaction issued through M5SysWireAdapter (below) against M5.update()'s
 // own internal I2C polling, which bypasses the adapter entirely and would otherwise race it from
 // a different FreeRTOS task - see the comment on lockSysI2CBus() in bus_HAL.h.
@@ -28,19 +28,19 @@ static SemaphoreHandle_t sysI2CMutex() {
 #endif
 
 void lockSysI2CBus() {
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
     xSemaphoreTake(sysI2CMutex(), portMAX_DELAY);
 #endif
 }
 
 void unlockSysI2CBus() {
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
     xSemaphoreGive(sysI2CMutex());
 #endif
 }
 
 bool trylockSysI2CBus() {
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
     return xSemaphoreTake(sysI2CMutex(), 0) == pdTRUE;
 #else
     return true;
@@ -53,19 +53,19 @@ bool trylockSysI2CBus() {
 // and I2C_NUM_1 isn't even a valid i2c_port_t value, so boards/*/interface.cpp can't reference
 // it. Everything in this file must fall back to sharing the single Wire controller instead.
 #if defined(SOC_HP_I2C_NUM) && SOC_HP_I2C_NUM >= 2
-#define BRUCE_HAS_DUAL_I2C 1
+#define WILLY_HAS_DUAL_I2C 1
 #endif
 
 // Matches the default documented in boards/*/interface.cpp: system peripherals sit on Wire1
 // whenever sys_i2c pins differ from i2c_bus, and share Wire otherwise. Boards where that isn't
 // true must call setSysI2CBus() during setup.
-#ifdef BRUCE_HAS_DUAL_I2C
+#ifdef WILLY_HAS_DUAL_I2C
 static TwoWire *sysWire = &Wire1;
 #else
 static TwoWire *sysWire = &Wire;
 #endif
 
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
 // On M5Stack boards the sys_i2c port's ESP-IDF i2c_master_bus_handle_t is created and owned by
 // M5Unified/LovyanGFX (m5gfx::i2c), not by Arduino Wire/Wire1 — M5.begin() never calls Wire.begin()
 // on that port. A second TwoWire trying to install its own bus handle on an already-claimed port
@@ -180,7 +180,7 @@ static int8_t activeScl = -1;
 void setSysI2CBus(TwoWire *wire) { sysWire = wire; }
 
 TwoWire *getSysI2CBus() {
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
     return sysWireAdapter();
 #else
     return sysWire;
@@ -189,7 +189,7 @@ TwoWire *getSysI2CBus() {
 
 TwoWire *acquireI2CBus(int8_t sda, int8_t scl) {
     bool sharesSysBus =
-        (gpio_num_t)sda == bruceConfigPins.sys_i2c.sda && (gpio_num_t)scl == bruceConfigPins.sys_i2c.scl;
+        (gpio_num_t)sda == wilyConfigPins.sys_i2c.sda && (gpio_num_t)scl == wilyConfigPins.sys_i2c.scl;
     BUSHAL_DBG(
         "[busHAL] acquire(%d/%d): sharesSysBus=%d userWire=%p userBusShared=%d active=%d/%d\n",
         (int)sda,
@@ -204,7 +204,7 @@ TwoWire *acquireI2CBus(int8_t sda, int8_t scl) {
     if (sharesSysBus) {
         userWire = nullptr;
         userBusShared = true;
-#ifdef BRUCE_HAS_M5UNIFIED
+#ifdef WILLY_HAS_M5UNIFIED
         return sysWireAdapter();
 #else
         return sysWire;
@@ -220,7 +220,7 @@ TwoWire *acquireI2CBus(int8_t sda, int8_t scl) {
         return boardWire;
     }
 
-#ifdef BRUCE_HAS_DUAL_I2C
+#ifdef WILLY_HAS_DUAL_I2C
     TwoWire *wire = (sysWire == &Wire) ? &Wire1 : &Wire;
 #else
     // Only one general-purpose I2C controller exists: i2c_bus has no choice but to time-share
@@ -241,7 +241,7 @@ TwoWire *acquireI2CBus(int8_t sda, int8_t scl) {
 }
 
 TwoWire *acquireI2CBus() {
-    return acquireI2CBus((int8_t)bruceConfigPins.i2c_bus.sda, (int8_t)bruceConfigPins.i2c_bus.scl);
+    return acquireI2CBus((int8_t)wilyConfigPins.i2c_bus.sda, (int8_t)wilyConfigPins.i2c_bus.scl);
 }
 
 void releaseI2CBus() {
@@ -258,8 +258,8 @@ void releaseI2CBus() {
 }
 
 bool checkAndRecoverSysI2CBus() {
-    int8_t sda = (int8_t)bruceConfigPins.sys_i2c.sda;
-    int8_t scl = (int8_t)bruceConfigPins.sys_i2c.scl;
+    int8_t sda = (int8_t)wilyConfigPins.sys_i2c.sda;
+    int8_t scl = (int8_t)wilyConfigPins.sys_i2c.scl;
     if (sda < 0 || scl < 0) return false; // board has no sys_i2c
 
     static unsigned long sdaLowSinceMs = 0;
@@ -355,7 +355,7 @@ static SPIClass *acquireSharedSPI(gpio_num_t sck, gpio_num_t miso, gpio_num_t mo
             // StickCPluses share SCK pins with SDCard, but not MISO and MOSI
             // AUX_SPI must be restarted every time we use it with every module in legacy mode
             // so if it doesn't conflict, save the variables to no reset the bus (T-HMI touch)
-            if (!bruceConfigPins.SDCARD_bus.checkConflict(sck)) {
+            if (!wilyConfigPins.SDCARD_bus.checkConflict(sck)) {
                 sharedSpiMiso = miso;
                 sharedSpiMosi = mosi;
             }
@@ -377,7 +377,7 @@ SPIClass *acquireSPIBus(gpio_num_t sck, gpio_num_t miso, gpio_num_t mosi) {
 
     // Same physical wiring as the SD card: it is mounted for the whole program lifetime, so its
     // bus is already up and must not be reconfigured.
-    if (bruceConfigPins.SDCARD_bus.mosi != GPIO_NUM_NC && mosi == bruceConfigPins.SDCARD_bus.mosi) {
+    if (wilyConfigPins.SDCARD_bus.mosi != GPIO_NUM_NC && mosi == wilyConfigPins.SDCARD_bus.mosi) {
         return &sdcardSPI;
     }
 

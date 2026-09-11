@@ -12,7 +12,7 @@
 #include "core/sd_functions.h"
 #include <FS.h>
 
-// Generic Bruce .rfid parser. Drivers with extra fields (MIFARE Classic
+// Generic Wily .rfid parser. Drivers with extra fields (MIFARE Classic
 // blocks/keys, NTAG version/signature/counters) override this.
 int RFIDInterface::loadFromFile(const String &filepath) {
     FS *fs;

@@ -1,4 +1,4 @@
-# Pinouts diagram to use Bruce
+﻿# Pinouts diagram to use Wily
 
 ## USING CUSTOM BOARD, with SPI
 | Device  | SCK   | MISO  | MOSI  | CS    | GDO0/CE   |
@@ -8,7 +8,7 @@
 | NRF24   | 12    | 13    | 11    | 10    | 3         |
 | WS500   | 12    | 13    | 11    | **    | **        |
 
-** WS500 need to be configured in brucePins.config to set the pis according to your need.
+** WS500 need to be configured in wilyPins.config to set the pis according to your need.
 
 | Device  | RX    | TX    | GPIO   |
 | ---     | :---: | :---: | :---:  |
@@ -32,7 +32,7 @@ Configured to be compatible with [Willy's firmware](https://willy-firmware.com/)
 | WS500   | 43    | 2     | 3     | **     | **        |
 
 /* Pins 17 and 18 are used in touchscreen control, they will move to 18->16, 17->44 on touchscreen version
-** WS500 need to be configured in brucePins.config to set the pis according to your need.
+** WS500 need to be configured in wilyPins.config to set the pis according to your need.
 
 | Device  | RX    | TX    | GPIO  |
 | ---     | :---: | :---: | :---: |
@@ -46,7 +46,7 @@ I2C SDA: 16 -> 18 if touchscreen
 I2C SCL: 21 -> 17 if touchscreen
 
 
-# Bruce 1.13+ pin changes
+# Wily 1.13+ pin changes
 T-Display S3 Touch uses pins 17 and 18 to control touchscreen, and it should not be interfered by NRF pins (on SD_MMC) or Infrared Pins (Custom Boards)
 
 Same happens on SD_MMC environment, that uses Lilygo T-Display Shield, where pins 11, 12 and 13 are exclusive for SD Card, and were being used by GPS and I2C bus.. in this case, GPS and I2C changes to 16/21, and if touch is detected, I2C changes to 18/17 and NRF pins change to 16/44 respectivelly

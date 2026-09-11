@@ -11,11 +11,11 @@ void js_fatal_error_handler(JSContext *ctx) {
     JSValue jsvMessage = JS_GetPropertyStr(ctx, obj, "message");
     if (strcmp(JS_ToCString(ctx, jsvMessage, &sb), "Script exited") == 0) { return; }
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setTextSize(FM);
-    tft.setTextColor(TFT_RED, bruceConfig.bgColor);
+    tft.setTextColor(TFT_RED, wilyConfig.bgColor);
     tft.drawCentreString("Error", tftWidth / 2, 10, 1);
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(FP);
     tft.setCursor(0, 33);
 

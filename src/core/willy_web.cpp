@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "core/willy_logger.h"
 
-extern BruceConfig bruceConfig;
+extern WilyConfig wilyConfig;
 
 void setupWillyWeb(AsyncWebServer* server) {
     // Serve assets from SD card if they exist
@@ -39,7 +39,7 @@ void setupWillyWeb(AsyncWebServer* server) {
     server->on("/api/version", HTTP_GET, [](AsyncWebServerRequest *request) {
         StaticJsonDocument<256> doc;
         doc["firmware"] = "Willy";
-        doc["version"] = BRUCE_VERSION;
+        doc["version"] = WILLY_VERSION;
         doc["chip"] = ESP.getChipModel();
         doc["flash_kb"] = ESP.getFlashChipSize() / 1024;
 

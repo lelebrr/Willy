@@ -19,6 +19,7 @@
 #include "modules/wifi/wifi_heatmap.h"
 #include "modules/wifi/advanced_atks.h"
 #include "modules/wifi/wps_atks.h"
+#include "modules/wifi/wifi_advanced.h"
 
 
 
@@ -62,7 +63,7 @@ void WifiMenu::optionsMenu() {
             Option("Conectar WiFi", lambdaHelper(WifiCommon::connectMenu, WIFI_STA)),
             Option("Iniciar WiFi AP", [=]() {
                  WifiCommon::connectMenu(WIFI_AP);
-                 displayInfo("pwd: " + bruceConfig.wifiAp.pwd, true);
+                 displayInfo("pwd: " + wilyConfig.wifiAp.pwd, true);
              }),
         };
     }
@@ -176,12 +177,13 @@ void WifiMenu::optionsMenu() {
                        }});
     options.push_back({"Wireguard", wg_setup});
     options.push_back({"Responder", responder});
-    options.push_back({"Brucegotchi", brucegotchi_start});
+    options.push_back({"Wilygotchi", wilygotchi_start});
     options.push_back({"Recuperar Senha", wifi_recover_menu});
     options.push_back({"Analisador de Canais", channel_analyzer_setup});
     options.push_back({"Detectar Jam", jam_detect_setup});
     options.push_back({"WiFi Heatmap", wifiHeatmap});
     options.push_back({"Traffic Fingerprint", encryptedTrafficFingerprint});
+    options.push_back({"WiFi Suite Avancada", [=]() { wifiAdvancedSuiteMenu(); }});
 #endif
 
     options.push_back({"Config", [this]() { configMenu(); }});
@@ -236,7 +238,7 @@ void WifiMenu::drawIcon(float scale) {
     int deltaY = scale * 20;
     int radius = scale * 6;
 
-    tft.fillCircle(iconCenterX, iconCenterY + deltaY, radius, bruceConfig.priColor);
+    tft.fillCircle(iconCenterX, iconCenterY + deltaY, radius, wilyConfig.priColor);
     tft.drawArc(
         iconCenterX,
         iconCenterY + deltaY,
@@ -244,8 +246,8 @@ void WifiMenu::drawIcon(float scale) {
         deltaY,
         130,
         230,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -254,7 +256,7 @@ void WifiMenu::drawIcon(float scale) {
         2 * deltaY,
         130,
         230,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
 }

@@ -62,6 +62,15 @@
 ### 🆕 Novos Módulos (unificação)
 
 - [BLE Suite](ble_suite.md)
+- [BLE Advanced Suite](ble_advanced_suite.md)
+- [IR Advanced Suite](ir_advanced_suite.md)
+- [RF Advanced Suite](rf_advanced_suite.md)
+- [NFC Advanced Suite](nfc_advanced_suite.md)
+- [RFID Advanced Suite](rfid_advanced_suite.md)
+- [BadUSB Advanced Suite](badusb_advanced_suite.md)
+- [WiFi Advanced Suite](wifi_advanced_suite.md)
+- [SubGHz Advanced Suite](subghz_advanced_suite.md)
+- [GPS & Wardriving Advanced Suite](gps_wardriving_advanced_suite.md)
 - [ST25R3916 RFID](st25r3916_rfid.md)
 - [Protocolos RF + Keeloq](rf_protocols_keeloq.md)
 - [NetCut / SOCKS4 / Analyzer](wifi_netcut_socks.md)
@@ -379,6 +388,7 @@ Cria portal captivo falso:
 | 10 | **Mgmt Frame Bypass** | Flood invisível a WIDS |
 
 📖 **Guia completo:** [WiFi Advanced Attacks](wifi_advanced_attacks.md)
+📖 **WiFi Suite (55+ funções):** [WiFi Advanced Suite](wifi_advanced_suite.md)
 
 ---
 
@@ -573,6 +583,7 @@ Filtre interferências em ambientes claros ou ruidosos:
 
 📖 **Guia completo:** [IR Advanced Attacks](ir_advanced_attacks.md)
 📖 **Configuração:** [IR Configuração Avançada](ir_advanced_config.md)
+📖 **IR Suite (50+ funções):** [IR Advanced Suite](ir_advanced_suite.md)
 
 ---
 
@@ -635,6 +646,8 @@ Padrão detectado:
 | 10 | **Sensor Drain Flood** | Exaustão de bateria |
 
 📖 **Guia completo:** [RF Advanced Attacks](rf_advanced_attacks.md)
+📖 **RF Suite (50+ funções):** [RF Advanced Suite](rf_advanced_suite.md)
+📖 **SubGHz Suite (55+ funções):** [SubGHz Advanced Suite](subghz_advanced_suite.md)
 
 ---
 
@@ -729,6 +742,8 @@ Sector 1 (Data):
 | 10 | **NFC Worm Propagator** | Propagação de payload |
 
 📖 **Guia completo:** [NFC Advanced Attacks](nfc_advanced_attacks.md)
+📖 **NFC Suite (50+ funções):** [NFC Advanced Suite](nfc_advanced_suite.md)
+📖 **RFID Suite (55+ funções):** [RFID Advanced Suite](rfid_advanced_suite.md)
 
 ---
 
@@ -779,6 +794,7 @@ ENTER
 | `rickroll.txt` | Universal | Rickroll |
 
 📖 **Guia completo:** [BadUSB HID Attacks](badusb_hid_attacks.md)
+📖 **BadUSB Suite (55+ funções):** [BadUSB Advanced Suite](badusb_advanced_suite.md)
 
 ---
 

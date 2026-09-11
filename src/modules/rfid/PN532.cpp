@@ -25,7 +25,7 @@ PN532::PN532(CONNECTION_TYPE connection_type) {
     _connection_type = connection_type;
     _use_i2c = (connection_type == I2C || connection_type == I2C_SPI);
     if (connection_type == CONNECTION_TYPE::I2C)
-        nfc.setInterface(bruceConfigPins.i2c_bus.sda, bruceConfigPins.i2c_bus.scl);
+        nfc.setInterface(wilyConfigPins.i2c_bus.sda, wilyConfigPins.i2c_bus.scl);
 #ifdef M5STICK
     else if (connection_type == CONNECTION_TYPE::I2C_SPI) nfc.setInterface(GPIO_NUM_26, GPIO_NUM_25);
 #endif
@@ -38,16 +38,16 @@ bool PN532::begin() {
         _connection_type == CONNECTION_TYPE::I2C ? "I2C" :
         _connection_type == CONNECTION_TYPE::I2C_SPI ? "I2C_SPI" : "SPI");
     Serial.printf("[PN532] I2C bus: SDA=%d, SCL=%d\n",
-        (int)bruceConfigPins.i2c_bus.sda, (int)bruceConfigPins.i2c_bus.scl);
+        (int)wilyConfigPins.i2c_bus.sda, (int)wilyConfigPins.i2c_bus.scl);
 
 #ifdef M5STICK
     if (_connection_type == CONNECTION_TYPE::I2C_SPI) {
         Wire.begin(GPIO_NUM_26, GPIO_NUM_25);
     } else if (_connection_type == CONNECTION_TYPE::I2C) {
-        Wire.begin(bruceConfigPins.i2c_bus.sda, bruceConfigPins.i2c_bus.scl);
+        Wire.begin(wilyConfigPins.i2c_bus.sda, wilyConfigPins.i2c_bus.scl);
     }
 #else
-    Wire.begin(bruceConfigPins.i2c_bus.sda, bruceConfigPins.i2c_bus.scl);
+    Wire.begin(wilyConfigPins.i2c_bus.sda, wilyConfigPins.i2c_bus.scl);
 #endif
     Serial.println("[PN532] Wire.begin() done");
 
@@ -229,7 +229,7 @@ int PN532::save(String filename) {
 
     if (!file) { return FAILURE; }
 
-    file.println("Filetype: Bruce RFID File");
+    file.println("Filetype: Wily RFID File");
     file.println("Version 1");
     file.println("Device type: " + printableUID.picc_type);
     file.println("# UID, ATQA and SAK are common for all formats");
@@ -440,7 +440,7 @@ int PN532::authenticate_mifare_classic(byte block) {
     if (!successA) {
         uint8_t keyA[6];
 
-        for (const auto &mifKey : bruceConfig.mifareKeys) {
+        for (const auto &mifKey : wilyConfig.mifareKeys) {
             for (size_t i = 0; i < mifKey.length(); i += 2) {
                 keyA[i / 2] = strtoul(mifKey.substring(i, i + 2).c_str(), NULL, 16);
             }
@@ -466,7 +466,7 @@ int PN532::authenticate_mifare_classic(byte block) {
     if (!successB) {
         uint8_t keyB[6];
 
-        for (const auto &mifKey : bruceConfig.mifareKeys) {
+        for (const auto &mifKey : wilyConfig.mifareKeys) {
             for (size_t i = 0; i < mifKey.length(); i += 2) {
                 keyB[i / 2] = strtoul(mifKey.substring(i, i + 2).c_str(), NULL, 16);
             }

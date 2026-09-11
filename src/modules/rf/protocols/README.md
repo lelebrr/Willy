@@ -1,7 +1,7 @@
-# `rf/protocols/` — RF Protocol Definitions (sub-GHz)
+﻿# `rf/protocols/` — RF Protocol Definitions (sub-GHz)
 
 This directory is the **only place** where RF protocol definitions and
-sub-GHz radio presets used by Bruce's RF module should live.
+sub-GHz radio presets used by Wily's RF module should live.
 
 ## Purpose
 
@@ -155,4 +155,4 @@ ships its `keeloq_mfcodes` asset.
   (`applications/main/subghz/.../assets/keeloq_mfcodes`)
 
 The KeeLoq `type` ids (learning schemes) match that keystore's `type` column, so
-a `/mfcodes` exported from either firmware works in Bruce verbatim.
+a `/mfcodes` exported from either firmware works in Wily verbatim.

@@ -11,6 +11,8 @@
 #include "modules/rf/rf_spectrum.h"
 #include "modules/rf/rf_waterfall.h"
 #include "modules/rf/rf_advanced_atks.h"
+#include "modules/rf/rf_advanced.h"
+#include "modules/rf/subghz_advanced.h"
 #include "modules/rf/protocols/rf_encoder.h"
 #include "modules/rf/protocols/rf_keeloq.h"
 
@@ -45,6 +47,8 @@ void RFMenu::optionsMenu() {
         {"Aprendiz Rolling",   [=]() { RollingCodeLearnerReplay(); }     },
         {"Trava de Espectro",     [=]() { SpectrumTargetLock(); }           },
         {"Dreno de Bateria", [=]() { SensorBatteryDrainFlood(); } },
+        {"RF Suite Avancada", [=]() { rfAdvancedSuiteMenu(); } },
+        {"SubGHz Suite Avancada", [=]() { subghzAdvancedSuiteMenu(); } },
         {"Jammer Intermitente",
          [=]() {
              if (displayMessage("AVISO: Jamming pode ser\nilegal. Continuar?", "Não", nullptr, "Sim", TFT_RED) ==
@@ -75,8 +79,8 @@ void RFMenu::optionsMenu() {
 
     delay(200);
     String txt = "Radio Frequencia";
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) txt += " (CC1101)"; // Indicates if CC1101 is connected
-    else txt += " Tx: " + String(bruceConfigPins.rfTx) + " Rx: " + String(bruceConfigPins.rfRx);
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) txt += " (CC1101)"; // Indicates if CC1101 is connected
+    else txt += " Tx: " + String(wilyConfigPins.rfTx) + " Rx: " + String(wilyConfigPins.rfRx);
 
     loopOptions(options, MENU_TYPE_SUBMENU, txt.c_str());
 }
@@ -102,7 +106,7 @@ void RFMenu::drawIcon(float scale) {
     if (triangleSize % 2 != 0) triangleSize++;
 
     // Body
-    tft.fillCircle(iconCenterX, iconCenterY - radius, radius, bruceConfig.priColor);
+    tft.fillCircle(iconCenterX, iconCenterY - radius, radius, wilyConfig.priColor);
     tft.fillTriangle(
         iconCenterX,
         iconCenterY,
@@ -110,7 +114,7 @@ void RFMenu::drawIcon(float scale) {
         iconCenterY + triangleSize,
         iconCenterX + triangleSize / 2,
         iconCenterY + triangleSize,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 
     // Left Arcs
@@ -121,8 +125,8 @@ void RFMenu::drawIcon(float scale) {
         2 * radius,
         40,
         140,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -131,8 +135,8 @@ void RFMenu::drawIcon(float scale) {
         2 * radius + deltaRadius,
         40,
         140,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -141,8 +145,8 @@ void RFMenu::drawIcon(float scale) {
         2 * radius + 2 * deltaRadius,
         40,
         140,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
 
     // Right Arcs
@@ -153,8 +157,8 @@ void RFMenu::drawIcon(float scale) {
         2 * radius,
         220,
         320,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -163,8 +167,8 @@ void RFMenu::drawIcon(float scale) {
         2 * radius + deltaRadius,
         220,
         320,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
     tft.drawArc(
         iconCenterX,
@@ -173,7 +177,7 @@ void RFMenu::drawIcon(float scale) {
         2 * radius + 2 * deltaRadius,
         220,
         320,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
 }

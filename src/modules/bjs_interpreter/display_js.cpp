@@ -754,7 +754,7 @@ JSValue native_createSprite(JSContext *ctx, JSValue *this_val, int argc, JSValue
 }
 
 JSValue native_getRotation(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    return JS_NewInt32(ctx, bruceConfigPins.rotation);
+    return JS_NewInt32(ctx, wilyConfigPins.rotation);
 }
 
 JSValue native_getBrightness(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
@@ -774,7 +774,7 @@ JSValue native_setBrightness(JSContext *ctx, JSValue *this_val, int argc, JSValu
 }
 
 JSValue native_restoreBrightness(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    setBrightness(bruceConfig.bright, false);
+    setBrightness(wilyConfig.bright, false);
     return JS_UNDEFINED;
 }
 #endif

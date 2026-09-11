@@ -138,7 +138,7 @@ void displayScrollingText(const String &text, Opt_Coord &coord) {
             coord.y,
             (coord.size - 1) * LW * tft.getTextSize(),
             LH * tft.getTextSize(),
-            bruceConfig.bgColor
+            wilyConfig.bgColor
         ); // Clear display area
         tft.setCursor(coord.x, coord.y);
         tft.print(scrollingPart);
@@ -405,7 +405,7 @@ void displaySuccess(String txt, bool waitKeyPress) {
 
 void displayTextLine(String txt, bool waitKeyPress) {
     // todo: add newlines to txt if too long
-    displayRedStripe(txt, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
+    displayRedStripe(txt, getComplementaryColor2(wilyConfig.priColor), wilyConfig.priColor);
 #ifndef HAS_SCREEN
     Serial.println("MESSAGE: " + txt);
     return;
@@ -581,7 +581,7 @@ int loopOptions(
             tftWidth * 0.8,
             (FM * 8 + 4) * menuSize + 10,
             5,
-            bruceConfig.bgColor
+            wilyConfig.bgColor
         );
     if (index >= options.size()) index = 0;
     bool firstRender = true;
@@ -591,8 +591,8 @@ int loopOptions(
         if (exit) break;
         if (menuType == MENU_TYPE_MAIN) {
             checkReboot();
-            if (devModeCounter >= 5 && !bruceConfig.devMode) {
-                bruceConfig.setDevMode(true);
+            if (devModeCounter >= 5 && !wilyConfig.devMode) {
+                wilyConfig.setDevMode(true);
                 displayInfo("Modo Dev Ativado", true);
             }
             if (millis() - _clock_bat_timer > 30000) {
@@ -618,9 +618,9 @@ int loopOptions(
                     coord = drawOptions(
                         index,
                         options,
-                        bruceConfig.priColor,
-                        bruceConfig.secColor,
-                        bruceConfig.bgColor,
+                        wilyConfig.priColor,
+                        wilyConfig.secColor,
+                        wilyConfig.bgColor,
                         firstRender
                     );
             }
@@ -667,13 +667,13 @@ int loopOptions(
                         15,
                         0,
                         360 * (millis() - (_tmp + 200)) / 500,
-                        getColorVariation(bruceConfig.priColor),
-                        bruceConfig.bgColor
+                        getColorVariation(wilyConfig.priColor),
+                        wilyConfig.bgColor
                     );
                 vTaskDelay(10 / portTICK_RATE_MS);
             }
             tft.drawArc(
-                tftWidth / 2, tftHeight / 2, 25, 15, 0, 360, bruceConfig.bgColor, bruceConfig.bgColor
+                tftWidth / 2, tftHeight / 2, 25, 15, 0, 360, wilyConfig.bgColor, wilyConfig.bgColor
             );
             LongPress = false;
 #endif
@@ -692,7 +692,7 @@ int loopOptions(
         if (check(NextPress) || check(DownPress)) {
             index++;
             if ((index + 1) > options.size()) {
-                if (!bruceConfig.devMode) devModeCounter++;
+                if (!wilyConfig.devMode) devModeCounter++;
                 index = 0;
             }
             redraw = true;
@@ -729,13 +729,13 @@ void progressHandler(int progress, size_t total, String message) {
     if (total == 0) return; // evita divisao por zero no map()
     int barWidth = map(progress, 0, total, 0, tftWidth - 40);
     if (barWidth < 3) {
-        tft.fillRect(6, 27, tftWidth - 12, tftHeight - 33, bruceConfig.bgColor);
-        tft.fillRoundRect(18, tftHeight - 47, tftWidth - 36, 17, 8, bruceConfig.bgColor);
-        tft.drawRoundRect(18, tftHeight - 47, tftWidth - 36, 17, 8, bruceConfig.priColor);
-        displayRedStripe(message, TFT_WHITE, bruceConfig.priColor);
+        tft.fillRect(6, 27, tftWidth - 12, tftHeight - 33, wilyConfig.bgColor);
+        tft.fillRoundRect(18, tftHeight - 47, tftWidth - 36, 17, 8, wilyConfig.bgColor);
+        tft.drawRoundRect(18, tftHeight - 47, tftWidth - 36, 17, 8, wilyConfig.priColor);
+        displayRedStripe(message, TFT_WHITE, wilyConfig.priColor);
     }
     if (barWidth > 0) {
-        tft.fillRoundRect(20, tftHeight - 45, barWidth, 13, 6, bruceConfig.priColor);
+        tft.fillRoundRect(20, tftHeight - 45, barWidth, 13, 6, wilyConfig.priColor);
     }
 }
 
@@ -755,7 +755,7 @@ Opt_Coord drawOptions(
     // drawStatusBar();
 
     int32_t optionsTopY = tftHeight / 2 - menuSize * (FM * 8 + 4) / 2 - 5;
-    tft.drawPixel(0, 0, bruceConfig.bgColor);
+    tft.drawPixel(0, 0, wilyConfig.bgColor);
     if (firstRender) {
         tft.fillRoundRect(
             tftWidth * 0.10, optionsTopY, tftWidth * 0.8, (FM * 8 + 4) * menuSize + 10, 5, bgcolor
@@ -820,10 +820,10 @@ Exit:
 void drawSubmenu(int index, std::vector<Option> &options, const char *title) {
     drawStatusBar();
     int menuSize = options.size();
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.setTextSize(FP);
     tft.drawPixel(0, 0, 0);
-    tft.fillRect(6, 30, tftWidth - 12, 8 * FP, bruceConfig.bgColor);
+    tft.fillRect(6, 30, tftWidth - 12, 8 * FP, wilyConfig.bgColor);
     tft.drawString(title, 12, 30);
 
     // middle of the drawing area
@@ -840,36 +840,36 @@ void drawSubmenu(int index, std::vector<Option> &options, const char *title) {
     // Previous item
     const char *firstOption =
         index - 1 >= 0 ? options[index - 1].label.c_str() : options[menuSize - 1].label.c_str();
-    tft.setTextColor(bruceConfig.secColor);
-    tft.fillRect(6, middle_up, tftWidth - 12, 8 * FM, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.secColor);
+    tft.fillRect(6, middle_up, tftWidth - 12, 8 * FM, wilyConfig.bgColor);
     tft.drawCentreString(firstOption, tftWidth / 2, middle_up, SMOOTH_FONT);
 
     // Selected item
     int selectedTextSize = options[index].label.length() <= tftWidth / (LW * FG) - 1 ? FG : FM;
     tft.setTextSize(selectedTextSize);
-    tft.setTextColor(bruceConfig.priColor);
-    tft.fillRect(6, middle - FG * LH / 2 - 1, tftWidth - 12, FG * LH + 5, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor);
+    tft.fillRect(6, middle - FG * LH / 2 - 1, tftWidth - 12, FG * LH + 5, wilyConfig.bgColor);
     tft.drawCentreString(options[index].label, tftWidth / 2, middle - selectedTextSize * LH / 2, SMOOTH_FONT);
     tft.drawFastHLine(
         tftWidth / 2 - strlen(options[index].label.c_str()) * selectedTextSize * LW / 2,
         middle + selectedTextSize * LH / 2 + 1,
         strlen(options[index].label.c_str()) * selectedTextSize * LW,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
     // Next Item
     const char *thirdOption =
         index + 1 < menuSize ? options[index + 1].label.c_str() : options[0].label.c_str();
     tft.setTextSize(FM);
-    tft.setTextColor(bruceConfig.secColor);
-    tft.fillRect(6, middle_down, tftWidth - 12, 8 * FM, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.secColor);
+    tft.fillRect(6, middle_down, tftWidth - 12, 8 * FM, wilyConfig.bgColor);
     tft.drawCentreString(thirdOption, tftWidth / 2, middle_down, SMOOTH_FONT);
 
-    tft.fillRect(tftWidth - 5, 0, 5, tftHeight, bruceConfig.bgColor);
-    tft.fillRect(tftWidth - 5, index * tftHeight / menuSize, 5, tftHeight / menuSize, bruceConfig.priColor);
+    tft.fillRect(tftWidth - 5, 0, 5, tftHeight, wilyConfig.bgColor);
+    tft.fillRect(tftWidth - 5, index * tftHeight / menuSize, 5, tftHeight / menuSize, wilyConfig.priColor);
 
 #if defined(HAS_TOUCH)
     tft.drawCentreString("\\/", tftWidth / 2, middle_down + (FM * LH + 6), 1);
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
     tft.drawString("[ x ]", 7, 7, 1);
     TouchFooter();
 #endif
@@ -879,7 +879,7 @@ void drawStatusBar() {
     int i = 0;
     uint32_t freeHeap = ESP.getFreeHeap() / 1024;
     uint32_t cpuFreq = ESP.getCpuFreqMHz();
-    tft.setTextColor(TFT_DARKGREY, bruceConfig.bgColor);
+    tft.setTextColor(TFT_DARKGREY, wilyConfig.bgColor);
     tft.setTextSize(FP);
     tft.drawString("H:" + String(freeHeap) + "k C:" + String(cpuFreq) + "M", 10, 7);
 
@@ -897,7 +897,7 @@ void drawStatusBar() {
         i++;
     }
     if (sdcardMounted) {
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.setTextSize(FP);
         tft.drawString("SD", tftWidth - (bat_margin), 12);
         i++;
@@ -923,16 +923,16 @@ void drawStatusBar() {
         i++;
     } // Draw Wg bedide BLE, if the others exist, if not, beside battery
 
-    if (bruceConfig.theme.border) {
-        tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
-        tft.drawLine(5, 25, tftWidth - 6, 25, bruceConfig.priColor);
-        tft.drawLine(5, 26, tftWidth - 6, 26, getColorVariation(bruceConfig.priColor, 3, -1));
+    if (wilyConfig.theme.border) {
+        tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
+        tft.drawLine(5, 25, tftWidth - 6, 25, wilyConfig.priColor);
+        tft.drawLine(5, 26, tftWidth - 6, 26, getColorVariation(wilyConfig.priColor, 3, -1));
     }
 
     if (clock_set) {
-        int clock_fontsize = 1; // Font size of the clock / BRUCE + BRUCE_VERSION
-        setTftDisplay(12, 12, bruceConfig.priColor, clock_fontsize, bruceConfig.bgColor);
-        tft.fillRect(12, 12, 100, clock_fontsize * LH, bruceConfig.bgColor);
+        int clock_fontsize = 1; // Font size of the clock / WILLY + WILLY_VERSION
+        setTftDisplay(12, 12, wilyConfig.priColor, clock_fontsize, wilyConfig.bgColor);
+        tft.fillRect(12, 12, 100, clock_fontsize * LH, wilyConfig.bgColor);
 #if defined(HAS_RTC)
         updateTimeStr(_rtc.getTimeStruct());
 #else
@@ -940,20 +940,20 @@ void drawStatusBar() {
 #endif
         tft.print(timeStr);
     } else {
-        setTftDisplay(12, 12, bruceConfig.priColor, 1, bruceConfig.bgColor);
-        tft.print("BRUCE " + String(BRUCE_VERSION));
+        setTftDisplay(12, 12, wilyConfig.priColor, 1, wilyConfig.bgColor);
+        tft.print("WILLY " + String(WILLY_VERSION));
     }
 }
 
 void drawMainBorder(bool clear) {
     if (clear) {
         tft.drawPixel(0, 0, 0);
-        tft.fillScreen(bruceConfig.bgColor);
+        tft.fillScreen(wilyConfig.bgColor);
     }
-    setTftDisplay(12, 12, bruceConfig.priColor, 1, bruceConfig.bgColor);
+    setTftDisplay(12, 12, wilyConfig.priColor, 1, wilyConfig.bgColor);
     tft.setTextDatum(0);
 
-    // if(WifiState::wifiConnected) {tft.print(timeStr);} else {tft.print("BRUCE 1.0b");}
+    // if(WifiState::wifiConnected) {tft.print(timeStr);} else {tft.print("WILLY 1.0b");}
 
     drawStatusBar();
 
@@ -969,7 +969,7 @@ void drawMainBorderWithTitle(String title, bool clear) {
 
 void printTitle(String title) {
     tft.setCursor((tftWidth - (title.length() * FM * LW)) / 2, BORDER_PAD_Y);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.setTextSize(FM);
 
     title.toUpperCase();
@@ -978,7 +978,7 @@ void printTitle(String title) {
     // Sublinhado de destaque centralizado
     {
         int barW = 46;
-        tft.fillRect((tftWidth - barW) / 2, tft.getCursorY() + 2, barW, 2, bruceConfig.priColor);
+        tft.fillRect((tftWidth - barW) / 2, tft.getCursorY() + 2, barW, 2, wilyConfig.priColor);
     }
 
     tft.setTextSize(FP);
@@ -986,7 +986,7 @@ void printTitle(String title) {
 
 void printSubtitle(String subtitle, bool withLine) {
     int16_t cursorX = (tftWidth - (subtitle.length() * FP * LW)) / 2;
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.setTextSize(FP);
 
     tft.setCursor(cursorX, BORDER_PAD_Y + FM * LH);
@@ -1007,7 +1007,7 @@ void printFootnote(String text) {
 }
 
 void printCenterFootnote(String text) {
-    tft.fillRect(10, tftHeight - BORDER_PAD_X - FP * LH, tftWidth - 20, FP * LH, bruceConfig.bgColor);
+    tft.fillRect(10, tftHeight - BORDER_PAD_X - FP * LH, tftWidth - 20, FP * LH, wilyConfig.bgColor);
     tft.setTextSize(FP);
     tft.drawCentreString(text, tftWidth / 2, tftHeight - BORDER_PAD_X - FP * LH, SMOOTH_FONT);
 }
@@ -1020,10 +1020,10 @@ void drawBatteryStatus(int x, int y, uint8_t bat) {
     // Icone de bateria 22x12: moldura + pino + nivel. Vermelho <=15%.
     if (bat > 100) bat = 100;
     uint16_t col = TFT_GREEN;
-    if (isCharging()) col = bruceConfig.priColor;
+    if (isCharging()) col = wilyConfig.priColor;
     else if (bat <= 15) col = TFT_RED;
     else if (bat <= 50) col = TFT_YELLOW;
-    tft.fillRect(x, y, 22, 12, bruceConfig.bgColor);
+    tft.fillRect(x, y, 22, 12, wilyConfig.bgColor);
     tft.drawRoundRect(x, y, 18, 12, 2, col);
     tft.fillRect(x + 18, y + 3, 3, 6, col);
     int w = 14 * bat / 100;
@@ -1034,14 +1034,14 @@ void drawBatteryStatus(int x, int y, uint8_t bat) {
 ** Description:   Draws a padlock when connected
 ***************************************************************************************/
 void drawWireguardStatus(int x, int y) {
-    tft.fillRect(x, y, 20, 17, bruceConfig.bgColor);
+    tft.fillRect(x, y, 20, 17, wilyConfig.bgColor);
     if (isConnectedWireguard) {
         tft.drawRoundRect(11 + x, 0 + y, 8, 12, 5, TFT_GREEN);
         tft.fillRoundRect(10 + x, 8 + y, 10, 8, 0, TFT_GREEN);
     } else {
-        tft.drawRoundRect(1 + x, 0 + y, 8, 12, 5, bruceConfig.priColor);
-        tft.fillRoundRect(0 + x, 8 + y, 10, 8, 0, bruceConfig.bgColor);
-        tft.fillRoundRect(6 + x, 8 + y, 10, 10, 0, bruceConfig.priColor);
+        tft.drawRoundRect(1 + x, 0 + y, 8, 12, 5, wilyConfig.priColor);
+        tft.fillRoundRect(0 + x, 8 + y, 10, 8, 0, wilyConfig.bgColor);
+        tft.fillRoundRect(6 + x, 8 + y, 10, 10, 0, wilyConfig.priColor);
     }
 }
 
@@ -1052,10 +1052,10 @@ void drawWireguardStatus(int x, int y) {
 #define MAX_ITEMS (int)(tftHeight - 20) / (LH * FM)
 Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
     Opt_Coord coord;
-    tft.drawPixel(0, 0, bruceConfig.bgColor);
+    tft.drawPixel(0, 0, wilyConfig.bgColor);
     if (index == 0) {
-        tft.fillScreen(bruceConfig.bgColor);
-        tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+        tft.fillScreen(wilyConfig.bgColor);
+        tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
     }
     tft.setCursor(10, 10);
     tft.setTextSize(FM);
@@ -1072,9 +1072,9 @@ Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
         if (i >= start) {
             tft.setCursor(10, tft.getCursorY());
             if (fileList[i].folder == true)
-                tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
-            else if (fileList[i].operation == true) tft.setTextColor(ALCOLOR, bruceConfig.bgColor);
-            else { tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor); }
+                tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
+            else if (fileList[i].operation == true) tft.setTextColor(ALCOLOR, wilyConfig.bgColor);
+            else { tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor); }
 
             if (index == i) {
                 txt = ">";
@@ -1082,8 +1082,8 @@ Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
                 coord.y = tft.getCursorY();
                 coord.size = nchars;
                 coord.fgcolor =
-                    fileList[i].folder ? getColorVariation(bruceConfig.priColor) : bruceConfig.priColor;
-                coord.bgcolor = bruceConfig.bgColor;
+                    fileList[i].folder ? getColorVariation(wilyConfig.priColor) : wilyConfig.priColor;
+                coord.bgcolor = wilyConfig.bgColor;
             } else txt = " ";
             txt += fileList[i].filename + "                 ";
             tft.println(txt.substring(0, nchars));
@@ -1097,76 +1097,76 @@ Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
 // desenhos do menu principal, sprite "draw" com 80x80 pixels
 
 void drawWifiSmall(int x, int y) {
-    tft.fillRect(x, y, 16, 16, bruceConfig.bgColor);
-    tft.fillCircle(9 + x, 14 + y, 1, bruceConfig.priColor);
-    tft.drawArc(9 + x, 14 + y, 4, 6, 130, 230, bruceConfig.priColor, bruceConfig.bgColor);
-    tft.drawArc(9 + x, 14 + y, 10, 12, 130, 230, bruceConfig.priColor, bruceConfig.bgColor);
+    tft.fillRect(x, y, 16, 16, wilyConfig.bgColor);
+    tft.fillCircle(9 + x, 14 + y, 1, wilyConfig.priColor);
+    tft.drawArc(9 + x, 14 + y, 4, 6, 130, 230, wilyConfig.priColor, wilyConfig.bgColor);
+    tft.drawArc(9 + x, 14 + y, 10, 12, 130, 230, wilyConfig.priColor, wilyConfig.bgColor);
 }
 
 void drawWebUISmall(int x, int y) {
-    tft.fillRect(x, y, 16, 16, bruceConfig.bgColor);
+    tft.fillRect(x, y, 16, 16, wilyConfig.bgColor);
 
-    tft.drawCircle(8 + x, 8 + y, 7, bruceConfig.priColor);
+    tft.drawCircle(8 + x, 8 + y, 7, wilyConfig.priColor);
 
-    tft.drawLine(3 + x, 4 + y, 14 + x, 4 + y, bruceConfig.priColor);
-    tft.drawLine(2 + x, 8 + y, 15 + x, 8 + y, bruceConfig.priColor);
-    tft.drawLine(3 + x, 12 + y, 14 + x, 12 + y, bruceConfig.priColor);
+    tft.drawLine(3 + x, 4 + y, 14 + x, 4 + y, wilyConfig.priColor);
+    tft.drawLine(2 + x, 8 + y, 15 + x, 8 + y, wilyConfig.priColor);
+    tft.drawLine(3 + x, 12 + y, 14 + x, 12 + y, wilyConfig.priColor);
 }
 
 void drawBLESmall(int x, int y) {
-    tft.fillRect(x, 2 + y, 17, 13, bruceConfig.bgColor);
-    tft.drawWideLine(8 + x, 8 + y, 4 + x, 5 + y, 2, bruceConfig.priColor, bruceConfig.bgColor);
-    tft.drawWideLine(8 + x, 8 + y, 4 + x, 13 + y, 2, bruceConfig.priColor, bruceConfig.bgColor);
-    tft.drawTriangle(8 + x, 8 + y, 8 + x, 2 + y, 13 + x, 5 + y, bruceConfig.priColor);
-    tft.drawTriangle(8 + x, 8 + y, 8 + x, 14 + y, 13 + x, 11 + y, bruceConfig.priColor);
+    tft.fillRect(x, 2 + y, 17, 13, wilyConfig.bgColor);
+    tft.drawWideLine(8 + x, 8 + y, 4 + x, 5 + y, 2, wilyConfig.priColor, wilyConfig.bgColor);
+    tft.drawWideLine(8 + x, 8 + y, 4 + x, 13 + y, 2, wilyConfig.priColor, wilyConfig.bgColor);
+    tft.drawTriangle(8 + x, 8 + y, 8 + x, 2 + y, 13 + x, 5 + y, wilyConfig.priColor);
+    tft.drawTriangle(8 + x, 8 + y, 8 + x, 14 + y, 13 + x, 11 + y, wilyConfig.priColor);
 }
 
 void drawBLE_beacon(int x, int y, uint16_t color) {
-    tft.fillRect(x, y, 40, 80, bruceConfig.bgColor);
-    tft.drawWideLine(40 + x, 53 + y, 2 + x, 26 + y, 5, color, bruceConfig.bgColor);
-    tft.drawWideLine(40 + x, 26 + y, 2 + x, 53 + y, 5, color, bruceConfig.bgColor);
-    tft.drawWideLine(40 + x, 53 + y, 20 + x, 68 + y, 5, color, bruceConfig.bgColor);
-    tft.drawWideLine(40 + x, 26 + y, 20 + x, 12 + y, 5, color, bruceConfig.bgColor);
-    tft.drawWideLine(20 + x, 12 + y, 20 + x, 68 + y, 5, color, bruceConfig.bgColor);
+    tft.fillRect(x, y, 40, 80, wilyConfig.bgColor);
+    tft.drawWideLine(40 + x, 53 + y, 2 + x, 26 + y, 5, color, wilyConfig.bgColor);
+    tft.drawWideLine(40 + x, 26 + y, 2 + x, 53 + y, 5, color, wilyConfig.bgColor);
+    tft.drawWideLine(40 + x, 53 + y, 20 + x, 68 + y, 5, color, wilyConfig.bgColor);
+    tft.drawWideLine(40 + x, 26 + y, 20 + x, 12 + y, 5, color, wilyConfig.bgColor);
+    tft.drawWideLine(20 + x, 12 + y, 20 + x, 68 + y, 5, color, wilyConfig.bgColor);
     tft.fillTriangle(40 + x, 26 + y, 20 + x, 40 + y, 20 + x, 12 + y, color);
     tft.fillTriangle(40 + x, 53 + y, 20 + x, 40 + y, 20 + x, 68 + y, color);
 }
 
 void drawGPS(int x, int y) {
-    tft.fillRect(x, y, 80, 80, bruceConfig.bgColor);
-    tft.drawEllipse(40 + x, 70 + y, 15, 8, bruceConfig.priColor);
-    tft.drawArc(40 + x, 25 + y, 23, 7, 0, 340, bruceConfig.priColor, bruceConfig.bgColor);
-    tft.fillTriangle(40 + x, 70 + y, 20 + x, 64 + y, 60 + x, 64 + y, bruceConfig.priColor);
+    tft.fillRect(x, y, 80, 80, wilyConfig.bgColor);
+    tft.drawEllipse(40 + x, 70 + y, 15, 8, wilyConfig.priColor);
+    tft.drawArc(40 + x, 25 + y, 23, 7, 0, 340, wilyConfig.priColor, wilyConfig.bgColor);
+    tft.fillTriangle(40 + x, 70 + y, 20 + x, 64 + y, 60 + x, 64 + y, wilyConfig.priColor);
 }
 
 void drawGpsSmall(int x, int y) {
-    tft.fillRect(x, y, 17, 17, bruceConfig.bgColor);
-    tft.drawEllipse(9 + x, 14 + y, 4, 3, bruceConfig.priColor);
-    tft.drawArc(9 + x, 6 + y, 5, 2, 0, 340, bruceConfig.priColor, bruceConfig.bgColor);
-    tft.fillTriangle(9 + x, 15 + y, 5 + x, 9 + y, 13 + x, 9 + y, bruceConfig.priColor);
+    tft.fillRect(x, y, 17, 17, wilyConfig.bgColor);
+    tft.drawEllipse(9 + x, 14 + y, 4, 3, wilyConfig.priColor);
+    tft.drawArc(9 + x, 6 + y, 5, 2, 0, 340, wilyConfig.priColor, wilyConfig.bgColor);
+    tft.fillTriangle(9 + x, 15 + y, 5 + x, 9 + y, 13 + x, 9 + y, wilyConfig.priColor);
 }
 
 void drawCreditCard(int x, int y) {
-    tft.fillRect(x, y, 70, 50, bruceConfig.bgColor);
-    tft.fillRoundRect(x + 5, y + 5, 60, 40, 5, bruceConfig.priColor);
-    tft.fillRect(x + 5, y + 15, 60, 10, getColorVariation(bruceConfig.priColor, 3, -1));
-    tft.fillRect(x + 10, y + 30, 12, 10, getColorVariation(bruceConfig.priColor, 3, 1));
-    tft.drawRect(x + 10, y + 30, 12, 10, getColorVariation(bruceConfig.priColor, 5, -1));
-    tft.drawRect(x + 10 + 4, y + 30, 4, 10, getColorVariation(bruceConfig.priColor, 5, -1));
-    tft.drawRect(x + 10, y + 33, 5, 4, getColorVariation(bruceConfig.priColor, 5, -1));
-    tft.drawRect(x + 17, y + 33, 5, 4, getColorVariation(bruceConfig.priColor, 5, -1));
-    tft.fillRect(x + 30, y + 35, 30, 5, getColorVariation(bruceConfig.priColor, 5, 1));
+    tft.fillRect(x, y, 70, 50, wilyConfig.bgColor);
+    tft.fillRoundRect(x + 5, y + 5, 60, 40, 5, wilyConfig.priColor);
+    tft.fillRect(x + 5, y + 15, 60, 10, getColorVariation(wilyConfig.priColor, 3, -1));
+    tft.fillRect(x + 10, y + 30, 12, 10, getColorVariation(wilyConfig.priColor, 3, 1));
+    tft.drawRect(x + 10, y + 30, 12, 10, getColorVariation(wilyConfig.priColor, 5, -1));
+    tft.drawRect(x + 10 + 4, y + 30, 4, 10, getColorVariation(wilyConfig.priColor, 5, -1));
+    tft.drawRect(x + 10, y + 33, 5, 4, getColorVariation(wilyConfig.priColor, 5, -1));
+    tft.drawRect(x + 17, y + 33, 5, 4, getColorVariation(wilyConfig.priColor, 5, -1));
+    tft.fillRect(x + 30, y + 35, 30, 5, getColorVariation(wilyConfig.priColor, 5, 1));
 }
 
 void drawMfkey32Icon(int x, int y) {
-    tft.drawRect(x + 2, y + 15, 24, 40, bruceConfig.priColor);
-    tft.drawRect(x + 5, y + 18, 18, 12, bruceConfig.priColor);
-    tft.drawRect(x + 5, y + 34, 18, 18, bruceConfig.priColor);
-    tft.drawLine(x + 5, y + 40, x + 22, y + 40, bruceConfig.priColor);
-    tft.drawLine(x + 5, y + 46, x + 22, y + 46, bruceConfig.priColor);
-    tft.drawLine(x + 11, y + 34, x + 11, y + 51, bruceConfig.priColor);
-    tft.drawLine(x + 17, y + 34, x + 17, y + 51, bruceConfig.priColor);
-    tft.drawRect(x + 30, y + 10, 25, 35, bruceConfig.priColor);
+    tft.drawRect(x + 2, y + 15, 24, 40, wilyConfig.priColor);
+    tft.drawRect(x + 5, y + 18, 18, 12, wilyConfig.priColor);
+    tft.drawRect(x + 5, y + 34, 18, 18, wilyConfig.priColor);
+    tft.drawLine(x + 5, y + 40, x + 22, y + 40, wilyConfig.priColor);
+    tft.drawLine(x + 5, y + 46, x + 22, y + 46, wilyConfig.priColor);
+    tft.drawLine(x + 11, y + 34, x + 11, y + 51, wilyConfig.priColor);
+    tft.drawLine(x + 17, y + 34, x + 17, y + 51, wilyConfig.priColor);
+    tft.drawRect(x + 30, y + 10, 25, 35, wilyConfig.priColor);
     int startX = x + 32;
     int startY = y + 12;
     int endX = x + 52;
@@ -1175,24 +1175,24 @@ void drawMfkey32Icon(int x, int y) {
     int turns = 0;
 
     while (startX <= endX && startY <= endY && turns < 3) {
-        tft.drawFastHLine(startX, startY, endX - startX + 1, bruceConfig.priColor);
+        tft.drawFastHLine(startX, startY, endX - startX + 1, wilyConfig.priColor);
         startY += step;
-        tft.drawFastVLine(endX, startY, endY - startY + 1, bruceConfig.priColor);
+        tft.drawFastVLine(endX, startY, endY - startY + 1, wilyConfig.priColor);
         endX -= step;
-        tft.drawFastHLine(startX, endY, endX - startX + 1, bruceConfig.priColor);
+        tft.drawFastHLine(startX, endY, endX - startX + 1, wilyConfig.priColor);
         endY -= step;
-        tft.drawFastVLine(startX, startY, endY - startY + 1, bruceConfig.priColor);
+        tft.drawFastVLine(startX, startY, endY - startY + 1, wilyConfig.priColor);
         startX += step;
         turns++;
     }
-    tft.fillRect(x + 40, y + 36, 6, 6, getColorVariation(bruceConfig.priColor, 3, 1));
+    tft.fillRect(x + 40, y + 36, 6, 6, getColorVariation(wilyConfig.priColor, 3, 1));
 }
 
 void drawMfkey64Icon(int x, int y) {
     drawMfkey32Icon(x, y);
-    tft.fillRoundRect(x + 40, y + 6, 24, 14, 4, bruceConfig.bgColor);
-    tft.drawRoundRect(x + 40, y + 6, 24, 14, 4, getColorVariation(bruceConfig.priColor, 3, -1));
-    tft.drawCircle(x + 48, y + 12, 4, getColorVariation(bruceConfig.priColor, 3, -1));
+    tft.fillRoundRect(x + 40, y + 6, 24, 14, 4, wilyConfig.bgColor);
+    tft.drawRoundRect(x + 40, y + 6, 24, 14, 4, getColorVariation(wilyConfig.priColor, 3, -1));
+    tft.drawCircle(x + 48, y + 12, 4, getColorVariation(wilyConfig.priColor, 3, -1));
 }
 
 // ####################################################################################################
@@ -1808,9 +1808,9 @@ int16_t ypos = 0;
 int PNGDraw(PNGDRAW *pDraw) {
     uint16_t usPixels[MAX_IMAGE_WIDTH];
     // static uint16_t dmaBuffer[MAX_IMAGE_WIDTH]; // static so buffer persists after fn exit
-    uint8_t r = ((uint16_t)bruceConfig.bgColor & 0xF800) >> 8;
-    uint8_t g = ((uint16_t)bruceConfig.bgColor & 0x07E0) >> 3;
-    uint8_t b = ((uint16_t)bruceConfig.bgColor & 0x001F) << 3;
+    uint8_t r = ((uint16_t)wilyConfig.bgColor & 0xF800) >> 8;
+    uint8_t g = ((uint16_t)wilyConfig.bgColor & 0x07E0) >> 3;
+    uint8_t b = ((uint16_t)wilyConfig.bgColor & 0x001F) << 3;
     png->getLineAsRGB565(pDraw, usPixels, PNG_RGB565_BIG_ENDIAN, b << 16 | g << 8 | r);
     if (!pngCacheOnly) {
         tft.drawPixel(0, 0, 0);
@@ -1913,7 +1913,7 @@ bool drawPNG(FS &fs, String filename, int x, int y, bool center) {
 
     if (!mem) {
         Serial.println("Fail alloc PNG!");
-        bruceConfig.theme.label = true;
+        wilyConfig.theme.label = true;
         return false;
     }
 

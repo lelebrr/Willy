@@ -57,11 +57,11 @@ void rf_brute_repeats() {
 bool rf_brute_start() {
     int txpin;
 
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
-        txpin = bruceConfigPins.CC1101_bus.io0;
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
+        txpin = wilyConfigPins.CC1101_bus.io0;
         if (!initRfModule("tx", brute_frequency)) return false;
     } else {
-        txpin = bruceConfigPins.rfTx;
+        txpin = wilyConfigPins.rfTx;
         if (!initRfModule("tx")) return false;
     }
 
@@ -122,8 +122,8 @@ bool rf_brute_start() {
         if (i % 10 == 0) {
             displayRedStripe(
                 String(i) + "/" + String((1 << bits)) + " " + brute_protocol,
-                getComplementaryColor2(bruceConfig.priColor),
-                bruceConfig.priColor
+                getComplementaryColor2(wilyConfig.priColor),
+                wilyConfig.priColor
             );
         }
     }

@@ -49,29 +49,29 @@ void _post_setup_gpio() {
     uint16_t calData[5] = {225, 3413, 403, 3334, 1};
     tft.setTouch(calData);
 #endif
-    bruceConfigPins.gps_bus.rx = (gpio_num_t)GPS_SERIAL_RX;
-    bruceConfigPins.gps_bus.tx = (gpio_num_t)GPS_SERIAL_TX;
-    bruceConfigPins.gpsBaudrate = 9600;
-    bruceConfigPins.rfTx = 8;
-    bruceConfigPins.rfRx = 9;
+    wilyConfigPins.gps_bus.rx = (gpio_num_t)GPS_SERIAL_RX;
+    wilyConfigPins.gps_bus.tx = (gpio_num_t)GPS_SERIAL_TX;
+    wilyConfigPins.gpsBaudrate = 9600;
+    wilyConfigPins.rfTx = 8;
+    wilyConfigPins.rfRx = 9;
 
     // Force disable color inversion for ST7789/ILI9341 on nm-cyd-c5.
-    // Must be done here because begin_storage() loads bruceConf.json which may
+    // Must be done here because begin_storage() loads wilyConf.json which may
     // override the value set in _setup_gpio().
 #ifdef ST7789_DRIVER
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
     tft.invertDisplay(0);
 #endif
 #ifdef ILI9341_DRIVER
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
     tft.invertDisplay(0);
 #endif
 
     // Force set I2C bus pins for nm-cyd-c5.
-    // brucePins.conf may have stale/wrong i2c_bus values, so override them
+    // wilyPins.conf may have stale/wrong i2c_bus values, so override them
     // to ensure PN532 and other I2C devices use the correct GPIO9(SDA)/GPIO8(SCL).
-    bruceConfigPins.i2c_bus.sda = (gpio_num_t)GROVE_SDA;
-    bruceConfigPins.i2c_bus.scl = (gpio_num_t)GROVE_SCL;
+    wilyConfigPins.i2c_bus.sda = (gpio_num_t)GROVE_SDA;
+    wilyConfigPins.i2c_bus.scl = (gpio_num_t)GROVE_SCL;
 }
 
 /***************************************************************************************
@@ -125,22 +125,22 @@ void InputHandler(void) {
         touchPoint.pressed = false;
         _IH_touched = false;
         Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d", t.x, t.y);
-        if (bruceConfigPins.rotation == 3) {
+        if (wilyConfigPins.rotation == 3) {
             t.y = (tftHeight + 20) - t.y;
             t.x = tftWidth - t.x;
         }
-        if (bruceConfigPins.rotation == 0) {
+        if (wilyConfigPins.rotation == 0) {
             uint16_t tmp = t.x;
             t.x = map((tftHeight + 20) - t.y, 0, 320, 0, 240);
             t.y = map(tmp, 0, 240, 0, 320);
         }
-        if (bruceConfigPins.rotation == 2) {
+        if (wilyConfigPins.rotation == 2) {
             uint16_t tmp = t.x;
             t.x = map(t.y, 0, 320, 0, 240);
             t.y = map(tftWidth - tmp, 0, 240, 0, 320);
         }
 
-        Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot=%d\n", t.x, t.y, bruceConfigPins.rotation);
+        Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot=%d\n", t.x, t.y, wilyConfigPins.rotation);
 
         if (!wakeUpScreen()) AnyKeyPress = true;
         else return;

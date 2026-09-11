@@ -148,7 +148,7 @@ void drawVectorIcon(int x, int y, int size, IconType icon, uint16_t color) {
 void drawButton(int x, int y, int size, IconType icon, bool selected, bool active) {
     uint16_t bgColor = TFT_BLACK;
     uint16_t iconColor = active ? TFT_WHITE : TFT_DARKGREY;
-    uint16_t borderColor = selected ? bruceConfig.priColor : TFT_DARKGREY;
+    uint16_t borderColor = selected ? wilyConfig.priColor : TFT_DARKGREY;
 
     // Highlighted button has colored background
     if (selected) {
@@ -169,7 +169,7 @@ void drawButton(int x, int y, int size, IconType icon, bool selected, bool activ
 // Draw Styled Progress Bar
 void drawProgressBar(int x, int y, int width, int height, unsigned long position, unsigned long duration) {
     uint16_t barBg = TFT_DARKGREY;
-    uint16_t barFill = bruceConfig.priColor;
+    uint16_t barFill = wilyConfig.priColor;
 
     // Background bar
     int barY = y + (height / 2) - 2;
@@ -216,7 +216,7 @@ bool showVolumeControl(uint8_t &currentVolume) {
         tft.fillRect(innerBarX, innerBarY, innerBarW, innerBarH, TFT_DARKGREY);
 
         int fillH = (tempVolume * innerBarH) / 100;
-        uint16_t volColor = (tempVolume > 80) ? TFT_RED : bruceConfig.priColor;
+        uint16_t volColor = (tempVolume > 80) ? TFT_RED : wilyConfig.priColor;
         tft.fillRect(innerBarX, innerBarY + (innerBarH - fillH), innerBarW, fillH, volColor);
 
         // Volume percentage text
@@ -297,13 +297,13 @@ void musicPlayerUI(FS *fs, const String &filepath) {
 
     unsigned long currentPosition = 0;
     unsigned long duration = 0;
-    uint8_t currentVolume = bruceConfig.soundVolume;
+    uint8_t currentVolume = wilyConfig.soundVolume;
 
     // --- Draw functions ---
 
     auto drawHeader = [&]() {
-        tft.fillRect(0, 0, tftWidth, ui.HEADER_HEIGHT, bruceConfig.priColor);
-        tft.setTextColor(bruceConfig.bgColor, bruceConfig.priColor);
+        tft.fillRect(0, 0, tftWidth, ui.HEADER_HEIGHT, wilyConfig.priColor);
+        tft.setTextColor(wilyConfig.bgColor, wilyConfig.priColor);
         tft.setTextSize(ui.TEXT_SIZE_LARGE);
 
         // Center title
@@ -316,7 +316,7 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         int y = ui.HEADER_HEIGHT + ui.MARGIN_Y;
 
         // Background area info
-        tft.fillRect(0, y, tftWidth, ui.DISPLAY_HEIGHT, bruceConfig.bgColor);
+        tft.fillRect(0, y, tftWidth, ui.DISPLAY_HEIGHT, wilyConfig.bgColor);
 
         // Music icon box - larger for better visibility
         int iconSize = ui.DISPLAY_HEIGHT - 4;
@@ -345,7 +345,7 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         int textX = ui.MARGIN_X + boxSize + gap;
         int maxChars = (tftWidth - textX - 5) / (6 * ui.TEXT_SIZE_LARGE);
 
-        tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+        tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
         tft.setTextSize(ui.TEXT_SIZE_LARGE);
 
         String displayText = player.filename;
@@ -368,7 +368,7 @@ void musicPlayerUI(FS *fs, const String &filepath) {
     auto drawTimers = [&]() {
         int y = ui.HEADER_HEIGHT + ui.MARGIN_Y + ui.DISPLAY_HEIGHT + 2;
         tft.setTextSize(ui.TEXT_SIZE_SMALL);
-        tft.setTextColor(TFT_LIGHTGREY, bruceConfig.bgColor);
+        tft.setTextColor(TFT_LIGHTGREY, wilyConfig.bgColor);
 
         String curr = formatTime(currentPosition);
         String tot = duration > 0 ? formatTime(duration) : "--:--";
@@ -406,7 +406,7 @@ void musicPlayerUI(FS *fs, const String &filepath) {
     };
 
     // Initial Draw
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     drawHeader();
     drawTrackInfo();
     drawTimers();
@@ -503,7 +503,7 @@ void musicPlayerUI(FS *fs, const String &filepath) {
 
                     case BTN_VOLUME:
                         showVolumeControl(currentVolume);
-                        tft.fillScreen(bruceConfig.bgColor); // Full redraw after popup
+                        tft.fillScreen(wilyConfig.bgColor); // Full redraw after popup
                         drawHeader();
                         infoNeedsRedraw = true;
                         progressNeedsRedraw = true;
@@ -542,6 +542,6 @@ void musicPlayerUI(FS *fs, const String &filepath) {
         delay(30); // Loop for responsive input
     }
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
 }
 #endif

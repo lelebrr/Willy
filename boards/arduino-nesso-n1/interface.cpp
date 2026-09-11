@@ -20,7 +20,7 @@ void _setup_gpio() {
     // I2C_NUM_1 doesn't exist in i2c_port_t here and M5.In_I2C is always on Wire/I2C_NUM_0.
     setSysI2CBus(&Wire);
     enableNessoGrovePower();
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
     M5.BtnA.setDebounceThresh(8);
     M5.BtnB.setDebounceThresh(8);
     M5.BtnB.setHoldThresh(kBtnBLongPressMs);

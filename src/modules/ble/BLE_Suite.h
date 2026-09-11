@@ -18,8 +18,8 @@ extern volatile int tftWidth;
 extern volatile int tftHeight;
 class tft_logger;
 extern tft_logger tft;
-class BruceConfig;
-extern BruceConfig bruceConfig;
+class WilyConfig;
+extern WilyConfig wilyConfig;
 
 bool check(int key);
 

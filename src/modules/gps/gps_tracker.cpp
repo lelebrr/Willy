@@ -39,7 +39,7 @@ void GPSTracker::setup() {
     display_banner();
     padprintln("Inicializando...");
 
-#ifdef BRUCE_IR_SERIAL
+#ifdef WILLY_IR_SERIAL
     displayWarning("ATIVE A CHAVE GPS!", true);
     display_banner();
 #endif
@@ -52,7 +52,7 @@ void GPSTracker::setup() {
 bool GPSTracker::begin_gps() {
     releasePins();
     GPSserial.begin(
-        bruceConfigPins.gpsBaudrate, SERIAL_8N1, bruceConfigPins.gps_bus.rx, bruceConfigPins.gps_bus.tx
+        wilyConfigPins.gpsBaudrate, SERIAL_8N1, wilyConfigPins.gps_bus.rx, wilyConfigPins.gps_bus.tx
     );
 
     // Apply GPS configuration if in advanced mode
@@ -62,10 +62,10 @@ bool GPSTracker::begin_gps() {
         gpsConfig.applyConfiguration(GPSserial);
 
         // If baudrate was changed, reinitialize serial
-        if (gpsConfig.advancedBaudrate != bruceConfigPins.gpsBaudrate && gpsConfig.advancedBaudrate > 0) {
+        if (gpsConfig.advancedBaudrate != wilyConfigPins.gpsBaudrate && gpsConfig.advancedBaudrate > 0) {
             GPSserial.end();
             GPSserial.begin(
-                gpsConfig.advancedBaudrate, SERIAL_8N1, bruceConfigPins.gps_bus.rx, bruceConfigPins.gps_bus.tx
+                gpsConfig.advancedBaudrate, SERIAL_8N1, wilyConfigPins.gps_bus.rx, wilyConfigPins.gps_bus.tx
             );
         }
     }
@@ -269,45 +269,45 @@ void GPSTracker::add_coord() {
 
 void GPSTracker::releasePins() {
     rxPinReleased = false;
-    if (bruceConfigPins.CC1101_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
-        bruceConfigPins.NRF24_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
+    if (wilyConfigPins.CC1101_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
+        wilyConfigPins.NRF24_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
 #if !defined(LITE_VERSION)
-        bruceConfigPins.W5500_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
-        bruceConfigPins.LoRa_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
+        wilyConfigPins.W5500_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
+        wilyConfigPins.LoRa_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
 #endif
-        bruceConfigPins.SDCARD_bus.checkConflict(bruceConfigPins.gps_bus.rx)) {
+        wilyConfigPins.SDCARD_bus.checkConflict(wilyConfigPins.gps_bus.rx)) {
         // T-Embed CC1101 and T-Display S3 Touch ties this pin to the NRF24 CS; switch it to input so the GPS
         // UART can drive it.
-        pinMode(bruceConfigPins.gps_bus.rx, INPUT);
+        pinMode(wilyConfigPins.gps_bus.rx, INPUT);
         rxPinReleased = true;
     }
 }
 
 void GPSTracker::restorePins() {
     if (rxPinReleased) {
-        if (bruceConfigPins.CC1101_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
-            bruceConfigPins.NRF24_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
+        if (wilyConfigPins.CC1101_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
+            wilyConfigPins.NRF24_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
 #if !defined(LITE_VERSION)
-            bruceConfigPins.W5500_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
-            bruceConfigPins.LoRa_bus.checkConflict(bruceConfigPins.gps_bus.rx) ||
+            wilyConfigPins.W5500_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
+            wilyConfigPins.LoRa_bus.checkConflict(wilyConfigPins.gps_bus.rx) ||
 #endif
-            bruceConfigPins.SDCARD_bus.checkConflict(bruceConfigPins.gps_bus.rx)) {
+            wilyConfigPins.SDCARD_bus.checkConflict(wilyConfigPins.gps_bus.rx)) {
             // Restore the original board state after leaving the GPS app s
             // o the radio/other peripherals behave as expected
-            pinMode(bruceConfigPins.gps_bus.rx, OUTPUT);
-            if (bruceConfigPins.gps_bus.rx == bruceConfigPins.CC1101_bus.cs ||
-                bruceConfigPins.gps_bus.rx == bruceConfigPins.NRF24_bus.cs ||
+            pinMode(wilyConfigPins.gps_bus.rx, OUTPUT);
+            if (wilyConfigPins.gps_bus.rx == wilyConfigPins.CC1101_bus.cs ||
+                wilyConfigPins.gps_bus.rx == wilyConfigPins.NRF24_bus.cs ||
 #if !defined(LITE_VERSION)
-                bruceConfigPins.gps_bus.rx == bruceConfigPins.W5500_bus.cs ||
-                bruceConfigPins.gps_bus.rx == bruceConfigPins.W5500_bus.cs ||
+                wilyConfigPins.gps_bus.rx == wilyConfigPins.W5500_bus.cs ||
+                wilyConfigPins.gps_bus.rx == wilyConfigPins.W5500_bus.cs ||
 #endif
-                bruceConfigPins.gps_bus.rx == bruceConfigPins.SDCARD_bus.cs) {
+                wilyConfigPins.gps_bus.rx == wilyConfigPins.SDCARD_bus.cs) {
                 // If it is conflicting to an SPI CS pin, keep it HIGH
-                digitalWrite(bruceConfigPins.gps_bus.rx, HIGH);
+                digitalWrite(wilyConfigPins.gps_bus.rx, HIGH);
             } else {
                 // If it is conflicting with any other SPI pin, keep it LOW
                 // Avoids CC1101 Jamming and nRF24 radio to keep enabled
-                digitalWrite(bruceConfigPins.gps_bus.rx, LOW);
+                digitalWrite(wilyConfigPins.gps_bus.rx, LOW);
             }
         }
         rxPinReleased = false;

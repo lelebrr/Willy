@@ -58,7 +58,7 @@ void _setup_gpio() {
 #endif
 #endif
 
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
 }
 
 /***************************************************************************************
@@ -181,28 +181,28 @@ void InputHandler(void) {
         uint8_t touched = 0;
         uint8_t rot = 5;
 
-        if (rot != bruceConfigPins.rotation) {
-            if (bruceConfigPins.rotation == 1) {
+        if (rot != wilyConfigPins.rotation) {
+            if (wilyConfigPins.rotation == 1) {
                 touch.setMaxCoordinates(TFT_HEIGHT, TFT_WIDTH);
                 touch.setSwapXY(true);
                 touch.setMirrorXY(false, true);
             }
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 touch.setMaxCoordinates(TFT_HEIGHT, TFT_WIDTH);
                 touch.setSwapXY(true);
                 touch.setMirrorXY(true, false);
             }
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 touch.setMaxCoordinates(TFT_WIDTH, TFT_HEIGHT);
                 touch.setSwapXY(false);
                 touch.setMirrorXY(false, false);
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 touch.setMaxCoordinates(TFT_WIDTH, TFT_HEIGHT);
                 touch.setSwapXY(false);
                 touch.setMirrorXY(true, true);
             }
-            rot = bruceConfigPins.rotation;
+            rot = wilyConfigPins.rotation;
         }
         // Track touch state to prevent double events on press/release
         static bool lastTouchState = false;
@@ -228,16 +228,16 @@ void InputHandler(void) {
 #endif
 #if !defined(TOUCH_GT911_I2C)
             // Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d",t.x, t.y);
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 t.y = (tftHeight + 20) - t.y;
                 t.x = tftWidth - t.x;
             }
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 int tmp = t.x;
                 t.x = tftWidth - t.y;
                 t.y = tmp;
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 int tmp = t.x;
                 t.x = t.y;
                 t.y = (tftHeight + 20) - tmp;

@@ -60,6 +60,19 @@ public:
 
     bool isMifareClassicSak(uint8_t sak) const;
 
+    // Public wrappers for advanced operations (used by RFID Advanced Suite)
+    bool mifareAuthBlock(uint8_t block, const uint8_t key[6], bool useKeyB);
+    bool mifareReadBlock(uint8_t block, uint8_t data[16]);
+    bool mifareWriteBlock(uint8_t block, const uint8_t data[16]);
+    void mifareHalt();
+    bool isoDepApdu(const uint8_t *tx, uint16_t txLen, uint8_t *rx, uint16_t rxCap, uint16_t *rxLen);
+    bool readDESFireInfoPublic();
+    bool readNtagSignaturePublic();
+    bool readNtagCountersPublic();
+    int buildEmuPagesPublic();
+    bool setupListenModePublic(const uint8_t *uidBuf, uint8_t uidLen, const uint8_t *atqa, uint8_t sak);
+    int handleListenLoopPublic(uint32_t timeoutMs);
+
 private:
     CONNECTION_TYPE _connection_type;
     RfalRfST25R3916Class *_hw = nullptr;

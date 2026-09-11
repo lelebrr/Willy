@@ -20,11 +20,11 @@ void NRF24Menu::optionsMenu() {
     options.clear();
     options.push_back(Option("Informacao", nrf_common::nrf_info));
 
-    if (bruceConfigPins.NRF24_bus.mosi == bruceConfigPins.SDCARD_bus.mosi &&
-        bruceConfigPins.NRF24_bus.mosi != GPIO_NUM_NC)
+    if (wilyConfigPins.NRF24_bus.mosi == wilyConfigPins.SDCARD_bus.mosi &&
+        wilyConfigPins.NRF24_bus.mosi != GPIO_NUM_NC)
         options.push_back(Option("Espectro", [=]() { nrf_spectrum(&sdcardSPI); }));
 #if TFT_MOSI > 0 // Display doesn't use SPI bus
-    else if (bruceConfigPins.NRF24_bus.mosi == (gpio_num_t)TFT_MOSI)
+    else if (wilyConfigPins.NRF24_bus.mosi == (gpio_num_t)TFT_MOSI)
         options.push_back(Option("Espectro", [=]() { nrf_spectrum(&tft.getSPIinstance()); }));
 #endif
     else options.push_back(Option("Espectro", [=]() { nrf_spectrum(&SPI); }));
@@ -87,16 +87,16 @@ void NRF24Menu::attacksMenu() {
 void NRF24Menu::configMenu() {
     uint8_t opt = 0;
     int idx = 0;
-    if (bruceConfigPins.NRF24_bus.mosi == (gpio_num_t)SDCARD_MOSI) idx = 1;
+    if (wilyConfigPins.NRF24_bus.mosi == (gpio_num_t)SDCARD_MOSI) idx = 1;
     options = {
         {"NRF24 (Legado)",     [&]() { opt = 1; }         },
         {"NRF24 (SPI Comp.)", [&]() { opt = 2; }         },
         {"Voltar",               [this]() { optionsMenu(); }},
     };
 
-    loopOptions(options, MENU_TYPE_SUBMENU, "Config RF", idx);
+    loopOptions(options, MENU_TYPE_SUBMENU, "Config NRF24", idx);
     if (opt == 1) {
-        bruceConfigPins.setNrf24Pins(
+        wilyConfigPins.setNrf24Pins(
             {(gpio_num_t)NRF24_SCK_PIN,
              (gpio_num_t)NRF24_MISO_PIN,
              (gpio_num_t)NRF24_MOSI_PIN,
@@ -104,7 +104,7 @@ void NRF24Menu::configMenu() {
              (gpio_num_t)NRF24_CE_PIN,
              GPIO_NUM_NC}
         );
-        bruceConfigPins.setCC1101Pins(
+        wilyConfigPins.setCC1101Pins(
             {(gpio_num_t)NRF24_SCK_PIN,
              (gpio_num_t)NRF24_MISO_PIN,
              (gpio_num_t)NRF24_MOSI_PIN,
@@ -115,7 +115,7 @@ void NRF24Menu::configMenu() {
     }
 #if CONFIG_SOC_GPIO_OUT_RANGE_MAX > 30
     if (opt == 2) {
-        bruceConfigPins.setNrf24Pins(
+        wilyConfigPins.setNrf24Pins(
             {(gpio_num_t)SDCARD_SCK,
              (gpio_num_t)SDCARD_MISO,
              (gpio_num_t)SDCARD_MOSI,
@@ -123,7 +123,7 @@ void NRF24Menu::configMenu() {
              GPIO_NUM_32,
              GPIO_NUM_NC}
         );
-        bruceConfigPins.setCC1101Pins(
+        wilyConfigPins.setCC1101Pins(
             {(gpio_num_t)SDCARD_SCK,
              (gpio_num_t)SDCARD_MISO,
              (gpio_num_t)SDCARD_MOSI,
@@ -152,32 +152,32 @@ void NRF24Menu::drawIcon(float scale) {
     int connR = iconH / 20;
 
     // Case
-    tft.drawRect(caseX, caseY, caseW, caseH, bruceConfig.priColor);
+    tft.drawRect(caseX, caseY, caseW, caseH, wilyConfig.priColor);
 
     // Antenna
-    tft.fillRect(caseX + caseW, caseY + caseH / 2 - antW / 2, antW, antW, bruceConfig.priColor);
+    tft.fillRect(caseX + caseW, caseY + caseH / 2 - antW / 2, antW, antW, wilyConfig.priColor);
     tft.fillRoundRect(
         caseX + caseW + antW,
         caseY + caseH - iconH,
         antW,
         iconH - caseH / 2 + antW / 2,
         antW / 2,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 
     // Connectors
-    tft.fillCircle(caseX + caseW / 6, caseY + 1 * caseH / 5, connR, bruceConfig.priColor);
-    tft.fillCircle(caseX + caseW / 6, caseY + 2 * caseH / 5, connR, bruceConfig.priColor);
-    tft.fillCircle(caseX + caseW / 6, caseY + 3 * caseH / 5, connR, bruceConfig.priColor);
-    tft.fillCircle(caseX + caseW / 6, caseY + 4 * caseH / 5, connR, bruceConfig.priColor);
+    tft.fillCircle(caseX + caseW / 6, caseY + 1 * caseH / 5, connR, wilyConfig.priColor);
+    tft.fillCircle(caseX + caseW / 6, caseY + 2 * caseH / 5, connR, wilyConfig.priColor);
+    tft.fillCircle(caseX + caseW / 6, caseY + 3 * caseH / 5, connR, wilyConfig.priColor);
+    tft.fillCircle(caseX + caseW / 6, caseY + 4 * caseH / 5, connR, wilyConfig.priColor);
 
-    tft.fillCircle(caseX + caseW / 3, caseY + 1 * caseH / 5, connR, bruceConfig.priColor);
-    tft.fillCircle(caseX + caseW / 3, caseY + 2 * caseH / 5, connR, bruceConfig.priColor);
-    tft.fillCircle(caseX + caseW / 3, caseY + 3 * caseH / 5, connR, bruceConfig.priColor);
-    tft.fillCircle(caseX + caseW / 3, caseY + 4 * caseH / 5, connR, bruceConfig.priColor);
+    tft.fillCircle(caseX + caseW / 3, caseY + 1 * caseH / 5, connR, wilyConfig.priColor);
+    tft.fillCircle(caseX + caseW / 3, caseY + 2 * caseH / 5, connR, wilyConfig.priColor);
+    tft.fillCircle(caseX + caseW / 3, caseY + 3 * caseH / 5, connR, wilyConfig.priColor);
+    tft.fillCircle(caseX + caseW / 3, caseY + 4 * caseH / 5, connR, wilyConfig.priColor);
 
     // Chip
     tft.fillRect(
-        caseX + caseW - 2 * antW - connR, caseY + caseH / 2 - antW / 2, antW, antW, bruceConfig.priColor
+        caseX + caseW - 2 * antW - connR, caseY + caseH / 2 - antW / 2, antW, antW, wilyConfig.priColor
     );
 }

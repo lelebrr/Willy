@@ -12,7 +12,7 @@
  * @function mic.recordWav(pathOrPathObj?, options?)
  *
  * @param pathOrPathObj {string|object} - Optional path or path object
- *   - string: "/BruceMIC/rec.wav"
+ *   - string: "/WilyMIC/rec.wav"
  *   - object: { fs: "SD"|"LittleFS", path: "/..." }
  *   - If omitted, defaults to auto-detected storage
  *
@@ -46,7 +46,7 @@ JSValue native_micRecordWav(JSContext *ctx, JSValue *this_val, int argc, JSValue
     if (argc < 1 || JS_IsUndefined(argv[0]) || JS_IsNull(argv[0])) {
         // No path provided - use defaults
         fileParams.fs = nullptr;
-        fileParams.path = "/BruceMIC/recording.wav";
+        fileParams.path = "/WilyMIC/recording.wav";
         fileParams.exist = false;
         fileParams.paramOffset = 0;
     } else {

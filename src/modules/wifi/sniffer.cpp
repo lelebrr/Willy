@@ -996,8 +996,8 @@ void sniffer_setup() {
 
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config_t));
-    snprintf((char *)wifi_config.ap.ssid, sizeof(wifi_config.ap.ssid), "%s_Sniffer", bruceConfig.wifiAp.ssid.c_str());
-    strncpy((char *)wifi_config.ap.password, bruceConfig.wifiAp.pwd.c_str(), sizeof(wifi_config.ap.password) - 1);
+    snprintf((char *)wifi_config.ap.ssid, sizeof(wifi_config.ap.ssid), "%s_Sniffer", wilyConfig.wifiAp.ssid.c_str());
+    strncpy((char *)wifi_config.ap.password, wilyConfig.wifiAp.pwd.c_str(), sizeof(wifi_config.ap.password) - 1);
     wifi_config.ap.password[sizeof(wifi_config.ap.password) - 1] = '\0';
     wifi_config.ap.ssid_len = strlen((char *)wifi_config.ap.ssid);
     wifi_config.ap.channel = 1;                   // Channel
@@ -1101,8 +1101,8 @@ void sniffer_setup() {
                         15,
                         0,
                         360 * (millis() - _tmp) / 700,
-                        getColorVariation(bruceConfig.priColor),
-                        bruceConfig.bgColor
+                        getColorVariation(wilyConfig.priColor),
+                        wilyConfig.bgColor
                     );
                 vTaskDelay(10 / portTICK_RATE_MS);
             }
@@ -1208,7 +1208,7 @@ void sniffer_setup() {
             drawMainBorderWithTitle("pcap sniffer", clearScreen); // Clear Screen and redraw border
             clearScreen = false;
             tft.setTextSize(FP);
-            tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+            tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
             String activeFile = "File: ";
             if (sniffer_get_mode() == SnifferMode::Full && rawCaptureEnabled()) {
                 activeFile += FileSys + ":" + filename;
@@ -1220,12 +1220,12 @@ void sniffer_setup() {
             padprintln(activeFile);
             padprintln("Modo Sniffer: " + currentModeString());
             if (deauth) {
-                tft.setTextColor(bruceConfig.bgColor, bruceConfig.priColor);
+                tft.setTextColor(wilyConfig.bgColor, wilyConfig.priColor);
                 padprintln(
                     "Deauth: in " + String((DEAUTH_INTERVAL - (millis() - deauth_tmp)) / 1000) + "s, total " +
                     String(deauth_counter) + " pkts sent"
                 );
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
 
             } else padprintln("Silent mode.");
 
@@ -1250,7 +1250,7 @@ void sniffer_setup() {
             }
 
             // make a nice reverse video bar
-            tft.setTextColor(bruceConfig.bgColor, bruceConfig.priColor);
+            tft.setTextColor(wilyConfig.bgColor, wilyConfig.priColor);
             tft.drawRightString(
                 "Ch" +
                     String(

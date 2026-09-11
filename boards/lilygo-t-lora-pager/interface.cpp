@@ -205,10 +205,10 @@ void _setup_gpio() {
     keyboard->flush();
 
     // Start with default IR, RF, GPS and RFID Configs, replace old
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.rfidModule = ST25R3916_SPI_MODULE;
-    bruceConfigPins.irRx = 1;
-    bruceConfigPins.gpsBaudrate = 38400;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.rfidModule = ST25R3916_SPI_MODULE;
+    wilyConfigPins.irRx = 1;
+    wilyConfigPins.gpsBaudrate = 38400;
 
     // Encoder
     pinMode(ENCODER_KEY, INPUT);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// Part of Bruce (AGPL-3.0-or-later). This file contains code DERIVED FROM and
+// Part of Wily (AGPL-3.0-or-later). This file contains code DERIVED FROM and
 // modified after:
 //   - rc-switch (LGPL-2.1-or-later), (C) 2011 Suat Ozgur and contributors —
 //     the classic OOK protocol capture/decode state machine;

@@ -1,4 +1,4 @@
-BLE Security Suite Module
+﻿BLE Security Suite Module
 
 ⚠️ DISCLAIMER
 
@@ -6,7 +6,7 @@ For authorized testing and educational purposes only. Success varies by target d
 
 About
 
-BLE Suite is a comprehensive Bluetooth Low Energy security testing framework for ESP32 devices running Bruce firmware. Provides reconnaissance, protocol exploitation, and post-exploitation capabilities.
+BLE Suite is a comprehensive Bluetooth Low Energy security testing framework for ESP32 devices running Wily firmware. Provides reconnaissance, protocol exploitation, and post-exploitation capabilities.
 
 Hardware Integration
 

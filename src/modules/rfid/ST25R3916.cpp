@@ -1,4 +1,4 @@
-﻿#include "ST25R3916.h"
+#include "ST25R3916.h"
 #if !defined(LITE_VERSION)
 
 // ST25R3916 via RFAL fork (lewisxhe/ST25R3916-fork + NFC-RFAL-fork).
@@ -213,19 +213,19 @@ ST25R3916::~ST25R3916() {
 bool ST25R3916::_initSPI() {
     _deselectSharedSpiDevices();
 
-    int cs = (int)bruceConfigPins.ST25R_bus.cs;
-    int irq = (int)bruceConfigPins.ST25R_bus.io0;
+    int cs = (int)wilyConfigPins.ST25R_bus.cs;
+    int irq = (int)wilyConfigPins.ST25R_bus.io0;
     ST25R_LOG(
         "_initSPI: CS=%d IRQ=%d MOSI=%d MISO=%d SCK=%d",
         cs,
         irq,
-        (int)bruceConfigPins.ST25R_bus.mosi,
-        (int)bruceConfigPins.ST25R_bus.miso,
-        (int)bruceConfigPins.ST25R_bus.sck
+        (int)wilyConfigPins.ST25R_bus.mosi,
+        (int)wilyConfigPins.ST25R_bus.miso,
+        (int)wilyConfigPins.ST25R_bus.sck
     );
 
     _spi = acquireSPIBus(
-        bruceConfigPins.ST25R_bus.sck, bruceConfigPins.ST25R_bus.miso, bruceConfigPins.ST25R_bus.mosi
+        wilyConfigPins.ST25R_bus.sck, wilyConfigPins.ST25R_bus.miso, wilyConfigPins.ST25R_bus.mosi
     );
     if (!_spi) {
         ST25R_LOG("_initSPI: no hardware SPI bus available for these pins");
@@ -1376,7 +1376,7 @@ int ST25R3916::load() {
     FS *fs;
     if (!getFsStorage(fs)) return FAILURE;
 
-    String filepath = loopSD(*fs, true, "RFID|NFC", "/BruceRFID");
+    String filepath = loopSD(*fs, true, "RFID|NFC", "/WilyRFID");
     if (filepath.length() == 0) return FAILURE;
 
     return loadFromFile(filepath);
@@ -1456,7 +1456,7 @@ int ST25R3916::loadFromFile(const String &filepath) {
 
 // RFAL's rfalT2TPollerRead()/GET_VERSION/READ_SIG default timeouts (5-20ms,
 // see rfal_t2t.cpp's RFAL_FDT_POLL_READ_MAX) assume near-instant silicon tag
-// response. A software tag emulator relaying through an MCU (e.g. Bruce's own
+// response. A software tag emulator relaying through an MCU (e.g. Wily's own
 // PN532 emulate(), I2C-bound and deliberately clocked slow for target-mode
 // stability) can easily take longer than that to answer post-activation
 // commands, causing spurious ST_ERR_TIMEOUT even though the emulator would
@@ -1996,7 +1996,7 @@ int ST25R3916::saveFlipper(const String &filename) {
     FS *fs;
     if (!getFsStorage(fs)) return FAILURE;
 
-    File file = createNewFile(fs, "/BruceRFID", filename + ".nfc");
+    File file = createNewFile(fs, "/WilyRFID", filename + ".nfc");
     if (!file) return FAILURE;
 
     String devType = ntagVariant.length() ? ntagVariant : printableUID.picc_type;
@@ -2040,10 +2040,10 @@ int ST25R3916::save(const String &filename) {
     FS *fs;
     if (!getFsStorage(fs)) return FAILURE;
 
-    File file = createNewFile(fs, "/BruceRFID", filename + ".rfid");
+    File file = createNewFile(fs, "/WilyRFID", filename + ".rfid");
     if (!file) return FAILURE;
 
-    file.println("Filetype: Bruce RFID File");
+    file.println("Filetype: Wily RFID File");
     file.println("Version 1");
     file.println("Device type: " + printableUID.picc_type);
     file.println("# UID, ATQA and SAK are common for all formats");
@@ -2453,7 +2453,7 @@ void ST25R3916::_mfcRebuildStrAllPages() {
 }
 
 int ST25R3916::_readMifareClassic(rfalNfcDevice *dev) {
-    bruceConfig.ensureMifareKeysLoaded();
+    wilyConfig.ensureMifareKeysLoaded();
     memset(&mfcDump, 0, sizeof(mfcDump));
     _mfcAuthed = false;
 
@@ -2507,10 +2507,10 @@ int ST25R3916::_readMifareClassic(rfalNfcDevice *dev) {
             }
         }
 
-        // Fallback: try user keys from bruceConfig.mifareKeys (custom dictionary).
+        // Fallback: try user keys from wilyConfig.mifareKeys (custom dictionary).
         if (!authed) {
             for (int useB = 0; useB <= 1 && !authed; useB++) {
-                for (const auto &mifKey : bruceConfig.mifareKeys) {
+                for (const auto &mifKey : wilyConfig.mifareKeys) {
                     uint8_t k[6];
                     for (int i = 0; i < 6; i++)
                         k[i] = (uint8_t)strtoul(mifKey.substring(i * 2, i * 2 + 2).c_str(), nullptr, 16);
@@ -2703,7 +2703,7 @@ int ST25R3916::_saveMifareClassicFlipper(const String &filename) {
     FS *fs;
     if (!getFsStorage(fs)) return FAILURE;
 
-    File file = createNewFile(fs, "/BruceRFID", filename + ".nfc");
+    File file = createNewFile(fs, "/WilyRFID", filename + ".nfc");
     if (!file) return FAILURE;
 
     String type = mfcType.length() ? mfcType : "1K";
@@ -3337,6 +3337,54 @@ int ST25R3916::_emulateFelica() {
     _listenStop();
     ST25R_LOG("emulate felica: encerrado — polls=%d", polls);
     return SUCCESS;
+}
+
+// ============================================================================
+// Public wrapper methods for RFID Advanced Suite
+// ============================================================================
+
+bool ST25R3916::mifareAuthBlock(uint8_t block, const uint8_t key[6], bool useKeyB) {
+    return _mifareAuth(block, key, useKeyB);
+}
+
+bool ST25R3916::mifareReadBlock(uint8_t block, uint8_t data[16]) {
+    return _mifareReadBlock(block, data);
+}
+
+bool ST25R3916::mifareWriteBlock(uint8_t block, const uint8_t data[16]) {
+    return _mifareWriteBlock(block, data);
+}
+
+void ST25R3916::mifareHalt() {
+    _mfcHalt();
+}
+
+bool ST25R3916::isoDepApdu(const uint8_t *tx, uint16_t txLen, uint8_t *rx, uint16_t rxCap, uint16_t *rxLen) {
+    return _isoDepApdu(tx, txLen, rx, rxCap, rxLen);
+}
+
+bool ST25R3916::readDESFireInfoPublic() {
+    return _readDESFireInfo();
+}
+
+bool ST25R3916::readNtagSignaturePublic() {
+    return _readNtagSignature();
+}
+
+bool ST25R3916::readNtagCountersPublic() {
+    return _readNtagCounters();
+}
+
+int ST25R3916::buildEmuPagesPublic() {
+    return _buildEmuPages();
+}
+
+bool ST25R3916::setupListenModePublic(const uint8_t *uidBuf, uint8_t uidLen, const uint8_t *atqa, uint8_t sak) {
+    return _setupListenMode(uidBuf, uidLen, atqa, sak);
+}
+
+int ST25R3916::handleListenLoopPublic(uint32_t timeoutMs) {
+    return _handleListenLoop(timeoutMs);
 }
 
 #endif // !LITE_VERSION

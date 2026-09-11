@@ -56,7 +56,7 @@ void nrf_unifying_exploit() {
             if (current_channel > 80) current_channel = 5;
 
             if (attempts % 100 == 0) {
-                tft.fillRect(10, 100, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 100, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 100);
                 tft.printf("Payloads sent: %d", attempts);
             }

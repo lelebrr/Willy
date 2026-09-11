@@ -1,6 +1,6 @@
 /**
  * @file mqjs_bindings.cpp
- * @brief Micro QuickJS bindings for Bruce
+ * @brief Micro QuickJS bindings for Wily
  * @version 1.0
  *
  * Implementation for mquickjs API compatibility.
@@ -30,10 +30,10 @@ extern int getBattery();
 #define JS_TO_CSTRING(ctx, val, buf) JS_ToCString(ctx, val, buf)
 
 // Forward declaration for the dispatch function
-static JSValue js_bruce_dispatch(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv, int magic);
+static JSValue js_wily_dispatch(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv, int magic);
 
 // Macro for easier function definition in the table
-#define BRUCE_CFUNC_DEF(magic, args) { { .generic_magic = js_bruce_dispatch }, JS_UNDEFINED, JS_CFUNC_generic_magic, args, magic }
+#define WILLY_CFUNC_DEF(magic, args) { { .generic_magic = js_wily_dispatch }, JS_UNDEFINED, JS_CFUNC_generic_magic, args, magic }
 
 // Enum for function indices
 enum {
@@ -90,61 +90,61 @@ enum {
 };
 
 // Function table for mQuickJS
-extern "C" const JSCFunctionDef bruce_func_table[] = {
-    BRUCE_CFUNC_DEF(FUNC_DELAY, 1),
-    BRUCE_CFUNC_DEF(FUNC_MILLIS, 0),
-    BRUCE_CFUNC_DEF(FUNC_PRINT, 1),
-    BRUCE_CFUNC_DEF(PRINTLN, 1),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_FILLSCREEN, 1),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_DRAWSTRING, 3),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_DRAWCENTRE, 4),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_SETTEXTCOLOR, 2),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_SETTEXTSIZE, 1),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_WIDTH, 0),
-    BRUCE_CFUNC_DEF(FUNC_DISPLAY_HEIGHT, 0),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_DIGITALWRITE, 2),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_DIGITALREAD, 1),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_ANALOGWRITE, 2),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_ANALOGREAD, 1),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_PINMODE, 2),
-    BRUCE_CFUNC_DEF(FUNC_WIFI_SCAN, 0),
-    BRUCE_CFUNC_DEF(FUNC_WIFI_CONNECT, 3),
-    BRUCE_CFUNC_DEF(FUNC_WIFI_DISCONNECT, 0),
-    BRUCE_CFUNC_DEF(FUNC_WIFI_STATUS, 0),
-    BRUCE_CFUNC_DEF(FUNC_WIFI_IP, 0),
-    BRUCE_CFUNC_DEF(FUNC_HTTP_GET, 1),
-    BRUCE_CFUNC_DEF(FUNC_STORAGE_READ, 1),
-    BRUCE_CFUNC_DEF(FUNC_STORAGE_WRITE, 3),
-    BRUCE_CFUNC_DEF(FUNC_STORAGE_REMOVE, 1),
-    BRUCE_CFUNC_DEF(FUNC_STORAGE_EXISTS, 1),
-    BRUCE_CFUNC_DEF(FUNC_SUBGHZ_TX, 4),
-    BRUCE_CFUNC_DEF(FUNC_BADUSB_RUN, 1),
-    BRUCE_CFUNC_DEF(FUNC_DEVICE_BATTERY, 0),
-    BRUCE_CFUNC_DEF(FUNC_DEVICE_FREEHEAP, 0),
-    BRUCE_CFUNC_DEF(FUNC_DEVICE_BOARD, 0),
-    BRUCE_CFUNC_DEF(FUNC_DEVICE_SDK, 0),
-    BRUCE_CFUNC_DEF(FUNC_IR_TX, 3),
-    BRUCE_CFUNC_DEF(FUNC_IR_SEND, 3),
-    BRUCE_CFUNC_DEF(FUNC_KEYBOARD_INPUT, 3),
-    BRUCE_CFUNC_DEF(FUNC_KEYBOARD_HEX, 3),
-    BRUCE_CFUNC_DEF(FUNC_KEYBOARD_NUM, 3),
-    BRUCE_CFUNC_DEF(FUNC_DIALOG_ERROR, 1),
-    BRUCE_CFUNC_DEF(FUNC_DIALOG_WARNING, 1),
-    BRUCE_CFUNC_DEF(FUNC_DIALOG_INFO, 1),
-    BRUCE_CFUNC_DEF(FUNC_DIALOG_SUCCESS, 1),
-    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETBOARDNAME, 0),
-    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETCPUFREQ, 0),
-    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETFREEHEAP, 0),
-    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETFLASHCHIPSIZE, 0),
-    BRUCE_CFUNC_DEF(FUNC_COMPAT_GETSDKVERSION, 0),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_LEDC_ATTACH, 3),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_LEDC_WRITE, 2),
-    BRUCE_CFUNC_DEF(FUNC_GPIO_LEDC_DETACH, 1)
+extern "C" const JSCFunctionDef wily_func_table[] = {
+    WILLY_CFUNC_DEF(FUNC_DELAY, 1),
+    WILLY_CFUNC_DEF(FUNC_MILLIS, 0),
+    WILLY_CFUNC_DEF(FUNC_PRINT, 1),
+    WILLY_CFUNC_DEF(PRINTLN, 1),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_FILLSCREEN, 1),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_DRAWSTRING, 3),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_DRAWCENTRE, 4),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_SETTEXTCOLOR, 2),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_SETTEXTSIZE, 1),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_WIDTH, 0),
+    WILLY_CFUNC_DEF(FUNC_DISPLAY_HEIGHT, 0),
+    WILLY_CFUNC_DEF(FUNC_GPIO_DIGITALWRITE, 2),
+    WILLY_CFUNC_DEF(FUNC_GPIO_DIGITALREAD, 1),
+    WILLY_CFUNC_DEF(FUNC_GPIO_ANALOGWRITE, 2),
+    WILLY_CFUNC_DEF(FUNC_GPIO_ANALOGREAD, 1),
+    WILLY_CFUNC_DEF(FUNC_GPIO_PINMODE, 2),
+    WILLY_CFUNC_DEF(FUNC_WIFI_SCAN, 0),
+    WILLY_CFUNC_DEF(FUNC_WIFI_CONNECT, 3),
+    WILLY_CFUNC_DEF(FUNC_WIFI_DISCONNECT, 0),
+    WILLY_CFUNC_DEF(FUNC_WIFI_STATUS, 0),
+    WILLY_CFUNC_DEF(FUNC_WIFI_IP, 0),
+    WILLY_CFUNC_DEF(FUNC_HTTP_GET, 1),
+    WILLY_CFUNC_DEF(FUNC_STORAGE_READ, 1),
+    WILLY_CFUNC_DEF(FUNC_STORAGE_WRITE, 3),
+    WILLY_CFUNC_DEF(FUNC_STORAGE_REMOVE, 1),
+    WILLY_CFUNC_DEF(FUNC_STORAGE_EXISTS, 1),
+    WILLY_CFUNC_DEF(FUNC_SUBGHZ_TX, 4),
+    WILLY_CFUNC_DEF(FUNC_BADUSB_RUN, 1),
+    WILLY_CFUNC_DEF(FUNC_DEVICE_BATTERY, 0),
+    WILLY_CFUNC_DEF(FUNC_DEVICE_FREEHEAP, 0),
+    WILLY_CFUNC_DEF(FUNC_DEVICE_BOARD, 0),
+    WILLY_CFUNC_DEF(FUNC_DEVICE_SDK, 0),
+    WILLY_CFUNC_DEF(FUNC_IR_TX, 3),
+    WILLY_CFUNC_DEF(FUNC_IR_SEND, 3),
+    WILLY_CFUNC_DEF(FUNC_KEYBOARD_INPUT, 3),
+    WILLY_CFUNC_DEF(FUNC_KEYBOARD_HEX, 3),
+    WILLY_CFUNC_DEF(FUNC_KEYBOARD_NUM, 3),
+    WILLY_CFUNC_DEF(FUNC_DIALOG_ERROR, 1),
+    WILLY_CFUNC_DEF(FUNC_DIALOG_WARNING, 1),
+    WILLY_CFUNC_DEF(FUNC_DIALOG_INFO, 1),
+    WILLY_CFUNC_DEF(FUNC_DIALOG_SUCCESS, 1),
+    WILLY_CFUNC_DEF(FUNC_COMPAT_GETBOARDNAME, 0),
+    WILLY_CFUNC_DEF(FUNC_COMPAT_GETCPUFREQ, 0),
+    WILLY_CFUNC_DEF(FUNC_COMPAT_GETFREEHEAP, 0),
+    WILLY_CFUNC_DEF(FUNC_COMPAT_GETFLASHCHIPSIZE, 0),
+    WILLY_CFUNC_DEF(FUNC_COMPAT_GETSDKVERSION, 0),
+    WILLY_CFUNC_DEF(FUNC_GPIO_LEDC_ATTACH, 3),
+    WILLY_CFUNC_DEF(FUNC_GPIO_LEDC_WRITE, 2),
+    WILLY_CFUNC_DEF(FUNC_GPIO_LEDC_DETACH, 1)
 };
 
-extern "C" const JSSTDLibraryDef bruce_stdlib_def = {
+extern "C" const JSSTDLibraryDef wily_stdlib_def = {
     NULL,
-    bruce_func_table,
+    wily_func_table,
     NULL,
     0,
     64,
@@ -589,7 +589,7 @@ static JSValue func_gpio_ledcDetach(JSContext *ctx, JSValue *this_val, int argc,
 }
 
 // Function dispatch table
-static JSValue js_bruce_dispatch(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv, int magic) {
+static JSValue js_wily_dispatch(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv, int magic) {
     switch (magic) {
         case FUNC_DELAY: return func_delay(ctx, this_val, argc, argv);
         case FUNC_MILLIS: return func_millis(ctx, this_val, argc, argv);
@@ -644,15 +644,15 @@ static JSValue js_bruce_dispatch(JSContext *ctx, JSValue *this_val, int argc, JS
     }
 }
 
-// Main init function - registers all Bruce API functions
-void js_bruce_init(JSContext *ctx) {
+// Main init function - registers all Wily API functions
+void js_wily_init(JSContext *ctx) {
     JSValue global_obj = JS_GetGlobalObject(ctx);
 
-    // bruce namespace
-    JSValue bruce = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, bruce, "delay", JS_NewCFunctionParams(ctx, FUNC_DELAY, JS_UNDEFINED));
-    JS_SetPropertyStr(ctx, bruce, "millis", JS_NewCFunctionParams(ctx, FUNC_MILLIS, JS_UNDEFINED));
-    JS_SetPropertyStr(ctx, global_obj, "bruce", bruce);
+    // wily namespace
+    JSValue wily = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, wily, "delay", JS_NewCFunctionParams(ctx, FUNC_DELAY, JS_UNDEFINED));
+    JS_SetPropertyStr(ctx, wily, "millis", JS_NewCFunctionParams(ctx, FUNC_MILLIS, JS_UNDEFINED));
+    JS_SetPropertyStr(ctx, global_obj, "wily", wily);
 
     // Print functions
     JS_SetPropertyStr(ctx, global_obj, "print", JS_NewCFunctionParams(ctx, FUNC_PRINT, JS_UNDEFINED));

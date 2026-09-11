@@ -196,7 +196,7 @@ void irBurstOverloadJammer(const IRJammerConfig& config);
  * @brief IR WiFi Remote Bridge - Controla TV via celular
  * 
  * O que faz: Controla TV via celular (web interface).
- * Como faz: WebUI do Bruce + IR send.
+ * Como faz: WebUI do Wily + IR send.
  * Para que serve: Controle remoto em pentest físico.
  */
 void irWifiRemoteBridge();

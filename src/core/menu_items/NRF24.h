@@ -11,8 +11,8 @@ public:
     void configMenu(void);
     void attacksMenu(void);
     void drawIcon(float scale);
-    bool hasTheme() { return bruceConfig.theme.nrf; }
-    String themePath() { return bruceConfig.theme.paths.nrf; }
+    bool hasTheme() { return wilyConfig.theme.nrf; }
+    String themePath() { return wilyConfig.theme.paths.nrf; }
 };
 
 #endif

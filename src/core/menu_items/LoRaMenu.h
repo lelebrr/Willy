@@ -13,8 +13,8 @@ public:
 
     void optionsMenu(void);
     void drawIcon(float scale);
-    bool hasTheme() { return bruceConfig.theme.lora; }
-    String themePath() { return bruceConfig.theme.paths.lora; }
+    bool hasTheme() { return wilyConfig.theme.lora; }
+    String themePath() { return wilyConfig.theme.paths.lora; }
 
 private:
     void configMenu(void);

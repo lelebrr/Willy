@@ -2,10 +2,10 @@
 #define __DISPLAY_LOGER
 #ifdef HAS_SCREEN
 #include <display/tft.h>
-#define BRUCE_TFT_DRIVER tft_display
+#define WILLY_TFT_DRIVER tft_display
 #else
 #include "VectorDisplay.h"
-#define BRUCE_TFT_DRIVER SerialDisplayClass
+#define WILLY_TFT_DRIVER SerialDisplayClass
 #endif
 enum tftFuncs : uint8_t { // DO NOT CHANGE THE ORDER, ADD NEW FUNCTIONS TO THE END!!!
     FILLSCREEN,           // 0
@@ -50,7 +50,7 @@ enum tftFuncs : uint8_t { // DO NOT CHANGE THE ORDER, ADD NEW FUNCTIONS TO THE E
 struct tftLog {
     uint8_t data[MAX_LOG_SIZE];
 };
-class tft_logger : public BRUCE_TFT_DRIVER {
+class tft_logger : public WILLY_TFT_DRIVER {
 private:
     tftLog *log = nullptr;
     char (*images)[MAX_LOG_IMG_PATH] = nullptr;

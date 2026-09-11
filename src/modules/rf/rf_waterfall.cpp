@@ -6,7 +6,7 @@ float m_rf_waterfall_start_freq = 433.0;
 float m_rf_waterfall_end_freq = 435.0;
 
 void rf_waterfall() {
-    if (bruceConfigPins.rfModule != CC1101_SPI_MODULE) {
+    if (wilyConfigPins.rfModule != CC1101_SPI_MODULE) {
         displayError("Waterfall needs a CC1101!", true);
         return;
     }
@@ -119,14 +119,14 @@ void rf_waterfall_run() {
             float f_freq = f_start + i * f_freq_step;
             setMHZ(f_freq);
             // To make sure CC1101 shared with TFT works properly on T-Embed
-            if (bruceConfigPins.CC1101_bus.mosi == TFT_MOSI) {
+            if (wilyConfigPins.CC1101_bus.mosi == TFT_MOSI) {
                 tft.drawPixel(0, 0, 0);
                 delayMicroseconds(150); // T-Embed case, need more time to process
             } else delayMicroseconds(100);
 
             int i_rssi = ELECHOUSE_cc1101.getRssi();
             // To make sure CC1101 shared with TFT works properly on T-Embed
-            if (bruceConfigPins.CC1101_bus.mosi == TFT_MOSI) tft.drawPixel(0, 0, 0);
+            if (wilyConfigPins.CC1101_bus.mosi == TFT_MOSI) tft.drawPixel(0, 0, 0);
             if (i_rssi > temp_max_rssi) {
                 temp_max_rssi = i_rssi;
                 temp_max_freq = f_freq;

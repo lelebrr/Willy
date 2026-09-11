@@ -14,7 +14,7 @@ JSValue native_playAudioFile(JSContext *ctx, JSValue *this_val, int argc, JSValu
 }
 
 JSValue native_tone(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
-    if (!bruceConfig.soundEnabled) { return JS_UNDEFINED; }
+    if (!wilyConfig.soundEnabled) { return JS_UNDEFINED; }
 
     uint32_t freq = 500;
     uint32_t duration = 1000;

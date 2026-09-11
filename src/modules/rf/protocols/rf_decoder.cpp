@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// Part of Bruce (AGPL-3.0-or-later). This file contains code DERIVED FROM and
+// Part of Wily (AGPL-3.0-or-later). This file contains code DERIVED FROM and
 // modified after:
 //   - rc-switch (LGPL-2.1-or-later), (C) 2011 Suat Ozgur and contributors —
 //     the classic OOK protocol capture/decode state machine;
@@ -45,7 +45,7 @@ static int rf_push_duration_merge(std::vector<int> &out, int d) {
 }
 
 static void rf_filter_m5_rx_glitches(std::vector<int> &durations) {
-    if (bruceConfigPins.rfModule != M5_RF_MODULE || durations.empty()) return;
+    if (wilyConfigPins.rfModule != M5_RF_MODULE || durations.empty()) return;
 
     std::vector<int> filtered;
     filtered.reserve(durations.size());
@@ -130,11 +130,11 @@ void RfRxSession::arm() {
 }
 
 bool RfRxSession::begin() {
-    if (bruceConfigPins.rfModule == M5_RF_MODULE) {
-        if (!initRfModule("rx", bruceConfigPins.rfFreq)) return false;
+    if (wilyConfigPins.rfModule == M5_RF_MODULE) {
+        if (!initRfModule("rx", wilyConfigPins.rfFreq)) return false;
 
         portENTER_CRITICAL(&rf_m5_mux);
-        rf_m5_pin = bruceConfigPins.rfRx;
+        rf_m5_pin = wilyConfigPins.rfRx;
         rf_m5_active = true;
         rf_m5_last_level = digitalRead(rf_m5_pin);
         rf_m5_last_edge_us = micros();
@@ -144,7 +144,7 @@ bool RfRxSession::begin() {
 
         attachInterrupt(digitalPinToInterrupt(rf_m5_pin), rf_m5_edge_isr, CHANGE);
         _m5Isr = true;
-        RF_DBG("M5 GPIO RX started on gpio=%d filter=%dus", bruceConfigPins.rfRx, RF_M5_RX_GLITCH_US);
+        RF_DBG("M5 GPIO RX started on gpio=%d filter=%dus", wilyConfigPins.rfRx, RF_M5_RX_GLITCH_US);
         return true;
     }
 

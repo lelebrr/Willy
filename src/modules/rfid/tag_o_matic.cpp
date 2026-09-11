@@ -40,7 +40,7 @@ TagOMatic::~TagOMatic() {
 }
 
 void TagOMatic::set_rfid_module() {
-    switch (bruceConfigPins.rfidModule) {
+    switch (wilyConfigPins.rfidModule) {
         case PN532_I2C_MODULE: _rfid = new PN532(PN532::CONNECTION_TYPE::I2C); break;
 #ifdef M5STICK
         case PN532_I2C_SPI_MODULE: _rfid = new PN532(PN532::CONNECTION_TYPE::I2C_SPI); break;
@@ -166,9 +166,9 @@ void TagOMatic::display_banner() {
 
     tft.setTextSize(FP);
     padprintln("");
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
     padprintln("Pressione [OK] para mudar.");
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     padprintln("");
 }
 
@@ -223,7 +223,7 @@ void TagOMatic::read_card() {
     if (millis() - _lastReadTime < 2000) return;
 
     if (_rfid->read() != RFIDInterface::SUCCESS) {
-        if (bruceConfigPins.rfidModule != M5_RFID2_MODULE) { // Read felica if module is PN532
+        if (wilyConfigPins.rfidModule != M5_RFID2_MODULE) { // Read felica if module is PN532
             if (_rfid->read(1) != RFIDInterface::SUCCESS) return;
         } else {
             return;
@@ -504,7 +504,7 @@ void TagOMatic::save_scan_result() {
 
     if (!file) { return; }
 
-    String payload = "Filetype: Bruce RFID Scan Result\r\n";
+    String payload = "Filetype: Wily RFID Scan Result\r\n";
     size_t payload_size = payload.length();
     for (const String &uid : _scanned_tags) { payload_size += uid.length() + 2; }
 
@@ -646,9 +646,9 @@ int TagOMatic::load_file_headless(String filename) {
     File file = (*fs).open(filepath, FILE_READ);
     if (!file) { return RFIDInterface::FAILURE; }
 
-    // Parse file .rfid (standard RFID format for Bruce)
+    // Parse file .rfid (standard RFID format for Wily)
 
-    // Filetype: Bruce RFID File
+    // Filetype: Wily RFID File
     // Version: 1
     // Device type: <tipo>
     // UID: <uid>

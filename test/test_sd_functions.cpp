@@ -77,7 +77,7 @@ struct BusPin {
     int cs = 4;
 };
 
-struct BruceConfigPinsMock {
+struct WilyConfigPinsMock {
     BusPin SDCARD_bus;
     BusPin CC1101_bus;
     BusPin NRF24_bus;
@@ -92,7 +92,7 @@ struct BruceConfigPinsMock {
     }
 };
 
-BruceConfigPinsMock bruceConfigPins;
+WilyConfigPinsMock wilyConfigPins;
 
 bool sdcardMounted = false;
 
@@ -122,7 +122,7 @@ FSMock LittleFS;
 
 void displayError(const char* msg, bool flag) {}
 
-struct BruceConfigMock {
+struct WilyConfigMock {
     int fromFile_calls = 0;
     bool last_checkFS = false;
 
@@ -132,7 +132,7 @@ struct BruceConfigMock {
     }
 };
 
-BruceConfigMock bruceConfig;
+WilyConfigMock wilyConfig;
 
 
 // --- Extracted blocks ---
@@ -162,11 +162,11 @@ void reset_mocks() {
     SD.mkdir_calls = 0;
     sdcardMounted = false;
 
-    bruceConfigPins.SDCARD_bus.sck = 1;
-    bruceConfigPins.SDCARD_bus.cs = 4;
-    bruceConfigPins.CC1101_bus.cs = -1;
-    bruceConfigPins.NRF24_bus.cs = -1;
-    bruceConfigPins.W5500_bus.cs = -1;
+    wilyConfigPins.SDCARD_bus.sck = 1;
+    wilyConfigPins.SDCARD_bus.cs = 4;
+    wilyConfigPins.CC1101_bus.cs = -1;
+    wilyConfigPins.NRF24_bus.cs = -1;
+    wilyConfigPins.W5500_bus.cs = -1;
 
     LittleFS.begin_result = true;
     LittleFS.begin_calls = 0;
@@ -174,11 +174,11 @@ void reset_mocks() {
     LittleFS.totalBytes_val = 8192;
     LittleFS.usedBytes_val = 0;
 
-    bruceConfig.fromFile_calls = 0;
-    bruceConfig.last_checkFS = false;
+    wilyConfig.fromFile_calls = 0;
+    wilyConfig.last_checkFS = false;
 
-    bruceConfigPins.fromFile_calls = 0;
-    bruceConfigPins.last_checkFS = false;
+    wilyConfigPins.fromFile_calls = 0;
+    wilyConfigPins.last_checkFS = false;
 }
 
 // Storage extraction tests
@@ -196,11 +196,11 @@ void test_littlefs_success_sdcard_success() {
 
     assert(SD.begin_calls == 1);
 
-    assert(bruceConfig.fromFile_calls == 1);
-    assert(bruceConfig.last_checkFS == true);
+    assert(wilyConfig.fromFile_calls == 1);
+    assert(wilyConfig.last_checkFS == true);
 
-    assert(bruceConfigPins.fromFile_calls == 1);
-    assert(bruceConfigPins.last_checkFS == true);
+    assert(wilyConfigPins.fromFile_calls == 1);
+    assert(wilyConfigPins.last_checkFS == true);
 
     std::cout << "test_littlefs_success_sdcard_success passed\n";
 }
@@ -210,7 +210,7 @@ void test_littlefs_success_sdcard_fail() {
 
     LittleFS.begin_result = true;
     // setupSdCard will fail if sck is -1
-    bruceConfigPins.SDCARD_bus.sck = -1;
+    wilyConfigPins.SDCARD_bus.sck = -1;
 
     begin_storage();
 
@@ -219,11 +219,11 @@ void test_littlefs_success_sdcard_fail() {
 
     assert(SD.begin_calls == 0); // Didn't even try to mount
 
-    assert(bruceConfig.fromFile_calls == 1);
-    assert(bruceConfig.last_checkFS == false);
+    assert(wilyConfig.fromFile_calls == 1);
+    assert(wilyConfig.last_checkFS == false);
 
-    assert(bruceConfigPins.fromFile_calls == 1);
-    assert(bruceConfigPins.last_checkFS == false);
+    assert(wilyConfigPins.fromFile_calls == 1);
+    assert(wilyConfigPins.last_checkFS == false);
 
     std::cout << "test_littlefs_success_sdcard_fail passed\n";
 }
@@ -241,11 +241,11 @@ void test_littlefs_fail_format_success() {
 
     assert(SD.begin_calls == 1);
 
-    assert(bruceConfig.fromFile_calls == 1);
-    assert(bruceConfig.last_checkFS == true);
+    assert(wilyConfig.fromFile_calls == 1);
+    assert(wilyConfig.last_checkFS == true);
 
-    assert(bruceConfigPins.fromFile_calls == 1);
-    assert(bruceConfigPins.last_checkFS == true);
+    assert(wilyConfigPins.fromFile_calls == 1);
+    assert(wilyConfigPins.last_checkFS == true);
 
     std::cout << "test_littlefs_fail_format_success passed\n";
 }
@@ -254,7 +254,7 @@ void test_littlefs_fail_format_success() {
 
 void test_setupSdCard_sck_negative() {
     reset_mocks();
-    bruceConfigPins.SDCARD_bus.sck = -1;
+    wilyConfigPins.SDCARD_bus.sck = -1;
 
     bool result = setupSdCard();
 

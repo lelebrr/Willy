@@ -14,8 +14,8 @@ public:
 
     void optionsMenu(void);
     void drawIcon(float scale);
-    bool hasTheme() { return bruceConfig.theme.ethernet; }
-    String themePath() { return bruceConfig.theme.paths.ethernet; }
+    bool hasTheme() { return wilyConfig.theme.ethernet; }
+    String themePath() { return wilyConfig.theme.paths.ethernet; }
 };
 
 #endif

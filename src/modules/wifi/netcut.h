@@ -3,17 +3,17 @@
 
 /**
  * @file netcut.h
- * @brief NetCut ARP Module for Bruce Firmware
- * @description ARP Poisoning / Restore / Troll module integrated into Bruce WiFi menu.
+ * @brief NetCut ARP Module for Wily Firmware
+ * @description ARP Poisoning / Restore / Troll module integrated into Wily WiFi menu.
  *              Ported from standalone NetCut ESP32 firmware.
  *
  * Key design decisions:
  *   - Uses LwIP netif->linkoutput() for ARP packet injection (NOT esp_wifi_internal_tx)
- *   - Reuses Bruce's ARPScanner infrastructure for device discovery
- *   - All UI via Bruce's loopOptions() — no custom display drawing
+ *   - Reuses Wily's ARPScanner infrastructure for device discovery
+ *   - All UI via Wily's loopOptions() — no custom display drawing
  *   - Troll Mode is BLOCKING — stops when user presses EscPress/Back
  *   - No WebUI — control exclusively via T-Embed screen + encoder
- *   - VIP persistence via LittleFS (Bruce's standard config system)
+ *   - VIP persistence via LittleFS (Wily's standard config system)
  *
  * @note Requires active WiFi STA connection before use.
  */
@@ -27,7 +27,7 @@
 #include "lwip/netif.h"
 #include "lwip/pbuf.h"
 
-// Bruce core headers
+// Wily core headers
 #include "core/display.h"
 #include "core/mykeyboard.h"
 #include "core/net_utils.h"
@@ -110,7 +110,7 @@ void netcutMenu();
 
 /**
  * @brief Scan the local network for devices via ARP requests.
- *        Uses LwIP etharp_request() + etharp_get_entry() — same method as Bruce's ARPScanner.
+ *        Uses LwIP etharp_request() + etharp_get_entry() — same method as Wily's ARPScanner.
  *        Results are stored in internal device list.
  * @return Number of devices found.
  */
@@ -193,7 +193,7 @@ void netcutLoadVipList();
 
 /**
  * @brief Interactive menu to adjust troll offline/online durations.
- *        Uses Bruce's loopOptions() for value input.
+ *        Uses Wily's loopOptions() for value input.
  */
 void netcutTrollTimingMenu();
 

@@ -1,4 +1,4 @@
-# Pinouts diagram to use Bruce
+﻿# Pinouts diagram to use Wily
 
 ## USING CUSTOM BOARD, with SPI
 

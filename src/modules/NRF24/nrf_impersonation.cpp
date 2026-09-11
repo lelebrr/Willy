@@ -51,7 +51,7 @@ void nrf_device_impersonation() {
                 NRFradio.startListening();
 
                 spoof_count++;
-                tft.fillRect(10, 100, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 100, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 100);
                 tft.printf("Spoofed packets: %d", spoof_count);
             }

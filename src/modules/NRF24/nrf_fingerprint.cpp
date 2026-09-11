@@ -51,10 +51,10 @@ void nrf_device_fingerprint() {
                 NRFradio.read(buf, 32);
                 devs_found++;
 
-                tft.fillRect(10, 80, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 80, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 80);
                 tft.printf("Found packets: %d", devs_found);
-                tft.fillRect(10, 100, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 100, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 100);
                 tft.printf("Last CH:%d Len:%d", current_channel, NRFradio.getPayloadSize());
             }

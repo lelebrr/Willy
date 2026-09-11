@@ -16,7 +16,7 @@ void pollEncoder(void) { encoder->poll(); }
 void _setup_gpio() {
     M5.begin();
     setSysI2CBus(M5.In_I2C.getPort() == I2C_NUM_1 ? &Wire1 : &Wire);
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
     pinMode(ENCODER_KEY, INPUT);
     pinMode(ENCODER_INA, INPUT_PULLUP);
     pinMode(ENCODER_INB, INPUT_PULLUP);

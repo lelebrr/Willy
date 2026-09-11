@@ -61,11 +61,11 @@ void _setup_gpio() {
     digitalWrite(ADC_EN, HIGH);
 
     // Start with default IR, RF and RFID Configs, replace old
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.rfidModule = PN532_I2C_MODULE;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.rfidModule = PN532_I2C_MODULE;
 
-    bruceConfigPins.irRx = RXLED;
-    bruceConfigPins.irTx = TXLED;
+    wilyConfigPins.irRx = RXLED;
+    wilyConfigPins.irTx = TXLED;
 
     Serial.begin(115200);
 }
@@ -113,7 +113,7 @@ void InputHandler(void) {
 }
 
 void powerOff() {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     digitalWrite(TFT_BL, LOW);
     tft.writecommand(0x10);
     esp_sleep_enable_ext0_wakeup((gpio_num_t)DW_BTN, BTN_ACT);

@@ -7,6 +7,6 @@ Thanks to thoses developers for their projects:
 Thanks to @bmorcelli for his help doing a better code.
 */
 
-void brucegotchi_start();
-void brucegotchi_setup();
-void brucegotchi_update();
+void wilygotchi_start();
+void wilygotchi_setup();
+void wilygotchi_update();

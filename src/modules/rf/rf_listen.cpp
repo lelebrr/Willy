@@ -13,7 +13,7 @@ void IRAM_ATTR onPulse() {
     static bool wasHigh = false;
     unsigned long now = micros();
 
-    if (digitalRead(bruceConfigPins.CC1101_bus.io0)) {
+    if (digitalRead(wilyConfigPins.CC1101_bus.io0)) {
         pulseDuration = now - lastMicros;
         ___frequency = 1000000.0 / pulseDuration;
         newPulse = true;
@@ -42,14 +42,14 @@ void rf_listen() {
 
         if (redraw) {
             String text = String("Frequency: ") + String(freq, 2) + String("MHz");
-            displayRedStripe(text, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
+            displayRedStripe(text, getComplementaryColor2(wilyConfig.priColor), wilyConfig.priColor);
         }
 
         if (check(EscPress)) break;
         if (check(SelPress)) break;
     }
 
-    if (bruceConfigPins.rfModule != CC1101_SPI_MODULE) {
+    if (wilyConfigPins.rfModule != CC1101_SPI_MODULE) {
         displayError("Listener needs a CC1101!", true);
         return;
     }
@@ -61,8 +61,8 @@ void rf_listen() {
     ELECHOUSE_cc1101.setRxBW(58);
     ELECHOUSE_cc1101.setModulation(2);
     ELECHOUSE_cc1101.setDcFilterOff(true);
-    attachInterrupt(digitalPinToInterrupt(bruceConfigPins.CC1101_bus.io0), onPulse, CHANGE);
-    displayRedStripe("Listening...", getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
+    attachInterrupt(digitalPinToInterrupt(wilyConfigPins.CC1101_bus.io0), onPulse, CHANGE);
+    displayRedStripe("Listening...", getComplementaryColor2(wilyConfig.priColor), wilyConfig.priColor);
 
     unsigned long lastPulseTime = millis();
     bool pulseActive = false;
@@ -71,14 +71,14 @@ void rf_listen() {
 
     while (!check(EscPress)) {
         displayRedStripe(
-            "Waiting for a pulse", getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor
+            "Waiting for a pulse", getComplementaryColor2(wilyConfig.priColor), wilyConfig.priColor
         );
         if (newPulse) {
             newPulse = false;
             lastPulseTime = millis();
             pulseActive = true;
             String pulseText = String("Freq: ") + String(___frequency, 2) + String(" Hz");
-            displayRedStripe(pulseText, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
+            displayRedStripe(pulseText, getComplementaryColor2(wilyConfig.priColor), wilyConfig.priColor);
 
             willyLogger.logCC1101(___frequency, ELECHOUSE_cc1101.getRssi(), "Listen");
 
@@ -91,12 +91,12 @@ void rf_listen() {
 
         if (pulseActive && millis() - lastPulseTime > 3000) {
             pulseActive = false;
-            displayRedStripe("No signal", getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
+            displayRedStripe("No signal", getComplementaryColor2(wilyConfig.priColor), wilyConfig.priColor);
         }
 
         if (check(EscPress)) break;
         if (check(SelPress)) break;
     }
 
-    detachInterrupt(digitalPinToInterrupt(bruceConfigPins.CC1101_bus.io0));
+    detachInterrupt(digitalPinToInterrupt(wilyConfigPins.CC1101_bus.io0));
 }

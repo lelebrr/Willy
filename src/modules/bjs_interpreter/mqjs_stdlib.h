@@ -5,10 +5,10 @@
 #define MQJS_STDLIB_H
 
 
-// Minimal standard library for Bruce JavaScript interpreter
+// Minimal standard library for Wily JavaScript interpreter
 const char *mqjs_stdlib = " \
-    // Global Bruce Utility functions \
-    bruce.log = function(...args) { bruce.println(...args); }; \
+    // Global Wily Utility functions \
+    wily.log = function(...args) { wily.println(...args); }; \
 ";
 
 #endif // MQJS_STDLIB_H

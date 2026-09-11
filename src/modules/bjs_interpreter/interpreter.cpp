@@ -10,8 +10,8 @@ extern "C" {
 #include "mquickjs.h"
 }
 
-void js_bruce_init(JSContext *ctx);
-extern "C" JSSTDLibraryDef bruce_stdlib_def;
+void js_wily_init(JSContext *ctx);
+extern "C" JSSTDLibraryDef wily_stdlib_def;
 
 char *script = NULL;
 char *scriptDirpath = NULL;
@@ -52,7 +52,7 @@ void interpreterHandler(void *pvParameters) {
     }
 
 
-    ctx = JS_NewContext(js_mem, mem_size, &bruce_stdlib_def);
+    ctx = JS_NewContext(js_mem, mem_size, &wily_stdlib_def);
     if (!ctx) {
         log_e("Failed to create JS context");
         free(js_mem);
@@ -63,7 +63,7 @@ void interpreterHandler(void *pvParameters) {
         return;
     }
 
-    js_bruce_init(ctx); // Register Bruce API
+    js_wily_init(ctx); // Register Wily API
 
     JSValue val = JS_Eval(ctx, script, strlen(script), scriptName ? scriptName : "index.js", 0);
 
@@ -149,7 +149,7 @@ bool run_js_script_headless(FS fs, String filename) {
 
 String getScriptsFolder(FS *&fs) {
     String folder;
-    String possibleFolders[] = {"/scripts", "/WillyJS", "/BruceScripts"};
+    String possibleFolders[] = {"/scripts", "/WillyJS", "/WillyScripts"};
     int listSize = sizeof(possibleFolders) / sizeof(possibleFolders[0]);
 
     for (int i = 0; i < listSize; i++) {
@@ -220,8 +220,8 @@ std::vector<Option> getScriptsOptionsList(String currentPath, bool saveStartupSc
             String entry_title = nameOnly.substring(0, nameOnly.lastIndexOf(".")); // remove the extension
             opt.push_back({entry_title.c_str(), [=]() {
                                if (saveStartupScript) {
-                                   bruceConfig.startupAppLuaScript = fullPath; // keep config name or rename in config.h later
-                                   bruceConfig.saveFile();
+                                   wilyConfig.startupAppLuaScript = fullPath; // keep config name or rename in config.h later
+                                   wilyConfig.saveFile();
                                } else {
                                    Serial.printf("Running script: %s\n", fullPath.c_str());
                                    run_js_script_headless(*fs, fullPath);

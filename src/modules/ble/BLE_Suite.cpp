@@ -30,7 +30,7 @@
 int showSubMenu(const char *title, const char *options[], int optionCount);
 
 extern tft_logger tft;
-extern BruceConfig bruceConfig;
+extern WilyConfig wilyConfig;
 extern volatile int tftWidth;
 extern volatile int tftHeight;
 
@@ -361,7 +361,7 @@ void BLEAttackManager::prepareForConnection() {
         delay(300);
     }
 
-    BLEStateManager::initBLE("Bruce-Attack", ESP_PWR_LVL_P9);
+    BLEStateManager::initBLE("Wily-Attack", ESP_PWR_LVL_P9);
     NimBLEDevice::setMTU(250);
     NimBLEDevice::setSecurityAuth(true, true, true);
     delay(300);
@@ -489,7 +489,7 @@ NimBLEClient *attemptConnectionWithStrategies(NimBLEAddress target, String &conn
     showAttackProgress("Trying exploit-based connection...", TFT_ORANGE);
     BLEStateManager::deinitBLE(true);
     delay(800);
-    std::string exploitName = "Bruce-Exploit";
+    std::string exploitName = "Wily-Exploit";
     NimBLEDevice::init(exploitName);
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
     NimBLEDevice::setSecurityAuth(false, false, false);
@@ -2379,7 +2379,7 @@ MultiConnectionAttack::~MultiConnectionAttack() { cleanup(); }
 bool MultiConnectionAttack::connectionFloodSingle(NimBLEAddress target, int timeout) {
     BLEStateManager::deinitBLE(true);
     delay(100);
-    std::string floodName = "Bruce-Flooder";
+    std::string floodName = "Wily-Flooder";
     NimBLEDevice::init(floodName);
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
 
@@ -2428,16 +2428,16 @@ bool MultiConnectionAttack::connectionFlood(std::vector<NimBLEAddress> targets, 
 bool MultiConnectionAttack::advertisingSpamSingle(NimBLEAddress target) {
     BLEStateManager::deinitBLE(true);
     delay(300);
-    std::string spamName = "Bruce-Spammer";
+    std::string spamName = "Wily-Spammer";
     NimBLEDevice::init(spamName);
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
 
     NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
     if (!pAdvertising) return false;
 
-    uint8_t bruceData[] = {0xFF, 0xFF, 'B', 'R', 'U', 'C', 'E'};
-    pAdvertising->setManufacturerData(bruceData, sizeof(bruceData));
-    pAdvertising->setName("Bruce-Spammer");
+    uint8_t wilyData[] = {0xFF, 0xFF, 'B', 'R', 'U', 'C', 'E'};
+    pAdvertising->setManufacturerData(wilyData, sizeof(wilyData));
+    pAdvertising->setName("Wily-Spammer");
     pAdvertising->addServiceUUID(NimBLEUUID("12345678-1234-5678-1234-567812345678"));
 
     pAdvertising->start(0);
@@ -2843,7 +2843,7 @@ bool PairingAttackServiceClass::bruteForcePIN(NimBLEAddress target) {
 
         BLEStateManager::deinitBLE(true);
         delay(300);
-        std::string pinName = "Bruce-PINBrute";
+        std::string pinName = "Wily-PINBrute";
         NimBLEDevice::init(pinName);
         NimBLEDevice::setSecurityAuth(true, true, true);
         NimBLEDevice::setPower(ESP_PWR_LVL_P9);
@@ -2900,7 +2900,7 @@ bool DoSAttackServiceClass::connectionFlood(NimBLEAddress target) {
 
         BLEStateManager::deinitBLE(true);
         delay(100);
-        std::string floodName = "Bruce-Flooder";
+        std::string floodName = "Wily-Flooder";
         NimBLEDevice::init(floodName);
         NimBLEDevice::setPower(ESP_PWR_LVL_P9);
 
@@ -2930,7 +2930,7 @@ bool DoSAttackServiceClass::advertisingSpam(NimBLEAddress target) {
 
     BLEStateManager::deinitBLE(true);
     delay(300);
-    std::string spamName = "Bruce-Spammer";
+    std::string spamName = "Wily-Spammer";
     NimBLEDevice::init(spamName);
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
 
@@ -2942,7 +2942,7 @@ bool DoSAttackServiceClass::advertisingSpam(NimBLEAddress target) {
 
     uint8_t spamData[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     pAdvertising->setManufacturerData(spamData, sizeof(spamData));
-    pAdvertising->setName("Bruce-Spammer");
+    pAdvertising->setName("Wily-Spammer");
     pAdvertising->addServiceUUID(NimBLEUUID("12345678-1234-5678-1234-567812345678"));
 
     const int SPAM_DURATION = 10000;
@@ -3013,16 +3013,16 @@ String selectFileFromSD() {
 
     while (!exitMenu) {
         if (selected != lastSelected || scrollOffset != lastScrollOffset) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+            tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
             tft.setTextSize(2);
             tft.setCursor((tftWidth - strlen("SD CARD FILES") * 12) / 2, 15);
             tft.print("SD CARD FILES");
             tft.setTextSize(1);
 
-            tft.setTextColor(TFT_YELLOW, bruceConfig.bgColor);
+            tft.setTextColor(TFT_YELLOW, wilyConfig.bgColor);
             tft.setCursor(20, 40);
             tft.print("Found: ");
             tft.print(fileCount);
@@ -3039,8 +3039,8 @@ String selectFileFromSD() {
                     tft.setCursor(25, yPos + 8);
                     tft.print("> ");
                 } else {
-                    tft.fillRect(20, yPos, tftWidth - 40, menuItemHeight - 3, bruceConfig.bgColor);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.fillRect(20, yPos, tftWidth - 40, menuItemHeight - 3, wilyConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
                     tft.setCursor(25, yPos + 8);
                     tft.print("  ");
                 }
@@ -3051,14 +3051,14 @@ String selectFileFromSD() {
             }
 
             if (fileCount > maxVisibleItems) {
-                tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                 tft.setCursor(tftWidth - 25, menuStartY + 5);
                 if (scrollOffset > 0) tft.print("^");
                 tft.setCursor(tftWidth - 25, menuStartY + (maxVisibleItems * menuItemHeight) - 20);
                 if (scrollOffset + maxVisibleItems < fileCount) tft.print("v");
             }
 
-            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.setCursor(20, tftHeight - 30);
             tft.print("SEL: Select  PREV/NEXT: Navigate");
             tft.setCursor(20, tftHeight - 20);
@@ -3146,11 +3146,11 @@ String getScriptFromUser() {
 
     while (!exitMenu) {
         if (selected != lastSelected || scrollOffset != lastScrollOffset) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             TouchFooter();
             tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+            tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
             tft.setTextSize(2);
             tft.setCursor((tftWidth - strlen("SELECT SCRIPT") * 12) / 2, 15);
             tft.print("SELECT SCRIPT");
@@ -3167,8 +3167,8 @@ String getScriptFromUser() {
                     tft.setCursor(25, yPos + 8);
                     tft.print("> ");
                 } else {
-                    tft.fillRect(20, yPos, tftWidth - 40, menuItemHeight - 3, bruceConfig.bgColor);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.fillRect(20, yPos, tftWidth - 40, menuItemHeight - 3, wilyConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
                     tft.setCursor(25, yPos + 8);
                     tft.print("  ");
                 }
@@ -3179,14 +3179,14 @@ String getScriptFromUser() {
             }
 
             if (scriptCount > maxVisibleItems) {
-                tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                 tft.setCursor(tftWidth - 25, menuStartY + 5);
                 if (scrollOffset > 0) tft.print("^");
                 tft.setCursor(tftWidth - 25, menuStartY + (maxVisibleItems * menuItemHeight) - 20);
                 if (scrollOffset + maxVisibleItems < scriptCount) tft.print("v");
             }
 
-            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.setCursor(20, tftHeight - 30);
             tft.print("SEL: Select  PREV/NEXT: Navigate");
             tft.setCursor(20, tftHeight - 20);
@@ -3879,7 +3879,7 @@ static String parseManufacturerData(const std::vector<uint8_t> &payload) {
 
 void BLE_Sniffer() {
     // FIX: Always init - handles case where stack was deinit'd by another module
-    BLEStateManager::initBLE("BruceSniffer", ESP_PWR_LVL_P9);
+    BLEStateManager::initBLE("WilySniffer", ESP_PWR_LVL_P9);
     NimBLEScan *pScan = nullptr;
     bool firstRun = true;
     bool redraw = true;
@@ -3906,7 +3906,7 @@ void BLE_Sniffer() {
         bool isSelPressed = check(SelPress);
         if (isSelPressed && snifferPacketCount == 0) {
             if (firstRun) {
-                BLEStateManager::initBLE("BruceSniffer", ESP_PWR_LVL_P9);
+                BLEStateManager::initBLE("WilySniffer", ESP_PWR_LVL_P9);
                 pScan = NimBLEDevice::getScan();
                 if (!pScan) {
                     displayError("Falha no scanner");
@@ -3970,11 +3970,11 @@ void BLE_Sniffer() {
                 }
 
                 if (redraw) {
-                    tft.fillScreen(bruceConfig.bgColor);
+                    tft.fillScreen(wilyConfig.bgColor);
                     drawMainBorderWithTitle("CAPTURED PACKETS");
 
                     tft.setTextSize(FP);
-                    tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                     tft.setCursor(10, y);
                     tft.println("Packets: " + String(snifferPacketCount));
                     y += lineH;
@@ -3984,8 +3984,8 @@ void BLE_Sniffer() {
                         int idx = scrollOffset + i;
                         SnifferPacket &pkt = snifferPackets[idx];
                         bool selectedItem = (idx == selected);
-                        uint16_t fg = selectedItem ? bruceConfig.bgColor : TFT_WHITE;
-                        uint16_t bg = selectedItem ? bruceConfig.priColor : bruceConfig.bgColor;
+                        uint16_t fg = selectedItem ? wilyConfig.bgColor : TFT_WHITE;
+                        uint16_t bg = selectedItem ? wilyConfig.priColor : wilyConfig.bgColor;
 
                         tft.fillRect(10, y, tftWidth - 20, lineH - 2, bg);
                         tft.setTextColor(fg, bg);
@@ -3997,7 +3997,7 @@ void BLE_Sniffer() {
                     }
 
                     if (snifferPacketCount > visibleItems) {
-                        tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                        tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                         tft.setCursor(tftWidth - 30, BORDER_PAD_Y + FM * LH + 4 + lineH);
                         if (scrollOffset > 0)
                             tft.drawString("^", tftWidth - 25, BORDER_PAD_Y + FM * LH + 4 + lineH, 1);
@@ -4008,7 +4008,7 @@ void BLE_Sniffer() {
                         }
                     }
 
-                    tft.setTextColor(TFT_DARKGREY, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_DARKGREY, wilyConfig.bgColor);
                     tft.setCursor(10, tftHeight - 20);
                     tft.drawString(
                         "PREV/NEXT: Navigate  SEL: View Details  ESC: Back", 10, tftHeight - 20, 1
@@ -4040,7 +4040,7 @@ void BLE_Sniffer() {
                     int dy = BORDER_PAD_Y + FM * LH + 4;
                     int dlh = max(12, tftHeight / 14);
                     tft.setTextSize(FP);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
 
                     tft.setCursor(10, dy);
                     tft.println("Device: " + pkt.name);
@@ -4057,16 +4057,16 @@ void BLE_Sniffer() {
                     dy += dlh;
 
                     String parsed = parseManufacturerData(pkt.payload);
-                    tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                     tft.println(parsed);
                     dy += dlh;
 
-                    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
                     String hexDump = pkt.payloadHex;
                     if (hexDump.length() > 400) hexDump = hexDump.substring(0, 400) + "...\n(truncated)";
                     tft.println(hexDump);
 
-                    tft.setTextColor(TFT_DARKGREY, bruceConfig.bgColor);
+                    tft.setTextColor(TFT_DARKGREY, wilyConfig.bgColor);
                     tft.setCursor(10, tftHeight - 20);
                     tft.drawString("Press any key to continue", 10, tftHeight - 20, 1);
 
@@ -4092,9 +4092,9 @@ void BLE_Sniffer() {
             }
 
             if (fs && !storageType.isEmpty()) {
-                if (!fs->exists("/BruceSniffer")) fs->mkdir("/BruceSniffer");
+                if (!fs->exists("/WilySniffer")) fs->mkdir("/WilySniffer");
 
-                String filename = "/BruceSniffer/sniffer_" + String(millis()) + ".txt";
+                String filename = "/WilySniffer/sniffer_" + String(millis()) + ".txt";
                 File file = fs->open(filename, FILE_WRITE);
                 if (file) {
                     file.println("=== BLE SNIFFER CAPTURE ===");
@@ -4157,7 +4157,7 @@ String selectTargetFromScan(const char *title) {
 #endif
 
     // FIX: Always call initBLE - it handles the case where stack was deinit'd
-    if (!BLEStateManager::initBLE("Bruce-Scanner", ESP_PWR_LVL_P9)) {
+    if (!BLEStateManager::initBLE("Wily-Scanner", ESP_PWR_LVL_P9)) {
         displayError("Falha no BLE");
         return "";
     }
@@ -4177,11 +4177,11 @@ String selectTargetFromScan(const char *title) {
     // Clear previous results before scanning
     g_pBLEScan->clearResults();
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
     TouchFooter();
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(2);
     String titleStr = String(title);
     int maxTitleWidth = tftWidth - 20;
@@ -4347,17 +4347,17 @@ String selectTargetFromScan(const char *title) {
 
     while (!exitLoop) {
         if (selectedIdx != lastSelected || scrollOffset != lastScrollOffset) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
             TouchFooter();
 
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+            tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
             tft.setTextSize(2);
             tft.setCursor((tftWidth - tft.textWidth("SELECT DEVICE")) / 2, 15);
             tft.print("SELECT DEVICE");
             tft.setTextSize(1);
 
-            tft.setTextColor(TFT_YELLOW, bruceConfig.bgColor);
+            tft.setTextColor(TFT_YELLOW, wilyConfig.bgColor);
             tft.setCursor(20, 40);
             tft.print("Found: ");
             tft.print(deviceCount);
@@ -4382,8 +4382,8 @@ String selectTargetFromScan(const char *title) {
                     tft.setCursor(20, yPos + 10);
                     tft.print("> ");
                 } else {
-                    tft.fillRect(15, yPos, tftWidth - 30, deviceItemHeight - 5, bruceConfig.bgColor);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.fillRect(15, yPos, tftWidth - 30, deviceItemHeight - 5, wilyConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
                     tft.setCursor(20, yPos + 10);
                     tft.print("  ");
                 }
@@ -4391,14 +4391,14 @@ String selectTargetFromScan(const char *title) {
             }
 
             if (deviceCount > (size_t)maxVisibleDevices) {
-                tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                 tft.setCursor(tftWidth - 25, menuStartY + 10);
                 if (scrollOffset > 0) tft.print("^");
                 tft.setCursor(tftWidth - 25, menuStartY + (maxVisibleDevices * deviceItemHeight) - 15);
                 if (scrollOffset + maxVisibleDevices < (int)deviceCount) tft.print("v");
             }
 
-            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.setCursor(20, tftHeight - 30);
             tft.print("SEL: Select  PREV/NEXT: Navigate");
             tft.setCursor(20, tftHeight - 20);
@@ -4473,17 +4473,17 @@ String selectMultipleTargetsFromScan(const char *title, std::vector<NimBLEAddres
     if (maxVisibleItems > (int)deviceCount) maxVisibleItems = deviceCount;
 
     while (!exitMenu) {
-        tft.fillScreen(bruceConfig.bgColor);
+        tft.fillScreen(wilyConfig.bgColor);
         tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
         TouchFooter();
 
-        tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+        tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
         tft.setTextSize(2);
         tft.setCursor((tftWidth - tft.textWidth(title)) / 2, 15);
         tft.print(title);
         tft.setTextSize(1);
 
-        tft.setTextColor(TFT_YELLOW, bruceConfig.bgColor);
+        tft.setTextColor(TFT_YELLOW, wilyConfig.bgColor);
         tft.setCursor(20, 40);
         tft.print("Selected: ");
         tft.print(targets.size());
@@ -4501,8 +4501,8 @@ String selectMultipleTargetsFromScan(const char *title, std::vector<NimBLEAddres
                 tft.setCursor(25, yPos + 8);
                 tft.print(selected[idx] ? "[X] " : "[ ] ");
             } else {
-                tft.fillRect(20, yPos, tftWidth - 40, menuItemHeight - 3, bruceConfig.bgColor);
-                tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                tft.fillRect(20, yPos, tftWidth - 40, menuItemHeight - 3, wilyConfig.bgColor);
+                tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
                 tft.setCursor(25, yPos + 8);
                 tft.print(selected[idx] ? "[X] " : "[ ] ");
             }
@@ -4513,14 +4513,14 @@ String selectMultipleTargetsFromScan(const char *title, std::vector<NimBLEAddres
         }
 
         if (deviceCount > (size_t)maxVisibleItems) {
-            tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
             tft.setCursor(tftWidth - 25, menuStartY + 5);
             if (scrollOffset > 0) tft.print("^");
             tft.setCursor(tftWidth - 25, menuStartY + (maxVisibleItems * menuItemHeight) - 20);
             if (scrollOffset + maxVisibleItems < (int)deviceCount) tft.print("v");
         }
 
-        tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+        tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
         tft.setCursor(20, tftHeight - 30);
         tft.print("SEL: Toggle  NEXT: Confirm  PREV: Select");
         tft.setCursor(20, tftHeight - 20);
@@ -4883,19 +4883,19 @@ static bool welcomeShown = false;
 void showWelcomeScreen() {
     if (welcomeShown) return;
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     TouchFooter();
     tft.setTextSize(4);
-    tft.setTextColor(TFT_PURPLE, bruceConfig.bgColor);
-    tft.setCursor((tftWidth - tft.textWidth("BRUCE")) / 2, 35);
-    tft.print("BRUCE");
+    tft.setTextColor(TFT_PURPLE, wilyConfig.bgColor);
+    tft.setCursor((tftWidth - tft.textWidth("WILLY")) / 2, 35);
+    tft.print("WILLY");
 
-    tft.setTextColor(TFT_BLUE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_BLUE, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setCursor((tftWidth - tft.textWidth("BLE SUITE")) / 2, 80);
     tft.print("BLE SUITE");
 
-    tft.setTextColor(TFT_LIGHTGREY, bruceConfig.bgColor);
+    tft.setTextColor(TFT_LIGHTGREY, wilyConfig.bgColor);
     tft.setTextSize(1.5);
     tft.setCursor((tftWidth - tft.textWidth("v3.1")) / 2, 100);
     tft.print("v3.1");
@@ -4910,7 +4910,7 @@ void showWelcomeScreen() {
 
 void BleSuiteMenu() {
     // FIX: Init BLE stack ONCE when entering the suite
-    BLEStateManager::initBLE("Bruce-BLESuite", ESP_PWR_LVL_P9);
+    BLEStateManager::initBLE("Wily-BLESuite", ESP_PWR_LVL_P9);
 
     // Clear data when entering the menu
     scannerData.clear();
@@ -4941,11 +4941,11 @@ void BleSuiteMenu() {
 
     while (true) {
         if (selected != lastSelected || scrollOffset != lastScrollOffset) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             TouchFooter();
             tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+            tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
             tft.setTextSize(2);
             tft.setCursor((tftWidth - tft.textWidth("BLE SUITE")) / 2, 15);
             tft.print("BLE SUITE");
@@ -4961,8 +4961,8 @@ void BleSuiteMenu() {
                     tft.setCursor(25, yPos + 5);
                     tft.print("> ");
                 } else {
-                    tft.fillRect(20, yPos, tftWidth - 40, 20, bruceConfig.bgColor);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.fillRect(20, yPos, tftWidth - 40, 20, wilyConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
                     tft.setCursor(25, yPos + 5);
                     tft.print("  ");
                 }
@@ -4970,14 +4970,14 @@ void BleSuiteMenu() {
             }
 
             if (MENU_ITEMS > maxVisible) {
-                tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                 tft.setCursor(tftWidth - 25, 65);
                 if (scrollOffset > 0) tft.print("^");
                 tft.setCursor(tftWidth - 25, 65 + (maxVisible * 25) - 10);
                 if (scrollOffset + maxVisible < MENU_ITEMS) tft.print("v");
             }
 
-            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.setCursor(20, tftHeight - 30);
             tft.print("SEL: Select  PREV/NEXT: Navigate");
             tft.setCursor(20, tftHeight - 20);
@@ -5049,7 +5049,7 @@ const char *getScanTitle(int attackIndex) {
 
 void executeAttackWithTargetScan(int attackIndex) {
     // FIX: Ensure BLE is initialized for the attack
-    BLEStateManager::initBLE("Bruce-Attack", ESP_PWR_LVL_P9);
+    BLEStateManager::initBLE("Wily-Attack", ESP_PWR_LVL_P9);
 
     String targetInfo = selectTargetFromScan(getScanTitle(attackIndex));
     if (targetInfo.isEmpty()) return;
@@ -5089,11 +5089,11 @@ void executeAttackWithTargetScan(int attackIndex) {
 //=============================================================================
 
 int showSubMenu(const char *title, const char *options[], int optionCount) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     TouchFooter();
     tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setTextWrap(true, true);
     tft.setCursor((tftWidth - tft.textWidth(title)) / 2, 15);
@@ -5106,7 +5106,7 @@ int showSubMenu(const char *title, const char *options[], int optionCount) {
 
     while (true) {
         if (selected != lastSelected || scrollOffset != lastScrollOffset) {
-            tft.fillRect(20, 60, tftWidth - 40, tftHeight - 115, bruceConfig.bgColor);
+            tft.fillRect(20, 60, tftWidth - 40, tftHeight - 115, wilyConfig.bgColor);
 
             for (int i = 0; i < maxVisible && (scrollOffset + i) < optionCount; i++) {
                 int idx = scrollOffset + i;
@@ -5132,8 +5132,8 @@ int showSubMenu(const char *title, const char *options[], int optionCount) {
                     tft.setCursor(25, yPos + 5);
                     tft.print("> ");
                 } else {
-                    tft.fillRect(20, yPos, tftWidth - 40, 20, bruceConfig.bgColor);
-                    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+                    tft.fillRect(20, yPos, tftWidth - 40, 20, wilyConfig.bgColor);
+                    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
                     tft.setCursor(25, yPos + 5);
                     tft.print("  ");
                 }
@@ -5141,14 +5141,14 @@ int showSubMenu(const char *title, const char *options[], int optionCount) {
             }
 
             if (optionCount > maxVisible) {
-                tft.setTextColor(TFT_CYAN, bruceConfig.bgColor);
+                tft.setTextColor(TFT_CYAN, wilyConfig.bgColor);
                 tft.setCursor(tftWidth - 25, 65);
                 if (scrollOffset > 0) tft.print("^");
                 tft.setCursor(tftWidth - 25, 65 + (maxVisible * 25) - 10);
                 if (scrollOffset + maxVisible < optionCount) tft.print("v");
             }
 
-            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.setCursor(20, tftHeight - 30);
             tft.print("SEL: Select  PREV/NEXT: Navigate");
             tft.setCursor(20, tftHeight - 20);
@@ -5784,17 +5784,17 @@ void runAudioControlTest(NimBLEAddress target) {
 
     while (!exitSubmenu) {
         if (selectedTest != lastSelected) {
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             TouchFooter();
             tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+            tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
             tft.setTextSize(2);
             tft.setCursor((tftWidth - tft.textWidth("AUDIO CONTROL TEST")) / 2, 15);
             tft.print("AUDIO CONTROL TEST");
             tft.setTextSize(1);
 
-            tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+            tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
             tft.setCursor(20, 60);
             tft.println("Select Audio Test:");
 
@@ -5822,7 +5822,7 @@ void runAudioControlTest(NimBLEAddress target) {
                 tft.print(displayName);
             }
 
-            tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.setCursor(20, tftHeight - 30);
             tft.print("SEL: Select  PREV/NEXT: Navigate");
             tft.setCursor(20, tftHeight - 20);
@@ -5950,17 +5950,17 @@ void runHFPHIDPivotAttack(NimBLEAddress target) {
 //=============================================================================
 
 void showAttackProgress(const char *message, uint16_t color) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     TouchFooter();
     tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setCursor((tftWidth - tft.textWidth("BLE SUITE")) / 2, 15);
     tft.print("BLE SUITE");
     tft.setTextSize(1);
 
-    tft.setTextColor(color, bruceConfig.bgColor);
+    tft.setTextColor(color, wilyConfig.bgColor);
 
     String msg = message;
     int maxWidth = tftWidth - 40;
@@ -5997,7 +5997,7 @@ void showAttackProgress(const char *message, uint16_t color) {
     tft.print(spinner[spinnerPos % 4]);
     spinnerPos++;
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setCursor(20, tftHeight - 30);
     tft.print("Please wait...");
 }
@@ -6070,11 +6070,11 @@ void showAttackResult(bool success, const char *message) {
 }
 
 bool confirmAttack(const char *targetName) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     TouchFooter();
     tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setCursor((tftWidth - tft.textWidth("CONFIRM ATTACK")) / 2, 15);
     tft.print("CONFIRM ATTACK");
@@ -6093,7 +6093,7 @@ bool confirmAttack(const char *targetName) {
     tft.setCursor(20, 90);
     tft.println("FastPair buffer overflow exploit");
 
-    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+    tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
     tft.setCursor(20, tftHeight - 30);
     tft.print("SEL: Yes  NEXT: No  ESC: Cancel");
 
@@ -6106,17 +6106,17 @@ bool confirmAttack(const char *targetName) {
 }
 
 bool requireSimpleConfirmation(const char *message) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     TouchFooter();
     tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setCursor((tftWidth - tft.textWidth("CONFIRM")) / 2, 15);
     tft.print("CONFIRM");
     tft.setTextSize(1);
 
-    tft.fillRect(20, 50, tftWidth - 40, 80, bruceConfig.bgColor);
+    tft.fillRect(20, 50, tftWidth - 40, 80, wilyConfig.bgColor);
     tft.setCursor(20, 60);
     String msgStr = message;
 
@@ -6148,7 +6148,7 @@ bool requireSimpleConfirmation(const char *message) {
         if (yPos > 130) break;
     }
 
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setCursor(20, tftHeight - 35);
     tft.print("SEL: OK  ESC: Cancel");
 
@@ -6172,16 +6172,16 @@ int8_t showAdaptiveMessage(
     if (strlen(btn2) > 0) buttonCount++;
     if (strlen(btn3) > 0) buttonCount++;
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     TouchFooter();
     tft.drawRect(5, 5, tftWidth - 10, tftHeight - 10, TFT_WHITE);
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(2);
     tft.setCursor((tftWidth - tft.textWidth("MESSAGE")) / 2, 15);
     tft.print("MESSAGE");
     tft.setTextSize(1);
 
-    tft.setTextColor(color, bruceConfig.bgColor);
+    tft.setTextColor(color, wilyConfig.bgColor);
 
     String lineStr = line1;
     int maxWidth = tftWidth - 40;
@@ -6212,7 +6212,7 @@ int8_t showAdaptiveMessage(
         if (yPos > 140) break;
     }
 
-    tft.setTextColor(TFT_BLACK, bruceConfig.bgColor);
+    tft.setTextColor(TFT_BLACK, wilyConfig.bgColor);
     tft.setCursor(20, tftHeight - 35);
 
     if (buttonCount == 0) {

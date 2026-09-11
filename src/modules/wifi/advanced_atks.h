@@ -228,7 +228,7 @@ std::vector<MeshNetwork> detectMeshNetworks();
  * @brief Smart Deauth Scheduler - Deauth programado
  *
  * O que faz: Deauth programado por horário ou condição.
- * Como faz: Usa o interpretador JS já presente no Bruce.
+ * Como faz: Usa o interpretador JS já presente no Wily.
  * Para que serve: Manter rede offline sem flood constante (stealth).
  */
 void smartDeauthScheduler();

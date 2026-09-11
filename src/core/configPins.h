@@ -26,7 +26,7 @@ enum RFModules {
     CC1101_SPI_MODULE = 1,
 };
 
-class BruceConfigPins {
+class WilyConfigPins {
 public:
     struct UARTPins {
         gpio_num_t rx = GPIO_NUM_NC;
@@ -111,7 +111,7 @@ public:
         }
     };
 
-    const char *filepath = "/brucePins.conf";
+    const char *filepath = "/wilyPins.conf";
 
     // SPI Buses
 
@@ -232,7 +232,7 @@ public:
     /////////////////////////////////////////////////////////////////////////////////////
     // Constructor
     /////////////////////////////////////////////////////////////////////////////////////
-    BruceConfigPins() {};
+    WilyConfigPins() {};
 
     /////////////////////////////////////////////////////////////////////////////////////
     // Operations

@@ -1,16 +1,16 @@
-# Third-party code and attribution
+﻿# Third-party code and attribution
 
-Bruce is licensed under the **GNU Affero General Public License v3.0 or later**
+Wily is licensed under the **GNU Affero General Public License v3.0 or later**
 (AGPL-3.0-or-later); see [`LICENSE`](LICENSE).
 
-Parts of Bruce's RF / sub-GHz module (`src/modules/rf/`) are **derived from**
-other free-software projects. Those portions were modified to fit Bruce's native
+Parts of Wily's RF / sub-GHz module (`src/modules/rf/`) are **derived from**
+other free-software projects. Those portions were modified to fit Wily's native
 RMT engine, data model and UI, but remain the work of their original authors and
 are used under their respective licenses. Each affected source file carries a
 header pointing back to this document.
 
 > This file documents attribution for copyleft compliance. It is not legal
-> advice; if you redistribute Bruce, review these obligations yourself.
+> advice; if you redistribute Wily, review these obligations yourself.
 
 ## Sub-GHz protocols / KeeLoq
 
@@ -30,7 +30,7 @@ header pointing back to this document.
 - License: GNU General Public License v3.0
 - Copyright (C) the Momentum Firmware contributors.
 - Used by: the extended KeeLoq manufacturer list and the model for the
-  encrypted built-in keystore (`keeloq_mfcodes`), which Bruce mirrors by
+  encrypted built-in keystore (`keeloq_mfcodes`), which Wily mirrors by
   shipping an AES-encrypted keystore decrypted at runtime as a fallback.
   Files: `src/modules/rf/protocols/rf_keeloq.cpp`,
   `src/modules/rf/protocols/rf_keeloq_mfcodes_data.h` (generated),
@@ -47,7 +47,7 @@ header pointing back to this document.
 - Copyright (C) 2011 Suat Özgür and the rc-switch contributors.
 - Used by: the classic OOK protocol timing table (the numbered `RcSwitch_N`
   protocols and the factor-based `{high,low}×te` model) and the
-  capture/decode and send state machines that Bruce re-implemented over its
+  capture/decode and send state machines that Wily re-implemented over its
   native RMT engine.
   Files: `src/modules/rf/protocols/rf_registry.{h,cpp}`,
   `src/modules/rf/protocols/rf_decoder.{h,cpp}`,
@@ -94,11 +94,11 @@ sequences and protocol state machines follow the upstream NFC HAL/stack.
 ## Bundled libraries (linked dependencies)
 
 Fetched via PlatformIO `lib_deps` (see `platformio.ini`) and linked into the
-firmware. Each library keeps its own license; the URL is the exact source Bruce
+firmware. Each library keeps its own license; the URL is the exact source Wily
 builds against. Consult each upstream repository for the authoritative license
 text and copyright holders — the SPDX identifiers below are provided as a guide.
 
-### Bruce/community forks (adjusted to build in Bruce)
+### Wily/community forks (adjusted to build in Wily)
 
 Several dependencies are **forks** maintained for the project: they carry
 patches for the pioarduino ESP32 core, memory reductions, API changes or
@@ -106,18 +106,18 @@ bug-fixes that upstream has not merged. They remain the work of their original
 authors under the original license; only the fork host differs.
 
 - **IRremoteESP8266** — fork of <https://github.com/crankyoldgit/IRremoteESP8266>
-  (LGPL-2.1). Bruce uses <https://github.com/bmorcelli/IRremoteESP8266> (and
+  (LGPL-2.1). Wily uses <https://github.com/bmorcelli/IRremoteESP8266> (and
   `BorisKofman/IRremoteESP8266#Espressif-version-3` in the light build) for
   ESP32-Arduino-3.x compatibility.
 - **SmartRC-CC1101-Driver-Lib** — fork of the ELECHOUSE CC1101 driver
-  <https://github.com/LSatan/SmartRC-CC1101-Driver-Lib> (MIT). Bruce uses
+  <https://github.com/LSatan/SmartRC-CC1101-Driver-Lib> (MIT). Wily uses
   <https://github.com/bmorcelli/SmartRC-CC1101-Driver-Lib>.
 - **Adafruit BusIO** — fork <https://github.com/emericklaw/Adafruit-BusIO_Bruce>
   (`1.17.2-bruce.1`) of <https://github.com/adafruit/Adafruit_BusIO> (MIT).
 - **Adafruit PN532** — fork <https://github.com/emericklaw/Adafruit-PN532_Bruce>
   (`1.3.3-bruce.1`) of <https://github.com/adafruit/Adafruit-PN532> (BSD).
 - **mquickjs** — <https://github.com/BruceDevices/mquickjs>, the JS interpreter
-  built on Fabrice Bellard's QuickJS / quickjs-ng (MIT). Powers the Bruce
+  built on Fabrice Bellard's QuickJS / quickjs-ng (MIT). Powers the Wily
   JavaScript interpreter.
 - **WireGuard-ESP32-Arduino** — <https://github.com/sayacom/WireGuard-ESP32-Arduino>
   (`feature/esp-netif` branch), an Arduino port of Jason A. Donenfeld's WireGuard
@@ -180,7 +180,7 @@ authors under the original license; only the fork host differs.
 ## Vendored libraries (`lib/`)
 
 Libraries checked into the tree under `lib/` (PlatformIO private libraries).
-Some are Bruce-authored HAL glue; others are copied third-party code, sometimes
+Some are Wily-authored HAL glue; others are copied third-party code, sometimes
 trimmed or adapted. Each retains its original author's license.
 
 - **`lib/TFT_eSPI`** — Bodmer's TFT_eSPI (`2.5.43`), FreeBSD/MIT/BSD; itself
@@ -202,7 +202,7 @@ trimmed or adapted. Each retains its original author's license.
 - **`lib/PN532_SRIX`** — ST SRIX/SRI NFC support, `arduino-pn532-srix` by "Lilz"
   (GPL-3.0 / LGPL-3.0), refactored to reuse only Adafruit_PN532 constants. Header
   in `pn532_srix.h`.
-- **`lib/HAL`** — Bruce's own hardware-abstraction layer
+- **`lib/HAL`** — Wily's own hardware-abstraction layer
   (<https://github.com/pr3y/Bruce>). Wraps display backends (LovyanGFX, M5GFX,
   TFT_eSPI) and bundles:
   - `io_expander/Adafruit_AW9523.*` — Adafruit AW9523 GPIO expander driver (BSD),

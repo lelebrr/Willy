@@ -16,9 +16,9 @@ static bool spectrum_rmt_rx_done_callback(
 void draw_tf_spectrum_grid() {
     tft.setTextSize(1);
     tft.setCursor(3, 2);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
-    tft.printf(" RF - Espectro (%.2f Mhz)", bruceConfigPins.rfFreq);
-    tft.fillRect(0, 20, tftWidth, tftHeight - 20, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
+    tft.printf(" RF - Espectro (%.2f Mhz)", wilyConfigPins.rfFreq);
+    tft.fillRect(0, 20, tftWidth, tftHeight - 20, wilyConfig.bgColor);
     tft.drawFastHLine(0, 20 + tftHeight / 2, tftWidth, TFT_DARKGREY);
     tft.drawFastVLine((1 * tftWidth) / 4, 20, tftHeight - 20, TFT_DARKGREY);
     tft.drawFastVLine((2 * tftWidth) / 4, 20, tftHeight - 20, TFT_DARKGREY);
@@ -26,7 +26,7 @@ void draw_tf_spectrum_grid() {
 }
 
 void rf_spectrum() {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     draw_tf_spectrum_grid();
     rmt_channel_handle_t rx_ch = NULL;
     rx_ch = setup_rf_rx();
@@ -68,7 +68,7 @@ void rf_spectrum() {
                 int lineX = map(i, 0, rx_size - 1, 0, tftWidth - 1); // Map i to within the display width
                 int startY = constrain(20 + tftHeight / 2 - lineHeight / 2, 20, 20 + tftHeight);
                 int endY = constrain(20 + tftHeight / 2 + lineHeight / 2, 20, 20 + tftHeight);
-                tft.drawLine(lineX, startY, lineX, endY, bruceConfig.priColor);
+                tft.drawLine(lineX, startY, lineX, endY, wilyConfig.priColor);
             }
 
             ESP_ERROR_CHECK(rmt_receive(rx_ch, item, sizeof(item), &receive_config));
@@ -90,25 +90,25 @@ void rf_spectrum() {
 //@Pirata
 void rf_SquareWave() {
     RCSwitch rcswitch;
-    if (!initRfModule("rx", bruceConfigPins.rfFreq)) return;
+    if (!initRfModule("rx", wilyConfigPins.rfFreq)) return;
 
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) rcswitch.enableReceive(bruceConfigPins.CC1101_bus.io0);
-    else rcswitch.enableReceive(bruceConfigPins.rfRx);
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) rcswitch.enableReceive(wilyConfigPins.CC1101_bus.io0);
+    else rcswitch.enableReceive(wilyConfigPins.rfRx);
     int line_w = 0;
     int line_h = 15;
     unsigned int *raw;
 PRINT:
     tft.drawPixel(0, 0, 0);
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setTextSize(1);
     tft.setCursor(3, 2);
-    tft.printf("  RF - Onda Quadrada (%.2f Mhz)", bruceConfigPins.rfFreq);
+    tft.printf("  RF - Onda Quadrada (%.2f Mhz)", wilyConfigPins.rfFreq);
 
     while (1) {
         if (rcswitch.RAWavailable()) {
             raw = rcswitch.getRAWReceivedRawdata();
             // Clear the display area
-            // tft.fillRect(0, 0, tftWidth, tftHeight, bruceConfig.bgColor);
+            // tft.fillRect(0, 0, tftWidth, tftHeight, wilyConfig.bgColor);
             // Draw waveform based on signal strength
             for (int i = 0; i < RCSWITCH_RAW_MAX_CHANGES - 1; i += 2) {
                 if (raw[i] == 0) break;
@@ -121,17 +121,17 @@ PRINT:
                 }
                 if (line_h > tftHeight) {
                     line_h = 15;
-                    tft.fillRect(0, 12, tftWidth, tftHeight, bruceConfig.bgColor);
+                    tft.fillRect(0, 12, tftWidth, tftHeight, wilyConfig.bgColor);
                 }
-                tft.drawFastVLine(line_w, line_h, 6, bruceConfig.priColor);
-                tft.drawFastHLine(line_w, line_h, raw[i] / TIME_DIVIDER, bruceConfig.priColor);
+                tft.drawFastVLine(line_w, line_h, 6, wilyConfig.priColor);
+                tft.drawFastHLine(line_w, line_h, raw[i] / TIME_DIVIDER, wilyConfig.priColor);
 
-                tft.drawFastVLine(line_w + raw[i] / TIME_DIVIDER, line_h, 6, bruceConfig.priColor);
+                tft.drawFastVLine(line_w + raw[i] / TIME_DIVIDER, line_h, 6, wilyConfig.priColor);
                 tft.drawFastHLine(
                     line_w + raw[i] / TIME_DIVIDER,
                     line_h + 6,
                     raw[i + 1] / TIME_DIVIDER,
-                    bruceConfig.priColor
+                    wilyConfig.priColor
                 );
                 line_w += (raw[i] + raw[i + 1]) / TIME_DIVIDER;
             }
@@ -147,7 +147,7 @@ PRINT:
 
 void rf_CC1101_rssi() {
 #if !defined(LITE_VERSION)
-    if (bruceConfigPins.rfModule != CC1101_SPI_MODULE) {
+    if (wilyConfigPins.rfModule != CC1101_SPI_MODULE) {
         displayError("apenas para modulo CC1101", true);
         return;
     }
@@ -162,16 +162,16 @@ void rf_CC1101_rssi() {
         if (redraw) {
             redraw = false;
             tft.drawPixel(0, 0, 0);
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             tft.setTextSize(1);
-            tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+            tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
             tft.setCursor(3, 2);
             // Fixed frequency sees a dot running grafic, showing RSSI over time
-            if (bruceConfigPins.rfFxdFreq) {
-                if (!initRfModule("rx", bruceConfigPins.rfFreq))
+            if (wilyConfigPins.rfFxdFreq) {
+                if (!initRfModule("rx", wilyConfigPins.rfFreq))
                     displayError("Erro ao definir frequencia", true);
-                tft.printf(" RF - Espectro RSSI (%.2f Mhz)", bruceConfigPins.rfFreq);
-                tft.drawFastVLine(20, 20, tftHeight, bruceConfig.priColor);
+                tft.printf(" RF - Espectro RSSI (%.2f Mhz)", wilyConfigPins.rfFreq);
+                tft.drawFastVLine(20, 20, tftHeight, wilyConfig.priColor);
                 tft.drawString("-95", 0, (tftHeight - 120) + 95);
                 tft.drawString("-80", 0, (tftHeight - 120) + 80);
                 tft.drawString("-65", 0, (tftHeight - 120) + 65);
@@ -183,28 +183,28 @@ void rf_CC1101_rssi() {
             }
             // Range Scan Sees a bargraph simillar to NRF24 grafic, using RSSI across frequencies
             else {
-                if (!initRfModule("rx", bruceConfigPins.rfFreq)) displayError("Erro ao iniciar modulo", true);
-                tft.printf(" RF - Espectro RSSI (%s)", subghz_frequency_ranges[bruceConfigPins.rfScanRange]);
-                tft.drawFastHLine(0, tftHeight - 20, tftWidth, bruceConfig.priColor);
+                if (!initRfModule("rx", wilyConfigPins.rfFreq)) displayError("Erro ao iniciar modulo", true);
+                tft.printf(" RF - Espectro RSSI (%s)", subghz_frequency_ranges[wilyConfigPins.rfScanRange]);
+                tft.drawFastHLine(0, tftHeight - 20, tftWidth, wilyConfig.priColor);
                 char buf[7];
-                float var = subghz_frequency_list[range_limits[bruceConfigPins.rfScanRange][0]];
+                float var = subghz_frequency_list[range_limits[wilyConfigPins.rfScanRange][0]];
                 snprintf(buf, sizeof(buf), "%.3f", var);
                 tft.drawString(buf, 2, tftHeight - 10);
-                var = subghz_frequency_list[range_limits[bruceConfigPins.rfScanRange][1]];
+                var = subghz_frequency_list[range_limits[wilyConfigPins.rfScanRange][1]];
                 snprintf(buf, sizeof(buf), "%.3f", var);
                 tft.drawRightString(buf, tftWidth - 2, tftHeight - 10);
-                int range = range_limits[bruceConfigPins.rfScanRange][1] -
-                            range_limits[bruceConfigPins.rfScanRange][0] + 1;
+                int range = range_limits[wilyConfigPins.rfScanRange][1] -
+                            range_limits[wilyConfigPins.rfScanRange][0] + 1;
                 int space = tftWidth / range;
                 for (int i = 0; i < range; i++) {
-                    tft.drawFastVLine(space * i, tftHeight - 20, 5, bruceConfig.priColor);
+                    tft.drawFastVLine(space * i, tftHeight - 20, 5, wilyConfig.priColor);
                 }
                 std::fill(bar_size.begin(), bar_size.end(), 0);
             }
         }
 
         // draw dot graph for fixed frequency
-        if (bruceConfigPins.rfFxdFreq) {
+        if (wilyConfigPins.rfFxdFreq) {
             int rssi = ELECHOUSE_cc1101.getRssi();
             tft.drawPixel(0, 0, 0); // To make sure CC1101 shared with TFT works properly
             const int base_y = tftHeight - 120;
@@ -215,28 +215,28 @@ void rf_CC1101_rssi() {
                 const int x1 = 20 + i;
                 const int curr = signal[i];
                 // erase old segment between previous and current points
-                tft.drawLine(x0, base_y - prev, x1, base_y - curr, bruceConfig.bgColor);
+                tft.drawLine(x0, base_y - prev, x1, base_y - curr, wilyConfig.bgColor);
                 const int next_val = (i == graph_size - 1) ? rssi : signal[i + 1];
                 // shift buffer left by one
                 signal[i - 1] = curr;
                 if (i == graph_size - 1) signal[i] = rssi;
                 // draw updated segment using new values
-                tft.drawLine(x0, base_y - curr, x1, base_y - next_val, bruceConfig.priColor);
+                tft.drawLine(x0, base_y - curr, x1, base_y - next_val, wilyConfig.priColor);
                 prev = curr;
             }
-            tft.drawFastVLine(20, 20, tftHeight, bruceConfig.priColor);
+            tft.drawFastVLine(20, 20, tftHeight, wilyConfig.priColor);
             vTaskDelay(pdMS_TO_TICKS(75));
         }
         // draw a bargraph similar to nrf24 across the range
         else {
-            int range = range_limits[bruceConfigPins.rfScanRange][1] -
-                        range_limits[bruceConfigPins.rfScanRange][0] + 1;
+            int range = range_limits[wilyConfigPins.rfScanRange][1] -
+                        range_limits[wilyConfigPins.rfScanRange][0] + 1;
 
             int space = tftWidth / range;
             int max_idx = 0;
             for (int i = 0; i < range; i++) {
                 if (EscPress || SelPress) break;
-                setMHZ(subghz_frequency_list[range_limits[bruceConfigPins.rfScanRange][0] + i]);
+                setMHZ(subghz_frequency_list[range_limits[wilyConfigPins.rfScanRange][0] + i]);
                 vTaskDelay(pdMS_TO_TICKS(5));
                 int rssi = ELECHOUSE_cc1101.getRssi();
                 tft.drawPixel(0, 0, 0); // To make sure CC1101 shared with TFT works properly
@@ -244,14 +244,14 @@ void rf_CC1101_rssi() {
                 if (size > bar_size[i]) bar_size[i] = size;
                 else bar_size[i] = bar_size[i] - (bar_size[i] - size) / 2; // slow down decrease
                 tft.fillRect(
-                    i * space, tftHeight - 20 - bar_size[i], space - 2, bar_size[i], bruceConfig.priColor
+                    i * space, tftHeight - 20 - bar_size[i], space - 2, bar_size[i], wilyConfig.priColor
                 );
-                tft.fillRect(i * space, 20, space, max_bar_size - bar_size[i], bruceConfig.bgColor);
+                tft.fillRect(i * space, 20, space, max_bar_size - bar_size[i], wilyConfig.bgColor);
                 if (bar_size[i] > bar_size[max_idx] && bar_size[i] > min_value) max_idx = i;
             }
             if (bar_size[max_idx] > min_value) {
                 char buf[7];
-                float var = subghz_frequency_list[range_limits[bruceConfigPins.rfScanRange][0] + max_idx];
+                float var = subghz_frequency_list[range_limits[wilyConfigPins.rfScanRange][0] + max_idx];
                 snprintf(buf, sizeof(buf), "%.2f", var);
                 tft.drawCentreString("Max=      ", tftWidth / 2, tftHeight - 10);
                 tft.drawCentreString("Max=" + String(buf), tftWidth / 2, tftHeight - 10);
@@ -260,7 +260,7 @@ void rf_CC1101_rssi() {
         if (check(EscPress)) { break; }
         if (check(SelPress)) {
             deinitRfModule();
-            rf_range_selection(bruceConfigPins.rfFreq);
+            rf_range_selection(wilyConfigPins.rfFreq);
             redraw = true;
         }
     }

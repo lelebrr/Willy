@@ -28,14 +28,14 @@ uint8_t current_channel = 1;
 uint32_t last_mood_switch = 10001;
 bool pwnagotchi_exit = false;
 
-void brucegotchi_setup() {
+void wilygotchi_setup() {
     initPwngrid();
     initUi();
     state = STATE_INIT;
-    Serial.println("Brucegotchi Initialized");
+    Serial.println("Wilygotchi Initialized");
 }
 
-void brucegotchi_update() {
+void wilygotchi_update() {
     if (state == STATE_HALT) { return; }
 
     if (state == STATE_INIT) {
@@ -90,7 +90,7 @@ void advertise(uint8_t channel) {
 
 void set_pwnagotchi_exit(bool new_value) { pwnagotchi_exit = new_value; }
 
-void brucegotchi_start() {
+void wilygotchi_start() {
     int tmp = 0;              // Control workflow
     bool shot = false;        // Control deauth faces
     bool pwgrid_done = false; // Control to start advertising
@@ -98,7 +98,7 @@ void brucegotchi_start() {
     uint8_t _times = 0;       // control delays without impacting control btns
     set_pwnagotchi_exit(false);
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     num_HS = 0; // restart pwnagotchi counting
     sniffer_reset_handshake_cache();
     registeredBeacons.clear();          // Clear the registeredBeacon array in case it has something
@@ -123,7 +123,7 @@ void brucegotchi_start() {
         sniffer_reset_handshake_cache();
     }
 
-    brucegotchi_setup(); // Starts the thing
+    wilygotchi_setup(); // Starts the thing
     // Draw footer & header
     drawTopCanvas();
     drawBottomCanvas();
@@ -133,7 +133,7 @@ void brucegotchi_start() {
 #if defined(HAS_TOUCH)
     TouchFooter();
 #endif
-    brucegotchi_update();
+    wilygotchi_update();
 
     tmp = millis();
     // LET'S GOOOOO!!!
@@ -192,7 +192,7 @@ void brucegotchi_start() {
             tmp = millis();
             pwgrid_done = false;
             Deauth_done = false;
-            brucegotchi_update();
+            wilygotchi_update();
         }
         if (check(SelPress)) {
             // moved down here to reset the options, due to use in other parts in pwngrid spam
@@ -204,7 +204,7 @@ void brucegotchi_start() {
             // Display menu
             loopOptions(options);
             // Redraw footer & header
-            tft.fillScreen(bruceConfig.bgColor);
+            tft.fillScreen(wilyConfig.bgColor);
             updateUi(true);
         }
         if (pwnagotchi_exit) { break; }

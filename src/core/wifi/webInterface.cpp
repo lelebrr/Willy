@@ -147,7 +147,7 @@ bool checkUserWebAuth(AsyncWebServerRequest *request, bool onFailureReturnLoginP
             int end = c.indexOf(';', start);
             if (end == -1) end = c.length();
             String token = c.substring(start, end);
-            if (bruceConfig.isValidWebUISession(token)) { return true; }
+            if (wilyConfig.isValidWebUISession(token)) { return true; }
         }
     }
     if (onFailureReturnLoginPage) {
@@ -242,19 +242,19 @@ void notFound(AsyncWebServerRequest *request) { request->send(404, "text/plain",
 **  Draw information on screen of WebUI.
 **********************************************************************/
 void drawWebUiScreen(bool mode_ap) {
-    tft.fillScreen(bruceConfig.bgColor);
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, ALCOLOR);
     if (mode_ap) {
-        setTftDisplay(0, 0, bruceConfig.bgColor, FM);
-        tft.drawCentreString(bruceConfig.wifiAp.ssid + "/" + bruceConfig.wifiAp.pwd, tftWidth / 2, 7, 1);
+        setTftDisplay(0, 0, wilyConfig.bgColor, FM);
+        tft.drawCentreString(wilyConfig.wifiAp.ssid + "/" + wilyConfig.wifiAp.pwd, tftWidth / 2, 7, 1);
     }
     setTftDisplay(0, 0, ALCOLOR, FM);
     tft.drawCentreString("WILLY WebUI", tftWidth / 2, 27, 1);
     String txt;
     if (!mode_ap) txt = WiFi.localIP().toString();
     else txt = WiFi.softAPIP().toString();
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
 
     tft.drawCentreString("http://willy.local", tftWidth / 2, 45, 1);
     setTftDisplay(7, 67);
@@ -263,9 +263,9 @@ void drawWebUiScreen(bool mode_ap) {
     tft.print("IP: ");
     tft.println(txt);
     tft.setCursor(7, tft.getCursorY());
-    tft.println("Usr: " + String(bruceConfig.webUI.user));
+    tft.println("Usr: " + String(wilyConfig.webUI.user));
     tft.setCursor(7, tft.getCursorY());
-    tft.println("Pwd: " + String(bruceConfig.webUI.pwd));
+    tft.println("Pwd: " + String(wilyConfig.webUI.pwd));
     tft.setCursor(7, tft.getCursorY());
     tft.setTextColor(TFT_RED);
     tft.setTextSize(FP);
@@ -318,9 +318,9 @@ void serveWebUIFile(
         response = request->beginResponse(*fs, "/WillyWebUI/" + filename, contentType);
     } else {
         if (filename == "theme.css") {
-            String css = ":root{--color:" + color565ToWebHex(bruceConfig.priColor) +
-                         ";--sec-color:" + color565ToWebHex(bruceConfig.secColor) +
-                         ";--background:" + color565ToWebHex(bruceConfig.bgColor) + ";}";
+            String css = ":root{--color:" + color565ToWebHex(wilyConfig.priColor) +
+                         ";--sec-color:" + color565ToWebHex(wilyConfig.secColor) +
+                         ";--background:" + color565ToWebHex(wilyConfig.bgColor) + ";}";
             AsyncWebServerResponse *themeResponse = request->beginResponse(200, "text/css", css);
             request->send(themeResponse);
             return;
@@ -349,7 +349,7 @@ static bool startMdnsResponder() {
         return false;
     }
 
-    if (!MDNS.begin(bruceConfig.hostname.c_str())) {
+    if (!MDNS.begin(wilyConfig.hostname.c_str())) {
         log_e("Error setting up MDNS responder!");
         return false;
     }
@@ -381,13 +381,13 @@ void configureWebServer() {
             String username = request->getParam("username", true)->value();
             String password = request->getParam("password", true)->value();
 
-            if (username == bruceConfig.webUI.user && password == bruceConfig.webUI.pwd) {
+            if (username == wilyConfig.webUI.user && password == wilyConfig.webUI.pwd) {
                 String token = generateToken();
                 AsyncWebServerResponse *response = request->beginResponse(302);
                 response->addHeader("Location", "/");
                 response->addHeader("Set-Cookie", "WILLYSESSION=" + token + "; Path=/; HttpOnly");
                 request->send(response);
-                bruceConfig.addWebUISession(token);
+                wilyConfig.addWebUISession(token);
                 willyLogger.info(COMP_WEBUI, "User Login successful");
                 return;
             }
@@ -408,7 +408,7 @@ void configureWebServer() {
                 int end = c.indexOf(';', start);
                 if (end == -1) end = c.length();
                 String token = c.substring(start, end);
-                bruceConfig.removeWebUISession(token);
+                wilyConfig.removeWebUISession(token);
             }
         }
         AsyncWebServerResponse *response = request->beginResponse(302);
@@ -440,8 +440,8 @@ void configureWebServer() {
                 response_body,
                 "{\"%s\":\"%s\",\"SD\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"},"
                 "\"LittleFS\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}",
-                "BRUCE_VERSION",
-                BRUCE_VERSION,
+                "WILLY_VERSION",
+                WILLY_VERSION,
                 "free",
                 humanReadableSize(SDTotalBytes - SDUsedBytes).c_str(),
                 "used",
@@ -704,7 +704,7 @@ void configureWebServer() {
             if (request->hasArg("usr") && request->hasArg("pwd")) {
                 const char *usr = request->arg("usr").c_str();
                 const char *pwd = request->arg("pwd").c_str();
-                bruceConfig.setWebUICreds(usr, pwd);
+                wilyConfig.setWebUICreds(usr, pwd);
                 request->send(
                     200, "text/plain", "User: " + String(usr) + " configured with password: " + String(pwd)
                 );

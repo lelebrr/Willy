@@ -95,11 +95,11 @@ void setBadUSBBLEKeyboardLayoutMenu();
 void setBadUSBBLEKeyDelayMenu();
 void setBadUSBBLEShowOutputMenu();
 
-void setSPIPinsMenu(BruceConfigPins::SPIPins &value);
+void setSPIPinsMenu(WilyConfigPins::SPIPins &value);
 
-void setUARTPinsMenu(BruceConfigPins::UARTPins &value);
+void setUARTPinsMenu(WilyConfigPins::UARTPins &value);
 
-void setI2CPinsMenu(BruceConfigPins::I2CPins &value);
+void setI2CPinsMenu(WilyConfigPins::I2CPins &value);
 
 void setTheme();
 

@@ -35,7 +35,7 @@ JSValue native_dialogMessage(JSContext *ctx, JSValue *this_val, int argc, JSValu
         return JS_ThrowTypeError(ctx, "dialog.message(msg:string, buttons?:object)");
     JSCStringBuf msb;
     const char *msg = JS_ToCString(ctx, argv[0], &msb);
-    int8_t selectedButton = displayMessage(msg, leftButton, centerButton, rightButton, bruceConfig.priColor);
+    int8_t selectedButton = displayMessage(msg, leftButton, centerButton, rightButton, wilyConfig.priColor);
     if (selectedButton == 0) {
         return JS_NewString(
             ctx, leftButton != NULL ? leftButton : (centerButton != NULL ? centerButton : "right")
@@ -191,13 +191,13 @@ JSValue native_dialogViewFile(JSContext *ctx, JSValue *this_val, int argc, JSVal
 
 JSValue native_dialogViewText(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
     if (argc < 1 || !JS_IsString(ctx, argv[0])) return JS_UNDEFINED;
-    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
     uint8_t padY = 10;
     if (argc > 1 && JS_IsString(ctx, argv[1])) {
         JSCStringBuf sb;
         const char *title = JS_ToCString(ctx, argv[1], &sb);
         tft.setCursor((tftWidth - (strlen(title) * FM * LW)) / 2, padY);
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.setTextSize(FM);
         tft.println(title);
         padY = tft.getCursorY();

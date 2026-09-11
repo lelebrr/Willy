@@ -41,7 +41,7 @@ char strAddl[200];
 
 void ble_info(String name, String address, String signal) {
     drawMainBorder();
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     tft.drawCentreString("-=Informacoes=-", tftWidth / 2, 28, SMOOTH_FONT);
     tft.drawString("Nome: " + name, 10, 48);
     tft.drawString("Endere.: " + address, 10, 66);
@@ -162,7 +162,7 @@ void ble_scan() {
 
 bool initBLEServer() {
     uint64_t chipid = ESP.getEfuseMac();
-    String blename = "Bruce-" + String((uint8_t)(chipid >> 32), HEX);
+    String blename = "Wily-" + String((uint8_t)(chipid >> 32), HEX);
 
     BLEDevice::init(blename.c_str());
     // BLEDevice::setPower(ESP_PWR_LVL_N12);
@@ -183,7 +183,7 @@ bool initBLEServer() {
 
 void disPlayBLESend() {
     uint8_t senddata[2] = {0};
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     drawMainBorder(); // Moved up to avoid drawing screen issues
     tft.setTextSize(1);
 
@@ -191,7 +191,7 @@ void disPlayBLESend() {
     pServer->getAdvertising()->start();
 
     uint64_t chipid = ESP.getEfuseMac();
-    String blename = "Bruce-" + String((uint8_t)(chipid >> 32), HEX);
+    String blename = "Wily-" + String((uint8_t)(chipid >> 32), HEX);
 
     BLEConnected = true;
 
@@ -202,7 +202,7 @@ void disPlayBLESend() {
             if (!wasConnected) {
                 tft.fillRect(10, 26, tftWidth - 20, tftHeight - 36, TFT_BLACK);
                 drawBLE_beacon(180, 28, TFT_BLUE);
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                 tft.setTextSize(FM);
                 tft.setCursor(12, 50);
                 // tft.printf("BLE connect!\n");

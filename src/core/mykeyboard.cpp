@@ -98,7 +98,7 @@ struct box_t {
     char key_sh;
 
     void clear(void) {
-        for (int i = 0; i < 8; ++i) { tft.fillRect(x, y, w, h, bruceConfig.bgColor); }
+        for (int i = 0; i < 8; ++i) { tft.fillRect(x, y, w, h, wilyConfig.bgColor); }
     }
     void draw(void) {
         int ie = touch_id < 0 ? 4 : 8;
@@ -235,9 +235,9 @@ bool handleDelete(String &current_text, int &cursor_x, int &cursor_y) {
         fontSize = FP;
     } else tft.setTextSize(FM);
     tft.setCursor((cursor_x - fontSize * LW), cursor_y);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.print(" ");
-    tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), 0x5AAB);
+    tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), 0x5AAB);
     tft.setCursor(cursor_x - fontSize * LW, cursor_y);
     cursor_x = tft.getCursorX();
     cursor_y = tft.getCursorY();
@@ -420,7 +420,7 @@ String generalKeyboard(
         for (int j = 0; j < KeyboardHeight; j++) { // y coord
             box_list[k].key = keys[j][i][0];
             box_list[k].key_sh = keys[j][i][1];
-            box_list[k].color = ~bruceConfig.bgColor;
+            box_list[k].color = ~wilyConfig.bgColor;
             box_list[k].x = i * key_width;
             box_list[k].y = j * key_height + 54;
             box_list[k].w = key_width;
@@ -433,7 +433,7 @@ String generalKeyboard(
     for (int i = 0; i < buttons_number; i++) {
         box_list[k].key = ' ';
         box_list[k].key_sh = ' ';
-        box_list[k].color = ~bruceConfig.bgColor;
+        box_list[k].color = ~wilyConfig.bgColor;
         box_list[k].x = btns_layout[i][0];
         box_list[k].y = 0;
         box_list[k].w = btns_layout[i][1];
@@ -444,7 +444,7 @@ String generalKeyboard(
     k = 0;
 #endif
 
-    tft.fillScreen(bruceConfig.bgColor); // reset the screen
+    tft.fillScreen(wilyConfig.bgColor); // reset the screen
 
     uint8_t longNextPress = 0;
     uint8_t longPrevPress = 0;
@@ -455,12 +455,12 @@ String generalKeyboard(
         if (redraw) {
             // setup
             tft.setCursor(0, 0);
-            tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+            tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
             tft.setTextSize(FM);
 
             // Draw the top row buttons_strings
             if (y < 0 || old_y < 0) {
-                tft.fillRect(0, 1, tftWidth, 22, bruceConfig.bgColor);
+                tft.fillRect(0, 1, tftWidth, 22, wilyConfig.bgColor);
                 // Draw the buttons_strings borders
                 for (int i = 0; i < buttons_number; ++i) {
                     tft.drawRect(
@@ -468,95 +468,95 @@ String generalKeyboard(
                         2,
                         btns_layout[i][1],
                         KBLH,
-                        getComplementaryColor2(bruceConfig.bgColor)
+                        getComplementaryColor2(wilyConfig.bgColor)
                     );
                 }
 
-                tft.drawRect(3, KBLH + 12, tftWidth - 3, KBLH, bruceConfig.priColor); // typed string border
+                tft.drawRect(3, KBLH + 12, tftWidth - 3, KBLH, wilyConfig.priColor); // typed string border
 
                 /* Highlight the corresponding button when the user cursor is over it */
                 // OK
                 if (x == 0 && y == -1) {
-                    tft.setTextColor(bruceConfig.bgColor, getComplementaryColor2(bruceConfig.bgColor));
+                    tft.setTextColor(wilyConfig.bgColor, getComplementaryColor2(wilyConfig.bgColor));
                     tft.fillRect(
                         btns_layout[0][0],
                         2,
                         btns_layout[0][1],
                         KBLH,
-                        getComplementaryColor2(bruceConfig.bgColor)
+                        getComplementaryColor2(wilyConfig.bgColor)
                     );
-                } else tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+                } else tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
                 tft.drawString("OK", btns_layout[0][2], 5);
                 // CAP
                 if (x == 1 && y == -1) {
-                    tft.setTextColor(bruceConfig.bgColor, getComplementaryColor2(bruceConfig.bgColor));
+                    tft.setTextColor(wilyConfig.bgColor, getComplementaryColor2(wilyConfig.bgColor));
                     tft.fillRect(
                         btns_layout[1][0],
                         2,
                         btns_layout[1][1],
                         KBLH,
-                        getComplementaryColor2(bruceConfig.bgColor)
+                        getComplementaryColor2(wilyConfig.bgColor)
                     );
                 } else if (caps) {
                     tft.fillRect(btns_layout[1][0], 2, btns_layout[1][1], KBLH, TFT_DARKGREY);
-                    tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), TFT_DARKGREY);
-                } else tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+                    tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), TFT_DARKGREY);
+                } else tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
                 tft.drawString("CAP", btns_layout[1][2], 5);
                 // DEL
                 if (x == 2 && y == -1) {
-                    tft.setTextColor(bruceConfig.bgColor, getComplementaryColor2(bruceConfig.bgColor));
+                    tft.setTextColor(wilyConfig.bgColor, getComplementaryColor2(wilyConfig.bgColor));
                     tft.fillRect(
                         btns_layout[2][0],
                         2,
                         btns_layout[2][1],
                         KBLH,
-                        getComplementaryColor2(bruceConfig.bgColor)
+                        getComplementaryColor2(wilyConfig.bgColor)
                     );
-                } else tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+                } else tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
                 tft.drawString("DEL", btns_layout[2][2], 5);
                 // SPACE
                 if (x == 3 && y == -1) {
-                    tft.setTextColor(bruceConfig.bgColor, getComplementaryColor2(bruceConfig.bgColor));
+                    tft.setTextColor(wilyConfig.bgColor, getComplementaryColor2(wilyConfig.bgColor));
                     tft.fillRect(
                         btns_layout[3][0],
                         2,
                         btns_layout[3][1],
                         KBLH,
-                        getComplementaryColor2(bruceConfig.bgColor)
+                        getComplementaryColor2(wilyConfig.bgColor)
                     );
-                } else tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+                } else tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
                 tft.drawString("ESPACO", btns_layout[3][2], 5);
 #if FM > 1 // draw only on large enough screens
            //   BACK
                 if (x > 3 && y == -1) {
-                    tft.setTextColor(bruceConfig.bgColor, getComplementaryColor2(bruceConfig.bgColor));
+                    tft.setTextColor(wilyConfig.bgColor, getComplementaryColor2(wilyConfig.bgColor));
                     tft.fillRect(
                         btns_layout[4][0],
                         2,
                         btns_layout[4][1],
                         KBLH,
-                        getComplementaryColor2(bruceConfig.bgColor)
+                        getComplementaryColor2(wilyConfig.bgColor)
                     );
-                } else tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+                } else tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
                 tft.drawString("SAIR", btns_layout[4][2], 5);
 #endif
             }
 
             // Prints the chars counter
             tft.setTextSize(FP);
-            tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+            tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
             String chars_counter = String(current_text.length()) + "/" + String(max_size);
             tft.fillRect(
                 tftWidth - ((chars_counter.length() * 6) + 20), // 5px per char + 1 padding
                 KBLH + 4,
                 (chars_counter.length() * 6) + 20,
                 7,
-                bruceConfig.bgColor
+                wilyConfig.bgColor
             ); // clear previous text
             tft.drawString(chars_counter, tftWidth - ((chars_counter.length() * 6) + 10), KBLH + 4);
 
             // Prints the title of the textbox, it should report what the user has to write in it
-            tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), 0x5AAB);
+            tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), 0x5AAB);
             tft.drawString(textbox_title.substring(0, max_FP_size - chars_counter.length() - 1), 3, KBLH + 4);
 
             // Drawing the textbox and the currently typed string
@@ -564,9 +564,9 @@ String generalKeyboard(
             // reset the text box if needed
             if (current_text.length() == (max_FM_size) || current_text.length() == (max_FM_size + 1) ||
                 current_text.length() == (max_FP_size) || current_text.length() == (max_FP_size + 1))
-                tft.fillRect(3, KBLH + 12, tftWidth - 3, KBLH, bruceConfig.bgColor);
+                tft.fillRect(3, KBLH + 12, tftWidth - 3, KBLH, wilyConfig.bgColor);
             // write the text
-            tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor));
+            tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor));
 
             if (current_text.length() >
                 max_FM_size) { // if the text is too long, we try to set the smaller font
@@ -598,9 +598,9 @@ String generalKeyboard(
                 );
             }
             // Draw the textbox border again(?)
-            tft.drawRect(3, KBLH + 12, tftWidth - 3, KBLH, bruceConfig.priColor); // typed string border
+            tft.drawRect(3, KBLH + 12, tftWidth - 3, KBLH, wilyConfig.priColor); // typed string border
 
-            tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), bruceConfig.bgColor);
+            tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), wilyConfig.bgColor);
             tft.setTextSize(FM);
 
             // Draw the actual keyboard
@@ -612,13 +612,13 @@ String generalKeyboard(
 
                     // Use the previous coordinates to redraw only the previous letter
                     if (old_x == j && old_y == i) {
-                        tft.setTextColor(~bruceConfig.bgColor, bruceConfig.bgColor);
-                        tft.fillRect(key_x, key_y, key_width, key_height, bruceConfig.bgColor);
+                        tft.setTextColor(~wilyConfig.bgColor, wilyConfig.bgColor);
+                        tft.fillRect(key_x, key_y, key_width, key_height, wilyConfig.bgColor);
                     }
                     // If selected, highlight it by changing font color and filling the back rectangle
                     if (x == j && y == i) {
-                        tft.setTextColor(bruceConfig.bgColor, ~bruceConfig.bgColor);
-                        tft.fillRect(key_x, key_y, key_width, key_height, ~bruceConfig.bgColor);
+                        tft.setTextColor(wilyConfig.bgColor, ~wilyConfig.bgColor);
+                        tft.fillRect(key_x, key_y, key_width, key_height, ~wilyConfig.bgColor);
                     }
 
                     // Print the letters
@@ -627,7 +627,7 @@ String generalKeyboard(
                     else tft.drawString(String(keys[i][j][1]), key_x + text_offset_x, key_y + text_offset_y);
 
                     // Return colors to normal to print the other letters
-                    if (x == j && y == i) { tft.setTextColor(~bruceConfig.bgColor, bruceConfig.bgColor); }
+                    if (x == j && y == i) { tft.setTextColor(~wilyConfig.bgColor, wilyConfig.bgColor); }
                 }
             }
             // backup key coordinates
@@ -711,7 +711,7 @@ String generalKeyboard(
                 }
                 if (box_list[buttons_start_index + 1].contain(touchPoint.x, touchPoint.y)) { // CAPS btn
                     caps = !caps;
-                    tft.fillRect(0, 54, tftWidth, tftHeight - 54, bruceConfig.bgColor);
+                    tft.fillRect(0, 54, tftWidth, tftHeight - 54, wilyConfig.bgColor);
                     touchHandled = true;
                 }
                 if (box_list[buttons_start_index + 2].contain(touchPoint.x, touchPoint.y)) { // DEL btn
@@ -962,9 +962,9 @@ String generalKeyboard(
                         fontSize = FP;
                     } else tft.setTextSize(FM);
                     tft.setCursor((cursor_x - fontSize * LW), cursor_y);
-                    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                     tft.print(" ");
-                    tft.setTextColor(getComplementaryColor2(bruceConfig.bgColor), 0x5AAB);
+                    tft.setTextColor(getComplementaryColor2(wilyConfig.bgColor), 0x5AAB);
                     tft.setCursor(cursor_x - fontSize * LW, cursor_y);
                     cursor_x = tft.getCursorX();
                     cursor_y = tft.getCursorY();
@@ -1089,7 +1089,7 @@ String generalKeyboard(
     }
 
     // Resets screen when finished writing
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     resetTftDisplay();
 
     return current_text;

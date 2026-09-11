@@ -1,4 +1,4 @@
-# Pinouts diagram to use Bruce
+﻿# Pinouts diagram to use Wily
 
 ## USING NM-CYD-C5, with SPI / CC1101 and NRF24 work with NM-RF-HAT
 

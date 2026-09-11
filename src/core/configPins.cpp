@@ -12,7 +12,7 @@ String getMacAddress() {
     return String(macStr);
 }
 
-void BruceConfigPins::fromJson(JsonObject obj) {
+void WilyConfigPins::fromJson(JsonObject obj) {
     int count = 0;
     String mac = getMacAddress();
 
@@ -182,7 +182,7 @@ void BruceConfigPins::fromJson(JsonObject obj) {
 #endif
     if (!root["i2c_bus"].isNull()) {
 #if defined(SOC_HP_I2C_NUM) && SOC_HP_I2C_NUM < 2 && SYS_I2C_SDA >= 0 && SYS_I2C_SCL >= 0 && \
-    !defined(BRUCE_BOARD_HAS_SOFTWARE_I2C)
+    !defined(WILLY_BOARD_HAS_SOFTWARE_I2C)
         log_e("I2C Pins cannot be changed on this board, using default values");
         i2c_bus = sys_i2c;
 #else
@@ -208,7 +208,7 @@ void BruceConfigPins::fromJson(JsonObject obj) {
     if (count > 0) saveFile();
 }
 
-void BruceConfigPins::toJson(JsonObject obj) const {
+void WilyConfigPins::toJson(JsonObject obj) const {
     JsonObject root = obj[getMacAddress()].to<JsonObject>();
 
     root["rot"] = rotation;
@@ -255,7 +255,7 @@ void BruceConfigPins::toJson(JsonObject obj) const {
     gps_bus.toJson(_gps);
 }
 
-void BruceConfigPins::loadFile(JsonDocument &jsonDoc, bool checkFS) {
+void WilyConfigPins::loadFile(JsonDocument &jsonDoc, bool checkFS) {
     FS *fs;
     if (checkFS) {
         if (!getFsStorage(fs)) return;
@@ -278,14 +278,14 @@ void BruceConfigPins::loadFile(JsonDocument &jsonDoc, bool checkFS) {
         Serial.println("Failed to read config file, using default configuration"); // Debug print
         return;
     } else {
-        Serial.println("deserializeJson completed successfully in BruceConfigPins."); // Debug print
+        Serial.println("deserializeJson completed successfully in WilyConfigPins."); // Debug print
     }
     file.close();
 
     // Print removed
 }
 
-void BruceConfigPins::fromFile(bool checkFS) {
+void WilyConfigPins::fromFile(bool checkFS) {
     JsonDocument jsonDoc;
     loadFile(jsonDoc, checkFS);
 
@@ -293,7 +293,7 @@ void BruceConfigPins::fromFile(bool checkFS) {
     jsonDoc.clear();
 }
 
-void BruceConfigPins::createFile() {
+void WilyConfigPins::createFile() {
     JsonDocument jsonDoc;
     toJson(jsonDoc.to<JsonObject>());
     // Print removed
@@ -318,7 +318,7 @@ void BruceConfigPins::createFile() {
     if (sdcardMounted) copyToFs(LittleFS, SD, filepath, false);
 }
 
-void BruceConfigPins::saveFile() {
+void WilyConfigPins::saveFile() {
     JsonDocument jsonDoc;
     loadFile(jsonDoc);
 
@@ -345,14 +345,14 @@ void BruceConfigPins::saveFile() {
     if (sdcardMounted) copyToFs(LittleFS, SD, filepath, false);
 }
 
-void BruceConfigPins::factoryReset() {
+void WilyConfigPins::factoryReset() {
     FS *fs = &LittleFS;
     fs->rename(String(filepath), "/bak." + String(filepath).substring(1));
     // don't try to mount SD Card if not previously mounted
     if (sdcardMounted) SD.rename(String(filepath), "/bak." + String(filepath).substring(1));
 }
 
-void BruceConfigPins::validateConfig() {
+void WilyConfigPins::validateConfig() {
     validateRotationValue();
     validateRfScanRangeValue();
     validateRfModuleValue();
@@ -372,55 +372,55 @@ void BruceConfigPins::validateConfig() {
     validateUARTPins(gps_bus);
 }
 #if !defined(LITE_VERSION)
-void BruceConfigPins::setLoRaPins(SPIPins value) {
+void WilyConfigPins::setLoRaPins(SPIPins value) {
     LoRa_bus = value;
     validateSpiPins(LoRa_bus);
     saveFile();
 }
-void BruceConfigPins::setW5500Pins(SPIPins value) {
+void WilyConfigPins::setW5500Pins(SPIPins value) {
     W5500_bus = value;
     validateSpiPins(W5500_bus);
     saveFile();
 }
-void BruceConfigPins::setSR25RPins(SPIPins value) {
+void WilyConfigPins::setSR25RPins(SPIPins value) {
     ST25R_bus = value;
     validateSpiPins(ST25R_bus);
     saveFile();
 }
 #endif
-void BruceConfigPins::setCC1101Pins(SPIPins value) {
+void WilyConfigPins::setCC1101Pins(SPIPins value) {
     CC1101_bus = value;
     validateSpiPins(CC1101_bus);
     saveFile();
 }
 
-void BruceConfigPins::setNrf24Pins(SPIPins value) {
+void WilyConfigPins::setNrf24Pins(SPIPins value) {
     NRF24_bus = value;
     validateSpiPins(NRF24_bus);
     saveFile();
 }
 
-void BruceConfigPins::setSDCardPins(SPIPins value) {
+void WilyConfigPins::setSDCardPins(SPIPins value) {
     SDCARD_bus = value;
     validateSpiPins(SDCARD_bus);
     saveFile();
 }
 
-void BruceConfigPins::setSpiPins(SPIPins value) {
+void WilyConfigPins::setSpiPins(SPIPins value) {
     validateSpiPins(value);
     saveFile();
 }
 
-void BruceConfigPins::setI2CPins(I2CPins value) {
+void WilyConfigPins::setI2CPins(I2CPins value) {
     validateI2CPins(value);
     saveFile();
 }
 
-void BruceConfigPins::setUARTPins(UARTPins value) {
+void WilyConfigPins::setUARTPins(UARTPins value) {
     validateUARTPins(value);
     saveFile();
 }
-void BruceConfigPins::validateSpiPins(SPIPins &value) {
+void WilyConfigPins::validateSpiPins(SPIPins &value) {
     if (value.sck < 0 || value.sck > GPIO_PIN_COUNT) value.sck = GPIO_NUM_NC;
     if (value.miso < 0 || value.miso > GPIO_PIN_COUNT) value.miso = GPIO_NUM_NC;
     if (value.mosi < 0 || value.mosi > GPIO_PIN_COUNT) value.mosi = GPIO_NUM_NC;
@@ -429,95 +429,95 @@ void BruceConfigPins::validateSpiPins(SPIPins &value) {
     if (value.io2 < 0 || value.io2 > GPIO_PIN_COUNT) value.io2 = GPIO_NUM_NC;
 }
 
-void BruceConfigPins::validateI2CPins(I2CPins &value) {
+void WilyConfigPins::validateI2CPins(I2CPins &value) {
     if (value.sda < 0 || value.sda > GPIO_PIN_COUNT) value.sda = GPIO_NUM_NC;
     if (value.scl < 0 || value.scl > GPIO_PIN_COUNT) value.scl = GPIO_NUM_NC;
 }
 
-void BruceConfigPins::validateUARTPins(UARTPins &value) {
+void WilyConfigPins::validateUARTPins(UARTPins &value) {
     if (value.rx < 0 || value.rx > GPIO_PIN_COUNT) value.rx = GPIO_NUM_NC;
     if (value.tx < 0 || value.tx > GPIO_PIN_COUNT) value.tx = GPIO_NUM_NC;
 }
 
-void BruceConfigPins::setRotation(int value) {
+void WilyConfigPins::setRotation(int value) {
     rotation = value;
     validateRotationValue();
     saveFile();
 }
 
-void BruceConfigPins::validateRotationValue() {
+void WilyConfigPins::validateRotationValue() {
     if (rotation < 0 || rotation > 3) rotation = 1;
 }
 
-void BruceConfigPins::setBleName(String value) {
+void WilyConfigPins::setBleName(String value) {
     bleName = value;
     saveFile();
 }
 
-void BruceConfigPins::setIrTxPin(int value) {
+void WilyConfigPins::setIrTxPin(int value) {
     irTx = value;
     saveFile();
 }
 
-void BruceConfigPins::setIrTxRepeats(uint8_t value) {
+void WilyConfigPins::setIrTxRepeats(uint8_t value) {
     irTxRepeats = value;
     saveFile();
 }
 
-void BruceConfigPins::setIrRxPin(int value) {
+void WilyConfigPins::setIrRxPin(int value) {
     irRx = value;
     saveFile();
 }
 
-void BruceConfigPins::setRfTxPin(int value) {
+void WilyConfigPins::setRfTxPin(int value) {
     rfTx = value;
     saveFile();
 }
 
-void BruceConfigPins::setRfRxPin(int value) {
+void WilyConfigPins::setRfRxPin(int value) {
     rfRx = value;
     saveFile();
 }
 
-void BruceConfigPins::setRfModule(RFModules value) {
+void WilyConfigPins::setRfModule(RFModules value) {
     rfModule = value;
     validateRfModuleValue();
     saveFile();
 }
 
-void BruceConfigPins::validateRfModuleValue() {
+void WilyConfigPins::validateRfModuleValue() {
     if (rfModule != M5_RF_MODULE && rfModule != CC1101_SPI_MODULE) { rfModule = M5_RF_MODULE; }
 }
 
-void BruceConfigPins::setRfFreq(float value, int fxdFreq) {
+void WilyConfigPins::setRfFreq(float value, int fxdFreq) {
     rfFreq = value;
     if (fxdFreq > 1) rfFxdFreq = fxdFreq;
     saveFile();
 }
 
-void BruceConfigPins::setRfFxdFreq(float value) {
+void WilyConfigPins::setRfFxdFreq(float value) {
     rfFxdFreq = value;
     saveFile();
 }
 
-void BruceConfigPins::setRfScanRange(int value, int fxdFreq) {
+void WilyConfigPins::setRfScanRange(int value, int fxdFreq) {
     rfScanRange = value;
     rfFxdFreq = fxdFreq;
     validateRfScanRangeValue();
     saveFile();
 }
 
-void BruceConfigPins::validateRfScanRangeValue() {
+void WilyConfigPins::validateRfScanRangeValue() {
     if (rfScanRange < 0 || rfScanRange > 3) rfScanRange = 3;
 }
 
-void BruceConfigPins::setRfidModule(RFIDModules value) {
+void WilyConfigPins::setRfidModule(RFIDModules value) {
     rfidModule = value;
     validateRfidModuleValue();
     saveFile();
 }
 
-void BruceConfigPins::validateRfidModuleValue() {
+void WilyConfigPins::validateRfidModuleValue() {
     if (rfidModule != M5_RFID2_MODULE && rfidModule != PN532_I2C_MODULE && rfidModule != PN532_SPI_MODULE &&
         rfidModule != RC522_SPI_MODULE && rfidModule != PN532_I2C_SPI_MODULE
 #if !defined(LITE_VERSION)
@@ -528,39 +528,39 @@ void BruceConfigPins::validateRfidModuleValue() {
     }
 }
 
-void BruceConfigPins::setiButtonPin(int value) {
+void WilyConfigPins::setiButtonPin(int value) {
     if (value < GPIO_NUM_MAX) {
         iButton = value;
         saveFile();
     } else log_e("iButton: Gpio pin not set, incompatible with this device\n");
 }
-void BruceConfigPins::setGpsBaudrate(int value) {
+void WilyConfigPins::setGpsBaudrate(int value) {
     gpsBaudrate = value;
     validateGpsBaudrateValue();
     saveFile();
 }
 
-void BruceConfigPins::validateGpsBaudrateValue() {
+void WilyConfigPins::validateGpsBaudrateValue() {
     if (gpsBaudrate != 9600 && gpsBaudrate != 19200 && gpsBaudrate != 57600 && gpsBaudrate != 38400 &&
         gpsBaudrate != 115200)
         gpsBaudrate = 9600;
 }
 
 
-bool BruceConfigPins::setSetting(const String& name, const String& value) {
-    static const std::map<String, std::function<void(BruceConfigPins*, const String&)>> settingsMap = {
-        {"rot", [](BruceConfigPins* cfg, const String& val) { cfg->setRotation(val.toInt()); }},
-        {"bleName", [](BruceConfigPins* cfg, const String& val) { cfg->setBleName(val); }},
-        {"irTx", [](BruceConfigPins* cfg, const String& val) { cfg->setIrTxPin(val.toInt()); }},
-        {"irTxRepeats", [](BruceConfigPins* cfg, const String& val) { cfg->setIrTxRepeats(static_cast<uint8_t>(val.toInt())); }},
-        {"irRx", [](BruceConfigPins* cfg, const String& val) { cfg->setIrRxPin(val.toInt()); }},
-        {"rfTx", [](BruceConfigPins* cfg, const String& val) { cfg->setRfTxPin(val.toInt()); }},
-        {"rfRx", [](BruceConfigPins* cfg, const String& val) { cfg->setRfRxPin(val.toInt()); }},
-        {"rfModule", [](BruceConfigPins* cfg, const String& val) { cfg->setRfModule(static_cast<RFModules>(val.toInt())); }},
-        {"rfFreq", [](BruceConfigPins* cfg, const String& val) { if (val.toFloat()) cfg->setRfFreq(val.toFloat()); }},
-        {"rfFxdFreq", [](BruceConfigPins* cfg, const String& val) { cfg->setRfFxdFreq(val.toInt()); }},
-        {"rfScanRange", [](BruceConfigPins* cfg, const String& val) { cfg->setRfScanRange(val.toInt()); }},
-        {"rfidModule", [](BruceConfigPins* cfg, const String& val) { cfg->setRfidModule(static_cast<RFIDModules>(val.toInt())); }}
+bool WilyConfigPins::setSetting(const String& name, const String& value) {
+    static const std::map<String, std::function<void(WilyConfigPins*, const String&)>> settingsMap = {
+        {"rot", [](WilyConfigPins* cfg, const String& val) { cfg->setRotation(val.toInt()); }},
+        {"bleName", [](WilyConfigPins* cfg, const String& val) { cfg->setBleName(val); }},
+        {"irTx", [](WilyConfigPins* cfg, const String& val) { cfg->setIrTxPin(val.toInt()); }},
+        {"irTxRepeats", [](WilyConfigPins* cfg, const String& val) { cfg->setIrTxRepeats(static_cast<uint8_t>(val.toInt())); }},
+        {"irRx", [](WilyConfigPins* cfg, const String& val) { cfg->setIrRxPin(val.toInt()); }},
+        {"rfTx", [](WilyConfigPins* cfg, const String& val) { cfg->setRfTxPin(val.toInt()); }},
+        {"rfRx", [](WilyConfigPins* cfg, const String& val) { cfg->setRfRxPin(val.toInt()); }},
+        {"rfModule", [](WilyConfigPins* cfg, const String& val) { cfg->setRfModule(static_cast<RFModules>(val.toInt())); }},
+        {"rfFreq", [](WilyConfigPins* cfg, const String& val) { if (val.toFloat()) cfg->setRfFreq(val.toFloat()); }},
+        {"rfFxdFreq", [](WilyConfigPins* cfg, const String& val) { cfg->setRfFxdFreq(val.toInt()); }},
+        {"rfScanRange", [](WilyConfigPins* cfg, const String& val) { cfg->setRfScanRange(val.toInt()); }},
+        {"rfidModule", [](WilyConfigPins* cfg, const String& val) { cfg->setRfidModule(static_cast<RFIDModules>(val.toInt())); }}
     };
 
     auto it = settingsMap.find(name);

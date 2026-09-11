@@ -97,7 +97,7 @@ void _setup_gpio() {
     attachInterrupt(R_BTN, ISR_right, FALLING);
 
 #ifdef T_DECK_PLUS
-    bruceConfigPins.gpsBaudrate = 38400;
+    wilyConfigPins.gpsBaudrate = 38400;
 #endif
 }
 
@@ -148,28 +148,28 @@ void InputHandler(void) {
 #else
     bool isPlus = true;
 #endif
-    if (rot != bruceConfigPins.rotation) {
-        if (bruceConfigPins.rotation == 1) {
+    if (rot != wilyConfigPins.rotation) {
+        if (wilyConfigPins.rotation == 1) {
             touch.setMaxCoordinates(320, 240);
             touch.setSwapXY(true);
             touch.setMirrorXY(!isPlus, true);
         }
-        if (bruceConfigPins.rotation == 3) {
+        if (wilyConfigPins.rotation == 3) {
             touch.setMaxCoordinates(320, 240);
             touch.setSwapXY(true);
             touch.setMirrorXY(isPlus, false);
         }
-        if (bruceConfigPins.rotation == 0) {
+        if (wilyConfigPins.rotation == 0) {
             touch.setMaxCoordinates(240, 320);
             touch.setSwapXY(false);
             touch.setMirrorXY(false, !isPlus);
         }
-        if (bruceConfigPins.rotation == 2) {
+        if (wilyConfigPins.rotation == 2) {
             touch.setMaxCoordinates(240, 320);
             touch.setSwapXY(false);
             touch.setMirrorXY(true, isPlus);
         }
-        rot = bruceConfigPins.rotation;
+        rot = wilyConfigPins.rotation;
     }
     touched = touch.getPoint(&t.x, &t.y);
     delay(1);
@@ -238,7 +238,7 @@ void InputHandler(void) {
     if ((millis() - tm) > 190 || LongPress) { // one reading each 190ms
         if (touched) {
 
-            // Serial.printf("\nPressed x=%d , y=%d, rot: %d", t.x, t.y, bruceConfigPins.rotation);
+            // Serial.printf("\nPressed x=%d , y=%d, rot: %d", t.x, t.y, wilyConfigPins.rotation);
             tm = millis();
 
             if (!wakeUpScreen()) AnyKeyPress = true;

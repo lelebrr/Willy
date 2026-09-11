@@ -1,10 +1,10 @@
-# Build e envs (`platformio.ini`, `boards/`)
+﻿# Build e envs (`platformio.ini`, `boards/`)
 
 ## Envs
 
 | Env | Uso |
 |---|---|
-| `[env]` (+`[env_light]`) | base Bruce multi-placa (Arduino 3.3.6 via pioarduino), `default_envs = CYD-2USB` |
+| `[env]` (+`[env_light]`) | base Wily multi-placa (Arduino 3.3.6 via pioarduino), `default_envs = CYD-2USB` |
 | `[env:willy_release]` / `[env:willy_debug]` | ESP32-S3 DevKitC-1 N8R2, 8 MB (`custom_8Mb.csv`), ILI9341 dedicado, `-O2 -flto` no release |
 | `[env:test]` | Unity no device (`test/`) |
 

@@ -62,7 +62,7 @@ void MassStorage::setupUsbCallback() {
     uint32_t numSectors = SD.numSectors();
 
     msc.vendorID("ESP32");
-    msc.productID("BRUCE");
+    msc.productID("WILLY");
     msc.productRevision("1.0");
 
     msc.onRead(usbReadCallback);
@@ -134,7 +134,7 @@ void drawUSBStickIcon(bool plugged) {
     static bool first = true;
 
     float scale;
-    if (bruceConfigPins.rotation & 0b01) scale = float((float)tftHeight / (float)135);
+    if (wilyConfigPins.rotation & 0b01) scale = float((float)tftHeight / (float)135);
     else scale = float((float)tftWidth / (float)240);
 
     int iconW = scale * 120;

@@ -1,7 +1,7 @@
 /**
  * @file startup_app.cpp
  * @author Rennan Cockles (https://github.com/rennancockles)
- * @brief Bruce startup apps
+ * @brief Wily startup apps
  * @version 0.1
  * @date 2024-11-20
  */
@@ -26,7 +26,7 @@
 
 StartupApp::StartupApp() {
 #ifndef LITE_VERSION
-    _startupApps["Brucegotchi"] = []() { brucegotchi_start(); };
+    _startupApps["Wilygotchi"] = []() { wilygotchi_start(); };
     _startupApps["Sniffer"] = []() { sniffer_setup(); };
     _startupApps["GPS Tracker"] = []() { GPSTracker(); };
     _startupApps["PN532 BLE"] = []() { Pn532ble(); };
@@ -43,7 +43,7 @@ StartupApp::StartupApp() {
     _startupApps["JS Script"] = []() {
         FS *fs;
         String folder = getScriptsFolder(fs);
-        run_js_script_headless(*fs, bruceConfig.startupAppLuaScript);
+        run_js_script_headless(*fs, wilyConfig.startupAppLuaScript);
     };
 #endif
 }
@@ -58,7 +58,7 @@ bool StartupApp::startApp(const String &appName) const {
     it->second();
 
     delay(200);
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
 
     return true;
 }

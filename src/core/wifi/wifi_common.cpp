@@ -39,7 +39,7 @@ void WifiCommon::ensurePlatform() {
 }
 
 bool WifiCommon::_wifiConnect(const String &ssid, int encryption) {
-    String password = bruceConfig.getWifiPassword(ssid);
+    String password = wilyConfig.getWifiPassword(ssid);
     if (password == "" && encryption > 0) { password = keyboard(password, 63, "Network Password:", true); }
     bool connected = _connectToWifiNetwork(ssid, password);
     bool retry = false;
@@ -65,7 +65,7 @@ bool WifiCommon::_wifiConnect(const String &ssid, int encryption) {
     if (connected) {
         WifiState::wifiConnected = true;
         WifiState::wifiIP = WiFi.localIP().toString();
-        bruceConfig.addWifiCredential(ssid, password);
+        wilyConfig.addWifiCredential(ssid, password);
 
         // Start timezone update in background if not already running
         if (timezoneTaskHandle == NULL) {
@@ -82,7 +82,7 @@ bool WifiCommon::_connectToWifiNetwork(const String &ssid, const String &pwd) {
     padprintln("");
     padprint("Conectando: " + ssid + ".");
     WiFi.mode(WIFI_MODE_STA);
-    WiFi.setHostname(bruceConfig.hostname.c_str());
+    WiFi.setHostname(wilyConfig.hostname.c_str());
     vTaskDelay(10 / portTICK_PERIOD_MS);
     WiFi.begin(ssid, pwd);
 
@@ -114,7 +114,7 @@ bool WifiCommon::_connectToWifiNetwork(const String &ssid, const String &pwd) {
 bool WifiCommon::_setupAP() {
     IPAddress AP_GATEWAY(172, 0, 0, 1);
     WiFi.softAPConfig(AP_GATEWAY, AP_GATEWAY, IPAddress(255, 255, 255, 0));
-    WiFi.softAP(bruceConfig.wifiAp.ssid, bruceConfig.wifiAp.pwd, 6, 0, 4, false);
+    WiFi.softAP(wilyConfig.wifiAp.ssid, wilyConfig.wifiAp.pwd, 6, 0, 4, false);
     WifiState::wifiIP = WiFi.softAPIP().toString(); // update global var
     Serial.println("IP: " + WifiState::wifiIP);
     WifiState::wifiConnected = true;
@@ -223,7 +223,7 @@ void WifiCommon::connectTask(void *pvParameters) {
 
     for (int i = 0; i < nets; i++) {
         ssid = WiFi.SSID(i);
-        pwd = bruceConfig.getWifiPassword(ssid);
+        pwd = wilyConfig.getWifiPassword(ssid);
         if (pwd == "") continue;
 
         WiFi.begin(ssid, pwd);
@@ -262,7 +262,7 @@ bool WifiCommon::connectToKnownNet(void) {
     for (int i = 0; i < nets; i++) {
         vTaskDelay(10 / portTICK_PERIOD_MS);
         String ssid = WiFi.SSID(i);
-        String password = bruceConfig.getWifiPassword(ssid);
+        String password = wilyConfig.getWifiPassword(ssid);
         if (password != "") {
             Serial.println("Conectando: " + ssid);
             result = _connectToWifiNetwork(ssid, password);

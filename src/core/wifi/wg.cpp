@@ -85,14 +85,14 @@ void read_and_parse_file() {
 
     File file = SD.open("/wg.conf");
     if (!file) {
-        tft.fillScreen(bruceConfig.bgColor);
+        tft.fillScreen(wilyConfig.bgColor);
         tft.setCursor(0, 0);
 
-        tft.setTextColor(TFT_RED, bruceConfig.bgColor);
+        tft.setTextColor(TFT_RED, wilyConfig.bgColor);
         Serial.println("Failed to open wg.conf file");
         // tft.println("No wg.conf file\nfound on\nthe SD");
-        displayRedStripe("No wg.conf file", TFT_RED, bruceConfig.priColor);
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        displayRedStripe("No wg.conf file", TFT_RED, wilyConfig.priColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         delay(6000);
         return;
     }
@@ -113,28 +113,28 @@ void wg_setup() {
     read_and_parse_file();
 
     Serial.println("Adjusting system time...");
-    configTime(bruceConfig.tmz * 3600, bruceConfig.dst ? 3600 : 0, "pool.ntp.org");
-    tft.fillScreen(bruceConfig.bgColor);
+    configTime(wilyConfig.tmz * 3600, wilyConfig.dst ? 3600 : 0, "pool.ntp.org");
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setCursor(0, 0);
 
     Serial.println("Connected. Initializing WireGuard...");
     // (chaves e IPs nao sao impressos: segredo permanece fora dos logs)
     wg.begin(local_ip, private_key, endpoint_address, public_key, endpoint_port);
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setCursor(0, 0);
     tft.setTextSize(FG);
 
-    tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+    tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
     tft.println("Connected!");
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.println("IP on tunnel:");
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.println(local_ip);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     Serial.println(local_ip);
     delay(7000);
     isConnectedWireguard = true;
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
 }
 #endif

@@ -100,11 +100,11 @@ void _setup_gpio() {
     digitalWrite(PIN_POWER_ON, HIGH);
 
     // Start with default IR, RF and RFID Configs, replace old
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.rfidModule = PN532_I2C_MODULE;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.rfidModule = PN532_I2C_MODULE;
 
-    bruceConfigPins.irRx = RXLED;
-    bruceConfigPins.irTx = TXLED;
+    wilyConfigPins.irRx = RXLED;
+    wilyConfigPins.irTx = TXLED;
 
     Serial.begin(115200);
 }
@@ -138,28 +138,28 @@ void InputHandler(void) {
         if (touch.read()) {
             auto t = touch.getPoint(0);
             tm = millis();
-            if (bruceConfigPins.rotation == 1) {
+            if (wilyConfigPins.rotation == 1) {
                 t.y = (tftHeight + 20) - t.y;
                 // t.x = tftWidth-t.x;
             }
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 // t.y = (tftHeight+20)-t.y;
                 t.x = tftWidth - t.x;
             }
             // Need to test the other orientations
 
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 int tmp = t.x;
                 t.x = tftWidth - t.y;
                 t.y = tmp;
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 int tmp = t.x;
                 t.x = t.y;
                 t.y = (tftHeight + 20) - tmp;
             }
 
-            // Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, bruceConfigPins.rotation);
+            // Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, wilyConfigPins.rotation);
 
             if (!wakeUpScreen()) AnyKeyPress = true;
             else return;
@@ -194,7 +194,7 @@ void InputHandler(void) {
 
 void powerOff() {
 #ifdef T_DISPLAY_S3
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     digitalWrite(PIN_POWER_ON, LOW);
     digitalWrite(TFT_BL, LOW);
     tft.writecommand(0x10);
@@ -214,15 +214,15 @@ void checkReboot() {
             if (millis() - time_count > 500) {
                 if (countDown == 0) {
                     int textWidth = tft.textWidth("PWR OFF IN 3/3", 1);
-                    tft.fillRect(tftWidth / 2 - textWidth / 2, 7, textWidth, 18, bruceConfig.bgColor);
+                    tft.fillRect(tftWidth / 2 - textWidth / 2, 7, textWidth, 18, wilyConfig.bgColor);
                 }
                 tft.setTextSize(1);
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                 countDown = (millis() - time_count) / 1000 + 1;
                 if (countDown < 4)
                     tft.drawCentreString("PWR OFF IN " + String(countDown) + "/3", tftWidth / 2, 12, 1);
                 else {
-                    tft.fillScreen(bruceConfig.bgColor);
+                    tft.fillScreen(wilyConfig.bgColor);
                     while (digitalRead(UP_BTN) == BTN_ACT || digitalRead(DW_BTN) == BTN_ACT);
                     delay(200);
                     powerOff();
@@ -234,7 +234,7 @@ void checkReboot() {
         // Clear text after releasing the button
         delay(30);
         if (millis() - time_count > 500) {
-            tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), bruceConfig.bgColor);
+            tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), wilyConfig.bgColor);
             drawStatusBar();
         }
     }

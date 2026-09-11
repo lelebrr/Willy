@@ -108,9 +108,9 @@ void nrf_jammer() {
                 tft.setCursor(10, tft.getCursorY() + 25);
                 tft.println("STATUS : " + String(NRFOnline) + " ACTIVE");
                 tft.setCursor(10, 100);
-                tft.fillRect(10, 100, tftWidth - 20, FM * LH, bruceConfig.bgColor);
+                tft.fillRect(10, 100, tftWidth - 20, FM * LH, wilyConfig.bgColor);
                 tft.print("MODE : " + String(modes[modeIndex].name));
-                tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+                tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
                 if ((CHECK_NRF_UART(mode)) || (CHECK_NRF_BOTH(mode))) {
                     String Mode = modes[modeIndex].name;
                     Mode.replace(" " ,"");
@@ -203,16 +203,16 @@ void nrf_channel_jammer() {
                 tft.println("NRF Channel Jammer");
                 tft.setCursor(10, tft.getCursorY() + 25);
                 tft.println("STATUS : " + String(NRFOnline) + " ACTIVE");
-                tft.fillRect(10, 100, tftWidth - 20, FM * LH, bruceConfig.bgColor);
+                tft.fillRect(10, 100, tftWidth - 20, FM * LH, wilyConfig.bgColor);
                 tft.setCursor(10, 100);
                 tft.print("MODE : CH " + String(channel));
                 tft.setCursor(10, 116);
-                tft.fillRect(10, 116, tftWidth - 20, FM * LH, bruceConfig.bgColor);
+                tft.fillRect(10, 116, tftWidth - 20, FM * LH, wilyConfig.bgColor);
                 tft.printf("Freq : %d MHz", freq);
                 if (CHECK_NRF_UART(mode) || CHECK_NRF_BOTH(mode)) {
                      NRFSerial.println("CH_"+String(channel));
                 }
-                tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+                tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
                 redraw = false;
                 vTaskDelay(200 / portTICK_PERIOD_MS);
             }
@@ -325,7 +325,7 @@ void nrf_channel_hopper() {
             if (menuIndex == 3) yHighlight = 130;
             if (menuIndex == 4) yHighlight = 150;
 
-            tft.drawRect(5, yHighlight - 2, tftWidth - 10, 18, bruceConfig.priColor);
+            tft.drawRect(5, yHighlight - 2, tftWidth - 10, 18, wilyConfig.priColor);
             if (CHECK_NRF_UART(mode) || CHECK_NRF_BOTH(mode)) {
                  NRFSerial.println("HOPPER_" + String(startChannel) + "_" + String(stopChannel) + "_" + String(stepSize));
             }

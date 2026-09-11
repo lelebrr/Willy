@@ -15,6 +15,7 @@
 #ifdef USB_as_HID
 #include "modules/badusb_ble/advanced_usb_attacks.h"
 #endif
+#include "modules/badusb_ble/badusb_advanced.h"
 // Removed: #include "modules/others/timer.h"
 
 void OthersMenu::optionsMenu() {
@@ -24,7 +25,7 @@ void OthersMenu::optionsMenu() {
         {"Sobre o Willy", []() {
              drawMainBorderWithTitle("Sobre");
              padprintln("");
-             padprintln("Willy " + String(BRUCE_VERSION));
+             padprintln("Willy " + String(WILLY_VERSION));
              padprintln(ESP.getChipModel());
              padprintln("Flash: " + String(ESP.getFlashChipSize() / 1048576) + "MB");
          }},
@@ -43,9 +44,9 @@ void OthersMenu::optionsMenu() {
 #else
                  int btn = HIGH;
 #endif
-                 tft.fillRect(10, 40, tftWidth - 20, 60, bruceConfig.bgColor);
+                 tft.fillRect(10, 40, tftWidth - 20, 60, wilyConfig.bgColor);
                  tft.setCursor(10, 40);
-                 tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                 tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                  tft.setTextSize(FM);
                  tft.println("X: " + String(x));
                  tft.println("Y: " + String(y));
@@ -90,6 +91,8 @@ void OthersMenu::badUsbHidMenu() {
         {"Atks Avancados", advancedUsbAtksMenu                    },
 #endif
 
+        {"BadUSB Suite Avancada", [=]() { badusbAdvancedSuiteMenu(); }},
+
         {"Voltar",       [this]() { optionsMenu(); }              },
     };
 
@@ -115,19 +118,19 @@ void OthersMenu::drawIcon(float scale) {
     int radius = scale * 7;
 
     // Center circle
-    tft.fillCircle(iconCenterX, iconCenterY, radius, bruceConfig.priColor);
+    tft.fillCircle(iconCenterX, iconCenterY, radius, wilyConfig.priColor);
 
     // Concentric arcs - dynamically scaled for different screen sizes
     tft.drawArc(
-        iconCenterX, iconCenterY, 2.5 * radius, 2 * radius, 0, 340, bruceConfig.priColor, bruceConfig.bgColor
+        iconCenterX, iconCenterY, 2.5 * radius, 2 * radius, 0, 340, wilyConfig.priColor, wilyConfig.bgColor
     );
 
     tft.drawArc(
-        iconCenterX, iconCenterY, 3.5 * radius, 3 * radius, 20, 360, bruceConfig.priColor, bruceConfig.bgColor
+        iconCenterX, iconCenterY, 3.5 * radius, 3 * radius, 20, 360, wilyConfig.priColor, wilyConfig.bgColor
     );
 
     tft.drawArc(
-        iconCenterX, iconCenterY, 4.5 * radius, 4 * radius, 0, 200, bruceConfig.priColor, bruceConfig.bgColor
+        iconCenterX, iconCenterY, 4.5 * radius, 4 * radius, 0, 200, wilyConfig.priColor, wilyConfig.bgColor
     );
 
     tft.drawArc(
@@ -137,7 +140,7 @@ void OthersMenu::drawIcon(float scale) {
         4 * radius,
         240,
         360,
-        bruceConfig.priColor,
-        bruceConfig.bgColor
+        wilyConfig.priColor,
+        wilyConfig.bgColor
     );
 }

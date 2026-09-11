@@ -24,7 +24,7 @@ bool rf_raw_save(RawRecording recorded) {
         return false;
     }
 
-    file.write((const uint8_t *)"Filetype: Bruce SubGhz File\n", 28);
+    file.write((const uint8_t *)"Filetype: Wily SubGhz File\n", 28);
     file.write((const uint8_t *)"Version 1\n", 10);
 
     char line[64];

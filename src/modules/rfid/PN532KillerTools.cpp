@@ -49,14 +49,14 @@ PN532KillerTools::~PN532KillerTools() {
 
 void PN532KillerTools::setup() {
     // Reset Pin states
-    if (bruceConfigPins.SDCARD_bus.checkConflict(RXD_PIN) ||
-        bruceConfigPins.SDCARD_bus.checkConflict(TXD_PIN)) {
+    if (wilyConfigPins.SDCARD_bus.checkConflict(RXD_PIN) ||
+        wilyConfigPins.SDCARD_bus.checkConflict(TXD_PIN)) {
         sdcardSPI.end();
     }
-    if (bruceConfigPins.CC1101_bus.checkConflict(RXD_PIN) ||
-        bruceConfigPins.CC1101_bus.checkConflict(TXD_PIN) ||
-        bruceConfigPins.NRF24_bus.checkConflict(RXD_PIN) ||
-        bruceConfigPins.NRF24_bus.checkConflict(TXD_PIN)) {
+    if (wilyConfigPins.CC1101_bus.checkConflict(RXD_PIN) ||
+        wilyConfigPins.CC1101_bus.checkConflict(TXD_PIN) ||
+        wilyConfigPins.NRF24_bus.checkConflict(RXD_PIN) ||
+        wilyConfigPins.NRF24_bus.checkConflict(TXD_PIN)) {
         CC_NRF_SPI.end();
     }
     pinMode(RXD_PIN, INPUT);
@@ -100,7 +100,7 @@ void PN532KillerTools::displayInitialScreen() {
 }
 
 void PN532KillerTools::playDeviceDetectedSound() {
-    if (bruceConfig.soundEnabled == 0) return; // if sound is disabled, do not play sound
+    if (wilyConfig.soundEnabled == 0) return; // if sound is disabled, do not play sound
 
 #if !defined(LITE_VERSION)
 #if defined(BUZZ_PIN)
@@ -116,9 +116,9 @@ void PN532KillerTools::playDeviceDetectedSound() {
         playAudioFile(&LittleFS, "/device_detected.wav");
     } else {
         // Fallback to startup sound logic
-        if (bruceConfig.theme.boot_sound) {
+        if (wilyConfig.theme.boot_sound) {
             playAudioFile(
-                bruceConfig.themeFS(), bruceConfig.getThemeItemImg(bruceConfig.theme.paths.boot_sound)
+                wilyConfig.themeFS(), wilyConfig.getThemeItemImg(wilyConfig.theme.paths.boot_sound)
             );
         } else if (SD.exists("/boot.wav")) {
             playAudioFile(&SD, "/boot.wav");
@@ -131,7 +131,7 @@ void PN532KillerTools::playDeviceDetectedSound() {
 }
 
 void PN532KillerTools::playUidFoundSound() {
-    if (bruceConfig.soundEnabled == 0) return; // if sound is disabled, do not play sound
+    if (wilyConfig.soundEnabled == 0) return; // if sound is disabled, do not play sound
 
 #if !defined(LITE_VERSION)
 #if defined(BUZZ_PIN)
@@ -733,7 +733,7 @@ public:
 bool PN532KillerTools::enableBleDataTransfer() {
     if (bleDataTransferEnabled) return true;
 
-    BLEDevice::init("BRUCE-PN532-BLE");
+    BLEDevice::init("WILLY-PN532-BLE");
     pServer = BLEDevice::createServer();
     if (!pServer) {
         displayError("BLE Server Fail");
@@ -930,7 +930,7 @@ void PN532KillerTools::udpWifiSelectMenu() {
     selOptions.push_back({"Modo AP", [&]() {
                               displayInfo("Iniciando AP...");
                               WiFi.mode(WIFI_AP);
-                              WiFi.softAP("BRUCE-UDP", "", 6);
+                              WiFi.softAP("WILLY-UDP", "", 6);
                               delay(200);
                               enableUdpDataTransfer();
                           }});

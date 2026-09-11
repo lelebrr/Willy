@@ -90,7 +90,7 @@
         "main"
     ],
     "cmake.ignoreCMakeListsMissing": true,
-    "cmake.sourceDirectory": "C:/Projetos/Bruce/lib/M5GFX",
+    "cmake.sourceDirectory": "C:/Projetos/Wily/lib/M5GFX",
     "[cpp]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
         "editor.rulers": [

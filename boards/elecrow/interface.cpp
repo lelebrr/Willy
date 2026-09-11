@@ -13,7 +13,7 @@ CYD28_TouchR touch(TFT_HEIGHT, TFT_WIDTH);
 void _setup_gpio() {
     pinMode(TOUCH_CS, OUTPUT);
     digitalWrite(TOUCH_CS, HIGH);
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
 }
 
 /***************************************************************************************
@@ -66,16 +66,16 @@ void InputHandler(void) {
     if (touch.touched()) {
         auto t = touch.getPointScaled();
         t = touch.getPointScaled();
-        if (bruceConfigPins.rotation == 3) {
+        if (wilyConfigPins.rotation == 3) {
             t.y = (tftHeight + 20) - t.y;
             t.x = tftWidth - t.x;
         }
-        if (bruceConfigPins.rotation == 0) {
+        if (wilyConfigPins.rotation == 0) {
             int tmp = t.x;
             t.x = tftWidth - t.y;
             t.y = tmp;
         }
-        if (bruceConfigPins.rotation == 2) {
+        if (wilyConfigPins.rotation == 2) {
             int tmp = t.x;
             t.x = t.y;
             t.y = (tftHeight + 20) - tmp;

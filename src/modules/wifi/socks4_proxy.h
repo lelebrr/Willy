@@ -4,7 +4,7 @@
 #include <cstdint>
 
 /**
- * SOCKS4 proxy **server** for Bruce firmware (ESP32).
+ * SOCKS4 proxy **server** for Wily firmware (ESP32).
  *
  * Listens on port 1080 (or given port). Use from your PC e.g.:
  *   ssh -o ProxyCommand='nc -X 4 -x <esp_ip>:1080 %h %p' user@target
@@ -17,7 +17,7 @@
  * - Official socks4 **client** example:
  * https://components.espressif.com/components/espressif/asio/versions/1.28.0/examples/socks4
  *
- * This module implements the **server** (ESP32 as proxy). Bruce uses the Arduino
+ * This module implements the **server** (ESP32 as proxy). Wily uses the Arduino
  * framework; the Asio component is ESP-IDF–oriented, so we use WiFiServer/WiFiClient
  * here. An Asio-based server would follow the same protocol and the esp-protocols
  * socks4/async_request patterns (with acceptor + relay instead of client connect).

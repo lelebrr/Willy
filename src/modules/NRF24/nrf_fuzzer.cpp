@@ -57,7 +57,7 @@ void nrf_smart_fuzzer() {
         }
 
         if (millis() - last_update > 200) {
-            tft.fillRect(10, 80, tftWidth - 20, 20, bruceConfig.bgColor);
+            tft.fillRect(10, 80, tftWidth - 20, 20, wilyConfig.bgColor);
             tft.setCursor(10, 80);
             tft.printf("Sent: %d", packets_sent);
             last_update = millis();

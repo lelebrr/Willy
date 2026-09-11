@@ -1,8 +1,8 @@
 /**
  * @file netcut.cpp
- * @brief NetCut ARP Module for Bruce Firmware
+ * @brief NetCut ARP Module for Wily Firmware
  * @description Ported from standalone NetCut ESP32. Uses LwIP netif->linkoutput()
- *              for safe ARP packet injection. All UI via Bruce loopOptions().
+ *              for safe ARP packet injection. All UI via Wily loopOptions().
  */
 
 #include "netcut.h"
@@ -79,7 +79,7 @@ static struct netif *_getStaNetif() {
 
 // ============================================
 // INTERNAL: Send a single ARP packet via LwIP
-// Same pattern as Bruce ARPSpoofer.cpp
+// Same pattern as Wily ARPSpoofer.cpp
 // ============================================
 static void _sendARP(
     struct netif *iface, const uint8_t *ethDst, const uint8_t *arpSenderMAC, const uint8_t *arpSenderIP,
@@ -303,8 +303,8 @@ int netcutScanDevices() {
             lastUIUpdate = millis();
             displayRedStripe(
                 String(hostsScanned) + "/" + String(totalHosts) + " | Found: " + String(s_deviceCount),
-                getComplementaryColor2(bruceConfig.priColor),
-                bruceConfig.priColor
+                getComplementaryColor2(wilyConfig.priColor),
+                wilyConfig.priColor
             );
         }
 
@@ -584,12 +584,12 @@ static void _activeLoop() {
                 }
             }
             const int _lh = (LH * FP + 2);
-            tft.fillRect(6, tftHeight - 6 * _lh, tftWidth - 12, 6 * _lh - 6, bruceConfig.bgColor);
+            tft.fillRect(6, tftHeight - 6 * _lh, tftWidth - 12, 6 * _lh - 6, wilyConfig.bgColor);
             tft.setTextSize(FP);
 
             // Troll timing info
             if (trollN > 0) {
-                tft.setTextColor(TFT_YELLOW, bruceConfig.bgColor);
+                tft.setTextColor(TFT_YELLOW, wilyConfig.bgColor);
                 tft.drawString(
                     "Troll: " + String(s_trollOfflineMs / 1000) + "s OFF / " +
                         String(s_trollOnlineMs / 1000) + "s ON",
@@ -599,20 +599,20 @@ static void _activeLoop() {
                 );
             }
 
-            tft.setTextColor(TFT_RED, bruceConfig.bgColor);
+            tft.setTextColor(TFT_RED, wilyConfig.bgColor);
             tft.drawString(
                 "CUT:" + String(cutN) + " Dev:" + String(s_deviceCount), 10, tftHeight - 5 * _lh, 1
             );
-            tft.setTextColor(TFT_MAGENTA, bruceConfig.bgColor);
+            tft.setTextColor(TFT_MAGENTA, wilyConfig.bgColor);
             tft.drawString(
                 "TRL:" + String(trollOff) + "off/" + String(trollOn) + "on", 10, tftHeight - 4 * _lh, 1
             );
 
             // Draw SNIPER count
-            for (int i = 0; i < s_deviceCount; i++) tft.setTextColor(TFT_GREEN, bruceConfig.bgColor);
+            for (int i = 0; i < s_deviceCount; i++) tft.setTextColor(TFT_GREEN, wilyConfig.bgColor);
             tft.drawString("Pkts:" + String(packetCount), 10, tftHeight - 3 * _lh, 1);
 
-            tft.setTextColor(TFT_DARKGREY, bruceConfig.bgColor);
+            tft.setTextColor(TFT_DARKGREY, wilyConfig.bgColor);
             tft.drawString("ESC=Para", 10, tftHeight - 2 * _lh, 1);
         }
 

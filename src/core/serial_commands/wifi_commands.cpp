@@ -36,7 +36,7 @@ uint32_t wifiCallback(cmd *c) {
         return WifiCommon::_setupAP();
 
     } else if (status == "add" && ssid != "" && pwd != "") {
-        bruceConfig.addWifiCredential(ssid, pwd);
+        wilyConfig.addWifiCredential(ssid, pwd);
         return true;
     } else if (status == "scan") {
         int nets = WiFi.scanNetworks();

@@ -312,8 +312,8 @@ void karma_setup() {
                         15,
                         0,
                         360 * (millis() - _tmp) / 700,
-                        getColorVariation(bruceConfig.priColor),
-                        bruceConfig.bgColor
+                        getColorVariation(wilyConfig.priColor),
+                        wilyConfig.bgColor
                     );
                 vTaskDelay(10 / portTICK_RATE_MS);
             }
@@ -410,7 +410,7 @@ void karma_setup() {
             tft.drawPixel(0, 0, 0);
             drawMainBorderWithTitle("SNIFFER DE PROBE");
             tft.setTextSize(FP);
-            tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+            tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
             padprintln("Salvo em " + FileSys);
             padprintln("Capturando ssids de probes...");
             padprintln(String(BTN_ALIAS) + ": Menu de Opcoes");

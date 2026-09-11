@@ -1,4 +1,4 @@
-# Cyber Menu UI (Willy)
+﻿# Cyber Menu UI (Willy)
 
 Menu alternativo em LVGL 8.3 (`src/ui/cyber_menu.{cpp,h}`), com tiles por página (`lv_tileview`), barra de notificação (hora via NTP + ícones WiFi/BLE) e callbacks que roteiam para os menus clássicos.
 
@@ -14,11 +14,11 @@ Tiles: Wi-Fi, BLE, IR, NFC, Sub-GHz, NRF24, GPS, Attacks, Core, Logs, RFID, SD.
 
 ## Visual
 
-`create_cyber_icon()`: botão 90×90 (ampliado p/ 180 na página) com gradiente vertical primária→secundária (`bruceConfig`), borda de destaque ciano, sombra neon pulsante infinita, fade-in + slide-up em cascata, zoom 1.2x no toque. Setas de navegação por toque nas laterais.
+`create_cyber_icon()`: botão 90×90 (ampliado p/ 180 na página) com gradiente vertical primária→secundária (`wilyConfig`), borda de destaque ciano, sombra neon pulsante infinita, fade-in + slide-up em cascata, zoom 1.2x no toque. Setas de navegação por toque nas laterais.
 
 ## Cores
 
-Usa `bruceConfig.priColor/secColor` (não `WillyConfig`) — acompanha o tema do sistema automaticamente.
+Usa `wilyConfig.priColor/secColor` (não `WillyConfig`) — acompanha o tema do sistema automaticamente.
 
 ## Barra superior
 

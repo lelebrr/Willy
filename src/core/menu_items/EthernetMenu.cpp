@@ -94,11 +94,11 @@ void EthernetMenu::drawIcon(float scale) {
     |     |
     |     |
     */
-    tft.drawRect(starterX, Y, lineWidth, iconH, bruceConfig.priColor);
+    tft.drawRect(starterX, Y, lineWidth, iconH, wilyConfig.priColor);
 
-    tft.drawRect(finalX, Y, lineWidth, iconH, bruceConfig.priColor);
+    tft.drawRect(finalX, Y, lineWidth, iconH, wilyConfig.priColor);
 
-    tft.drawRect(starterX, Y, iconW * 2, lineWidth, bruceConfig.priColor);
+    tft.drawRect(starterX, Y, iconW * 2, lineWidth, wilyConfig.priColor);
 
     // Draw the shorter side to close the first part of socket
     /*
@@ -106,9 +106,9 @@ void EthernetMenu::drawIcon(float scale) {
     |     |
     |-   -|
     */
-    tft.drawRect(starterX, Y + iconH, smallerH, lineWidth, bruceConfig.priColor);
+    tft.drawRect(starterX, Y + iconH, smallerH, lineWidth, wilyConfig.priColor);
 
-    tft.drawRect(finalX - smallerH + lineWidth, Y + iconH, smallerH, lineWidth, bruceConfig.priColor);
+    tft.drawRect(finalX - smallerH + lineWidth, Y + iconH, smallerH, lineWidth, wilyConfig.priColor);
 
     // Draw the final enclosure
     /*
@@ -117,12 +117,12 @@ void EthernetMenu::drawIcon(float scale) {
     |-    -|
       |  |
     */
-    tft.drawRect(starterX + smallerH, Y + iconH, lineWidth, smallerH, bruceConfig.priColor);
-    tft.drawRect(finalX - smallerH + lineWidth, Y + iconH, lineWidth, smallerH, bruceConfig.priColor);
+    tft.drawRect(starterX + smallerH, Y + iconH, lineWidth, smallerH, wilyConfig.priColor);
+    tft.drawRect(finalX - smallerH + lineWidth, Y + iconH, lineWidth, smallerH, wilyConfig.priColor);
 
     // Draw the four cable pin at a distance of 15 pixel
     for (size_t i = 0; i < 4; i++) {
-        tft.drawRect(starterX + 15 + (i * 15), Y, lineWidth, 16, bruceConfig.priColor);
+        tft.drawRect(starterX + 15 + (i * 15), Y, lineWidth, 16, wilyConfig.priColor);
     }
 
     // Close the socket calculating width of this side removing from total width, the size of the smaller size
@@ -131,7 +131,7 @@ void EthernetMenu::drawIcon(float scale) {
         Y + iconH + smallerH,
         (iconW * 2) - (smallerH * 2) + 4,
         lineWidth,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 }
 #endif

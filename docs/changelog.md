@@ -1,6 +1,6 @@
-# Changelog da unificação Willy
+﻿# Changelog da unificação Willy
 
-Consolidação de `Willy_ESP_s3`, `Willy_ESP32_S3`, `Cyd_Lele`, `Esp32-S3` e Bruce `firmware-main` em `F:\Willy` (as duas do meio eram esqueletos vazios — só estrutura de pastas).
+Consolidação de `Willy_ESP_s3`, `Willy_ESP32_S3`, `Cyd_Lele`, `Esp32-S3` e Wily `firmware-main` em `F:\Willy` (as duas do meio eram esqueletos vazios — só estrutura de pastas).
 
 ## Arquivos incorporados
 
@@ -54,7 +54,7 @@ Menus (ST25R ×2, tokens Wigle/WDGWars, upload WDGWars, autotestes RF, info/remo
 
 ## Limpeza geral (mortos e duplicados removidos)
 
-- **Deletados**: `src/web_server.*` + `src/web_files/` (demo órfã), `src/core/globals.h` (sombra conflitante), `src/core/headless_mode.h`, `User_Setup.h` (raiz e `include/`, obsoletos), `src/core/USBSerial/BruceUSBSerial.h` (classe com nome errado), `lib/mquickjs/` (~700 KB, gerador usa o baixado), `lib/stubs/{lvgl,FastLED_fixes}.h`, `lib/utility/Keyboard.*`, `test/test_joystick_ir.cpp` (superado pelo diagnóstico no firmware), `src/idf_component.yml.orig`, `include/README`, `lib/README`, `__pycache__`, `sd_files/ssid_list.zip`, `sd_files/wifi/exploits/*.json` (9 arquivos órfãos, nada lia), `firmware_dump.txt` (4 MB), ~50 MB de mídia não referenciada (arte IA, branding antigo, duplicatas).
+- **Deletados**: `src/web_server.*` + `src/web_files/` (demo órfã), `src/core/globals.h` (sombra conflitante), `src/core/headless_mode.h`, `User_Setup.h` (raiz e `include/`, obsoletos), `src/core/USBSerial/WilyUSBSerial.h` (classe com nome errado), `lib/mquickjs/` (~700 KB, gerador usa o baixado), `lib/stubs/{lvgl,FastLED_fixes}.h`, `lib/utility/Keyboard.*`, `test/test_joystick_ir.cpp` (superado pelo diagnóstico no firmware), `src/idf_component.yml.orig`, `include/README`, `lib/README`, `__pycache__`, `sd_files/ssid_list.zip`, `sd_files/wifi/exploits/*.json` (9 arquivos órfãos, nada lia), `firmware_dump.txt` (4 MB), ~50 MB de mídia não referenciada (arte IA, branding antigo, duplicatas).
 - **ODR unificado**: `include/willy_logger.h` removido; todos incluem `core/willy_logger.h` (duas definições diferentes da mesma classe = corrupção silenciosa).
 - **Build destravado**: criado `lib/TFT_eSPI/User_Setups/Setup_ESP32_S3_N8R2_ILI9341.h` (3 envs quebravam por arquivo ausente); stubs `SimpleCLI` com fallback `__has_include` (path hardcoded quebrava fresh builds).
 - **Testes**: `test/Makefile` apontado para `include/willy_config.h` + `src/ui/willy_config.cpp` (caminhos obsoletos pós-refactor).

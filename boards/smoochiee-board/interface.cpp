@@ -29,8 +29,8 @@ void _setup_gpio() {
     digitalWrite(NRF24_SS_PIN, HIGH);
     // Starts SPI instance for CC1101 and NRF24 with CS pins blocking communication at start
 
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.irRx = RXLED;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.irRx = RXLED;
     setSysI2CBus(&Wire); // PMU lives on the default Wire object
     Wire.setPins(SYS_I2C_SDA, SYS_I2C_SCL);
     // Wire.begin();
@@ -149,15 +149,15 @@ void checkReboot() {
             if (millis() - time_count > 500) {
                 if (countDown == 0) {
                     int textWidth = tft.textWidth("PWR OFF IN 3/3", 1);
-                    tft.fillRect(tftWidth / 2 - textWidth / 2, 7, textWidth, 18, bruceConfig.bgColor);
+                    tft.fillRect(tftWidth / 2 - textWidth / 2, 7, textWidth, 18, wilyConfig.bgColor);
                 }
                 tft.setTextSize(1);
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                 countDown = (millis() - time_count) / 1000 + 1;
                 if (countDown < 4)
                     tft.drawCentreString("PWR OFF IN " + String(countDown) + "/3", tftWidth / 2, 12, 1);
                 else {
-                    tft.fillScreen(bruceConfig.bgColor);
+                    tft.fillScreen(wilyConfig.bgColor);
                     while (digitalRead(L_BTN) == BTN_ACT || digitalRead(R_BTN) == BTN_ACT);
                     delay(200);
                     powerOff();
@@ -169,7 +169,7 @@ void checkReboot() {
         // Clear text after releasing the button
         delay(30);
         if (millis() - time_count > 500) {
-            tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), bruceConfig.bgColor);
+            tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), wilyConfig.bgColor);
             drawStatusBar();
         }
     }

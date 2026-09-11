@@ -55,7 +55,7 @@ struct ConfigPins {
     struct { gpio_num_t mosi; } SDCARD_bus;
 };
 
-ConfigPins bruceConfigPins;
+ConfigPins wilyConfigPins;
 
 SPIClass* last_init_spi = (SPIClass*)-1;
 void initCC1101once(SPIClass* spi) {
@@ -81,8 +81,8 @@ void reset_mocks() {
 
 void test_tft_mosi_match() {
     reset_mocks();
-    bruceConfigPins.CC1101_bus.mosi = 15;
-    bruceConfigPins.SDCARD_bus.mosi = 20;
+    wilyConfigPins.CC1101_bus.mosi = 15;
+    wilyConfigPins.SDCARD_bus.mosi = 20;
 
     setup_gpio();
 
@@ -96,8 +96,8 @@ void test_tft_mosi_match() {
 
 void test_sdcard_mosi_match() {
     reset_mocks();
-    bruceConfigPins.CC1101_bus.mosi = 20;
-    bruceConfigPins.SDCARD_bus.mosi = 20;
+    wilyConfigPins.CC1101_bus.mosi = 20;
+    wilyConfigPins.SDCARD_bus.mosi = 20;
 
     setup_gpio();
 
@@ -107,8 +107,8 @@ void test_sdcard_mosi_match() {
 
 void test_no_mosi_match() {
     reset_mocks();
-    bruceConfigPins.CC1101_bus.mosi = 10;
-    bruceConfigPins.SDCARD_bus.mosi = 20;
+    wilyConfigPins.CC1101_bus.mosi = 10;
+    wilyConfigPins.SDCARD_bus.mosi = 20;
 
     setup_gpio();
 

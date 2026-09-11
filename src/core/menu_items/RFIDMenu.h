@@ -9,8 +9,8 @@ public:
 
     void optionsMenu(void);
     void drawIcon(float scale);
-    bool hasTheme() { return bruceConfig.theme.rfid; }
-    String themePath() { return bruceConfig.theme.paths.rfid; }
+    bool hasTheme() { return wilyConfig.theme.rfid; }
+    String themePath() { return wilyConfig.theme.paths.rfid; }
 
 private:
     void configMenu(void);

@@ -19,7 +19,7 @@
 #include <IRutils.h>
 #include "globals.h"
 
-#ifdef BRUCE_IR_SERIAL
+#ifdef WILLY_IR_SERIAL
 #include "ys_irtm.h"
 #endif
 
@@ -68,18 +68,18 @@ void IrRead::setup() {
     PPM.enableOTG();
 #endif
 
-#ifdef BRUCE_IR_SERIAL
+#ifdef WILLY_IR_SERIAL
     displayWarning("ATIVE A CHAVE IR!", true);
 #endif
     // Checks if irRx pin is properly set
     const std::vector<std::pair<String, int>> pins = IR_RX_PINS;
     int count = 0;
     for (auto pin : pins) {
-        if (pin.second == bruceConfigPins.irRx) count++;
+        if (pin.second == wilyConfigPins.irRx) count++;
     }
     if (count == 0) gsetIrRxPin(true); // Open dialog to choose irRx pin
 
-    setup_ir_pin(bruceConfigPins.irRx, INPUT_PULLUP);
+    setup_ir_pin(wilyConfigPins.irRx, INPUT_PULLUP);
     if (headless) return;
     // else
     returnToMenu = true; // make sure menu is redrawn when quitting in any point
@@ -135,7 +135,7 @@ void IrRead::loop() {
 #ifdef USE_BOOST /// DISABLE 5V OUTPUT
             PPM.disableOTG();
 #endif
-#ifdef BRUCE_IR_SERIAL
+#ifdef WILLY_IR_SERIAL
             ysIrtm.end();
 #endif
             break;
@@ -168,7 +168,7 @@ void IrRead::begin() {
 void IrRead::cls() {
     drawMainBorder();
     tft.setCursor(10, 28);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
 }
 
 void IrRead::display_banner() {
@@ -194,7 +194,7 @@ void IrRead::display_btn_options() {
 }
 
 void IrRead::read_signal() {
-#ifdef BRUCE_IR_SERIAL
+#ifdef WILLY_IR_SERIAL
     uint16_t addr;
     uint8_t cmd;
     if (!_read_signal && ysIrtm.receiveNEC(&addr, &cmd)) {
@@ -508,7 +508,7 @@ bool IrRead::write_file(String filename, FS *fs) {
 
     if (!file) { return false; }
 
-    file.println("Filetype: Bruce IR File");
+    file.println("Filetype: Wily IR File");
     file.println("Version: 1");
     file.println("#");
     file.println("# " + filename);

@@ -42,9 +42,9 @@ void ScriptsMenu::drawIcon(float scale) {
     int slashSize = 2 * arrowSize;
 
     // File
-    tft.drawRect(iconCenterX - iconW / 2, iconCenterY - iconH / 2, iconW, iconH, bruceConfig.priColor);
+    tft.drawRect(iconCenterX - iconW / 2, iconCenterY - iconH / 2, iconW, iconH, wilyConfig.priColor);
     tft.fillRect(
-        iconCenterX + iconW / 2 - foldSize, iconCenterY - iconH / 2, foldSize, foldSize, bruceConfig.bgColor
+        iconCenterX + iconW / 2 - foldSize, iconCenterY - iconH / 2, foldSize, foldSize, wilyConfig.bgColor
     );
     tft.drawTriangle(
         (iconCenterX + iconW / 2 - foldSize),
@@ -53,7 +53,7 @@ void ScriptsMenu::drawIcon(float scale) {
         (iconCenterY - iconH / 2 + foldSize - 1),
         (iconCenterX + iconW / 2 - 1),
         (iconCenterY - iconH / 2 + foldSize - 1),
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 
     // Left Arrow
@@ -62,14 +62,14 @@ void ScriptsMenu::drawIcon(float scale) {
         iconCenterY + iconH / 2 - arrowPadBottom,
         iconCenterX - iconW / 2 + arrowPadX + arrowSize,
         iconCenterY + iconH / 2 - arrowPadBottom + arrowSize,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
     tft.drawLine(
         iconCenterX - iconW / 2 + arrowPadX,
         iconCenterY + iconH / 2 - arrowPadBottom,
         iconCenterX - iconW / 2 + arrowPadX + arrowSize,
         iconCenterY + iconH / 2 - arrowPadBottom - arrowSize,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 
     // Slash
@@ -78,7 +78,7 @@ void ScriptsMenu::drawIcon(float scale) {
         iconCenterY + iconH / 2 - arrowPadBottom + arrowSize,
         iconCenterX + slashSize / 2,
         iconCenterY + iconH / 2 - arrowPadBottom - arrowSize,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 
     // Right Arrow
@@ -87,13 +87,13 @@ void ScriptsMenu::drawIcon(float scale) {
         iconCenterY + iconH / 2 - arrowPadBottom,
         iconCenterX + iconW / 2 - arrowPadX - arrowSize,
         iconCenterY + iconH / 2 - arrowPadBottom + arrowSize,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
     tft.drawLine(
         iconCenterX + iconW / 2 - arrowPadX,
         iconCenterY + iconH / 2 - arrowPadBottom,
         iconCenterX + iconW / 2 - arrowPadX - arrowSize,
         iconCenterY + iconH / 2 - arrowPadBottom - arrowSize,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
 }

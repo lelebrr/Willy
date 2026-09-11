@@ -49,7 +49,7 @@ void nrf_stealth_exfil() {
             NRFradio.write(payload, 32);
             sent_bytes += 30;
 
-            tft.fillRect(10, 110, tftWidth - 20, 20, bruceConfig.bgColor);
+            tft.fillRect(10, 110, tftWidth - 20, 20, wilyConfig.bgColor);
             tft.setCursor(10, 110);
             tft.printf("Exfil bytes: %d", sent_bytes);
 

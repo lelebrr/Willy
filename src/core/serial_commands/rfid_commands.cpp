@@ -19,7 +19,7 @@
 static RFIDInterface *_rfid = nullptr;
 
 static RFIDInterface *_createRfidModule() {
-    switch (bruceConfigPins.rfidModule) {
+    switch (wilyConfigPins.rfidModule) {
         case PN532_I2C_MODULE: return new PN532(PN532::CONNECTION_TYPE::I2C);
 #ifdef M5STICK
         case PN532_I2C_SPI_MODULE: return new PN532(PN532::CONNECTION_TYPE::I2C_SPI);
@@ -210,7 +210,7 @@ uint32_t rfidInfoCallback(cmd *c) {
 }
 
 // rfid reset  — destroys the module instance (forces re-init on next command)
-// rfid save [filename=rfid_dump] [format=bruce|flipper]
+// rfid save [filename=rfid_dump] [format=wily|flipper]
 uint32_t rfidSaveCallback(cmd *c) {
     Command cmd(c);
     String filename = cmd.getArgument("filename").getValue();
@@ -228,7 +228,7 @@ uint32_t rfidSaveCallback(cmd *c) {
     if (format == "flipper") {
         result = _rfid->saveFlipper(filename);
         if (result == RFIDInterface::NOT_IMPLEMENTED)
-            serialDevice->println("Flipper format not supported by this module; using Bruce format.");
+            serialDevice->println("Flipper format not supported by this module; using Wily format.");
     } else {
         result = _rfid->save(filename);
     }
@@ -236,11 +236,11 @@ uint32_t rfidSaveCallback(cmd *c) {
     return result == RFIDInterface::SUCCESS;
 }
 
-// rfid loadfile [filepath=/BruceRFID/rfid_dump.rfid]
+// rfid loadfile [filepath=/WilyRFID/rfid_dump.rfid]
 uint32_t rfidLoadFileCallback(cmd *c) {
     Command cmd(c);
     String filepath = cmd.getArgument("filepath").getValue();
-    if (filepath.length() == 0) filepath = "/BruceRFID/rfid_dump.rfid";
+    if (filepath.length() == 0) filepath = "/WilyRFID/rfid_dump.rfid";
 
     if (!_ensureRfid()) return false;
 
@@ -263,7 +263,7 @@ uint32_t rfidNdefCallback(cmd *c) {
         value += cmd.getArgument(i).getValue();
     }
     type.toLowerCase();
-    if (value.length() == 0) value = (type == "text") ? "Bruce" : "https://bruce.computer";
+    if (value.length() == 0) value = (type == "text") ? "Wily" : "https://bruce.computer";
 
     if (!_ensureRfid()) return false;
 
@@ -389,9 +389,9 @@ void createRfidCommands(SimpleCLI *cli) {
     cmd.addCommand("info", rfidInfoCallback);
     Command saveCmd = cmd.addCommand("save", rfidSaveCallback);
     saveCmd.addPosArg("filename", "rfid_dump");
-    saveCmd.addPosArg("format", "bruce");
+    saveCmd.addPosArg("format", "wily");
     Command loadFileCmd = cmd.addCommand("loadfile", rfidLoadFileCallback);
-    loadFileCmd.addPosArg("filepath", "/BruceRFID/rfid_dump.rfid");
+    loadFileCmd.addPosArg("filepath", "/WilyRFID/rfid_dump.rfid");
     cmd.addBoundlessCommand("ndef", rfidNdefCallback);
     cmd.addCommand("reset", rfidResetCallback);
 

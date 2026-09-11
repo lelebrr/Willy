@@ -1,4 +1,4 @@
-# Pinouts diagram to use Bruce
+﻿# Pinouts diagram to use Wily
 
 ## Not compatible with StickCPlus (1.1 and 2)
 The reason for the incompatibility is that the "Boot" GPIO, that corresponds to GPIO 0, is also connected to PMIC (Power Management IC), which do not allows G0 to drive the SPI SCK pin properly, causing the SPI communication to fail.
@@ -17,7 +17,7 @@ This is the same reason why this device is not compatible with the following Hat
 | WS500   | 5     | 4     | 6     | **    | **        |
 | LoRa    | 5     | 4     | 6     | **    | **        |
 
-** WS500 need to be configured in brucePins.config to set the pis according to your need.
+** WS500 need to be configured in wilyPins.config to set the pis according to your need.
 
 GPS, PN532 and SI4713 uses the Grove Connector port.
 

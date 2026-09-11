@@ -1,4 +1,4 @@
-import os
+﻿import os
 import re
 import glob
 
@@ -167,7 +167,7 @@ conflicts = [
     ),
     # SDD_REQ/SEL_REQ retries during anti-collision are unconditionally
     # disabled (rt=0, meaning a single-shot attempt) whenever devLimit != 0 -
-    # i.e. exactly Bruce's own single-target read/emulate-read case
+    # i.e. exactly Wily's own single-target read/emulate-read case
     # (params.devLimit = 1 in ST25R3916.cpp). One missed/late response (see
     # the FDTMIN patch above) then fails activation outright with no recourse.
     # Retries cost only a few ms of delay and are otherwise unconditionally
@@ -175,7 +175,7 @@ conflicts = [
     (
         ".pio/libdeps/*/NFC-RFAL-fork/src/rfal_nfca.cpp",
         r'\(devLimit == 0U\) \? RFAL_NFCA_N_RETRANS : 0U',
-        '/* Bruce: always retry, see patch_library_conflicts.py */ RFAL_NFCA_N_RETRANS'
+        '/* Wily: always retry, see patch_library_conflicts.py */ RFAL_NFCA_N_RETRANS'
     ),
     # The WUPA sent at the top of rfalNfcaPollerFullCollisionResolution() (the anti-collision
     # pass POLL_COLAVOIDANCE actually runs, heavier than the lightweight TECHDETECT probe) had no
@@ -190,7 +190,7 @@ conflicts = [
     (
         ".pio/libdeps/*/NFC-RFAL-fork/src/rfal_nfca.cpp",
         r'ret = rfalRfDev->rfalISO14443ATransceiveShortFrame\(RFAL_14443A_SHORTFRAME_CMD_WUPA, \(uint8_t \*\)&nfcaDevList->sensRes, \(uint8_t\)rfalConvBytesToBits\(sizeof\(rfalNfcaSensRes\)\), &rcvLen, RFAL_NFCA_FDTMIN\);',
-        'rfalNfcaTxRetry(ret, rfalRfDev->rfalISO14443ATransceiveShortFrame(RFAL_14443A_SHORTFRAME_CMD_WUPA, (uint8_t *)&nfcaDevList->sensRes, (uint8_t)rfalConvBytesToBits(sizeof(rfalNfcaSensRes)), &rcvLen, RFAL_NFCA_FDTMIN), (/* Bruce: WUPA had no retry at all - see patch_library_conflicts.py */ RFAL_NFCA_N_RETRANS), RFAL_NFCA_T_RETRANS);'
+        'rfalNfcaTxRetry(ret, rfalRfDev->rfalISO14443ATransceiveShortFrame(RFAL_14443A_SHORTFRAME_CMD_WUPA, (uint8_t *)&nfcaDevList->sensRes, (uint8_t)rfalConvBytesToBits(sizeof(rfalNfcaSensRes)), &rcvLen, RFAL_NFCA_FDTMIN), (/* Wily: WUPA had no retry at all - see patch_library_conflicts.py */ RFAL_NFCA_N_RETRANS), RFAL_NFCA_T_RETRANS);'
     ),
     # 2 retries (EMVCo default) is occasionally still not enough margin for PN532's I2C-relayed
     # response time under load; bumped to 4 as a balance between activation reliability and not

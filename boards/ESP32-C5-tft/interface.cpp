@@ -38,7 +38,7 @@ void _setup_gpio() {
     digitalWrite(W5500_SS_PIN, HIGH);
     digitalWrite(TFT_CS, HIGH);
 #ifdef ILI9341_DRIVER
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
 #endif
 }
 /***************************************************************************************
@@ -128,22 +128,22 @@ void InputHandler(void) {
         touchPoint.pressed = false;
         _IH_touched = false;
         Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d", t.x, t.y);
-        if (bruceConfigPins.rotation == 3) {
+        if (wilyConfigPins.rotation == 3) {
             t.y = (tftHeight + 20) - t.y;
             t.x = tftWidth - t.x;
         }
-        if (bruceConfigPins.rotation == 0) {
+        if (wilyConfigPins.rotation == 0) {
             uint16_t tmp = t.x;
             t.x = map((tftHeight + 20) - t.y, 0, 320, 0, 240);
             t.y = map(tmp, 0, 240, 0, 320);
         }
-        if (bruceConfigPins.rotation == 2) {
+        if (wilyConfigPins.rotation == 2) {
             uint16_t tmp = t.x;
             t.x = map(t.y, 0, 320, 0, 240);
             t.y = map(tftWidth - tmp, 0, 240, 0, 320);
         }
 
-        Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot=%d\n", t.x, t.y, bruceConfigPins.rotation);
+        Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot=%d\n", t.x, t.y, wilyConfigPins.rotation);
 
         if (!wakeUpScreen()) AnyKeyPress = true;
         else return;

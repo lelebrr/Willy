@@ -26,7 +26,7 @@ struct TouchPointPro {
 ** Function name: _setup_gpio()
 ***************************************************************************************/
 void _setup_gpio() {
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
 
 #if defined(HAS_CAPACITIVE_TOUCH) && defined(TOUCH_GT911_I2C)
     // Bring up the I2C bus the GT911 lives on.
@@ -91,28 +91,28 @@ void InputHandler(void) {
         uint8_t touched = 0;
         static uint8_t rot = 5;
 
-        if (rot != bruceConfigPins.rotation) {
-            if (bruceConfigPins.rotation == 1) {
+        if (rot != wilyConfigPins.rotation) {
+            if (wilyConfigPins.rotation == 1) {
                 touch.setMaxCoordinates(TFT_HEIGHT, TFT_WIDTH);
                 touch.setSwapXY(true);
                 touch.setMirrorXY(false, true);
             }
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 touch.setMaxCoordinates(TFT_HEIGHT, TFT_WIDTH);
                 touch.setSwapXY(true);
                 touch.setMirrorXY(true, false);
             }
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 touch.setMaxCoordinates(TFT_WIDTH, TFT_HEIGHT);
                 touch.setSwapXY(false);
                 touch.setMirrorXY(false, false);
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 touch.setMaxCoordinates(TFT_WIDTH, TFT_HEIGHT);
                 touch.setSwapXY(false);
                 touch.setMirrorXY(true, true);
             }
-            rot = bruceConfigPins.rotation;
+            rot = wilyConfigPins.rotation;
         }
 
         static bool lastTouchState = false;

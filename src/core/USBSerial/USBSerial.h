@@ -1,5 +1,5 @@
-#ifndef BRUCE_USBSERIAL_H
-#define BRUCE_USBSERIAL_H
+#ifndef WILLY_USBSERIAL_H
+#define WILLY_USBSERIAL_H
 
 #include "SerialDevice.h"
 #include <Arduino.h>
@@ -28,4 +28,4 @@ private:
     Stream *out;
 };
 
-#endif // BRUCE_USBSERIAL_H
+#endif // WILLY_USBSERIAL_H

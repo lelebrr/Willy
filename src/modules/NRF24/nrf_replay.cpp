@@ -59,14 +59,14 @@ void nrf_keystroke_replay() {
                 last_pkt_time = millis();
                 buffer.push_back(pkt);
 
-                tft.fillRect(10, 80, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 80, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 80);
                 tft.printf("Recorded: %d pkts", buffer.size());
             }
             if (check(NextPress)) {
                 recording = false;
                 if (CHECK_NRF_SPI(mode)) NRFradio.stopListening();
-                tft.fillRect(10, 60, tftWidth - 20, 20, bruceConfig.bgColor);
+                tft.fillRect(10, 60, tftWidth - 20, 20, wilyConfig.bgColor);
                 tft.setCursor(10, 60);
                 tft.println("[PLAY] Replaying!");
             }
@@ -77,7 +77,7 @@ void nrf_keystroke_replay() {
                     delay(buffer[i].delay_ms);
                     NRFradio.write(buffer[i].data, buffer[i].len);
 
-                    tft.fillRect(10, 80, tftWidth - 20, 20, bruceConfig.bgColor);
+                    tft.fillRect(10, 80, tftWidth - 20, 20, wilyConfig.bgColor);
                     tft.setCursor(10, 80);
                     tft.printf("Sent %d / %d", i + 1, buffer.size());
 
@@ -88,7 +88,7 @@ void nrf_keystroke_replay() {
             recording = true;
             buffer.clear();
             if (CHECK_NRF_SPI(mode)) NRFradio.startListening();
-            tft.fillRect(10, 60, tftWidth - 20, 60, bruceConfig.bgColor);
+            tft.fillRect(10, 60, tftWidth - 20, 60, wilyConfig.bgColor);
             tft.setCursor(10, 60);
             tft.println("[REC] Waiting for pkts...");
         }

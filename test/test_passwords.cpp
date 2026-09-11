@@ -107,7 +107,7 @@ void test_encryptString_empty() {
     String password = "password";
     String result = encryptString(plaintext, password);
 
-    assert(result.startsWith("Filetype: Bruce Encrypted File\n"));
+    assert(result.startsWith("Filetype: Wily Encrypted File\n"));
     assert(result.endsWith("Data: \n"));
     std::cout << "✅ test_encryptString_empty passed" << std::endl;
 }
@@ -118,7 +118,7 @@ void test_encryptString_basic() {
     String password = "pass";
     String result = encryptString(plaintext, password);
 
-    assert(result.startsWith("Filetype: Bruce Encrypted File\n"));
+    assert(result.startsWith("Filetype: Wily Encrypted File\n"));
     // check Data line
     size_t dataPos = result.s.find("Data: ");
     assert(dataPos != std::string::npos);

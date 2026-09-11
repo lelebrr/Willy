@@ -25,24 +25,24 @@ void initSprites() {
     // sprite para desenhar a tela toda
     // tft.deleteSprite();
     // tft.createSprite(tftWidth,tftHeight);
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
 
     // menu_op para desenhar a orca (Willy)
     sprite.deleteSprite();
     sprite.createSprite(32, 30);
-    sprite.fillScreen(bruceConfig.bgColor);
+    sprite.fillScreen(wilyConfig.bgColor);
     sprite.fillEllipse(19, 17, 10, 5, TFT_BLACK); // Corpo - Preto
     sprite.fillCircle(17, 22, 4, TFT_WHITE); // Barriga - Branco
     sprite.fillTriangle(0, 10, 0, 22, 9, 17, TFT_BLACK); // Cauda - Preto
     sprite.fillTriangle(17, 6, 17, 14, 22, 14, TFT_BLACK); // Barbatana - Preto
     sprite.fillCircle(25, 14, 1, TFT_WHITE); // Olho
     sprite.fillTriangle(23, 18, 29, 18, 24, 21, TFT_CYAN); // Detalhe Willy
-    sprite.fillRect(0, 21, 32, 15, bruceConfig.bgColor);
+    sprite.fillRect(0, 21, 32, 15, wilyConfig.bgColor);
 
     // draw para desenhar o peixe
     draw.deleteSprite();
     draw.createSprite(20, 8);
-    draw.fillScreen(bruceConfig.bgColor);
+    draw.fillScreen(wilyConfig.bgColor);
     draw.fillEllipse(6, 4, 6, 3, TFT_ORANGE);
     draw.fillTriangle(16, 0, 16, 8, 11, 5, TFT_ORANGE);
     draw.drawFastVLine(6, 1, 7, TFT_WHITE);
@@ -97,7 +97,7 @@ void moveShark() {
 void moveFish(Fish &f) {
     f.x -= 2; // Move o peixe para a esquerda
     if (f.x < -10) {
-        tft.fillRect(f.x, f.y, 22, 11, bruceConfig.bgColor);
+        tft.fillRect(f.x, f.y, 22, 11, wilyConfig.bgColor);
         f.x = tftWidth + random(20, 100);
         f.y = random(10, tftHeight - 20);
     }
@@ -109,7 +109,7 @@ void checkCollisions() {
         if ((sharkX < fish[i].x + fish[i].size) && (sharkX + sharkSize > fish[i].x) &&
             (sharkY < fish[i].y + fish[i].size) && (sharkY + sharkSize > fish[i].y)) {
             // Colidiu com um peixe
-            tft.fillRect(fish[i].x, fish[i].y, 18, 8, bruceConfig.bgColor);
+            tft.fillRect(fish[i].x, fish[i].y, 18, 8, wilyConfig.bgColor);
             fish[i].x = tftWidth + random(20, 100);
             fish[i].y = random(10, tftHeight - 20);
             score++;
@@ -119,7 +119,7 @@ void checkCollisions() {
 
 // Função para exibir a pontuação
 void displayScore() {
-    tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+    tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
     tft.setTextSize(FM);
     tft.setCursor(0, 0);
     tft.printf("Score: %d", score);

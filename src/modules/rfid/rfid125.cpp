@@ -94,7 +94,7 @@ void RFID125::set_state(RFID125_State state) {
 void RFID125::cls() {
     drawMainBorder();
     tft.setCursor(10, 28);
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
 }
 
 void RFID125::display_banner() {
@@ -212,7 +212,7 @@ bool RFID125::write_file(String filename) {
     file_data.trim();
     file_data.toUpperCase();
 
-    file.println("Filetype: Bruce RFID 125kHz File");
+    file.println("Filetype: Wily RFID 125kHz File");
     file.println("Version 1");
     file.println("DATA: " + file_data);
     file.println("ASCII: " + _printable_data);

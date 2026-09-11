@@ -74,16 +74,16 @@ void InputHandler(void) {
     if (t.isPressed() || t.isHolding()) {
         tm = millis();
 
-        if (bruceConfigPins.rotation == 3) {
+        if (wilyConfigPins.rotation == 3) {
             t.y = (tftHeight + 20) - t.y;
             t.x = tftWidth - t.x;
         }
-        if (bruceConfigPins.rotation == 0) {
+        if (wilyConfigPins.rotation == 0) {
             int tmp = t.x;
             t.x = tftWidth - t.y;
             t.y = tmp;
         }
-        if (bruceConfigPins.rotation == 2) {
+        if (wilyConfigPins.rotation == 2) {
             int tmp = t.x;
             t.x = t.y;
             t.y = (tftHeight + 20) - tmp;

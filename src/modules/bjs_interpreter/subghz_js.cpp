@@ -70,9 +70,9 @@ JSValue native_subghzRead(JSContext *ctx, JSValue *this_val, int argc, JSValue *
     if (argc > 0 && JS_IsNumber(ctx, argv[0])) {
         int t;
         JS_ToInt32(ctx, &t, argv[0]);
-        r = RCSwitch_Read(bruceConfigPins.rfFreq, t); // custom timeout
+        r = RCSwitch_Read(wilyConfigPins.rfFreq, t); // custom timeout
     } else {
-        r = RCSwitch_Read(bruceConfigPins.rfFreq, 10);
+        r = RCSwitch_Read(wilyConfigPins.rfFreq, 10);
     }
     return JS_NewString(ctx, r.c_str());
 }
@@ -82,9 +82,9 @@ JSValue native_subghzReadRaw(JSContext *ctx, JSValue *this_val, int argc, JSValu
     if (argc > 0 && JS_IsNumber(ctx, argv[0])) {
         int t;
         JS_ToInt32(ctx, &t, argv[0]);
-        r = RCSwitch_Read(bruceConfigPins.rfFreq, t, true); // custom timeout
+        r = RCSwitch_Read(wilyConfigPins.rfFreq, t, true); // custom timeout
     } else {
-        r = RCSwitch_Read(bruceConfigPins.rfFreq, 10, true);
+        r = RCSwitch_Read(wilyConfigPins.rfFreq, 10, true);
     }
     return JS_NewString(ctx, r.c_str());
 }
@@ -94,7 +94,7 @@ JSValue native_subghzSetFrequency(JSContext *ctx, JSValue *this_val, int argc, J
     if (argc > 0 && JS_IsNumber(ctx, argv[0])) {
         double v;
         JS_ToNumber(ctx, &v, argv[0]);
-        bruceConfigPins.rfFreq = v; // float global var
+        wilyConfigPins.rfFreq = v; // float global var
     }
     return JS_UNDEFINED;
 }

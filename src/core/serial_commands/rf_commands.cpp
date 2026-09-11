@@ -226,7 +226,7 @@ uint32_t rfSendCallback(cmd *c) {
 
 void createRfRxCommand(Command *rfCmd) {
     Command cmd = rfCmd->addCommand("rx", rfRxCallback);
-    cmd.addPosArg("frequency", String(bruceConfigPins.rfFreq).c_str());
+    cmd.addPosArg("frequency", String(wilyConfigPins.rfFreq).c_str());
     cmd.addFlagArg("raw");
 }
 

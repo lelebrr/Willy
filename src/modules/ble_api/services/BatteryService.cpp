@@ -6,7 +6,7 @@
 #include <WiFi.h>
 #include <globals.h>
 
-BatteryService::BatteryService() : BruceBLEService() {}
+BatteryService::BatteryService() : WilyBLEService() {}
 
 BatteryService::~BatteryService() {}
 

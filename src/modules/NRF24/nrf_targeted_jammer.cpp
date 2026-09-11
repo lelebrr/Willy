@@ -45,7 +45,7 @@ void nrf_targeted_jammer() {
                     NRFradio.startConstCarrier(RF24_PA_MAX, target_channel);
                     timer = millis();
 
-                    tft.fillRect(10, 60, tftWidth-20, 60, bruceConfig.bgColor);
+                    tft.fillRect(10, 60, tftWidth-20, 60, wilyConfig.bgColor);
                     tft.setCursor(10, 70);
                     tft.printf("Target found CH: %d", target_channel);
                     tft.setCursor(10, 90);
@@ -58,7 +58,7 @@ void nrf_targeted_jammer() {
                     state = 0;
                     NRFradio.stopConstCarrier();
                     NRFradio.startListening();
-                    tft.fillRect(10, 60, tftWidth-20, 60, bruceConfig.bgColor);
+                    tft.fillRect(10, 60, tftWidth-20, 60, wilyConfig.bgColor);
                     tft.setCursor(10, 70);
                     tft.println("Scanning...");
                 }

@@ -15,7 +15,7 @@ JSValue native_ledSetColor(JSContext *ctx, JSValue *this_val, int argc, JSValue 
 
 #ifdef HAS_RGB_LED
     uint32_t color = ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
-    bruceConfig.setLedColor(color);
+    wilyConfig.setLedColor(color);
 #endif
     return JS_UNDEFINED;
 }
@@ -28,14 +28,14 @@ JSValue native_ledSetBrightness(JSContext *ctx, JSValue *this_val, int argc, JSV
     brightness = constrain(brightness, 0, 255);
 
 #ifdef HAS_RGB_LED
-    bruceConfig.setLedBright(brightness);
+    wilyConfig.setLedBright(brightness);
 #endif
     return JS_UNDEFINED;
 }
 
 JSValue native_ledOff(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
 #ifdef HAS_RGB_LED
-    bruceConfig.setLedColor(0);
+    wilyConfig.setLedColor(0);
 #endif
     return JS_UNDEFINED;
 }
@@ -50,10 +50,10 @@ JSValue native_ledBlink(JSContext *ctx, JSValue *this_val, int argc, JSValue *ar
 
 #ifdef HAS_RGB_LED
     // Store current, turn off, wait, restore
-    bruceConfig.setLedColor(0);
+    wilyConfig.setLedColor(0);
     vTaskDelay(pdMS_TO_TICKS(delayMs));
     // Restore the configured color
-    bruceConfig.setLedColor(bruceConfig.ledColor);
+    wilyConfig.setLedColor(wilyConfig.ledColor);
 #endif
     return JS_UNDEFINED;
 }

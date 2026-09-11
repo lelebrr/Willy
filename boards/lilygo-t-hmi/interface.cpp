@@ -20,7 +20,7 @@ void _setup_gpio() {
     digitalWrite(PWR_ON_PIN, HIGH);
     pinMode(PWR_EN_PIN, OUTPUT);
     digitalWrite(PWR_EN_PIN, HIGH);
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
 }
 
 /***************************************************************************************
@@ -75,20 +75,20 @@ void InputHandler(void) {
         if (touch.touched()) {
             auto t = touch.getPointScaled();
             // Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d", t.x, t.y);
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 // t.y = t.y;
                 t.x = tftWidth - t.x;
             }
-            if (bruceConfigPins.rotation == 1) {
+            if (wilyConfigPins.rotation == 1) {
                 t.y = (tftHeight + 20) - t.y;
                 // t.x = t.x;
             }
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 int tmp = t.x;
                 t.x = t.y;
                 t.y = tmp;
             }
-            if (bruceConfigPins.rotation == 2) {
+            if (wilyConfigPins.rotation == 2) {
                 int tmp = t.x;
                 t.x = tftWidth - t.y;
                 t.y = (tftHeight + 20) - tmp;

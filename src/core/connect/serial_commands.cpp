@@ -106,7 +106,7 @@ void EspSerialCmd::receiveCommands() {
 
 EspSerialCmd::Message EspSerialCmd::createCmdMessage() {
     // debounce
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     delay(500);
 
     String command = keyboard("", ESP_DATA_SIZE, "Serial Command");

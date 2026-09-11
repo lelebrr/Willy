@@ -15,11 +15,11 @@ RFJammer::~RFJammer() {
 }
 
 void RFJammer::setup() {
-    nTransmitterPin = bruceConfigPins.rfTx;
+    nTransmitterPin = wilyConfigPins.rfTx;
     if (!initRfModule("tx")) return;
 
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
-        nTransmitterPin = bruceConfigPins.CC1101_bus.io0;
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
+        nTransmitterPin = wilyConfigPins.CC1101_bus.io0;
     }
 
     sendRF = true;
@@ -40,9 +40,9 @@ void RFJammer::display_banner() {
     padprintln("");
     padprintln("");
 
-    tft.setTextColor(getColorVariation(bruceConfig.priColor), bruceConfig.bgColor);
+    tft.setTextColor(getColorVariation(wilyConfig.priColor), wilyConfig.bgColor);
     padprintln("Pressione [ESC] para opcoes.");
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
 }
 
 void RFJammer::run_full_jammer() {
@@ -171,7 +171,7 @@ void RFJammer::run_hopper_jammer() {
     int currentFreqIdx = 0;
 
     // Attempt to set freq using CC1101 (only applies if CC1101 is used)
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
         setMHZ(freqs[currentFreqIdx]);
     }
 
@@ -201,7 +201,7 @@ void RFJammer::run_hopper_jammer() {
             lastHopTime = currentTime;
             currentFreqIdx = (currentFreqIdx + 1) % freqCount;
             digitalWrite(nTransmitterPin, LOW);
-            if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
+            if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
                 setMHZ(freqs[currentFreqIdx]);
             }
             digitalWrite(nTransmitterPin, HIGH);
@@ -216,7 +216,7 @@ void RFJammer::run_hopper_jammer() {
     digitalWrite(nTransmitterPin, LOW);
 
     // Restore original frequency settings if CC1101 was adjusted
-    if (bruceConfigPins.rfModule == CC1101_SPI_MODULE) {
-        setMHZ(bruceConfigPins.rfFreq);
+    if (wilyConfigPins.rfModule == CC1101_SPI_MODULE) {
+        setMHZ(wilyConfigPins.rfFreq);
     }
 }

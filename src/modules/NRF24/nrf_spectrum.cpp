@@ -11,20 +11,20 @@ uint8_t channel[CHANNELS];
 // Register Access Functions
 inline byte getRegister(SPIClass &SSPI, byte r) {
 
-    digitalWrite(bruceConfigPins.NRF24_bus.cs, LOW);
+    digitalWrite(wilyConfigPins.NRF24_bus.cs, LOW);
     byte c = SSPI.transfer(r & 0x1F);
     c = SSPI.transfer(0);
-    digitalWrite(bruceConfigPins.NRF24_bus.cs, HIGH);
+    digitalWrite(wilyConfigPins.NRF24_bus.cs, HIGH);
 
     return c;
 }
 
 inline void setRegister(SPIClass &SSPI, byte r, byte v) {
 
-    digitalWrite(bruceConfigPins.NRF24_bus.cs, LOW);
+    digitalWrite(wilyConfigPins.NRF24_bus.cs, LOW);
     SSPI.transfer((r & 0x1F) | 0x20);
     SSPI.transfer(v);
-    digitalWrite(bruceConfigPins.NRF24_bus.cs, HIGH);
+    digitalWrite(wilyConfigPins.NRF24_bus.cs, HIGH);
 }
 
 inline void powerDown(SPIClass &SSPI) { setRegister(SSPI, 0x00, getRegister(SSPI, 0x00) & ~0x02); }
@@ -35,7 +35,7 @@ String scanChannels(SPIClass *SSPI, bool web) {
     String result = "{";
 
     uint8_t rpdValues[CHANNELS] = {0};
-    digitalWrite(bruceConfigPins.NRF24_bus.io0, LOW);
+    digitalWrite(wilyConfigPins.NRF24_bus.io0, LOW);
 
     for (int i = 0; i < CHANNELS; i++) {
         NRFradio.setChannel(i);
@@ -48,7 +48,7 @@ String scanChannels(SPIClass *SSPI, bool web) {
         rpdValues[i] = channel[i];
     }
 
-    digitalWrite(bruceConfigPins.NRF24_bus.io0, HIGH);
+    digitalWrite(wilyConfigPins.NRF24_bus.io0, HIGH);
 
     for (int i = 0; i < CHANNELS; i++) {
         int level = rpdValues[i];
@@ -56,13 +56,13 @@ String scanChannels(SPIClass *SSPI, bool web) {
         int c = i;
 
         tft.drawFastVLine(
-            x, tftHeight - (10 + level), level, (i % 2 == 0) ? bruceConfig.priColor : TFT_DARKGREY
+            x, tftHeight - (10 + level), level, (i % 2 == 0) ? wilyConfig.priColor : TFT_DARKGREY
         ); // for level display
 
         tft.drawFastVLine(
             x, 0, tftHeight - (9 + level), (i % 8) ? TFT_BLACK : RGB565(25, 25, 25)
         );                                                    /// for clearing
-        tft.drawFastVLine(x, 0, level, bruceConfig.secColor); /// for top display
+        tft.drawFastVLine(x, 0, level, wilyConfig.secColor); /// for top display
         // show 5 channel gap only
         if (c % 5 == 0 && c != 0) { tft.drawCentreString(String(c).c_str(), x, tftHeight / 2, 1); }
 
@@ -78,7 +78,7 @@ String scanChannels(SPIClass *SSPI, bool web) {
 }
 
 void nrf_spectrum(SPIClass *SSPI) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     tft.setTextSize(FP);
     tft.drawString("2.40Ghz", 0, tftHeight - LH);
     tft.drawCentreString("2.44Ghz", tftWidth / 2, tftHeight - LH, 1);

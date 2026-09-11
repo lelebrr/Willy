@@ -2,7 +2,7 @@
 #include "BLESerialService.h"
 #include <NimBLEDevice.h>
 
-BLESerialService::BLESerialService() : BruceBLEService() {}
+BLESerialService::BLESerialService() : WilyBLEService() {}
 
 BLESerialService::~BLESerialService() {}
 

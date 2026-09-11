@@ -1,4 +1,4 @@
-import re
+﻿import re
 with open("src/modules/bjs_interpreter/mqjs_bindings.cpp", "r") as f:
     code = f.read()
 
@@ -18,7 +18,7 @@ for f, _ in funcs:
 enum_str += "    CFUNC_COUNT\n"
 enum_str += "};\n\n"
 
-array_str = "const JSCFunctionDef bruce_c_functions[CFUNC_COUNT] = {\n"
+array_str = "const JSCFunctionDef wily_c_functions[CFUNC_COUNT] = {\n"
 for f, nargs in funcs:
     array_str += f"    [IDX_{f}] = {{ {{ .generic = {f} }}, {{0}}, JS_CFUNC_generic, {nargs}, 0 }},\n"
 array_str += "};\n\n"
@@ -26,11 +26,11 @@ array_str += "};\n\n"
 # replace JS_NewCFunction
 code = re.sub(r'JS_NewCFunction\s*\(\s*ctx\s*,\s*([a-zA-Z0-9_]+)\s*,\s*"[^"]+"\s*,\s*\d+\s*\)', r'JS_NewCFunctionParams(ctx, IDX_\1, JS_UNDEFINED)', code)
 
-# generate bruce_stdlib_def
+# generate wily_stdlib_def
 stdlib_def_str = """
-JSSTDLibraryDef bruce_stdlib_def = {
+JSSTDLibraryDef wily_stdlib_def = {
     .stdlib_table = NULL,
-    .c_function_table = bruce_c_functions,
+    .c_function_table = wily_c_functions,
     .c_finalizer_table = NULL,
     .stdlib_table_len = 0,
     .stdlib_table_align = 0,
@@ -40,8 +40,8 @@ JSSTDLibraryDef bruce_stdlib_def = {
 };
 """
 
-# inject array_str before `void js_bruce_init`
-code = code.replace('void js_bruce_init(JSContext *ctx) {', enum_str + array_str + stdlib_def_str + '\nvoid js_bruce_init(JSContext *ctx) {')
+# inject array_str before `void js_wily_init`
+code = code.replace('void js_wily_init(JSContext *ctx) {', enum_str + array_str + stdlib_def_str + '\nvoid js_wily_init(JSContext *ctx) {')
 
 # One more fix: JS_FreeValue and JS_DupValue are not in mquickjs.
 code = code.replace('JS_FreeValue(ctx, global_obj);', '')

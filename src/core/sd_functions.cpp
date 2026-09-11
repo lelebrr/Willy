@@ -30,30 +30,30 @@ std::vector<FileList> fileList;
 // --- BEGIN_SD_SETUP_TEST_EXTRACT ---
 bool setupSdCard() {
 #ifndef USE_SD_MMC
-    if (bruceConfigPins.SDCARD_bus.sck < 0) {
+    if (wilyConfigPins.SDCARD_bus.sck < 0) {
         sdcardMounted = false;
         return false;
     }
 
     // Explicitly set CS pin to OUTPUT and HIGH to ensure it's in a known state before starting SPI
-    if (bruceConfigPins.SDCARD_bus.cs >= 0) {
-        pinMode(bruceConfigPins.SDCARD_bus.cs, OUTPUT);
-        digitalWrite(bruceConfigPins.SDCARD_bus.cs, HIGH);
+    if (wilyConfigPins.SDCARD_bus.cs >= 0) {
+        pinMode(wilyConfigPins.SDCARD_bus.cs, OUTPUT);
+        digitalWrite(wilyConfigPins.SDCARD_bus.cs, HIGH);
     }
 
     // SPI CS Safeguard: Ensure shared devices on the same bus have CS HIGH
-    if (bruceConfigPins.CC1101_bus.cs >= 0) {
-        pinMode(bruceConfigPins.CC1101_bus.cs, OUTPUT);
-        digitalWrite(bruceConfigPins.CC1101_bus.cs, HIGH);
+    if (wilyConfigPins.CC1101_bus.cs >= 0) {
+        pinMode(wilyConfigPins.CC1101_bus.cs, OUTPUT);
+        digitalWrite(wilyConfigPins.CC1101_bus.cs, HIGH);
     }
-    if (bruceConfigPins.NRF24_bus.cs >= 0) {
-        pinMode(bruceConfigPins.NRF24_bus.cs, OUTPUT);
-        digitalWrite(bruceConfigPins.NRF24_bus.cs, HIGH);
+    if (wilyConfigPins.NRF24_bus.cs >= 0) {
+        pinMode(wilyConfigPins.NRF24_bus.cs, OUTPUT);
+        digitalWrite(wilyConfigPins.NRF24_bus.cs, HIGH);
     }
 #if !defined(LITE_VERSION)
-    if (bruceConfigPins.W5500_bus.cs >= 0) {
-        pinMode(bruceConfigPins.W5500_bus.cs, OUTPUT);
-        digitalWrite(bruceConfigPins.W5500_bus.cs, HIGH);
+    if (wilyConfigPins.W5500_bus.cs >= 0) {
+        pinMode(wilyConfigPins.W5500_bus.cs, OUTPUT);
+        digitalWrite(wilyConfigPins.W5500_bus.cs, HIGH);
     }
 #endif
 #endif
@@ -75,19 +75,19 @@ bool setupSdCard() {
     // Not using InputHandler (SdCard on default &SPI bus)
     if (task) {
         // Try with default frequency first, then 4MHz
-        if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs)) {
+        if (!SD.begin((int8_t)wilyConfigPins.SDCARD_bus.cs)) {
             Serial.println("SD.begin failed with default freq, trying 4MHz...");
-            if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, SPI, 4000000)) result = false;
+            if (!SD.begin((int8_t)wilyConfigPins.SDCARD_bus.cs, SPI, 4000000)) result = false;
         }
     }
     // SDCard in the same Bus as TFT, in this case we call the SPI TFT Instance
-    else if (bruceConfigPins.SDCARD_bus.mosi == (gpio_num_t)TFT_MOSI &&
-             bruceConfigPins.SDCARD_bus.mosi != GPIO_NUM_NC) {
+    else if (wilyConfigPins.SDCARD_bus.mosi == (gpio_num_t)TFT_MOSI &&
+             wilyConfigPins.SDCARD_bus.mosi != GPIO_NUM_NC) {
         Serial.println("SDCard in the same Bus as TFT, using TFT SPI instance");
 #if TFT_MOSI > 0 // condition for Headless and 8bit displays (no SPI bus)
-        if (!SD.begin(bruceConfigPins.SDCARD_bus.cs, tft.getSPIinstance())) {
+        if (!SD.begin(wilyConfigPins.SDCARD_bus.cs, tft.getSPIinstance())) {
             Serial.println("SD.begin (TFT SPI) failed, trying 4MHz...");
-            if (!SD.begin(bruceConfigPins.SDCARD_bus.cs, tft.getSPIinstance(), 4000000)) {
+            if (!SD.begin(wilyConfigPins.SDCARD_bus.cs, tft.getSPIinstance(), 4000000)) {
                 result = false;
                 Serial.println("SDCard in the same Bus as TFT, but failed to mount");
             } else result = true;
@@ -101,25 +101,25 @@ bool setupSdCard() {
     else {
     NEXT:
         Serial.printf("[SD] Starting SPI: SCK=%d, MISO=%d, MOSI=%d, CS=%d\n",
-                      (int)bruceConfigPins.SDCARD_bus.sck,
-                      (int)bruceConfigPins.SDCARD_bus.miso,
-                      (int)bruceConfigPins.SDCARD_bus.mosi,
-                      (int)bruceConfigPins.SDCARD_bus.cs);
+                      (int)wilyConfigPins.SDCARD_bus.sck,
+                      (int)wilyConfigPins.SDCARD_bus.miso,
+                      (int)wilyConfigPins.SDCARD_bus.mosi,
+                      (int)wilyConfigPins.SDCARD_bus.cs);
         sdcardSPI.begin(
-            (int8_t)bruceConfigPins.SDCARD_bus.sck,
-            (int8_t)bruceConfigPins.SDCARD_bus.miso,
-            (int8_t)bruceConfigPins.SDCARD_bus.mosi,
-            (int8_t)bruceConfigPins.SDCARD_bus.cs
+            (int8_t)wilyConfigPins.SDCARD_bus.sck,
+            (int8_t)wilyConfigPins.SDCARD_bus.miso,
+            (int8_t)wilyConfigPins.SDCARD_bus.mosi,
+            (int8_t)wilyConfigPins.SDCARD_bus.cs
         ); // start SPI communications
         delay(10);
-        if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI)) {
+        if (!SD.begin((int8_t)wilyConfigPins.SDCARD_bus.cs, sdcardSPI)) {
             Serial.println("SD.begin (sdcardSPI) failed, trying 4MHz...");
-            if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI, 4000000)) {
+            if (!SD.begin((int8_t)wilyConfigPins.SDCARD_bus.cs, sdcardSPI, 4000000)) {
                 Serial.println("SD.begin (sdcardSPI) failed at 4MHz, trying 1MHz...");
-                if (!SD.begin((int8_t)bruceConfigPins.SDCARD_bus.cs, sdcardSPI, 1000000)) {
+                if (!SD.begin((int8_t)wilyConfigPins.SDCARD_bus.cs, sdcardSPI, 1000000)) {
                     result = false;
 #if defined(ARDUINO_M5STICK_C_PLUS) || defined(ARDUINO_M5STICK_C_PLUS2)
-                    if (bruceConfigPins.SDCARD_bus.miso != bruceConfigPins.CC1101_bus.miso) sdcardSPI.end();
+                    if (wilyConfigPins.SDCARD_bus.miso != wilyConfigPins.CC1101_bus.miso) sdcardSPI.end();
 #endif
                 } else {
                     Serial.println("SDCARD mounted at 1MHz");
@@ -281,7 +281,7 @@ bool copyToFs(FS from, FS to, String path, bool draw) {
     }
     const int bufSize = 1024;
     static uint8_t buff[bufSize] = {0}; // static to keep this buffer off the task stack
-    // tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, bruceConfig.priColor);
+    // tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, wilyConfig.priColor);
     while ((bytesRead = source.read(buff, bufSize)) > 0) {
         if (dest.write(buff, bytesRead) != bytesRead) {
             // Serial.println("Falha ao escrever no arquivo de destino");
@@ -301,7 +301,7 @@ bool copyToFs(FS from, FS to, String path, bool draw) {
                     0,
                     int(rad),
                     ALCOLOR,
-                    bruceConfig.bgColor,
+                    wilyConfig.bgColor,
                     true
                 );
         }
@@ -360,7 +360,7 @@ bool pasteFile(FS fs, String path) {
     int prog = 0;
     const int bufSize = 1024;
     uint8_t buff[1024] = {0};
-    // tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, bruceConfig.priColor);
+    // tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, wilyConfig.priColor);
     while ((bytesRead = sourceFile.read(buff, bufSize)) > 0) {
         if (destFile.write(buff, bytesRead) != bytesRead) {
             // Serial.println("Falha ao escrever no arquivo de destino");
@@ -378,10 +378,10 @@ bool pasteFile(FS fs, String path) {
                 0,
                 int(rad),
                 ALCOLOR,
-                bruceConfig.bgColor,
+                wilyConfig.bgColor,
                 true
             );
-            // tft.fillRect(7,tftHeight-10, (tftWidth-14)*prog/tot, 5, bruceConfig.priColor);
+            // tft.fillRect(7,tftHeight-10, (tftWidth-14)*prog/tot, 5, wilyConfig.priColor);
         }
     }
 
@@ -676,8 +676,8 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
     String Folder = rootPath;
     String PreFolder = rootPath;
     tft.drawPixel(0, 0, 0);
-    tft.fillScreen(bruceConfig.bgColor); // TODO: Does only the T-Embed CC1101 need this?
-    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+    tft.fillScreen(wilyConfig.bgColor); // TODO: Does only the T-Embed CC1101 need this?
+    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
 
     bool exit = false;
     // returnToMenu=true;  // make sure menu is redrawn when quitting in any point
@@ -695,8 +695,8 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
         if (redraw) {
             if (strcmp(PreFolder.c_str(), Folder.c_str()) != 0 || reload) {
                 index = 0;
-                tft.fillScreen(bruceConfig.bgColor);
-                tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+                tft.fillScreen(wilyConfig.bgColor);
+                tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
                 readFs(fs, Folder, allowed_ext);
                 PreFolder = Folder;
                 maxFiles = fileList.empty() ? 0 : (int)fileList.size() - 1;
@@ -790,7 +790,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                         Option{"Menu Principal",  [&]() { exit = true; }                                              },
                     };
                     loopOptions(options);
-                    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+                    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
                     reload = true;
                     redraw = true;
                 } else if (fileList[index].folder == false && fileList[index].operation == false) {
@@ -803,7 +803,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                     options.push_back(Option{"Fechar Menu", [&]() { yield(); }});
                     options.push_back(Option{"Menu Principal", [&]() { exit = true; }});
                     loopOptions(options);
-                    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+                    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
                     reload = true;
                     redraw = true;
                 }
@@ -961,7 +961,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
                         result = filepath;
                         break;
                     }
-                    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, bruceConfig.priColor);
+                    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, wilyConfig.priColor);
                     reload = true;
                     redraw = true;
                 } else {

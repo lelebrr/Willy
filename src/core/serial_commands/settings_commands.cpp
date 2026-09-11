@@ -11,7 +11,7 @@ uint32_t settingsCallback(cmd *c) {
     setting_name.trim();
     setting_value.trim();
 
-    JsonDocument jsonDoc = bruceConfig.toJson();
+    JsonDocument jsonDoc = wilyConfig.toJson();
     JsonObject setting = jsonDoc.as<JsonObject>();
 
     if (setting_name.length() == 0 && setting_value.length() == 0) {
@@ -32,8 +32,8 @@ uint32_t settingsCallback(cmd *c) {
         return true;
     }
 
-    if (!bruceConfig.setSetting(setting_name, setting_value) &&
-        !bruceConfigPins.setSetting(setting_name, setting_value)) {
+    if (!wilyConfig.setSetting(setting_name, setting_value) &&
+        !wilyConfigPins.setSetting(setting_name, setting_value)) {
         serialDevice->println("Setting update failed or unsupported via serial: " + setting_name);
     }
 
@@ -41,7 +41,7 @@ uint32_t settingsCallback(cmd *c) {
 }
 
 uint32_t factoryResetCallback(cmd *c) {
-    bruceConfig.factoryReset();
+    wilyConfig.factoryReset();
     serialDevice->println("Factory reset done");
     return true;
 }

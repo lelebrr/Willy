@@ -6,6 +6,7 @@
 #include "modules/gps/wardriving.h"
 #include "modules/gps/gps_config.h"
 #include "modules/gps/wdgwars.h"
+#include "modules/gps/gps_wardriving_advanced.h"
 #include "core/wifi/wifi_common.h"
 #include <math.h>
 
@@ -14,6 +15,13 @@ void GpsMenu::optionsMenu() {
         {"Wardriving",  [this]() { wardrivingMenu(); }},
 #if !defined(LITE_VERSION)
         {"Rastreador GPS", [=]() { GPSTracker(); }       },
+        {"GPS Suite Avancada", []() {
+            gwAdvSetup();
+            gwAdvShowWelcomeScreen();
+            delay(1500);
+            gwAdvancedSuiteMenu();
+            gwAdvCleanup();
+        }},
 #endif
         {"Enviar p/ WDGWars", [=]() {
              if (!WifiState::wifiConnected) {
@@ -51,7 +59,7 @@ void GpsMenu::optionsMenu() {
     };
     addOptionToMainMenu();
 
-    String txt = "GPS (" + String(bruceConfigPins.gpsBaudrate) + " bps)";
+    String txt = "GPS (" + String(wilyConfigPins.gpsBaudrate) + " bps)";
     loopOptions(options, MENU_TYPE_SUBMENU, txt.c_str());
 }
 
@@ -76,7 +84,7 @@ void GpsMenu::configMenu() {
     options = {
         {"Modo de Operacao", [this]() { modeMenu(); }                      },
         {"Baudrate",         setGpsBaudrateMenu                           },
-        {"Pinos GPS",        [this]() { setUARTPinsMenu(bruceConfigPins.gps_bus); }},
+        {"Pinos GPS",        [this]() { setUARTPinsMenu(wilyConfigPins.gps_bus); }},
         {"Voltar",           [this]() { optionsMenu(); }                    },
     };
 
@@ -210,7 +218,7 @@ void GpsMenu::applyAdvancedConfig() {
 
     // Initialize serial for configuration
     HardwareSerial gpsSerial(2);
-    gpsSerial.begin(bruceConfigPins.gpsBaudrate, SERIAL_8N1, bruceConfigPins.gps_bus.rx, bruceConfigPins.gps_bus.tx);
+    gpsSerial.begin(wilyConfigPins.gpsBaudrate, SERIAL_8N1, wilyConfigPins.gps_bus.rx, wilyConfigPins.gps_bus.tx);
 
     delay(500);
 
@@ -240,7 +248,7 @@ void GpsMenu::drawIcon(float scale) {
     int tangentX = sqrt(radius * radius - (radius / 2 * radius / 2));
     int32_t tangentY = radius / 2;
 
-    tft.fillCircle(iconCenterX, iconCenterY - radius / 2, radius, bruceConfig.priColor);
+    tft.fillCircle(iconCenterX, iconCenterY - radius / 2, radius, wilyConfig.priColor);
     tft.fillTriangle(
         iconCenterX - tangentX,
         iconCenterY - radius / 2 + tangentY,
@@ -248,9 +256,9 @@ void GpsMenu::drawIcon(float scale) {
         iconCenterY - radius / 2 + tangentY,
         iconCenterX,
         iconCenterY + 1.5 * radius,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
-    tft.fillCircle(iconCenterX, iconCenterY - radius / 2, radius / 2, bruceConfig.bgColor);
+    tft.fillCircle(iconCenterX, iconCenterY - radius / 2, radius / 2, wilyConfig.bgColor);
 
-    tft.drawEllipse(iconCenterX, iconCenterY + 1.5 * radius, 1.5 * radius, radius / 2, bruceConfig.priColor);
+    tft.drawEllipse(iconCenterX, iconCenterY + 1.5 * radius, 1.5 * radius, radius / 2, wilyConfig.priColor);
 }

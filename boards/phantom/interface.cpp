@@ -14,9 +14,9 @@ SPIClass touchSPI;
 void _setup_gpio() {
     pinMode(XPT2046_CS, OUTPUT);
     digitalWrite(XPT2046_CS, HIGH);
-    bruceConfigPins.rotation = 0;  // portrait mode for Phantom
-    bruceConfig.colorInverted = 0; // color invert for Phantom
-    tft.setRotation(bruceConfigPins.rotation);
+    wilyConfigPins.rotation = 0;  // portrait mode for Phantom
+    wilyConfig.colorInverted = 0; // color invert for Phantom
+    tft.setRotation(wilyConfigPins.rotation);
     uint16_t calData[5] = {275, 3500, 280, 3590, 3}; // 0011 = 3
     tft.setTouch(calData);
 }
@@ -28,7 +28,7 @@ void _setup_gpio() {
 ***************************************************************************************/
 void _post_setup_gpio() {
     // uint16_t calData[5];
-    // bruceConfigPins.rotation = 0;
+    // wilyConfigPins.rotation = 0;
     // tft.setRotation(0);
     // tft.calibrateTouch(calData, TFT_WHITE, TFT_BLACK, 10);
     // Serial.printf("%d\n%d\n%d\n%d\n%d\n", calData[0], calData[1], calData[2], calData[3], calData[4]);
@@ -89,22 +89,22 @@ void InputHandler(void) {
 
             // Serial.printf("\nRAWRaw: Touch Pressed on x=%d, y=%d", t2.x, t2.y);
             // Serial.printf("\nRAW:    Touch Pressed on x=%d, y=%d", t.x, t.y);
-            if (bruceConfigPins.rotation == 0) {
+            if (wilyConfigPins.rotation == 0) {
                 t.y = (tftHeight + 20) - t.y;
                 t.x = tftWidth - t.x;
             }
-            if (bruceConfigPins.rotation == 3) {
+            if (wilyConfigPins.rotation == 3) {
                 uint16_t tmp = t.x;
                 t.x = map((tftHeight + 20) - t.y, 0, 240, 0, 320);
                 t.y = map(tmp, 0, 320, 0, 240);
             }
-            if (bruceConfigPins.rotation == 1) {
+            if (wilyConfigPins.rotation == 1) {
                 uint16_t tmp = t.x;
                 t.x = map(t.y, 0, 240, 0, 320);
                 t.y = map(tftWidth - tmp, 0, 320, 0, 240);
             }
             // Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot: %d\n", t.x, t.y,
-            // bruceConfigPins.rotation);
+            // wilyConfigPins.rotation);
             tm = millis();
             if (!wakeUpScreen()) AnyKeyPress = true;
             else return;

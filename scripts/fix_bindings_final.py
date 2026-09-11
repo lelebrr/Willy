@@ -1,4 +1,4 @@
-import re
+﻿import re
 with open('src/modules/bjs_interpreter/mqjs_bindings.cpp', 'r') as f:
     code = f.read()
 
@@ -50,7 +50,7 @@ static JSValue js_gpio_pinMode(JSContext *ctx, JSValue *this_val, int argc, JSVa
     return JS_UNDEFINED;
 }
 """
-if 'js_gpio_digitalWrite' not in code[:code.find('bruce_c_functions')]:
+if 'js_gpio_digitalWrite' not in code[:code.find('wily_c_functions')]:
     code = code.replace('// --- WiFi ---', missing_funcs + '\n// --- WiFi ---')
 
 with open('src/modules/bjs_interpreter/mqjs_bindings.cpp', 'w') as f:

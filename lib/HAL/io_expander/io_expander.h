@@ -91,7 +91,7 @@ public:
         turnPinOnOff(IO_EXP_VIBRO, LOW); // SMOOOCHIE||REAPER
         turnPinOnOff(IO_EXP_CC_RX, LOW); // SMOOOCHIE||REAPER
         turnPinOnOff(IO_EXP_CC_TX, LOW); // SMOOOCHIE||REAPER
-        turnPinOnOff(IO_EXP_LOGO, HIGH); // BRUCE LOGO LEAD ON REAPER
+        turnPinOnOff(IO_EXP_LOGO, HIGH); // WILLY LOGO LEAD ON REAPER
         turnPinOnOff(IO_EXP_NRF, HIGH);  // NRF ON BY DEFAULT FOR C5
 
         // Set button pins as inputs

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// Part of Bruce (AGPL-3.0-or-later). This file is DERIVED FROM and modified
+// Part of Wily (AGPL-3.0-or-later). This file is DERIVED FROM and modified
 // after the Flipper Zero firmware (KeeLoq cipher + keeloq_common learning
 // schemes), Copyright (C) Flipper Devices Inc. and the flipperzero-firmware
 // contributors, licensed GPL-3.0-or-later. The encrypted built-in keystore

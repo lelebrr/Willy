@@ -1,4 +1,4 @@
-# Pinouts diagram to use Bruce
+﻿# Pinouts diagram to use Wily
 
 | Device  | SCK   | MISO  | MOSI  | CS    | GDO0/CE   |
 | ---     | :---: | :---: | :---: | :---: | :---:     |

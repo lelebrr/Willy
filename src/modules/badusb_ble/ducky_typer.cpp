@@ -180,7 +180,7 @@ void ducky_startKb(HIDInterface *&hid, bool ble) {
                 displayError("Reinicie o aparelho");
                 returnToMenu = true;
             }
-            hid = new BleKeyboard(bruceConfigPins.bleName, "BruceFW", 100);
+            hid = new BleKeyboard(wilyConfigPins.bleName, "WilyFW", 100);
         } else {
 #if defined(USB_as_HID)
             hid = new USBHIDKeyboard();
@@ -209,22 +209,22 @@ void ducky_startKb(HIDInterface *&hid, bool ble) {
     if (ble) {
         if (hid->isConnected()) {
             // If connected as media controller and switch to BadBLE, changes the layout
-            hid->setLayout(keyboardLayouts[bruceConfig.badUSBBLEKeyboardLayout]);
-            hid->setDelay(bruceConfig.badUSBBLEKeyDelay);
+            hid->setLayout(keyboardLayouts[wilyConfig.badUSBBLEKeyboardLayout]);
+            hid->setDelay(wilyConfig.badUSBBLEKeyDelay);
             return;
         }
         if (!_Ask_for_restart) _Ask_for_restart = 1; // arm the flag
-        hid->begin(keyboardLayouts[bruceConfig.badUSBBLEKeyboardLayout]);
-        hid->setDelay(bruceConfig.badUSBBLEKeyDelay);
+        hid->begin(keyboardLayouts[wilyConfig.badUSBBLEKeyboardLayout]);
+        hid->setDelay(wilyConfig.badUSBBLEKeyDelay);
     } else {
 #if defined(USB_as_HID)
-        hid->begin(keyboardLayouts[bruceConfig.badUSBBLEKeyboardLayout]);
-        hid->setDelay(bruceConfig.badUSBBLEKeyDelay);
+        hid->begin(keyboardLayouts[wilyConfig.badUSBBLEKeyboardLayout]);
+        hid->setDelay(wilyConfig.badUSBBLEKeyDelay);
 #else
         mySerial.begin(CH9329_DEFAULT_BAUDRATE, SERIAL_8N1, BAD_RX, BAD_TX);
         delay(100);
-        hid->begin(mySerial, keyboardLayouts[bruceConfig.badUSBBLEKeyboardLayout]);
-        hid->setDelay(bruceConfig.badUSBBLEKeyDelay);
+        hid->begin(mySerial, keyboardLayouts[wilyConfig.badUSBBLEKeyboardLayout]);
+        hid->setDelay(wilyConfig.badUSBBLEKeyDelay);
 #endif
     }
 }
@@ -252,11 +252,11 @@ void ducky_stopKb(HIDInterface *&hid, bool ble) {
 void ducky_setup(HIDInterface *&hid, bool ble) {
     Serial.println("Ducky typer begin");
 
-    if (ble && bruceConfig.badUSBBLEKeyDelay < 50) {
+    if (ble && wilyConfig.badUSBBLEKeyDelay < 50) {
         displayWarning("Atraso <50ms: teclas podem falhar.", true);
     }
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
 
     if (ble && _Ask_for_restart == 2) {
         displayError("Reinicie o aparelho");
@@ -266,7 +266,7 @@ void ducky_setup(HIDInterface *&hid, bool ble) {
     FS *fs = nullptr;
     bool first_time = true;
 
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     String bad_script = "";
     options = {};
 
@@ -360,7 +360,7 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
 
     // String delay variables
     static int nextStringDelay = -1; // One-time delay for next STRING command (-1 = use default)
-    static int defaultStringDelay = bruceConfig.badUSBBLEKeyDelay; // Default delay for all STRING commands
+    static int defaultStringDelay = wilyConfig.badUSBBLEKeyDelay; // Default delay for all STRING commands
     currentOutputY = 0;
 
     _hid->releaseAll();
@@ -370,7 +370,7 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
     printStatusBadUSBBLE("Running");
 
     tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     tft.setCursor(BORDER_OFFSET_FROM_SCREEN_EDGE * 2, FP * 8 * 3 + 2 + STATUS_BAR_HEIGHT);
     tft.print("Run Time:");
 
@@ -381,9 +381,9 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
         tftHeight / 2 - FP * 4 - 2,
         tftWidth - BORDER_OFFSET_FROM_SCREEN_EDGE,
         tftHeight / 2 - FP * 4 - 2,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
-    if (!bruceConfig.badUSBBLEShowOutput) {
+    if (!wilyConfig.badUSBBLEShowOutput) {
         tft.setTextSize(FP);
         tft.setTextColor(TFT_RED);
         tft.setCursor(BORDER_OFFSET_FROM_SCREEN_EDGE * 2, tftHeight / 2);
@@ -524,8 +524,8 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
 
             // Apply jitter if enabled (conceptually, here we add a small random delay)
             // This makes the typing look more human-like to some heuristic systems.
-            if (bruceConfig.badUSBBLEKeyDelay > 0) {
-                int jitter = random(0, bruceConfig.badUSBBLEKeyDelay / 2 + 1);
+            if (wilyConfig.badUSBBLEKeyDelay > 0) {
+                int jitter = random(0, wilyConfig.badUSBBLEKeyDelay / 2 + 1);
                 delay(jitter);
             }
 
@@ -533,7 +533,7 @@ void key_input(Stream *stream, String bad_script_name, HIDInterface *_hid) {
             if (PriCmd == nullptr) {
                 printTFTBadUSBBLE(Command + " - UNKNOWN COMMAND", ALCOLOR, true);
             } else if (PriCmd->type != DuckyCommandType_Comment) {
-                printTFTBadUSBBLE(Command, bruceConfig.priColor);
+                printTFTBadUSBBLE(Command, wilyConfig.priColor);
                 if (Argument.length() > 0) {
                     printTFTBadUSBBLE(" " + Argument, (ArgCmd == nullptr ? TFT_WHITE : 0), true);
                 } else printTFTBadUSBBLE("", 0, true);
@@ -590,10 +590,10 @@ void ducky_keyboard(HIDInterface *&hid, bool ble) {
 
     drawMainBorder();
     tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     tft.drawString("Keyboard Started", tftWidth / 2, tftHeight / 2);
 
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.setTextSize(FP);
     drawMainBorder();
     tft.setCursor(10, 28);
@@ -744,7 +744,7 @@ DuckyCombination *findDuckyCombination(const char *cmd) {
 void sendAltChar(HIDInterface *hid, uint8_t charCode) {
     // Hold ALT key
     hid->press(KEY_LEFT_ALT);
-    delay(bruceConfig.badUSBBLEKeyDelay);
+    delay(wilyConfig.badUSBBLEKeyDelay);
 
     // Convert char code to 3-digit padded string (standard ALT code format)
     String codeStr = String(charCode);
@@ -773,21 +773,21 @@ void sendAltChar(HIDInterface *hid, uint8_t charCode) {
         }
 
         hid->press(numpadKey);
-        delay(bruceConfig.badUSBBLEKeyDelay);
+        delay(wilyConfig.badUSBBLEKeyDelay);
         hid->release(numpadKey);
-        delay(bruceConfig.badUSBBLEKeyDelay);
+        delay(wilyConfig.badUSBBLEKeyDelay);
     }
 
     // Release ALT key (this triggers the character input)
     hid->release(KEY_LEFT_ALT);
-    delay(bruceConfig.badUSBBLEKeyDelay);
+    delay(wilyConfig.badUSBBLEKeyDelay);
 }
 
 void sendAltString(HIDInterface *hid, const String &text) {
     for (int i = 0; i < text.length(); i++) {
         uint8_t charCode = (uint8_t)text[i];
         sendAltChar(hid, charCode);
-        delay(bruceConfig.badUSBBLEKeyDelay);
+        delay(wilyConfig.badUSBBLEKeyDelay);
     }
 }
 
@@ -799,9 +799,9 @@ void printTextAtPosition(uint16_t xOffset, uint16_t yOffset, const String &text)
     uint16_t y = FP * 8 * yOffset + 2 + STATUS_BAR_HEIGHT;
 
     tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.secColor);
+    tft.setTextColor(wilyConfig.secColor);
     tft.setCursor(x, y);
-    tft.fillRect(x, y, tftWidth - x - BORDER_OFFSET_FROM_SCREEN_EDGE * 2, FP * 8, bruceConfig.bgColor);
+    tft.fillRect(x, y, tftWidth - x - BORDER_OFFSET_FROM_SCREEN_EDGE * 2, FP * 8, wilyConfig.bgColor);
     tft.print(text);
     tft.setCursor(currentTextCursorX, currentTextCursorY);
 }
@@ -811,25 +811,25 @@ void printStatusBadUSBBLE(String text) { printTextAtPosition(8, 2, text); }
 void printDecimalTime(uint32_t timeElapsed) { printTextAtPosition(10, 3, formatTimeDecimal(timeElapsed)); }
 
 void printHeaderBadUSBBLE(String bad_script) {
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
     drawMainBorder();
 
     tft.setTextSize(FP);
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     tft.drawCentreString("BadUSB/BLE", tftWidth / 2, FP + STATUS_BAR_HEIGHT);
 
     tft.setCursor(BORDER_OFFSET_FROM_SCREEN_EDGE * 2, FP * 8 * 1 + 2 + STATUS_BAR_HEIGHT);
     tft.print("Script: ");
-    tft.setTextColor(bruceConfig.secColor);
+    tft.setTextColor(wilyConfig.secColor);
     tft.print(bad_script.substring(bad_script.lastIndexOf("/") + 1));
 
     tft.setCursor(BORDER_OFFSET_FROM_SCREEN_EDGE * 2, FP * 8 * 2 + 2 + STATUS_BAR_HEIGHT);
-    tft.setTextColor(bruceConfig.priColor);
+    tft.setTextColor(wilyConfig.priColor);
     tft.println("Status:");
 }
 
 void printTFTBadUSBBLE(String text, uint16_t color, bool newline) {
-    if (!bruceConfig.badUSBBLEShowOutput) return;
+    if (!wilyConfig.badUSBBLEShowOutput) return;
 
     static int bottomHalfStartY = tftHeight / 2;
     const int leftX = BORDER_OFFSET_FROM_SCREEN_EDGE * 2;
@@ -849,7 +849,7 @@ void printTFTBadUSBBLE(String text, uint16_t color, bool newline) {
             bottomHalfStartY,
             rightLimit - leftX,
             tftHeight - bottomHalfStartY - BORDER_OFFSET_FROM_SCREEN_EDGE * 2,
-            bruceConfig.bgColor
+            wilyConfig.bgColor
         );
         currentOutputY = bottomHalfStartY;
         cursorX = leftX;
@@ -935,35 +935,35 @@ void PresenterMode(HIDInterface *&hid, bool ble) {
 
     // Helper function to draw static UI elements (only once)
     auto drawStaticUI = [&]() {
-        tft.fillScreen(bruceConfig.bgColor);
+        tft.fillScreen(wilyConfig.bgColor);
 
         // Draw title "PRESENTER" at the top
         tft.setTextSize(FM);
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.drawCentreString("PRESENTER", tftWidth / 2, 10, 1);
 
         // Draw a separator line
-        tft.drawFastHLine(10, 35, tftWidth - 20, bruceConfig.priColor);
+        tft.drawFastHLine(10, 35, tftWidth - 20, wilyConfig.priColor);
 
         // Draw time label
         tft.setTextSize(FM);
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.drawCentreString("Time", tftWidth / 2, tftHeight / 2 + 15, 1);
 
         // Draw controls hint at bottom
         tft.setTextSize(1);
-        tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
         tft.drawCentreString("<< PREV | SEL | NEXT >>", tftWidth / 2, tftHeight - 15, 1);
     };
 
     // Helper function to update slide number (only when changed)
     auto updateSlideDisplay = [&]() {
         // Clear previous slide area
-        tft.fillRect(0, tftHeight / 2 - 35, tftWidth, 40, bruceConfig.bgColor);
+        tft.fillRect(0, tftHeight / 2 - 35, tftWidth, 40, wilyConfig.bgColor);
 
         // Draw current slide number - large and centered
         tft.setTextSize(4);
-        tft.setTextColor(TFT_WHITE, bruceConfig.bgColor);
+        tft.setTextColor(TFT_WHITE, wilyConfig.bgColor);
         String slideStr = "Slide " + String(currentSlide);
         tft.drawCentreString(slideStr, tftWidth / 2, tftHeight / 2 - 30, 1);
         lastDisplayedSlide = currentSlide;
@@ -987,9 +987,9 @@ void PresenterMode(HIDInterface *&hid, bool ble) {
         }
 
         // Clear timer area and redraw
-        tft.fillRect(0, tftHeight / 2 + 30, tftWidth, 30, bruceConfig.bgColor);
+        tft.fillRect(0, tftHeight / 2 + 30, tftWidth, 30, wilyConfig.bgColor);
         tft.setTextSize(3);
-        tft.setTextColor(timerStarted ? TFT_GREEN : TFT_DARKGREY, bruceConfig.bgColor);
+        tft.setTextColor(timerStarted ? TFT_GREEN : TFT_DARKGREY, wilyConfig.bgColor);
         tft.drawCentreString(timeBuffer, tftWidth / 2, tftHeight / 2 + 35, 1);
 
         lastDisplayedSeconds = elapsed;

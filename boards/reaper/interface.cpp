@@ -50,10 +50,10 @@ void _setup_gpio() {
     pinMode(SDCARD_CS, OUTPUT);
     digitalWrite(SDCARD_CS, HIGH);
 
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.irRx = RXLED;
-    bruceConfigPins.irTx = TXLED;
-    bruceConfigPins.rfidModule = ST25R3916_SPI_MODULE;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.irRx = RXLED;
+    wilyConfigPins.irTx = TXLED;
+    wilyConfigPins.rfidModule = ST25R3916_SPI_MODULE;
 
     bool pmu_ret = false;
     pmu_ret = PPM.init(Wire, SYS_I2C_SDA, SYS_I2C_SCL, BQ25896_SLAVE_ADDRESS);
@@ -178,12 +178,12 @@ void checkReboot() {
             // Display poweroff bar only if holding button
             if (millis() - time_count > 500) {
                 tft.setTextSize(1);
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                 countDown = (millis() - time_count) / 1000 + 1;
                 if (countDown < 3)
                     tft.drawCentreString("PWR OFF IN " + String(countDown) + "/2", tftWidth / 2, 12, 1);
                 else {
-                    tft.fillScreen(bruceConfig.bgColor);
+                    tft.fillScreen(wilyConfig.bgColor);
                     while (digitalRead(ESC_BTN) == BTN_ACT);
                     delay(200);
                     powerOff();
@@ -194,6 +194,6 @@ void checkReboot() {
 
         // Clear text after releasing the button
         delay(30);
-        tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), bruceConfig.bgColor);
+        tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), wilyConfig.bgColor);
     }
 }

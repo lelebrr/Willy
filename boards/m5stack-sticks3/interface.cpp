@@ -90,7 +90,7 @@ void _setup_gpio() {
 
     attachInterrupt(DW_BTN, isr_dw_btn, CHANGE);
     pinMode(TFT_BL, OUTPUT);
-    bruceConfig.colorInverted = 0;
+    wilyConfig.colorInverted = 0;
 }
 /***************************************************************************************
 ** Function name: _post_setup_gpio()

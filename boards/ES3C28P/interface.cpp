@@ -1,6 +1,6 @@
 /*
  * ES3C28P - 2.8" IPS ESP32-S3 Display Module
- * Board interface implementation for Bruce firmware
+ * Board interface implementation for Wily firmware
  *
  * Hardware:
  *   - ESP32-S3R8 (8MB OPI PSRAM, 16MB QSPI Flash)
@@ -113,10 +113,10 @@ void _setup_gpio() {
     digitalWrite(ES3C28P_AMP_EN, HIGH); // FM8002E: HIGH = disabled
 
     // ---- Start with default module configs ----
-    bruceConfigPins.rfModule = CC1101_SPI_MODULE;
-    bruceConfigPins.rfidModule = PN532_I2C_MODULE;
-    bruceConfigPins.irRx = RXLED;
-    bruceConfigPins.irTx = TXLED;
+    wilyConfigPins.rfModule = CC1101_SPI_MODULE;
+    wilyConfigPins.rfidModule = PN532_I2C_MODULE;
+    wilyConfigPins.irRx = RXLED;
+    wilyConfigPins.irTx = TXLED;
 
     Serial.begin(115200);
 }
@@ -194,15 +194,15 @@ void InputHandler(void) {
                 int16_t t_x = raw_x;
                 int16_t t_y = raw_y;
 
-                if (bruceConfigPins.rotation == 1) {
+                if (wilyConfigPins.rotation == 1) {
                     // Landscape: swap and mirror
                     t_x = raw_y;
                     t_y = (TFT_WIDTH - 1) - raw_x;
-                } else if (bruceConfigPins.rotation == 2) {
+                } else if (wilyConfigPins.rotation == 2) {
                     // Portrait inverted
                     t_x = (TFT_WIDTH - 1) - raw_x;
                     t_y = (TFT_HEIGHT - 1) - raw_y;
-                } else if (bruceConfigPins.rotation == 3) {
+                } else if (wilyConfigPins.rotation == 3) {
                     // Landscape inverted
                     t_x = (TFT_HEIGHT - 1) - raw_y;
                     t_y = raw_x;
@@ -393,7 +393,7 @@ void _setup_codec_speaker(bool enable) {
 ** Handles audio CODEC to enable/disable microphone
 **********************************************************************/
 void _setup_codec_mic(bool enable) {
-    // Set microphone I2S pin for Bruce's mic module
+    // Set microphone I2S pin for Wily's mic module
     extern gpio_num_t mic_bclk_pin;
     mic_bclk_pin = (gpio_num_t)BCLK;
 
@@ -404,7 +404,7 @@ void _setup_codec_mic(bool enable) {
         es8311_write_reg(ES8311_REG00_RESET, 0x00);
         es8311_write_reg(ES8311_REG00_RESET, 0x80);
 
-        // Clock config: MCLK derived from BCLK (bit7=1) since Bruce's mic
+        // Clock config: MCLK derived from BCLK (bit7=1) since Wily's mic
         // I2S driver doesn't output MCLK on a GPIO pin.
         // BCLK = 48000 * 16 * 2 = 1,536,000 Hz
         // pre_multi=8x (0x03) to get internal 12.288 MHz from 1.536 MHz BCLK

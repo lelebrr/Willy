@@ -47,7 +47,7 @@ uint32_t rgbColorCallback(cmd *c) {
     }
 
     uint16_t hexColor = tft.color565(r, g, b);
-    bruceConfig.priColor = hexColor; // change global var, dont save in config
+    wilyConfig.priColor = hexColor; // change global var, dont save in config
     return true;
 }
 
@@ -78,7 +78,7 @@ uint32_t hexColorCallback(cmd *c) {
     uint16_t b = (value >> 3) & 0x001F;
 
     uint16_t hexColor = (r | g | b);
-    bruceConfig.priColor = hexColor; // change global var, dont save in config
+    wilyConfig.priColor = hexColor; // change global var, dont save in config
     return true;
 }
 

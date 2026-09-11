@@ -28,7 +28,7 @@ JSValue native_menuShow(JSContext *ctx, JSValue *this_val, int argc, JSValue *ar
 
     if (length <= 0 || length > 100) return JS_NewInt32(ctx, -1);
 
-    // Build Bruce options vector from JS array
+    // Build Wily options vector from JS array
     options.clear();
     std::vector<String> labels; // Keep strings alive during menu display
     labels.reserve(length);
@@ -46,7 +46,7 @@ JSValue native_menuShow(JSContext *ctx, JSValue *this_val, int argc, JSValue *ar
         options.push_back({labels.back().c_str(), []() {}});
     }
 
-    // Show the native Bruce menu and get the selected index
+    // Show the native Wily menu and get the selected index
     int selected = loopOptions(options, MENU_TYPE_SUBMENU, title);
 
     options.clear();

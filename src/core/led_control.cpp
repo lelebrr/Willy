@@ -87,10 +87,10 @@ void ledEffectTask(void *pvParameters) {
     int frame = 0;
     uint64_t start_time = esp_timer_get_time() / 1000;
     while (1) {
-        CRGB baseColor = isPreviewLed ? previewLedColor : bruceConfig.ledColor;
-        int ledEffect = isPreviewLed ? previewLedEffect : bruceConfig.ledEffect;
-        int ledEffectSpeed = isPreviewLed ? previewLedEffectSpeed : bruceConfig.ledEffectSpeed;
-        int ledEffectDirection = isPreviewLed ? previewLedEffectDirection : bruceConfig.ledEffectDirection;
+        CRGB baseColor = isPreviewLed ? previewLedColor : wilyConfig.ledColor;
+        int ledEffect = isPreviewLed ? previewLedEffect : wilyConfig.ledEffect;
+        int ledEffectSpeed = isPreviewLed ? previewLedEffectSpeed : wilyConfig.ledEffectSpeed;
+        int ledEffectDirection = isPreviewLed ? previewLedEffectDirection : wilyConfig.ledEffectDirection;
 
         if (ledEffect == LED_EFFECT_COLOR_CYCLE || ledEffect == LED_EFFECT_COLOR_WHEEL) {
             short delayMs = 50;
@@ -239,13 +239,13 @@ void beginLed() {
     */
     ledSetup();
 
-    setLedBrightness(bruceConfig.ledBright);
+    setLedBrightness(wilyConfig.ledBright);
 }
 
 void blinkLed(int blinkTime) {
-    if (!bruceConfig.ledBlinkEnabled) return;
+    if (!wilyConfig.ledBlinkEnabled) return;
 
-    int ledBrightFrom = bruceConfig.ledBright;
+    int ledBrightFrom = wilyConfig.ledBright;
     int ledBrightTo = ledBrightFrom > 0 ? 0 : 50;
 
     beginLed();
@@ -282,7 +282,7 @@ void setLedBrightness(int value) {
     FastLED.show();
 }
 
-#define BrucePurple 9830500 // Custom purple color for Bruce
+#define WilyPurple 9830500 // Custom purple color for Wily
 // TODO: 3852441 -> 3849837
 void setLedColorConfig() {
     ledPreviewMode(true);
@@ -294,7 +294,7 @@ void setLedColorConfig() {
 
     constexpr ColorMapping colorMappings[] = {
         {"OFF",        CRGB::Black    },
-        {"Padrao",    BrucePurple    },
+        {"Padrao",    WilyPurple    },
         {"Branco",      CRGB::White    },
         {"Vermelho",        CRGB::Red      },
         {"Laranja",     CRGB::OrangeRed},
@@ -313,14 +313,14 @@ void setLedColorConfig() {
         int i = 0;
         static CRGB colorStorage[12];
         for (const auto &mapping : colorMappings) {
-            if (bruceConfig.ledColor == mapping.color) { idx = i; }
+            if (wilyConfig.ledColor == mapping.color) { idx = i; }
             colorStorage[i] = mapping.color;
 
             options.emplace_back(
                 mapping.name,
                 [=, &mapping]() {
-                    // bruceConfig.setLedColor(mapping.color);
-                    bruceConfig.setLedColor(
+                    // wilyConfig.setLedColor(mapping.color);
+                    wilyConfig.setLedColor(
                         ((uint32_t)mapping.color.r << 16) | ((uint32_t)mapping.color.g << 8) |
                         ((uint32_t)mapping.color.b)
                     );
@@ -340,7 +340,7 @@ void setLedColorConfig() {
              [=]() { setCustomColorMenu(); },
              idx == sizeof(colorMappings) / sizeof(colorMappings[0]),
              [](void *pointer, bool shouldRender) {
-                 setLedColor(bruceConfig.ledColor);
+                 setLedColor(wilyConfig.ledColor);
                  return false;
              }}
         );
@@ -371,7 +371,7 @@ void setCustomColorMenu() {
 }
 
 void setCustomColorSettingMenu(int rgb, std::function<uint32_t(uint32_t, int)> colorGenerator) {
-    uint32_t originalColor = bruceConfig.ledColor;
+    uint32_t originalColor = wilyConfig.ledColor;
 
     options.clear();
 
@@ -406,7 +406,7 @@ void setCustomColorSettingMenu(int rgb, std::function<uint32_t(uint32_t, int)> c
 
             options.emplace_back(
                 String(i),
-                [updatedColor]() { bruceConfig.setLedColor(updatedColor); },
+                [updatedColor]() { wilyConfig.setLedColor(updatedColor); },
                 selectedIndex == index,
                 hoverFunction,
                 &colorStorage[index]
@@ -449,45 +449,45 @@ void setLedEffectConfig() {
     while (1) {
         options = {
             {"Cor Solida",
-             [=]() { bruceConfig.setLedEffect(LED_EFFECT_SOLID); },
-             bruceConfig.ledEffect == LED_EFFECT_SOLID,
+             [=]() { wilyConfig.setLedEffect(LED_EFFECT_SOLID); },
+             wilyConfig.ledEffect == LED_EFFECT_SOLID,
              [](void *pointer,                                                                     bool shouldRender) {
                  setLedEffect(LED_EFFECT_SOLID);
-                 setLedColor(bruceConfig.ledColor);
+                 setLedColor(wilyConfig.ledColor);
                  return false;
              }                                                                    },
             {"Respirar",
-             [=]() { bruceConfig.setLedEffect(LED_COLOR_BREATHE); },
-             bruceConfig.ledEffect == LED_COLOR_BREATHE,
+             [=]() { wilyConfig.setLedEffect(LED_COLOR_BREATHE); },
+             wilyConfig.ledEffect == LED_COLOR_BREATHE,
              [](void *pointer,                                                                     bool shouldRender) {
                  setLedEffect(LED_COLOR_BREATHE);
                  return false;
              }                                                                    },
             {"Ciclo de Cores",
-             [=]() { bruceConfig.setLedEffect(LED_EFFECT_COLOR_CYCLE); },
-             bruceConfig.ledEffect == LED_EFFECT_COLOR_CYCLE,
+             [=]() { wilyConfig.setLedEffect(LED_EFFECT_COLOR_CYCLE); },
+             wilyConfig.ledEffect == LED_EFFECT_COLOR_CYCLE,
              [](void *pointer,                                                                     bool shouldRender) {
                  setLedEffect(LED_EFFECT_COLOR_CYCLE);
                  return false;
              }                                                                    },
 #if LED_COUNT > 1
             {"Roda de Cores",
-             [=]() { bruceConfig.setLedEffect(LED_EFFECT_COLOR_WHEEL); },
-             bruceConfig.ledEffect == LED_EFFECT_COLOR_WHEEL,
+             [=]() { wilyConfig.setLedEffect(LED_EFFECT_COLOR_WHEEL); },
+             wilyConfig.ledEffect == LED_EFFECT_COLOR_WHEEL,
              [](void *pointer,                                                                     bool shouldRender) {
                  setLedEffect(LED_EFFECT_COLOR_WHEEL);
                  return false;
              }                                                                    },
             {"Perseguicao",
-             [=]() { bruceConfig.setLedEffect(LED_EFFECT_CHASE); },
-             bruceConfig.ledEffect == LED_EFFECT_CHASE,
+             [=]() { wilyConfig.setLedEffect(LED_EFFECT_CHASE); },
+             wilyConfig.ledEffect == LED_EFFECT_CHASE,
              [](void *pointer,                                                                     bool shouldRender) {
                  setLedEffect(LED_EFFECT_CHASE);
                  return false;
              }                                                                    },
             {"Perseguicao Cauda",
-             [=]() { bruceConfig.setLedEffect(LED_EFFECT_CHASE_TAIL); },
-             bruceConfig.ledEffect == LED_EFFECT_CHASE_TAIL,
+             [=]() { wilyConfig.setLedEffect(LED_EFFECT_CHASE_TAIL); },
+             wilyConfig.ledEffect == LED_EFFECT_CHASE_TAIL,
              [](void *pointer,                                                                     bool shouldRender) {
                  setLedEffect(LED_EFFECT_CHASE_TAIL);
                  return false;
@@ -496,22 +496,22 @@ void setLedEffectConfig() {
             {"Config - Velocidade",
              setLedEffectSpeedConfig,                                     false,
              [](void *pointer,                                                                     bool shouldRender) {
-                 previewLedEffect = bruceConfig.ledEffect;
-                 previewLedEffectSpeed = bruceConfig.ledEffectSpeed;
-                 previewLedEffectDirection = bruceConfig.ledEffectDirection;
+                 previewLedEffect = wilyConfig.ledEffect;
+                 previewLedEffectSpeed = wilyConfig.ledEffectSpeed;
+                 previewLedEffectDirection = wilyConfig.ledEffectDirection;
                  return false;
              }                                                                    },
             {"Config - Direcao", setLedEffectDirectionConfig,           false, [](void *pointer, bool shouldRender) {
-                 previewLedEffect = bruceConfig.ledEffect;
-                 previewLedEffectSpeed = bruceConfig.ledEffectSpeed;
-                 previewLedEffectDirection = bruceConfig.ledEffectDirection;
+                 previewLedEffect = wilyConfig.ledEffect;
+                 previewLedEffectSpeed = wilyConfig.ledEffectSpeed;
+                 previewLedEffectDirection = wilyConfig.ledEffectDirection;
                  return false;
              }},
         };
 
         addOptionToMainMenu();
 
-        int selectedOption = loopOptions(options, bruceConfig.ledEffect);
+        int selectedOption = loopOptions(options, wilyConfig.ledEffect);
         if (selectedOption == -1 || selectedOption == options.size() - 1) {
             ledPreviewMode(false);
             ledSetup();
@@ -539,12 +539,12 @@ void setLedEffectSpeedConfig() {
         speedStorage[i] = i;
 
         String label = String(i + 1);
-        bool isSelected = (bruceConfig.ledEffectSpeed == i + 1);
+        bool isSelected = (wilyConfig.ledEffectSpeed == i + 1);
 
         options.emplace_back(
             label,
-            [i]() { bruceConfig.setLedEffectSpeed(i + 1); },
-            (bruceConfig.ledEffectSpeed == i + 1),
+            [i]() { wilyConfig.setLedEffectSpeed(i + 1); },
+            (wilyConfig.ledEffectSpeed == i + 1),
             hoverFunction,
             &speedStorage[i]
         );
@@ -555,8 +555,8 @@ void setLedEffectSpeedConfig() {
     speedStorage[10] = 11;
     options.emplace_back(
         "Sinc. com Encoder",
-        []() { bruceConfig.setLedEffectSpeed(11); },
-        (bruceConfig.ledEffectSpeed == 11),
+        []() { wilyConfig.setLedEffectSpeed(11); },
+        (wilyConfig.ledEffectSpeed == 11),
         hoverFunction,
         &speedStorage[10]
     );
@@ -564,9 +564,9 @@ void setLedEffectSpeedConfig() {
 
     addOptionToMainMenu();
 
-    int selectedOption = loopOptions(options, bruceConfig.ledEffectSpeed - 1);
+    int selectedOption = loopOptions(options, wilyConfig.ledEffectSpeed - 1);
     if (selectedOption == -1 || selectedOption == options.size() - 1) {
-        previewLedEffectSpeed = bruceConfig.ledEffectSpeed;
+        previewLedEffectSpeed = wilyConfig.ledEffectSpeed;
         return;
     }
 }
@@ -574,15 +574,15 @@ void setLedEffectSpeedConfig() {
 void setLedEffectDirectionConfig() {
     options = {
         {"Horario",
-         [=]() { bruceConfig.setLedEffectDirection(1); },
-         bruceConfig.ledEffectDirection == 1,
+         [=]() { wilyConfig.setLedEffectDirection(1); },
+         wilyConfig.ledEffectDirection == 1,
          [](void *pointer, bool shouldRender) {
              previewLedEffectDirection = 1;
              return false;
          }},
         {"Anti-Horario",
-         [=]() { bruceConfig.setLedEffectDirection(-1); },
-         bruceConfig.ledEffectDirection == -1,
+         [=]() { wilyConfig.setLedEffectDirection(-1); },
+         wilyConfig.ledEffectDirection == -1,
          [](void *pointer, bool shouldRender) {
              previewLedEffectDirection = -1;
              return false;
@@ -591,19 +591,19 @@ void setLedEffectDirectionConfig() {
 
     addOptionToMainMenu();
 
-    int selectedOption = loopOptions(options, (bruceConfig.ledEffectDirection == 1) ? 0 : 1);
+    int selectedOption = loopOptions(options, (wilyConfig.ledEffectDirection == 1) ? 0 : 1);
     if (selectedOption == -1 || selectedOption == options.size() - 1) {
-        previewLedEffectDirection = bruceConfig.ledEffectDirection;
+        previewLedEffectDirection = wilyConfig.ledEffectDirection;
         return;
     }
 }
 
 void ledSetup() {
-    if (bruceConfig.ledEffect == LED_EFFECT_SOLID) { ledEffects(false); }
+    if (wilyConfig.ledEffect == LED_EFFECT_SOLID) { ledEffects(false); }
 
-    if (bruceConfig.ledEffect > LED_EFFECT_SOLID) {
+    if (wilyConfig.ledEffect > LED_EFFECT_SOLID) {
         ledEffects(true);
-    } else setLedColor(bruceConfig.ledColor);
+    } else setLedColor(wilyConfig.ledColor);
 }
 
 void ledEffects(bool enable) {
@@ -622,62 +622,62 @@ void ledEffects(bool enable) {
 void ledPreviewMode(bool enable) {
     isPreviewLed = enable;
     if (enable) {
-        previewLedColor = bruceConfig.ledColor;
-        previewLedEffect = bruceConfig.ledEffect;
-        previewLedEffectSpeed = bruceConfig.ledEffectSpeed;
-        previewLedEffectDirection = bruceConfig.ledEffectDirection;
+        previewLedColor = wilyConfig.ledColor;
+        previewLedEffect = wilyConfig.ledEffect;
+        previewLedEffectSpeed = wilyConfig.ledEffectSpeed;
+        previewLedEffectDirection = wilyConfig.ledEffectDirection;
     }
     ledEffects(enable);
 }
 
 void setLedBrightnessConfig() {
     int idx = 0;
-    if (bruceConfig.ledBright == 0) idx = 0;
-    else if (bruceConfig.ledBright == 10) idx = 1;
-    else if (bruceConfig.ledBright == 25) idx = 2;
-    else if (bruceConfig.ledBright == 50) idx = 3;
-    else if (bruceConfig.ledBright == 75) idx = 4;
-    else if (bruceConfig.ledBright == 100) idx = 5;
+    if (wilyConfig.ledBright == 0) idx = 0;
+    else if (wilyConfig.ledBright == 10) idx = 1;
+    else if (wilyConfig.ledBright == 25) idx = 2;
+    else if (wilyConfig.ledBright == 50) idx = 3;
+    else if (wilyConfig.ledBright == 75) idx = 4;
+    else if (wilyConfig.ledBright == 100) idx = 5;
 
     options = {
         {"OFF",
-         [=]() { bruceConfig.setLedBright(0); },
-         bruceConfig.ledBright == 0,
+         [=]() { wilyConfig.setLedBright(0); },
+         wilyConfig.ledBright == 0,
          [](void *pointer, bool shouldRender) {
              setLedBrightness(0);
              return false;
          }},
         {"10 %",
-         [=]() { bruceConfig.setLedBright(10); },
-         bruceConfig.ledBright == 10,
+         [=]() { wilyConfig.setLedBright(10); },
+         wilyConfig.ledBright == 10,
          [](void *pointer, bool shouldRender) {
              setLedBrightness(10);
              return false;
          }},
         {"25 %",
-         [=]() { bruceConfig.setLedBright(25); },
-         bruceConfig.ledBright == 25,
+         [=]() { wilyConfig.setLedBright(25); },
+         wilyConfig.ledBright == 25,
          [](void *pointer, bool shouldRender) {
              setLedBrightness(25);
              return false;
          }},
         {"50 %",
-         [=]() { bruceConfig.setLedBright(50); },
-         bruceConfig.ledBright == 50,
+         [=]() { wilyConfig.setLedBright(50); },
+         wilyConfig.ledBright == 50,
          [](void *pointer, bool shouldRender) {
              setLedBrightness(50);
              return false;
          }},
         {"75 %",
-         [=]() { bruceConfig.setLedBright(75); },
-         bruceConfig.ledBright == 75,
+         [=]() { wilyConfig.setLedBright(75); },
+         wilyConfig.ledBright == 75,
          [](void *pointer, bool shouldRender) {
              setLedBrightness(75);
              return false;
          }},
         {"100%",
-         [=]() { bruceConfig.setLedBright(100); },
-         bruceConfig.ledBright == 100,
+         [=]() { wilyConfig.setLedBright(100); },
+         wilyConfig.ledBright == 100,
          [](void *pointer, bool shouldRender) {
              setLedBrightness(100);
              return false;
@@ -686,6 +686,6 @@ void setLedBrightnessConfig() {
     addOptionToMainMenu();
 
     loopOptions(options, idx);
-    setLedBrightness(bruceConfig.ledBright);
+    setLedBrightness(wilyConfig.ledBright);
 }
 #endif

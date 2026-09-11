@@ -84,11 +84,11 @@ void checkReboot() {
             if (millis() - time_count > 500) {
                 if (countDown == 0) {
                     int textWidth = tft.textWidth("PWR OFF IN 3/3", 1);
-                    tft.fillRect(60, 7, textWidth, 18, bruceConfig.bgColor);
+                    tft.fillRect(60, 7, textWidth, 18, wilyConfig.bgColor);
                 }
                 tft.setCursor(60, 12);
                 tft.setTextSize(1);
-                tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+                tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
                 countDown = (millis() - time_count) / 1000 + 1;
                 tft.printf(" PWR OFF IN %d/3\n", countDown);
                 vTaskDelay(10 / portTICK_RATE_MS);
@@ -97,7 +97,7 @@ void checkReboot() {
 
         // Clear text after releasing the button
         if (millis() - time_count > 500) {
-            tft.fillRect(60, 12, 16 * LW, tft.fontHeight(1), bruceConfig.bgColor);
+            tft.fillRect(60, 12, 16 * LW, tft.fontHeight(1), wilyConfig.bgColor);
             drawStatusBar();
         }
         PrevPress = true;

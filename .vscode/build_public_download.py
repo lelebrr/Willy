@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # ---@IncursioHack---
 import os
 import subprocess
@@ -91,7 +91,7 @@ if not bin_path.exists():
     print(f"Error: {bin_path} not found")
     exit(1)
 
-merged_bin_path = Path(f"Bruce-{env}.bin")
+merged_bin_path = Path(f"Wily-{env}.bin")
 if not merged_bin_path.exists():
     print(f"Error: {merged_bin_path} not found")
     exit(1)
@@ -100,7 +100,7 @@ tmp_dir = Path("/tmp/fwtest")
 tmp_dir.mkdir(exist_ok=True)
 dest = tmp_dir / "firmware.bin"
 shutil.copy(bin_path, dest)
-dest = Path(f"/tmp/fwtest/Bruce-{env}.bin")
+dest = Path(f"/tmp/fwtest/Wily-{env}.bin")
 shutil.copy(merged_bin_path, dest)
 
 mod_time = datetime.fromtimestamp(dest.stat().st_mtime)

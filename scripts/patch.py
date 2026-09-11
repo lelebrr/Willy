@@ -14,49 +14,66 @@ from os.path import basename, dirname, exists, isfile, join
 Import("env")  # type: ignore
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-arduinoespressif32-libs")
+if FRAMEWORK_DIR is None:
+    # Fallback: search common PlatformIO package locations
+    import os
+    _candidates = [
+        os.path.join(os.environ.get("PLATFORMIO_CORE_DIR", ""), "packages", "framework-arduinoespressif32-libs"),
+        os.path.expanduser("~/.platformio/packages/framework-arduinoespressif32-libs"),
+        "C:/.platformio/packages/framework-arduinoespressif32-libs",
+        "F:/PIO/packages/framework-arduinoespressif32-libs",
+    ]
+    for _c in _candidates:
+        if _c and exists(_c):
+            FRAMEWORK_DIR = _c
+            break
+    if FRAMEWORK_DIR is None:
+        print("WARNING: framework-arduinoespressif32-libs not found, skipping patch")
+
 board_mcu = env.BoardConfig()
 mcu = board_mcu.get("build.mcu", "")
-patchflag_path = join(FRAMEWORK_DIR,mcu, "lib", ".patched")
 
-# patch file only if we didn't do it befored
-if not isfile(join(FRAMEWORK_DIR,mcu, "lib", ".patched")):
-    original_file = join(FRAMEWORK_DIR,mcu, "lib", "libnet80211.a")
-    patched_file = join(
-        FRAMEWORK_DIR, mcu, "lib", "libnet80211.a.patched"
-    )
+if FRAMEWORK_DIR is not None:
+    patchflag_path = join(FRAMEWORK_DIR, mcu, "lib", ".patched")
 
-    if mcu=="esp32c5" or mcu=="esp32c6" :
-        env.Execute(
-            "pio pkg exec -p toolchain-riscv32-esp -- riscv32-esp-elf-objcopy  --weaken-symbol=ieee80211_raw_frame_sanity_check %s %s"
-            % (original_file, patched_file)
-        )
-    elif mcu=="esp32p4":
-        """Do nothing"""
-    else:
-        env.Execute(
-            "pio pkg exec -p toolchain-xtensa-%s -- xtensa-%s-elf-objcopy  --weaken-symbol=ieee80211_raw_frame_sanity_check %s %s"
-            % (mcu, mcu, original_file, patched_file)
+    # patch file only if we didn't do it before
+    if not isfile(join(FRAMEWORK_DIR, mcu, "lib", ".patched")):
+        original_file = join(FRAMEWORK_DIR, mcu, "lib", "libnet80211.a")
+        patched_file = join(
+            FRAMEWORK_DIR, mcu, "lib", "libnet80211.a.patched"
         )
 
-    if isfile("%s.old" % (original_file)):
-        remove("%s.old" % (original_file))
+        if mcu == "esp32c5" or mcu == "esp32c6":
+            env.Execute(
+                "pio pkg exec -p toolchain-riscv32-esp -- riscv32-esp-elf-objcopy  --weaken-symbol=ieee80211_raw_frame_sanity_check %s %s"
+                % (original_file, patched_file)
+            )
+        elif mcu == "esp32p4":
+            """Do nothing"""
+        else:
+            env.Execute(
+                "pio pkg exec -p toolchain-xtensa-%s -- xtensa-%s-elf-objcopy  --weaken-symbol=ieee80211_raw_frame_sanity_check %s %s"
+                % (mcu, mcu, original_file, patched_file)
+            )
 
-    if isfile(original_file):
-        rename(original_file, "%s.old" % (original_file))
-    else:
-        print("Patch: Original file not found")
+        if isfile("%s.old" % (original_file)):
+            remove("%s.old" % (original_file))
 
-    if isfile(patched_file):
-        rename(patched_file, original_file)
-    else:
-        print("Patch: Patched file not found")
+        if isfile(original_file):
+            rename(original_file, "%s.old" % (original_file))
+        else:
+            print("Patch: Original file not found")
 
+        if isfile(patched_file):
+            rename(patched_file, original_file)
+        else:
+            print("Patch: Patched file not found")
 
-    def _touch(path):
-        with open(path, "w") as fp:
-            fp.write("")
+        def _touch(path):
+            with open(path, "w") as fp:
+                fp.write("")
 
-    env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
+        env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
 
 
 def hash_file(file_path):

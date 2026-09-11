@@ -1,4 +1,4 @@
-# Wardriving, Wigle e WDGWars (GPS)
+﻿# Wardriving, Wigle e WDGWars (GPS)
 
 ## Wardriving (`src/modules/gps/wardriving.cpp`)
 
@@ -8,13 +8,13 @@ Formatos: CSV (planilhas), upload Wigle, WDGWars. Tracker dedicado: **GPS → Ra
 
 ## Wigle (`wigle.cpp`)
 
-Upload para Wigle.net com token Basic em `bruceConfig.wigleBasicToken`. Configure em **Config → Avancado → Token Wigle** (teclado, até 64 chars) ou via serial `settings wigleBasicToken <token>`.
+Upload para Wigle.net com token Basic em `wilyConfig.wigleBasicToken`. Configure em **Config → Avancado → Token Wigle** (teclado, até 64 chars) ou via serial `settings wigleBasicToken <token>`.
 
 ## WDGWars (`wdgwars.{cpp,h}`)
 
 Conector de upload CSV para `wdgwars.pl` (`WDGoWars::upload()` / `upload_all()`, TLS inseguro por limitação do ESP).
 
-- Chave: 64 hex de `wdgwars.pl/profile` em `bruceConfig.wdgwarsApiKey` — **Config → Avancado → Chave WDGWars** ou `settings wdgwarsApiKey <chave>`. Sem chave válida, o upload aborta com erro na tela.
+- Chave: 64 hex de `wdgwars.pl/profile` em `wilyConfig.wdgwarsApiKey` — **Config → Avancado → Chave WDGWars** ou `settings wdgwarsApiKey <chave>`. Sem chave válida, o upload aborta com erro na tela.
 - Menu **GPS → Enviar p/ WDGWars**: exige WiFi (oferece conectar), usa `/WillyWardriving` do SD (se montado) ou LittleFS, `auto_delete=false`.
 - Config GPS avançada (`gps_config.h`): taxa 1–10 Hz (5 Hz recomendado p/ wardriving), economia de energia, protocolo NMEA/UBX, filtro de satélite.
 

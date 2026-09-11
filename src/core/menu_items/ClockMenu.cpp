@@ -48,11 +48,11 @@ void ClockMenu::drawIcon(float scale) {
 
     // Case
     tft.drawArc(
-        iconCenterX, iconCenterY, 1.1 * radius, radius, 0, 360, bruceConfig.priColor, bruceConfig.bgColor
+        iconCenterX, iconCenterY, 1.1 * radius, radius, 0, 360, wilyConfig.priColor, wilyConfig.bgColor
     );
 
     // Pivot center
-    tft.fillCircle(iconCenterX, iconCenterY, radius / 10, bruceConfig.priColor);
+    tft.fillCircle(iconCenterX, iconCenterY, radius / 10, wilyConfig.priColor);
 
     // Hours & minutes
     tft.drawLine(
@@ -60,9 +60,9 @@ void ClockMenu::drawIcon(float scale) {
         iconCenterY,
         iconCenterX - 2 * pointerSize / 3,
         iconCenterY - 2 * pointerSize / 3,
-        bruceConfig.priColor
+        wilyConfig.priColor
     );
     tft.drawLine(
-        iconCenterX, iconCenterY, iconCenterX + pointerSize, iconCenterY - pointerSize, bruceConfig.priColor
+        iconCenterX, iconCenterY, iconCenterX + pointerSize, iconCenterY - pointerSize, wilyConfig.priColor
     );
 }

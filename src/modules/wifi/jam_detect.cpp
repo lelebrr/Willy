@@ -107,27 +107,27 @@ jd_draw(const uint16_t *dps, const uint16_t *peak, uint32_t thr, uint8_t curCh, 
         bool over = (dps[ch] >= thr);
 
         tft.setTextColor(
-            isCur ? bruceConfig.bgColor : bruceConfig.priColor,
-            isCur ? bruceConfig.priColor : bruceConfig.bgColor
+            isCur ? wilyConfig.bgColor : wilyConfig.priColor,
+            isCur ? wilyConfig.priColor : wilyConfig.bgColor
         );
         tft.drawString("Ch" + String(ch), x0, ry, 1);
 
         int bh = rowH - 3;
         if (bh < 4) bh = 4;
-        tft.drawRect(barX, ry, barW, bh, bruceConfig.priColor);
-        tft.fillRect(barX + 1, ry + 1, barW - 2, bh - 2, bruceConfig.bgColor);
+        tft.drawRect(barX, ry, barW, bh, wilyConfig.priColor);
+        tft.fillRect(barX + 1, ry + 1, barW - 2, bh - 2, wilyConfig.bgColor);
         uint32_t fillW = (uint32_t)(barW - 2) * dps[ch] / scale;
         if (fillW > (uint32_t)(barW - 2)) fillW = barW - 2;
-        if (fillW > 0) tft.fillRect(barX + 1, ry + 1, (int)fillW, bh - 2, over ? TFT_RED : bruceConfig.priColor);
+        if (fillW > 0) tft.fillRect(barX + 1, ry + 1, (int)fillW, bh - 2, over ? TFT_RED : wilyConfig.priColor);
         // peak-hold marker
         uint32_t pkX = (uint32_t)(barX + 1) + (uint32_t)(barW - 2) * peak[ch] / scale;
         if (peak[ch] > 0 && pkX > (uint32_t)(barX + 1)) tft.drawFastVLine((int)pkX, ry + 1, bh - 2, TFT_YELLOW);
 
-        tft.setTextColor(over ? TFT_RED : bruceConfig.priColor, bruceConfig.bgColor);
+        tft.setTextColor(over ? TFT_RED : wilyConfig.priColor, wilyConfig.bgColor);
         tft.drawString(String(dps[ch]), barX + barW + 4, ry, 1);
     }
 
-    tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
+    tft.setTextColor(wilyConfig.priColor, wilyConfig.bgColor);
     tft.drawString("scan ch" + String(curCh) + " thr" + String(thr) + "/s  UP/DN  ESC", x0, tftHeight - 12, 1);
 }
 
@@ -140,7 +140,7 @@ void jam_detect_setup() {
     int idx = 0;
 
     jd_start_wifi();
-    tft.fillScreen(bruceConfig.bgColor);
+    tft.fillScreen(wilyConfig.bgColor);
 
     for (;;) {
         if (returnToMenu) break;

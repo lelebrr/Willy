@@ -49,7 +49,7 @@ JSValue native_bleScan(JSContext *ctx, JSValue *this_val, int argc, JSValue *arg
 
 JSValue native_bleAdvertise(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv) {
     // usage: ble.advertise(name_string)
-    const char *name = "Bruce-App";
+    const char *name = "Wily-App";
     JSCStringBuf name_buf;
     if (argc > 0 && JS_IsString(ctx, argv[0])) {
         name = JS_ToCString(ctx, argv[0], &name_buf);

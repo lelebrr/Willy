@@ -8,7 +8,7 @@ YS_IRTM::YS_IRTM() {
 
 void YS_IRTM::begin() {
     if (!_initialized) {
-        _serial->begin(9600, SERIAL_8N1, bruceConfigPins.gps_bus.rx, bruceConfigPins.gps_bus.tx);
+        _serial->begin(9600, SERIAL_8N1, wilyConfigPins.gps_bus.rx, wilyConfigPins.gps_bus.tx);
         _initialized = true;
     }
 }
@@ -60,6 +60,6 @@ bool YS_IRTM::receiveNEC(uint16_t *address, uint8_t *command) {
     return false;
 }
 
-#ifdef BRUCE_IR_SERIAL
+#ifdef WILLY_IR_SERIAL
 YS_IRTM ysIrtm;
 #endif
