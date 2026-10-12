@@ -1,0 +1,9 @@
+docker :  Container willy-platformio_build-run-ff721add287e Creating 
+At line:1 char:1
++ docker compose run --rm -e PIO_ENVS=CYD-2USB -e PIO_JOBS=1 platformio ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( Container will...d287e Creating :String) 
+    [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ Container willy-platformio_build-run-ff721add287e Created 

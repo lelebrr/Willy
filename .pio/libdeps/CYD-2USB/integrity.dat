@@ -1,0 +1,37 @@
+ESP32Async/ESPAsyncWebServer@^3.11.2
+paulstoffregen/Time@1.6.1
+tinyu-zhao/FFT@^0.0.1
+LibSSH-ESP32
+earlephilhower/ESP8266SAM@^1.1.0
+bblanchon/ArduinoJson@^7.4.3
+ESP8266Audio@^1.9.7
+bitbank2/PNGdec@^1.1.2
+https://github.com/bmorcelli/rc-switch/archive/refs/heads/master.zip
+https://github.com/bmorcelli/SmartRC-CC1101-Driver-Lib/archive/refs/heads/master.zip
+https://github.com/whywilson/ESP-PN532Killer/archive/refs/heads/master.zip
+Bodmer/JPEGDecoder
+https://github.com/bmorcelli/ESP-Amiibolink/archive/refs/heads/main.zip
+Adafruit Si4713 Library@1.2.3
+mikalhart/TinyGPSPlus
+https://github.com/rennancockles/SimpleCLI/archive/refs/heads/master.zip
+paulstoffregen/OneWire@^2.3.8
+https://github.com/whywilson/ESP-PN532BLE/archive/refs/heads/master.zip
+fastled/FastLED@^3.10.3
+https://github.com/bmorcelli/ESP32-PsRamFS/archive/refs/heads/patch-1.zip
+https://github.com/huckor/BER-TLV/archive/refs/heads/master.zip
+https://github.com/sayacom/WireGuard-ESP32-Arduino/archive/refs/heads/feature/esp-netif.zip
+lvgl/lvgl@^8.4.0
+arduino-libraries/NTPClient @ ^3.2.1
+h2zero/NimBLE-Arduino@^2.5.1
+fbiego/ESP32Time@^2.0.0
+https://github.com/lewisxhe/XPowersLib/archive/refs/heads/master.zip
+https://github.com/whywilson/ESP-PN532-UART/archive/refs/heads/main.zip
+https://github.com/rennancockles/Arduino_MFRC522v2/archive/refs/heads/master.zip
+https://github.com/BruceDevices/mQuickJS/archive/refs/heads/main.zip
+https://github.com/bmorcelli/ESP-ChameleonUltra/archive/refs/heads/main.zip
+jgromes/RadioLib@^7.7.1
+https://github.com/bitbank2/AnimatedGIF/archive/refs/heads/master.zip
+https://github.com/bmorcelli/IRremoteESP8266/archive/refs/heads/master.zip
+Adafruit BusIO=https://github.com/emericklaw/Adafruit-BusIO_Bruce/archive/refs/heads/master.zip
+nrf24/RF24@^1.6.2
+Adafruit PN532=https://github.com/emericklaw/Adafruit-PN532_Bruce/archive/refs/heads/master.zip

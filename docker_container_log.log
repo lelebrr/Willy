@@ -1,0 +1,24 @@
+********************************************************************************
+If you like PlatformIO, please:
+- star it on GitHub > https://github.com/platformio/platformio-core
+- follow us on LinkedIn to stay up-to-date on the latest project news > https://www.linkedin.com/company/platformio/
+- try PlatformIO IDE for embedded development > https://platformio.org/platformio-ide
+********************************************************************************
+
+Processing CYD-2USB (board: CYD-2432S028; platform: https://github.com/pioarduino/platform-espressif32/releases/download/55.03.36/platform-espressif32.zip; framework: arduino)
+--------------------------------------------------------------------------------
+Platform Manager: Installing https://github.com/pioarduino/platform-espressif32/releases/download/55.03.36/platform-espressif32.zip
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Platform Manager: espressif32@55.3.36 has been installed!
+Tool Manager: Installing https://github.com/pioarduino/esp_install/releases/download/v5.3.4/esp_install-v5.3.4.zip
+Downloading 0% 10% 20% 30% 40% 50% 60% 70%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: tool-esp_install@5.3.4 has been installed!
+Created pioarduino Python virtual environment: /root/.platformio/penv
+Tool Manager: Installing https://github.com/espressif/arduino-esp32/releases/download/3.3.6/esp32-core-3.3.6.tar.xz
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: framework-arduinoespressif32@3.3.6 has been installed!
+Tool Manager: Installing https://github.com/espressif/arduino-esp32/releases/download/3.3.6/esp32-core-3.3.6-libs.tar.xz
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%

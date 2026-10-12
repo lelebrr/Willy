@@ -1,0 +1,150 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Compile & Link",
+            "linux":{
+                "command": "g++",
+                "args": [
+                    "${workspaceFolder}/out/**.o",
+                    "-o",
+                    "${workspaceFolder}/out/bertlv",
+                    "-L${workspaceFolder}/dep/linux/linux_lib/lib",
+                    "-Bstatic"
+                ]
+            },
+            "osx":{
+                "command": "g++",
+                "args": [
+                    "-isysroot",
+                    "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk",
+                    "-mmacosx-version-min=10.15",
+                    "${workspaceFolder}/out/**.o",
+                    "-o",
+                    "${workspaceFolder}/out/bertlv",
+                    "-Bstatic"
+                ],
+            },
+            "windows": {
+                "command": "g++",
+                "args": [
+                    "-Lc:\\mingw-w64\\mingw64\\x86_64-w64-mingw32\\lib",
+                    "-mwindows",
+                    "-static",                                        
+                    "${workspaceFolder}\\out\\**.o",
+                    "-o",
+                    "${workspaceFolder}\\out\\bertlv.exe"
+                ],
+              },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "dependsOn": [                
+                "MoveObjects"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Compile",
+            "linux":{
+                "command": "g++",
+                "args": [                    
+                    "-c",
+                    "$(find",
+                    "${workspaceFolder}/src/",
+                    "-type",
+                    "f",
+                    "-iregex",
+                    "'.*\\.cpp')",
+                    "-g",
+                    "-pthread",
+                    "-Wall"                   
+                ]
+            },
+            "osx":{
+                "command": "g++",
+                "args": [
+                    "-isysroot",
+                    "/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk",
+                    "-mmacosx-version-min=10.15",
+                    "-c",
+                    "$(find",
+                    "${workspaceFolder}/src/",
+                    "-type",
+                    "f",
+                    "-iregex",
+                    "'.*\\.cpp')",
+                    "-g",
+                    "-Wall"
+                ]
+            },
+            "windows": {
+                "command": "g++",
+                "args": [          
+                    "-c",
+                    "$(",
+                    "dir",
+                    "-Path",                    
+                    "${workspaceFolder}\\src",
+                    "-Filter",
+                    "*.cpp",
+                    "-Recurse",
+                    "|",
+                    "%{$_.FullName}",
+                    ")",
+                    "-g",
+                    "-Wall"
+                ],
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "MoveObjects",
+            "linux":{
+                "command": "mv",
+                "args": [                    
+                    "${workspaceFolder}/*.o",
+                    "${workspaceFolder}/out/"                 
+                ]
+            },
+            "osx":{
+                "command": "mv",
+                "args": [
+                    "${workspaceFolder}/*.o",
+                    "${workspaceFolder}/out/"
+                ]
+            },
+            "windows": {
+                "command": "Move-Item",
+                "args": [
+                    "-Path",
+                    "${workspaceFolder}\\*.o",
+                    "-Destination",
+                    "${workspaceFolder}\\out",
+                    "-Force"
+                ],
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "dependsOn": [                
+                "Compile"
+            ]
+        }
+    ]
+}

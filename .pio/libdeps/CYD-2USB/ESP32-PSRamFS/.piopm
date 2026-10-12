@@ -1,0 +1,1 @@
+{"type": "library", "name": "ESP32-PSRamFS", "version": "1.0.6", "spec": {"owner": null, "id": null, "name": "ESP32-PsRamFS", "requirements": null, "uri": "https://github.com/bmorcelli/ESP32-PsRamFS/archive/refs/heads/patch-1.zip"}}
