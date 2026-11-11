@@ -54,7 +54,8 @@ void MainMenu::begin(void) {
     returnToMenu = false;
     options = {};
 
-    std::vector<String> l = bruceConfig.disabledMenus;
+    // Referencia em vez de copia: o vetor nao e alterado durante o laco.
+    const std::vector<String> &l = bruceConfig.disabledMenus;
     for (int i = 0; i < _totalItems; i++) {
         String itemName = _menuItems[i]->getName();
         if (find(l.begin(), l.end(), itemName) == l.end()) { // If menu item is not disabled
@@ -93,9 +94,11 @@ void MainMenu::hideAppsMenu() {
     auto items = this->getItems();
 RESTART: // using gotos to avoid stackoverflow after many choices
     options.clear();
+    // A copia do vetor de menus desabilitados era feita dentro do laco,
+    // reconstruindo o vetor (e copiando cada String) uma vez por item.
+    const std::vector<String> &l = bruceConfig.disabledMenus;
     for (auto item : items) {
         String label = item->getName();
-        std::vector<String> l = bruceConfig.disabledMenus;
         bool enabled = find(l.begin(), l.end(), label) == l.end();
         options.push_back({label, [this, label]() { bruceConfig.addDisabledMenu(label); }, enabled});
     }

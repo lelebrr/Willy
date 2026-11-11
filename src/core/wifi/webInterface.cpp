@@ -111,17 +111,24 @@ String listFiles(FS &fs, String folder) {
         if (fullPath == "") { break; }
         // Serial.printf("Path: %s (isDir: %d)\n", fullPath.c_str(), isDir);
 
-        if (esp_get_free_heap_size() > (String("Fo:" + nameOnly + ":0\n").length()) + 1024) {
+        // "Fo:" (3) + nameOnly + ":0\n" (3): o tamanho maximo da linha e
+        // nameOnly.length() + 6. Antes era montada uma String completa por
+        // iteracao apenas para obter o length().
+        if (esp_get_free_heap_size() > (nameOnly.length() + 6) + 1024) {
+            char line[160];
             if (isDir) {
                 // Serial.printf("Directory: %s\n", fullPath.c_str());
-                returnText += "Fo:" + nameOnly + ":0\n";
+                snprintf(line, sizeof(line), "Fo:%s:0\n", nameOnly.c_str());
+                returnText += line;
             } else {
                 // For files, we need to get the size, so we open the file briefly
                 // Serial.printf("Opening file for size check: %s\n", fullPath.c_str());
                 File file = fs.open(fullPath);
                 // Serial.printf("File size: %llu bytes\n", file.size());
                 if (file) {
-                    returnText += "Fi:" + nameOnly + ":" + humanReadableSize(file.size()) + "\n";
+                    String sizeStr = humanReadableSize(file.size());
+                    snprintf(line, sizeof(line), "Fi:%s:%s\n", nameOnly.c_str(), sizeStr.c_str());
+                    returnText += line;
                     file.close();
                 }
             }

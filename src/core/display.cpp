@@ -729,7 +729,7 @@ int loopOptions(
 ** Description:   Função para manipular o progresso da atualização
 ** Dependencia: prog_handler =>>    0 - Flash, 1 - LittleFS
 ***************************************************************************************/
-void progressHandler(int progress, size_t total, String message) {
+void progressHandler(int progress, size_t total, const String &message) {
     int barWidth = map(progress, 0, total, 0, tftWidth - 40);
     if (barWidth < 3) {
         tft.fillRect(6, 27, tftWidth - 12, tftHeight - 33, bruceConfig.bgColor);
@@ -784,18 +784,29 @@ Opt_Coord drawOptions(
             if (options[i].selected) tft.setTextColor(selcolor, bgcolor); // if selected, change Text color
             else tft.setTextColor(fgcolor, bgcolor);
 
-            String text = "";
+            // Buffer de pilha: a versao anterior criava 3 objetos String
+            // temporarios (prefixo + rotulo + substring) por item do menu.
+            char text[96];
+            int maxChars = (tftWidth * 0.8 - 10) / (LW * FM) - 1;
+            if (maxChars < 1) maxChars = 1;
+            if (maxChars > (int)sizeof(text) - 1) maxChars = (int)sizeof(text) - 1;
+
+            size_t len = 0;
             if (i == index) {
-                text += ">";
+                text[len++] = '>';
                 coord.x = tftWidth * 0.10 + 5 + FM * LW;
                 coord.y = tft.getCursorY() + 4;
                 coord.size = (tftWidth * 0.8 - 10) / (LW * FM) - 1;
                 coord.fgcolor = fgcolor;
                 coord.bgcolor = bgcolor;
-            } else text += " ";
-            text += String(options[i].label) + "              ";
+            } else text[len++] = ' ';
+            // Rotulo seguido dos espacos de preenchimento, como antes.
+            const char *label = options[i].label.c_str();
+            while (*label && len < (size_t)maxChars && len < sizeof(text) - 1) { text[len++] = *label++; }
+            while (len < (size_t)maxChars && len < sizeof(text) - 1) { text[len++] = ' '; }
+            text[len] = '\0';
             tft.setCursor(tftWidth * 0.10 + 5, tft.getCursorY() + 4);
-            tft.println(text.substring(0, (tftWidth * 0.8 - 10) / (LW * FM) - 1));
+            tft.println(text);
             cont++;
         }
         if (cont > MAX_MENU_SIZE) goto Exit;
@@ -944,23 +955,26 @@ void drawMainBorder(bool clear) {
 #endif
 }
 
-void drawMainBorderWithTitle(String title, bool clear) {
+void drawMainBorderWithTitle(const String &title, bool clear) {
     drawMainBorder(clear);
     printTitle(title);
 }
 
-void printTitle(String title) {
+void printTitle(const String &title) {
     tft.setCursor((tftWidth - (title.length() * FM * LW)) / 2, BORDER_PAD_Y);
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
     tft.setTextSize(FM);
 
-    title.toUpperCase();
-    tft.println(title);
+    // toUpperCase() altera a String: usa uma copia local para nao mexer no
+    // argumento recebido por referencia.
+    String upperTitle = title;
+    upperTitle.toUpperCase();
+    tft.println(upperTitle);
 
     tft.setTextSize(FP);
 }
 
-void printSubtitle(String subtitle, bool withLine) {
+void printSubtitle(const String &subtitle, bool withLine) {
     int16_t cursorX = (tftWidth - (subtitle.length() * FP * LW)) / 2;
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
     tft.setTextSize(FP);
@@ -969,20 +983,22 @@ void printSubtitle(String subtitle, bool withLine) {
     tft.println(subtitle);
 
     if (withLine) {
-        String line = "";
-        for (byte i = 0; i < subtitle.length(); i++) line += "-";
+        // reserve evita o realloc (e a copia) do acumulador a cada caractere.
+        String line;
+        line.reserve(subtitle.length());
+        for (size_t i = 0; i < subtitle.length(); i++) line += '-';
 
         tft.setCursor(cursorX, tft.getCursorY());
         tft.println(line);
     }
 }
 
-void printFootnote(String text) {
+void printFootnote(const String &text) {
     tft.setTextSize(FP);
     tft.drawRightString(text, tftWidth - BORDER_PAD_X, tftHeight - BORDER_PAD_X - FP * LH, SMOOTH_FONT);
 }
 
-void printCenterFootnote(String text) {
+void printCenterFootnote(const String &text) {
     tft.fillRect(10, tftHeight - BORDER_PAD_X - FP * LH, tftWidth - 20, FP * LH, bruceConfig.bgColor);
     tft.setTextSize(FP);
     tft.drawCentreString(text, tftWidth / 2, tftHeight - BORDER_PAD_X - FP * LH, SMOOTH_FONT);
@@ -1016,7 +1032,7 @@ void drawWireguardStatus(int x, int y) {
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
 #define MAX_ITEMS (int)(tftHeight - 20) / (LH * FM)
-Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
+Opt_Coord listFiles(int index, const std::vector<FileList> &fileList) {
     Opt_Coord coord;
     tft.drawPixel(0, 0, bruceConfig.bgColor);
     if (index == 0) {
@@ -1033,7 +1049,7 @@ Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
         if (start < 0) start = 0;
     }
     int nchars = (tftWidth - 20) / (6 * tft.getTextSize());
-    String txt = ">";
+    if (nchars < 1) nchars = 1;
     while (i < arraySize) {
         if (i >= start) {
             tft.setCursor(10, tft.getCursorY());
@@ -1042,17 +1058,23 @@ Opt_Coord listFiles(int index, std::vector<FileList> fileList) {
             else if (fileList[i].operation == true) tft.setTextColor(ALCOLOR, bruceConfig.bgColor);
             else { tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor); }
 
+            // Buffer de pilha: evita 2 objetos String temporarios por item.
+            char txt[96];
+            size_t len = 0;
             if (index == i) {
-                txt = ">";
+                txt[len++] = '>';
                 coord.x = 10 + FM * LW;
                 coord.y = tft.getCursorY();
                 coord.size = nchars;
                 coord.fgcolor =
                     fileList[i].folder ? getColorVariation(bruceConfig.priColor) : bruceConfig.priColor;
                 coord.bgcolor = bruceConfig.bgColor;
-            } else txt = " ";
-            txt += fileList[i].filename + "                 ";
-            tft.println(txt.substring(0, nchars));
+            } else txt[len++] = ' ';
+            const char *name = fileList[i].filename.c_str();
+            while (*name && len < (size_t)nchars && len < sizeof(txt) - 1) { txt[len++] = *name++; }
+            while (len < (size_t)nchars && len < sizeof(txt) - 1) { txt[len++] = ' '; }
+            txt[len] = '\0';
+            tft.println(txt);
         }
         i++;
         if (i == (start + MAX_ITEMS) || i == arraySize) break;

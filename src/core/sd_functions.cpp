@@ -196,7 +196,7 @@ bool ToggleSDCard() {
 ** Function name: deleteFromSd
 ** Description:   delete file or folder
 ***************************************************************************************/
-bool deleteFromSd(FS fs, String path) {
+bool deleteFromSd(FS fs, const String &path) {
     File dir = fs.open(path);
     Serial.printf("Deleting: %s\n", path.c_str());
     if (!dir.isDirectory()) {
@@ -228,7 +228,7 @@ bool deleteFromSd(FS fs, String path) {
 ** Function name: renameFile
 ** Description:   rename file or folder
 ***************************************************************************************/
-bool renameFile(FS fs, String path, String filename) {
+bool renameFile(FS fs, const String &path, const String &filename) {
     String newName = keyboard(filename, 76, "Digite o novo Nome:");
     // Rename the file of folder
     if (fs.rename(path, path.substring(0, path.lastIndexOf('/')) + "/" + newName)) {
@@ -319,7 +319,7 @@ bool copyToFs(FS from, FS to, String path, bool draw) {
 ** Function name: copyFile
 ** Description:   copy file address to memory
 ***************************************************************************************/
-bool copyFile(FS fs, String path) {
+bool copyFile(FS fs, const String &path) {
     File file = fs.open(path, FILE_READ);
     if (!file.isDirectory()) {
         fileToCopy = path;
@@ -336,7 +336,7 @@ bool copyFile(FS fs, String path) {
 ** Function name: pasteFile
 ** Description:   paste file to new folder
 ***************************************************************************************/
-bool pasteFile(FS fs, String path) {
+bool pasteFile(FS fs, const String &path) {
     // Using Global Buffer
 
     // Abrir o arquivo original
@@ -395,7 +395,7 @@ bool pasteFile(FS fs, String path) {
 ** Function name: createFolder
 ** Description:   create new folder
 ***************************************************************************************/
-bool createFolder(FS fs, String path) {
+bool createFolder(FS fs, const String &path) {
     String foldername = keyboard("", 76, "Nome da Pasta: ");
     if (!fs.mkdir(path + "/" + foldername)) {
         displayRedStripe("Nao foi possivel criar pasta");
@@ -425,7 +425,7 @@ String readLineFromFile(File myFile) {
 ** Description:   read a small (<3KB) file and return its contents as a single string
 **                on any error returns an empty string
 ***************************************************************************************/
-String readSmallFile(FS &fs, String filepath) {
+String readSmallFile(FS &fs, const String &filepath) {
     String fileContent = "";
     File file;
 
@@ -506,7 +506,7 @@ size_t getFileSize(FS &fs, String filepath) {
     return fileSize;
 }
 
-String md5File(FS &fs, String filepath) {
+String md5File(FS &fs, const String &filepath) {
     File file = fs.open(filepath, FILE_READ);
     if (!file) return "";
 
@@ -530,7 +530,7 @@ String md5File(FS &fs, String filepath) {
     return String(s);
 }
 
-String crc32File(FS &fs, String filepath) {
+String crc32File(FS &fs, const String &filepath) {
     File file = fs.open(filepath, FILE_READ);
     if (!file) return "";
 
@@ -556,49 +556,56 @@ bool sortList(const FileList &a, const FileList &b) {
     if (a.folder != b.folder) {
         return a.folder > b.folder; // true if a is a folder and b is not
     }
-    // Order items alphabetically
-    String fa = a.filename.c_str();
-    fa.toUpperCase();
-    String fb = b.filename.c_str();
-    fb.toUpperCase();
-    return fa < fb;
+    // Order items alphabetically.
+    // strcasecmp evita alocar duas Strings (uma por item comparado) em cada
+    // comparacao do std::sort, que sao ~N*log2(N) comparacoes.
+    return strcasecmp(a.filename.c_str(), b.filename.c_str()) < 0;
 }
 
 /***************************************************************************************
 ** Function name: checkExt
 ** Description:   check file extension
 ***************************************************************************************/
-bool checkExt(String ext, String pattern) {
-    ext.toUpperCase();
-    pattern.toUpperCase();
-    if (ext == pattern) return true;
+bool checkExt(const String &ext, const String &pattern) {
+    // ext e pattern ja chegam normalizados em maiusculas pelo chamador.
+    // A comparacao usa os buffers diretamente, sem criar uma String por extensao.
+    const char *e = ext.c_str();
+    const char *p = pattern.c_str();
+    size_t eLen = ext.length();
+    size_t pLen = pattern.length();
+
+    if (eLen == pLen && strcmp(e, p) == 0) return true;
 
     // If the pattern is a list of extensions (e.g., "TXT|JPG|PNG"), split and check
-    int start = 0;
-    int end = pattern.indexOf('|');
-    while (end != -1) {
-        String currentExt = pattern.substring(start, end);
-        if (ext == currentExt) { return true; }
+    size_t start = 0;
+    while (start <= pLen) {
+        size_t end = start;
+        while (end < pLen && p[end] != '|') end++;
+        size_t len = end - start;
+        if (eLen == len && strncasecmp(e, p + start, len) == 0) return true;
+        if (end >= pLen) break;
         start = end + 1;
-        end = pattern.indexOf('|', start);
     }
 
-    // Check the last extension in the list
-    String lastExt = pattern.substring(start);
-    return ext == lastExt;
+    return false;
 }
 
 /***************************************************************************************
 ** Function name: readFs
 ** Description:   read files/folders from a folder
 ***************************************************************************************/
-void readFs(FS fs, String folder, String allowed_ext) {
+void readFs(FS fs, const String &folder, const String &allowed_ext) {
     int allFilesCount = 0;
     fileList.clear();
     FileList object;
 
     File root = fs.open(folder);
     if (!root || !root.isDirectory()) { return; }
+
+    // O padrao de extensao e normalizado uma unica vez, em vez de por arquivo.
+    String upperPattern = allowed_ext;
+    upperPattern.toUpperCase();
+    const bool acceptAll = (upperPattern == "*");
 
     while (true) {
         bool isDir;
@@ -615,7 +622,8 @@ void readFs(FS fs, String folder, String allowed_ext) {
         } else {
             int dotIndex = nameOnly.lastIndexOf(".");
             String ext = dotIndex >= 0 ? nameOnly.substring(dotIndex + 1) : "";
-            if (allowed_ext == "*" || checkExt(ext, allowed_ext)) {
+            ext.toUpperCase();
+            if (acceptAll || checkExt(ext, upperPattern)) {
                 object.filename = nameOnly;
                 object.folder = false;
                 object.operation = false;
@@ -988,7 +996,7 @@ String loopSD(FS &fs, bool filePicker, String allowed_ext, String rootPath) {
 **  Function: viewFile
 **  Display file content
 **********************************************************************/
-void viewFile(FS fs, String filepath) {
+void viewFile(FS fs, const String &filepath) {
     File file = fs.open(filepath, FILE_READ);
     if (!file) return;
 
@@ -1037,7 +1045,7 @@ bool getFsStorage(FS *&fs) {
 **  Function: fileInfo
 **  Display file info
 **********************************************************************/
-void fileInfo(FS fs, String filepath) {
+void fileInfo(FS fs, const String &filepath) {
     File file = fs.open(filepath, FILE_READ);
     if (!file) return;
 

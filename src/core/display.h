@@ -191,17 +191,17 @@ void drawSubmenu(int index, std::vector<Option> &options, const char *title);
 
 void drawStatusBar();
 void drawMainBorder(bool clear = true);
-void drawMainBorderWithTitle(String title, bool clear = true);
-void printTitle(String title);
-void printSubtitle(String subtitle, bool withLine = true);
-void printFootnote(String text);
-void printCenterFootnote(String text);
+void drawMainBorderWithTitle(const String &title, bool clear = true);
+void printTitle(const String &title);
+void printSubtitle(const String &subtitle, bool withLine = true);
+void printFootnote(const String &text);
+void printCenterFootnote(const String &text);
 
-Opt_Coord listFiles(int index, std::vector<FileList> fileList);
+Opt_Coord listFiles(int index, const std::vector<FileList> &fileList);
 
 void drawWireguardStatus(int x, int y);
 
-void progressHandler(int progress, size_t total, String message = "Running, Wait");
+void progressHandler(int progress, size_t total, const String &message = "Running, Wait");
 
 bool __attribute__((weak)) isCharging();
 

@@ -131,7 +131,7 @@ static void releasePacketCopy(wifi_promiscuous_pkt_t *packet);
 static uint64_t macToKey(const void *mac); // changed to const void *
 static void copyMac(uint8_t *dest, const uint8_t *src);
 static String extractSsid(const wifi_promiscuous_pkt_t *packet);
-static void copySsidToBuffer(const String &ssid, char *buffer, size_t len);
+static void copySsidToBuffer(const char *ssid, char *buffer, size_t len);
 static String sanitizeSsid(const char *ssid);
 static String macToHex(const uint8_t *mac);
 static String buildHandshakePath(const uint8_t *mac, const char *ssid);
@@ -518,10 +518,11 @@ static uint64_t macToKey(const void *mac) {
 
 static void copyMac(uint8_t *dest, const uint8_t *src) { memcpy(dest, src, 6); }
 
-static void copySsidToBuffer(const String &ssid, char *buffer, size_t len) {
-    if (!buffer || len == 0) return;
-    size_t copyLen = std::min<size_t>(ssid.length(), len - 1);
-    memcpy(buffer, ssid.c_str(), copyLen);
+static void copySsidToBuffer(const char *ssid, char *buffer, size_t len) {
+    if (!buffer || len == 0 || !ssid) return;
+    size_t ssidLen = strlen(ssid);
+    size_t copyLen = std::min<size_t>(ssidLen, len - 1);
+    memcpy(buffer, ssid, copyLen);
     buffer[copyLen] = '\0';
 }
 
@@ -536,12 +537,16 @@ static String extractSsid(const wifi_promiscuous_pkt_t *packet) {
         uint8_t tagLength = payload[offset + 1];
         if (offset + 2 + tagLength > len) break;
         if (tagNumber == 0x00) {
-            String ssid = "";
-            for (int i = 0; i < tagLength; ++i) {
+            // Monta o SSID em buffer de pilha: o append por caractere fazia
+            // um realloc do String a cada byte impresso.
+            char ssidBuf[33];
+            size_t ssidLen = 0;
+            for (int i = 0; i < tagLength && ssidLen < sizeof(ssidBuf) - 1; ++i) {
                 uint8_t chValue = payload[offset + 2 + i];
-                if (isprint(chValue)) { ssid += (char)chValue; }
+                if (isprint(chValue)) { ssidBuf[ssidLen++] = (char)chValue; }
             }
-            return ssid;
+            ssidBuf[ssidLen] = '\0';
+            return String(ssidBuf);
         }
         offset += 2 + tagLength;
     }
@@ -840,7 +845,8 @@ void sniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
     item.saveHandshake = saveHandshake;
     item.saveDeauth = saveDeauth;
     copyMac(item.bssid, frameInfo.apAddr);
-    String ssidLabel = frameInfo.ssid.length() == 0 ? "UNKNOWN" : frameInfo.ssid;
+    // Evita criar um String temporario por pacote no callback do driver WiFi.
+    const char *ssidLabel = frameInfo.ssid.length() == 0 ? "UNKNOWN" : frameInfo.ssid.c_str();
     copySsidToBuffer(ssidLabel, item.ssid, sizeof(item.ssid));
 
     BaseType_t taskWoken = pdFALSE;

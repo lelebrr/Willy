@@ -43,15 +43,27 @@ void setupWillyWeb(AsyncWebServer* server) {
             return;
         }
 
-        // Return only last portion if large
-        String tail = "";
-        if (file.size() > 5000) {
-            file.seek(file.size() - 5000);
+        // Return only last portion if large.
+        // A leitura e feita em bloco: a versao anterior fazia uma chamada de
+        // read() por byte (ate 5000 chamadas de FS) e um append por byte.
+        const size_t maxTail = 5000;
+        size_t fileSize = file.size();
+        size_t tailLen = fileSize;
+        if (fileSize > maxTail) {
+            file.seek(fileSize - maxTail);
+            tailLen = maxTail;
         }
-        while (file.available()) {
-            tail += (char)file.read();
+
+        char *tail = (char *)malloc(tailLen + 1);
+        if (tail) {
+            size_t readBytes = file.readBytes(tail, tailLen);
+            tail[readBytes] = '\0';
+            file.close();
+            request->send(200, "text/plain", (const uint8_t *)tail, readBytes);
+            free(tail);
+        } else {
+            file.close();
+            request->send(500, "text/plain", "Out of memory");
         }
-        file.close();
-        request->send(200, "text/plain", tail);
     });
 }

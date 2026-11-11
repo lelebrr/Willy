@@ -448,7 +448,7 @@ static bool startAsyncPlayback(
 
 // ===== CORE PLAYBACK FUNCTIONS =====
 
-bool playAudioFile(FS *fs, String filepath, PlaybackMode mode) {
+bool playAudioFile(FS *fs, const String &filepath, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
     if (!validateAudioFile(fs, filepath)) { return false; }
@@ -474,10 +474,12 @@ bool playAudioFile(FS *fs, String filepath, PlaybackMode mode) {
 
     AudioGenerator *generator = NULL;
 
-    filepath.toLowerCase();
-    if (filepath.endsWith(".txt") || filepath.endsWith(".rtttl")) generator = new AudioGeneratorRTTTL();
-    else if (filepath.endsWith(".wav")) generator = new AudioGeneratorWAV();
-    else if (filepath.endsWith(".mod")) generator = new AudioGeneratorMOD();
+    // toLowerCase() altera a String: usa copia local para nao mexer no argumento.
+    String lowerPath = filepath;
+    lowerPath.toLowerCase();
+    if (lowerPath.endsWith(".txt") || lowerPath.endsWith(".rtttl")) generator = new AudioGeneratorRTTTL();
+    else if (lowerPath.endsWith(".wav")) generator = new AudioGeneratorWAV();
+    else if (lowerPath.endsWith(".mod")) generator = new AudioGeneratorMOD();
     else if (filepath.endsWith(".opus")) generator = new AudioGeneratorOpus();
     else if (filepath.endsWith(".aac")) generator = new AudioGeneratorAAC();
     else if (filepath.endsWith(".flac")) generator = new AudioGeneratorFLAC();
@@ -528,11 +530,13 @@ bool playAudioFile(FS *fs, String filepath, PlaybackMode mode) {
     return startAsyncPlayback(generator, source, audioout, filepath);
 }
 
-bool playAudioRTTTLString(String song, PlaybackMode mode) {
+bool playAudioRTTTLString(const String &song, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
-    song.trim();
-    if (song == "") {
+    // trim() altera a String: usa copia local para nao mexer no argumento.
+    String songTrimmed = song;
+    songTrimmed.trim();
+    if (songTrimmed == "") {
         Serial.println("ERROR: Empty RTTTL string");
         return false;
     }
@@ -554,7 +558,7 @@ bool playAudioRTTTLString(String song, PlaybackMode mode) {
         return false;
     }
 
-    AudioFileSource *source = new AudioFileSourcePROGMEM(song.c_str(), song.length());
+    AudioFileSource *source = new AudioFileSourcePROGMEM(songTrimmed.c_str(), songTrimmed.length());
     if (!source) {
         delete generator;
         delete audioout;
@@ -595,11 +599,13 @@ bool playAudioRTTTLString(String song, PlaybackMode mode) {
     Serial.println("Start RTTTL (async)");
     return startAsyncPlayback(generator, source, audioout, "RTTTL");
 }
-bool tts(String text, PlaybackMode mode) {
+bool tts(const String &text, PlaybackMode mode) {
     if (!bruceConfig.soundEnabled) return false;
 
-    text.trim();
-    if (text == "") {
+    // trim() altera a String: usa copia local para nao mexer no argumento.
+    String textTrimmed = text;
+    textTrimmed.trim();
+    if (textTrimmed == "") {
         Serial.println("ERROR: Empty TTS text");
         return false;
     }
@@ -633,7 +639,7 @@ bool tts(String text, PlaybackMode mode) {
     }
 
     // TTS synthesis (always blocking)
-    sam->Say(audioout, text.c_str());
+    sam->Say(audioout, textTrimmed.c_str());
 
     delete sam;
     delete audioout;
@@ -642,7 +648,7 @@ bool tts(String text, PlaybackMode mode) {
     return true;
 }
 
-bool isAudioFile(String filepath) {
+bool isAudioFile(const String &filepath) {
     return filepath.endsWith(".opus") || filepath.endsWith(".rtttl") || filepath.endsWith(".txt") ||
            filepath.endsWith(".wav") || filepath.endsWith(".mod") || filepath.endsWith(".mp3") ||
            filepath.endsWith(".aac") || filepath.endsWith(".flac");

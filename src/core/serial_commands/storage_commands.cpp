@@ -26,7 +26,8 @@ uint32_t listCallback(cmd *c) {
         // Serial.printf("Path: %s (isDir: %d)\n", fullPath.c_str(), isDir);
 
         serialDevice->print(nameOnly);
-        if (esp_get_free_heap_size() > (String("Fo:" + nameOnly + ":0\n").length()) + 1024) {
+        // "Fo:" (3) + nameOnly + ":0\n" (3): o tamanho maximo da linha e nameOnly.length() + 6.
+        if (esp_get_free_heap_size() > (nameOnly.length() + 6) + 1024) {
             if (isDir) {
                 // Serial.printf("Directory: %s\n", fullPath.c_str());
                 serialDevice->println("\t<DIR>");
