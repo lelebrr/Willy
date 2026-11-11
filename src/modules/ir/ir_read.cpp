@@ -297,9 +297,13 @@ String IrRead::parse_raw_signal() {
     String signal_code = "";
     signal_code.reserve(raw_data_len * 6);
 
+    // itoa() direto evita criar um objeto String temporario por amostra
+    // (um sinal RAW tem centenas/milhares de amostras).
+    // Mantem o formato DECIMAL do original (String(uint16_t) -> decimal).
+    char numBuf[12];
     for (uint16_t i = 0; i < raw_data_len; i++) {
-        signal_code += String(rawcode[i]);
-        signal_code += " ";
+        signal_code += itoa(rawcode[i], numBuf, 10);
+        signal_code += ' ';
     }
 
     delete[] rawcode;
@@ -310,13 +314,18 @@ String IrRead::parse_raw_signal() {
 }
 
 void IrRead::append_to_file_str(String btn_name) {
-    strDeviceContent += "name: " + btn_name + "\n";
+    // Concatena direto: evita 2 Strings temporarios por chamada.
+    strDeviceContent += "name: ";
+    strDeviceContent += btn_name;
+    strDeviceContent += '\n';
 
     if (raw) {
         strDeviceContent += "type: raw\n";
         strDeviceContent += "frequency: " + String(IR_FREQUENCY) + "\n";
         strDeviceContent += "duty_cycle: " + String(DUTY_CYCLE) + "\n";
-        strDeviceContent += "data: " + parse_raw_signal() + "\n";
+        strDeviceContent += "data: ";
+        strDeviceContent += parse_raw_signal();
+        strDeviceContent += '\n';
     } else {
         // parsed signal  https://github.com/jamisonderek/flipper-zero-tutorials/wiki/Infrared
         strDeviceContent += "type: parsed\n";

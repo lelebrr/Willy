@@ -351,7 +351,7 @@ static JSValue func_storage_read(JSContext *ctx, JSValue *this_val, int argc, JS
     if (!path) return JS_EXCEPTION;
 
     FS *fs = &LittleFS;
-    if (String(path).startsWith("/sd")) fs = &SD;
+    if (strncmp(path, "/sd", 3) == 0) fs = &SD;
 
     if (!fs->exists(path)) return JS_UNDEFINED;
     File f = fs->open(path, "r");
@@ -370,7 +370,7 @@ static JSValue func_storage_write(JSContext *ctx, JSValue *this_val, int argc, J
     if (!path || !content) return JS_EXCEPTION;
 
     FS *fs = &LittleFS;
-    if (String(path).startsWith("/sd")) fs = &SD;
+    if (strncmp(path, "/sd", 3) == 0) fs = &SD;
 
     File f = fs->open(path, append ? "a" : "w");
     if (!f) return JS_FALSE;
@@ -386,7 +386,7 @@ static JSValue func_storage_remove(JSContext *ctx, JSValue *this_val, int argc, 
     if (!path) return JS_EXCEPTION;
 
     FS *fs = &LittleFS;
-    if (String(path).startsWith("/sd")) fs = &SD;
+    if (strncmp(path, "/sd", 3) == 0) fs = &SD;
 
     return fs->remove(path) ? JS_TRUE : JS_FALSE;
 }
@@ -398,7 +398,7 @@ static JSValue func_storage_exists(JSContext *ctx, JSValue *this_val, int argc, 
     if (!path) return JS_EXCEPTION;
 
     FS *fs = &LittleFS;
-    if (String(path).startsWith("/sd")) fs = &SD;
+    if (strncmp(path, "/sd", 3) == 0) fs = &SD;
 
     return fs->exists(path) ? JS_TRUE : JS_FALSE;
 }
@@ -419,7 +419,7 @@ static JSValue func_subghz_tx(JSContext *ctx, JSValue *this_val, int argc, JSVal
 
     if (String(data).endsWith(".sub")) {
         FS *fs = &LittleFS;
-        if (String(data).startsWith("/sd")) fs = &SD;
+        if (strncmp(data, "/sd", 3) == 0) fs = &SD;
         return JS_NewBool(txSubFile(fs, data, true));
     } else {
         // Simple RC Switch send simulation/proxy
@@ -433,7 +433,7 @@ static JSValue func_badusb_run(JSContext *ctx, JSValue *this_val, int argc, JSVa
     JSCStringBuf buf;
     const char *filename = JS_TO_CSTRING(ctx, argv[0], &buf);
     FS *fs = &LittleFS;
-    if (String(filename).startsWith("/sd")) fs = &SD;
+    if (strncmp(filename, "/sd", 3) == 0) fs = &SD;
 
     HIDInterface *hid = nullptr;
     ducky_startKb(hid, false);

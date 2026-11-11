@@ -571,13 +571,16 @@ int PN532::write_data_blocks() {
     bool blockWriteSuccess;
     int totalSize = strAllPages.length();
 
-    while (strAllPages.length() > 0) {
-        lineBreakIndex = strAllPages.indexOf("\n");
+    // Percorre por indice: a versao anterior recriava strAllPages a cada
+    // pagina (substring do resto), recopiando todo o conteudo a cada vez.
+    size_t pos = 0;
+    while (pos < strAllPages.length()) {
+        lineBreakIndex = strAllPages.indexOf("\n", pos);
 
         if (lineBreakIndex < 0) { break; } // Added for .JS and BugFix
 
-        pageLine = strAllPages.substring(0, lineBreakIndex);
-        strAllPages = strAllPages.substring(lineBreakIndex + 1);
+        pageLine = strAllPages.substring(pos, lineBreakIndex);
+        pos = lineBreakIndex + 1;
 
         pageIndex = pageLine.substring(5, pageLine.indexOf(":")).toInt();
         strBytes = pageLine.substring(pageLine.indexOf(":") + 1);
@@ -607,7 +610,7 @@ int PN532::write_data_blocks() {
 
         if (!blockWriteSuccess) return FAILURE;
 
-        progressHandler(totalSize - strAllPages.length(), totalSize, "Writing data blocks...");
+        progressHandler(totalSize - (strAllPages.length() - pos), totalSize, "Writing data blocks...");
     }
 
     return SUCCESS;

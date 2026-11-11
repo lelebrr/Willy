@@ -504,15 +504,27 @@ def test_checkExt_public_contract():
 
 
 def test_decrypt_odd_hex():
-    """decryptString: hex impar produz 1 byte extra (como strtol no original)."""
+    """decryptString: hex impar produz 1 byte extra (como strtol no original).
+
+    strtol(.., 16) le no maximo os digitos hex validos e ignora o resto:
+    "AB"->0xAB, "A"->0x0A, "1z"->0x01, "z1"->0x00.
+    """
     KEY = "WillyFirmwareCoreRefinement"
+    HEXDIGITS = "0123456789abcdefABCDEF"
 
     def original(hex_s):
-        out = []
-        i = 0
+        out, i = [], 0
         while i < len(hex_s):
             chunk = hex_s[i:i + 2]      # substring CLAMPA no fim
-            c = int(chunk, 16) if chunk else 0
+            j = 0
+            while j < len(chunk) and chunk[j] in HEXDIGITS:
+                j += 1
+            if j == 0:
+                c = 0
+            elif j == 1:
+                c = int(chunk[:1], 16)
+            else:
+                c = int(chunk[:2], 16)
             out.append(chr(c ^ ord(KEY[(i // 2) % len(KEY)])))
             i += 2
         return "".join(out)
@@ -526,17 +538,24 @@ def test_decrypt_odd_hex():
             if "A" <= c <= "F":
                 return ord(c) - 55
             return 0
-        out = []
-        i = 0
+        out, i = [], 0
         while i < len(hex_s):
-            hi = nib(hex_s[i])
-            lo = nib(hex_s[i + 1]) if i + 1 < len(hex_s) else nib(hex_s[i])
-            c = (hi << 4) | lo
+            n = 0
+            while n < len(hex_s) - i and n < 2 and hex_s[i + n] in HEXDIGITS:
+                n += 1
+            if n == 0:
+                c = 0
+            elif n == 1:
+                c = nib(hex_s[i])
+            else:
+                c = (nib(hex_s[i]) << 4) | nib(hex_s[i + 1])
             out.append(chr(c ^ ord(KEY[(i // 2) % len(KEY)])))
             i += 2
         return "".join(out)
 
-    for hex_s in ["", "61", "6162", "616263", "deadbeef", "0a0b0c"]:
+    for hex_s in ["", "61", "6162", "616263", "deadbeef", "0a0b0c",
+                  "6", "61626", "abc", "1z", "z1", "0z", "z0",
+                  "A", "zz", "ffz"]:
         check(f"decrypt({hex_s!r})", optimized(hex_s), original(hex_s))
 
 

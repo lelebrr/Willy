@@ -291,7 +291,7 @@ bool copyToFs(FS from, FS to, String path, bool draw) {
             return false;
         } else {
             prog += bytesRead;
-            float rad = 360 * prog / tot;
+            float rad = (tot > 0) ? (360.0f * prog / tot) : 0.0f;
             if (draw)
                 tft.drawArc(
                     tftWidth / 2,
@@ -359,7 +359,8 @@ bool pasteFile(FS fs, const String &path) {
     int tot = sourceFile.size();
     int prog = 0;
     const int bufSize = 1024;
-    uint8_t buff[1024] = {0};
+    // Buffer estatico: 1 KB na pilha pode estourar a stack da task.
+    static uint8_t buff[bufSize] = {0};
     // tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, bruceConfig.priColor);
     while ((bytesRead = sourceFile.read(buff, bufSize)) > 0) {
         if (destFile.write(buff, bytesRead) != bytesRead) {
@@ -369,7 +370,7 @@ bool pasteFile(FS fs, const String &path) {
             return false;
         } else {
             prog += bytesRead;
-            float rad = 360 * prog / tot;
+            float rad = (tot > 0) ? (360.0f * prog / tot) : 0.0f;
             tft.drawArc(
                 tftWidth / 2,
                 tftHeight / 2,

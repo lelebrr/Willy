@@ -237,17 +237,22 @@ bool RFID125::write_file(String filename) {
 }
 
 void RFID125::format_data() {
+    // itoa() direto evita criar um objeto String temporario por byte.
+    // Mantem o formato DECIMAL do original (String(uint8_t) -> decimal).
+    char numBuf[8];
     _printable_data = "";
+    _printable_data.reserve((size_t)(RFID125_PACKET_SIZE - 4) * 4);
     for (byte i = 1; i < RFID125_PACKET_SIZE - 3; i += 2) {
-        _printable_data += String(_tag_data[i]);
-        _printable_data += String(_tag_data[i + 1]);
-        _printable_data += " ";
+        _printable_data += itoa(_tag_data[i], numBuf, 10);
+        _printable_data += itoa(_tag_data[i + 1], numBuf, 10);
+        _printable_data += ' ';
     }
     _printable_data.trim();
     _printable_data.toUpperCase();
 
-    _printable_checksum = String(_tag_data[RFID125_PACKET_SIZE - 3]);
-    _printable_checksum += String(_tag_data[RFID125_PACKET_SIZE - 2]);
+    char sumBuf[8];
+    _printable_checksum = itoa(_tag_data[RFID125_PACKET_SIZE - 3], sumBuf, 10);
+    _printable_checksum += itoa(_tag_data[RFID125_PACKET_SIZE - 2], sumBuf, 10);
     _printable_checksum.trim();
     _printable_checksum.toUpperCase();
 }

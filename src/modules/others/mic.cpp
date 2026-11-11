@@ -261,7 +261,8 @@ void mic_test_one_task() {
     if (!plan) {
         Serial.println("Error alloc fft plan, exiting");
         displayError("Not Enough RAM", true);
-        free(frameBuffer);
+        // frameBuffer pode estar em PSRAM (ps_malloc): free() nao serve.
+        if (psramFound()) { free_psram(frameBuffer); } else { free(frameBuffer); }
         free(x_to_index_mul);
         return;
     }
@@ -312,7 +313,8 @@ void mic_test_one_task() {
     i2s_channel_disable(i2s_chan);
 
     fft_destroy(plan);
-    free(frameBuffer);
+    // frameBuffer pode estar em PSRAM (ps_malloc): free() nao serve.
+    if (psramFound()) { free_psram(frameBuffer); } else { free(frameBuffer); }
     free(x_to_index_mul);
 }
 

@@ -326,6 +326,8 @@ void saveHandshake(const wifi_promiscuous_pkt_t *packet, bool beacon, FS &Fs, co
 static String sanitizeSsid(const char *ssid) {
     if (!ssid || ssid[0] == '\0') { return "UNKNOWN"; }
     String sanitized = "";
+    // reserve evita o realloc (e a copia) a cada caractere.
+    sanitized.reserve(MAX_CAPTURE_SSID_LEN + 8);
     for (size_t i = 0; ssid[i] != '\0' && i < MAX_CAPTURE_SSID_LEN; ++i) {
         const char c = ssid[i];
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' ||

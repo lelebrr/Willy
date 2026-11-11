@@ -96,11 +96,11 @@ int32_t usbWriteCallback(uint32_t lba, uint32_t offset, uint8_t *buffer, uint32_
     const uint32_t secSize = SD.sectorSize();
     if (secSize == 0) return -1; // disk error
 
-    // Write blocs
+    // Write blocs.
+    // O buffer ja contem os dados do setor: a copia intermediaria (VLA de
+    // 512 bytes na pilha, por setor) era desnecessaria.
     for (uint32_t x = 0; x < bufsize / secSize; ++x) {
-        uint8_t blkBuffer[secSize];
-        memcpy(blkBuffer, buffer + secSize * x, secSize);
-        if (!SD.writeRAW(blkBuffer, lba + x)) {
+        if (!SD.writeRAW(buffer + secSize * x, lba + x)) {
             return -1; // write error
         }
     }

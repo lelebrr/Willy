@@ -915,13 +915,15 @@ String BruceConfig::encryptString(const String &input) const {
 
 // Converte um par de digitos hex em um byte.
 // Reproduz o comportamento do strtol(.., 16) usado na versao original:
-// caracteres invalidos resultam em 0.
+//   "AB" -> 0xAB | "A" -> 0x0A | "1z" -> 0x01 | "z1" -> 0x00
+// strtol le no maximo os digitos hex validos e ignora o restante.
 static inline uint8_t hexPairToByte(const char *p, size_t remaining) {
+    size_t n = 0;
+    while (n < remaining && n < 2 && isxdigit((unsigned char)p[n])) { n++; }
+    if (n == 0) return 0;              // nenhum digito valido -> 0
     int hi = hexCharToDecimal(p[0]);
-    int lo = (remaining > 1) ? hexCharToDecimal(p[1]) : hexCharToDecimal(p[0]);
-    // strtol ignora o que nao for hex: os nibbles invalidos viram 0.
-    if (!isxdigit((unsigned char)p[0])) hi = 0;
-    if (remaining > 1 && !isxdigit((unsigned char)p[1])) lo = 0;
+    if (n == 1) return (uint8_t)hi;   // strtol("A", 16) == 0x0A (nao 0xA0)
+    int lo = hexCharToDecimal(p[1]);
     return (uint8_t)((hi << 4) | lo);
 }
 
