@@ -1,0 +1,34 @@
+.pio/build/CYD-2USB/lib2c7/lvgl/misc/lv_mem.c.o: \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_mem.c \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_mem.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../lv_conf_internal.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../lv_conf_kconfig.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/dio_qspi/include/sdkconfig.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_attr.h \
+ F:/Willy/lv_conf.h .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_types.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_tlsf.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_gc.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_ll.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_timer.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../hal/lv_hal_tick.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/lv_conf_internal.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../draw/lv_img_cache.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../draw/lv_img_decoder.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/lv_conf_internal.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../draw/lv_img_buf.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_color.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/lv_conf_internal.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_assert.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_log.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_types.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_mem.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_math.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_area.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_fs.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_types.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../draw/lv_draw_mask.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_math.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/../core/lv_obj_pos.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_area.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_assert.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/misc/lv_log.h

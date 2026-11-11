@@ -1,0 +1,301 @@
+
+
+#pragma once
+
+#include "fl/stl/type_traits.h"
+#include "fl/system/sketch_macros.h"
+#include "fl/stl/int.h"
+
+// Note: fl/stl/cstdio.h intentionally NOT included directly — workaround
+// for zackees/zccache#619 (Windows PCH path-spelling drift defeats
+// `#pragma once` across the PCH boundary). istream.h only needs one
+// cstdio.h symbol — `fl::available()` — so forward-declare it here
+// and let consumers that need the full cstdio API include it themselves.
+#include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
+
+namespace fl {
+    int available() FL_NO_EXCEPT;
+}
+
+namespace fl {
+
+class istream_real {
+private:
+    static const fl::size BUFFER_SIZE = 256;
+    // Every member has an initializer so the defaulted constructor is
+    // constexpr: the global `fl::cin` (which embeds one of these) is then
+    // constant-initialized in .bss with no dynamic initializer, and
+    // --gc-sections drops its 256-byte buffer from sketches that never
+    // read from it.
+    char mBuffer[BUFFER_SIZE] = {};
+    fl::size mBufferLen = 0;
+    fl::size mPos = 0;
+    bool mFailed = false;
+    
+    // Helper to read a line from input
+    bool readLine() FL_NO_EXCEPT;
+    
+    // Helper to skip whitespace
+    void skipWhitespace() FL_NO_EXCEPT;
+    
+    // Helper to read until whitespace or end
+    bool readToken(string& token) FL_NO_EXCEPT;
+    
+public:
+    istream_real() FL_NO_EXCEPT = default;
+    
+    // Check if stream is in good state
+    bool good() const FL_NO_EXCEPT { return !mFailed; }
+    bool fail() const FL_NO_EXCEPT { return mFailed; }
+    bool eof() const FL_NO_EXCEPT { return mPos >= mBufferLen && fl::available() == 0; }
+    
+    // Clear error state
+    void clear() FL_NO_EXCEPT { mFailed = false; }
+    
+    // Stream input operators
+    istream_real& operator>>(string& str) FL_NO_EXCEPT;
+    istream_real& operator>>(char& c) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::i8& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::u8& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::i16& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::i32& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::u32& n) FL_NO_EXCEPT;
+    istream_real& operator>>(float& f) FL_NO_EXCEPT;
+    istream_real& operator>>(double& d) FL_NO_EXCEPT;
+    
+    // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
+    // This only handles fl::size and fl::u16 from the fl:: namespace
+    template<typename T>
+    typename fl::enable_if<
+        fl::is_same<T, fl::size>::value ||
+        fl::is_same<T, fl::u16>::value,
+        istream_real&
+    >::type operator>>(T& n) FL_NO_EXCEPT;
+    
+    // Get a line from input
+    istream_real& getline(string& str) FL_NO_EXCEPT;
+    
+    // Get next character
+    int get() FL_NO_EXCEPT;
+    
+    // Put back a character
+    istream_real& putback(char c) FL_NO_EXCEPT;
+    
+    // Peek at next character without consuming it
+    int peek() FL_NO_EXCEPT;
+};
+
+// Function to get singleton instance of istream_real (for better linker elimination)
+istream_real& cin_real() FL_NO_EXCEPT;
+
+// Stub istream class that conditionally delegates to istream_real
+class istream {
+private:
+#if SKETCH_HAS_LARGE_MEMORY
+    istream_real mRealStream;
+#endif
+    
+public:
+    istream() FL_NO_EXCEPT = default;
+    
+    // Check if stream is in good state
+    bool good() const FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        return mRealStream.good();
+#else
+        return true; // Always good on memory-constrained platforms
+#endif
+    }
+    
+    bool fail() const FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        return mRealStream.fail();
+#else
+        return false; // Never fail on memory-constrained platforms
+#endif
+    }
+    
+    bool eof() const FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        return mRealStream.eof();
+#else
+        return true; // Always EOF on memory-constrained platforms
+#endif
+    }
+    
+    // Clear error state
+    void clear() FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream.clear();
+#endif
+    }
+    
+    // Stream input operators
+    istream& operator>>(string& str) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> str;
+#else
+        // No-op on memory-constrained platforms
+        str.clear();
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(char& c) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> c;
+#else
+        // No-op on memory-constrained platforms
+        c = '\0';
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(fl::i8& n) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(fl::u8& n) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(fl::i16& n) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(fl::i32& n) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(fl::u32& n) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(float& f) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> f;
+#else
+        // No-op on memory-constrained platforms
+        f = 0.0f;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(double& d) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> d;
+#else
+        // No-op on memory-constrained platforms
+        d = 0.0;
+#endif
+        return *this;
+    }
+    
+    // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
+    template<typename T>
+    typename fl::enable_if<
+        fl::is_same<T, fl::size>::value ||
+        fl::is_same<T, fl::u16>::value,
+        istream&
+    >::type operator>>(T& n) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    // Get a line from input
+    istream& getline(string& str) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream.getline(str);
+#else
+        // No-op on memory-constrained platforms
+        str.clear();
+#endif
+        return *this;
+    }
+    
+    // Get next character
+    int get() FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        return mRealStream.get();
+#else
+        // No-op on memory-constrained platforms
+        return -1;
+#endif
+    }
+    
+    // Put back a character
+    istream& putback(char c) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        mRealStream.putback(c);
+#else
+        FL_UNUSED(c);
+#endif
+        return *this;
+    }
+    
+    // Peek at next character without consuming it
+    int peek() FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+        return mRealStream.peek();
+#else
+        // No-op on memory-constrained platforms
+        return -1;
+#endif
+    }
+};
+
+// Global cin instance for input (now uses the stub)
+extern istream cin;
+
+// Template implementation for istream_real
+template<typename T>
+typename fl::enable_if<
+    fl::is_same<T, fl::size>::value ||
+    fl::is_same<T, fl::u16>::value,
+    istream_real&
+>::type istream_real::operator>>(T& n) FL_NO_EXCEPT {
+    // Use existing fl::u32 parsing logic for both fl::size and fl::u16
+    // since they're both unsigned integer types that fit in fl::u32
+    fl::u32 temp;
+    (*this) >> temp;
+    n = static_cast<T>(temp);
+    return *this;
+}
+
+} // namespace fl

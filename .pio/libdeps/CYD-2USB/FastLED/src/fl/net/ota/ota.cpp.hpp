@@ -1,0 +1,95 @@
+/// @file fl/net/ota/ota.cpp.hpp
+/// OTA (Over-The-Air) update implementation - wrapper around platform interface
+
+#include "fl/net/ota/ota.h"
+#include "platforms/ota.h"
+#include "fl/stl/noexcept.h"
+
+namespace fl {
+namespace net {
+
+// ============================================================================
+// OTA Wrapper Implementation
+// ============================================================================
+
+OTA::OTA() FL_NO_EXCEPT : mImpl(nullptr) {
+    // Lazy initialization - mImpl will be created on first method call
+}
+
+OTA::~OTA() FL_NO_EXCEPT {
+    // shared_ptr handles cleanup automatically
+}
+
+bool OTA::beginWiFi(const char* hostname, const char* password,
+                    const char* ssid, const char* wifi_pass) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    return mImpl->beginWiFi(hostname, password, ssid, wifi_pass);
+}
+
+bool OTA::begin(const char* hostname, const char* password) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    return mImpl->begin(hostname, password);
+}
+
+bool OTA::enableApFallback(const char* ap_ssid, const char* ap_pass) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    return mImpl->enableApFallback(ap_ssid, ap_pass);
+}
+
+void OTA::onProgress(ProgressCallback callback) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    mImpl->onProgress(callback);
+}
+
+void OTA::onError(ErrorCallback callback) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    mImpl->onError(callback);
+}
+
+void OTA::onState(StateCallback callback) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    mImpl->onState(callback);
+}
+
+void OTA::onBeforeReboot(void (*callback)()) FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    mImpl->onBeforeReboot(callback);
+}
+
+void OTA::poll() FL_NO_EXCEPT {
+    if (!mImpl) {
+        mImpl = platforms::IOTA::create();
+    }
+    mImpl->poll();
+}
+
+bool OTA::isConnected() const FL_NO_EXCEPT {
+    if (!mImpl) {
+        return false;
+    }
+    return mImpl->isConnected();
+}
+
+u8 OTA::getFailedServices() const FL_NO_EXCEPT {
+    if (!mImpl) {
+        return 0;
+    }
+    return mImpl->getFailedServices();
+}
+
+} // namespace net
+}  // namespace fl

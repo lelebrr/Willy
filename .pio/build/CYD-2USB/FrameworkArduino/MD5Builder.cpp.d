@@ -1,0 +1,19 @@
+.pio/build/CYD-2USB/FrameworkArduino/MD5Builder.cpp.o: \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/MD5Builder.cpp \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/HEXBuilder.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/WString.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/pgmspace.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/Stream.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/Print.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/newlib/platform_include/stdio.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/WString.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/Printable.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/MD5Builder.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_system/include/esp_system.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_err.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_compiler.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_attr.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_bit_defs.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_idf_version.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_rom/include/esp_rom_md5.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/HashBuilder.h

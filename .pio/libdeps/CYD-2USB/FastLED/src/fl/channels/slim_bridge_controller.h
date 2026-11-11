@@ -1,0 +1,267 @@
+/// @file slim_bridge_controller.h
+/// @brief Shared "slim bridge" legacy `addLeds<>()` controller for channel drivers.
+///
+/// Extracted (issue #4581, gap register A1-A12 in #4580) from the ESP32 RMT5
+/// legacy bridge prototyped in draft PR #4576
+/// (`platforms/esp/32/drivers/rmt/rmt_5/idf5_clockless.h`) and the
+/// `ClocklessIdf4` `reset_us` folding pattern. This header has NO platform
+/// includes -- it is pure `fl::` glue over `IChannelDriver` so every
+/// platform's legacy bridge controller can share one implementation and one
+/// conformance suite instead of re-deriving the enqueue/wait/encode dance
+/// per driver.
+
+#pragma once
+
+#include "fl/stl/static_assert.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/vector.h"
+
+#include "cpixel_ledcontroller.h"
+#include "fl/channels/data.h"
+#include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
+#include "fl/channels/bus_traits.h"  // IWYU pragma: keep (DriverTraits<Bus::X> satisfies the DriverTraits contract)
+#include "fl/channels/config.h"
+#include "fl/chipsets/encoders/pixel_iterator.h"
+#include "fl/log/log.h"
+#include "fl/system/sketch_macros.h"
+
+namespace fl {
+
+/// Preserve explicit build overrides while allowing a backend to choose its
+/// legacy default without changing other drivers or depending on include order.
+template <bool PLATFORM_DEFAULT = !FL_PLATFORM_HAS_LARGE_MEMORY>
+struct SlimBridgeDirectShow {
+#ifdef FL_SLIM_BRIDGE_DIRECT_SHOW
+    static constexpr bool value = (FL_SLIM_BRIDGE_DIRECT_SHOW != 0);
+#else
+    static constexpr bool value = PLATFORM_DEFAULT;
+#endif
+};
+
+namespace detail {
+template <typename Traits>
+auto reject_legacy_frame(int) FL_NO_EXCEPT -> decltype(Traits::rejectLegacyFrame(), void()) {
+    Traits::rejectLegacyFrame();
+}
+
+template <typename Traits>
+void reject_legacy_frame(...) FL_NO_EXCEPT {}
+
+template <typename Traits>
+auto show_batched_legacy(int) FL_NO_EXCEPT -> decltype(Traits::showLegacy(), void()) {
+    Traits::showLegacy();
+}
+
+template <typename Traits>
+void show_batched_legacy(...) FL_NO_EXCEPT {
+    IChannelDriver& driver = Traits::instance();
+    driver.show();
+    driver.waitForReady();
+}
+} // namespace detail
+
+/// How a SlimBridgeController reaches its driver. Specialized (not an
+/// `if`) so the direct variant never names ChannelManager at all.
+template <bool DIRECT_SHOW, bool BATCHED = false>
+struct SlimBridgeShowPolicy;
+
+/// Default: registered with ChannelManager, which owns enable/disable and
+/// flushes every registered driver once at the end of FastLED.show().
+template <bool BATCHED>
+struct SlimBridgeShowPolicy<false, BATCHED> {
+    template <typename DriverTraits>
+    static void attach() FL_NO_EXCEPT { DriverTraits::registerWithManager(); }
+    static bool enabled(IChannelDriver& driver) FL_NO_EXCEPT {
+        return ChannelManager::registry().isDriverEnabled(driver);
+    }
+    static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
+    template <typename DriverTraits>
+    static void endShow() FL_NO_EXCEPT {}
+};
+
+/// Immediate direct mode preserves backends that accept only one strip per
+/// show(). There is no registry or runtime driver selection.
+template <>
+struct SlimBridgeShowPolicy<true, false> {
+    template <typename DriverTraits>
+    static void attach() FL_NO_EXCEPT {}
+    static bool enabled(IChannelDriver&) FL_NO_EXCEPT { return true; }
+    static void afterEnqueue(IChannelDriver& driver) FL_NO_EXCEPT { driver.show(); }
+    template <typename DriverTraits>
+    static void endShow() FL_NO_EXCEPT {}
+};
+
+/// Batched direct mode is opt-in for drivers that consume a queued batch.
+/// Flush after all strips enqueue and poll async completion before returning.
+template <>
+struct SlimBridgeShowPolicy<true, true> : SlimBridgeShowPolicy<true, false> {
+    static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
+    template <typename DriverTraits>
+    static void endShow() FL_NO_EXCEPT {
+        // RMT4 supplies autonomous completion. Other batched drivers retain
+        // the bounded synchronous fallback until they supply that capability.
+        detail::show_batched_legacy<DriverTraits>(0);
+    }
+};
+
+/// @brief Shared legacy `addLeds<>()` bridge controller over an `IChannelDriver`.
+///
+/// This is the driver-agnostic "slim bridge": a `CPixelLEDController` that
+/// owns one `ChannelDataPtr`, builds it once at construction, and on every
+/// `showPixels()` call re-encodes into that same buffer (no per-frame
+/// allocation) and hands it to the driver named by `DriverTraits`.
+///
+/// `DriverTraits` contract (mirrors `fl::BusTraits<Bus::X>`, see
+/// `fl/channels/bus_traits.h`):
+///   - `static IChannelDriver& instance() FL_NO_EXCEPT;`
+///       Meyers-singleton accessor for the concrete driver.
+///   - `static void registerWithManager() FL_NO_EXCEPT;`
+///       Registers `instance()` with `ChannelManager` at some priority.
+///       MUST be idempotent -- called from every `SlimBridgeController`
+///       instantiation's constructor. `fl::BusTraits<Bus::X>` (see
+///       `fl/channels/bus_traits.h`) already satisfies this contract, so
+///       any existing `BusTraits<Bus::X>` specialization can be passed
+///       directly as `DriverTraits`.
+///
+/// @tparam DATA_PIN    GPIO data pin for the clockless chipset
+/// @tparam TIMING      Compile-time chipset timing trait (see
+///                     `fl/chipsets/chipset_timing_config.h`,
+///                     `makeTimingConfig<TIMING>()`)
+/// @tparam RGB_ORDER   Color byte ordering (RGB, GBR, etc.)
+/// @tparam WAIT_TIME   Minimum inter-frame wait time in microseconds. If
+///                     greater than the TIMING trait's `reset_us`, this
+///                     folds into the built `ChannelData`'s timing so the
+///                     driver honors the longer of the two (mirrors the
+///                     historical `ClocklessIdf4` `reset_us` folding).
+/// @tparam DriverTraits Trait type satisfying the contract documented above.
+/// @tparam XTRA0       Legacy clockless trailing zero bits per byte, stored
+///                     on the ChannelData for engines that honour it.
+/// @tparam DIRECT_SHOW Bypass ChannelManager (see SlimBridgeShowPolicy).
+///                     Defaults to the platform memory tier. Build overrides
+///                     use FL_SLIM_BRIDGE_DIRECT_SHOW=0/1.
+/// @tparam BATCHED_DIRECT_SHOW Flush direct drivers at endShowLeds(). Only
+///                     enable for drivers that consume multiple queued strips.
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME, typename DriverTraits,
+          int XTRA0 = 0, bool DIRECT_SHOW = SlimBridgeDirectShow<>::value,
+          bool BATCHED_DIRECT_SHOW = false>
+class SlimBridgeController : public CPixelLEDController<RGB_ORDER> {
+    using Policy = SlimBridgeShowPolicy<DIRECT_SHOW, BATCHED_DIRECT_SHOW>;
+
+public:
+    SlimBridgeController() FL_NO_EXCEPT {
+        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
+        // (A?) Fold WAIT_TIME (microseconds) into reset_us, mirroring the
+        // historical ClocklessIdf4 behavior: the driver must honor whichever
+        // is longer -- the chipset's own latch/reset requirement, or the
+        // caller-requested minimum inter-frame wait.
+        if (WAIT_TIME > 0 && static_cast<u32>(WAIT_TIME) > timing.reset_us) {
+            timing.reset_us = static_cast<u32>(WAIT_TIME);
+        }
+        // A clockless controller bound to a unified parallel-IO bus needs
+        // that engine's clockless pipeline linked (#4793).
+        detail::enable_clockless<DriverTraits>();
+        mData = ChannelData::create(DATA_PIN, timing, fl::vector_psram<u8>(),
+                                     ChannelPixelFormat::RGB);
+        FL_STATIC_ASSERT(XTRA0 >= 0 && XTRA0 <= 32, "XTRA0 out of range");
+        mData->setExtraZeroBitsPerByte(static_cast<u8>(XTRA0));
+        // Idempotent by contract -- safe to call from every instantiation's
+        // constructor (mirrors ClocklessIdf5's registerWithManager() call).
+        // A no-op in direct-show mode.
+        Policy::template attach<DriverTraits>();
+    }
+
+    void init() FL_NO_EXCEPT override {}
+
+    void endShowLeds(void* data) FL_NO_EXCEPT override {
+        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
+        // FastLED enqueues every controller before calling any endShowLeds,
+        // so the first direct controller flushes the complete parallel batch.
+        Policy::template endShow<DriverTraits>();
+    }
+
+    /// @brief Expose the underlying `ChannelDataPtr` for conformance tests.
+    const ChannelDataPtr& channelData() const FL_NO_EXCEPT { return mData; }
+
+protected:
+    void showPixels(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT override {
+        IChannelDriver& driver = DriverTraits::instance();
+
+        // (A1) Respect runtime driver enable/disable: ChannelManager is the
+        // single source of truth. A disabled driver means "drop this frame",
+        // not "enqueue and hope" -- silently enqueuing to a disabled driver
+        // is the #2517 silent-drop failure mode.
+        if (!Policy::enabled(driver)) {
+            FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' is disabled - dropping frame");
+            return;
+        }
+
+        // (A8) If the previous frame's buffer is still in flight, block
+        // (bounded) until the driver reports it can accept more work rather
+        // than racing the driver's in-progress DMA/RMT transfer.
+        if (mData->isInUse()) {
+            if (!driver.waitForReady()) {
+                FL_WARN_ONCE("SlimBridgeController: driver '" << driver.getName().c_str() << "' did not become ready in time - dropping frame");
+                return;
+            }
+        }
+
+        // (A5) Publish the pixel byte layout so the driver (and any
+        // downstream padding/diagnostic code) knows the encoded stride.
+        if (this->getRgbww().active()) {
+            mData->setPixelFormat(ChannelPixelFormat::RGBWW);
+        } else if (this->getRgbw().active()) {
+            mData->setPixelFormat(ChannelPixelFormat::RGBW);
+        } else {
+            mData->setPixelFormat(ChannelPixelFormat::RGB);
+        }
+
+        const int pixelCount = pixels.size();
+        const fl::size bytesPerPixel = channelPixelFormatBytesPerPixel(mData->getPixelFormat());
+        if (pixelCount < 0 || bytesPerPixel == 0 ||
+            static_cast<fl::size>(pixelCount) > static_cast<fl::size>(-1) / bytesPerPixel) {
+            detail::reject_legacy_frame<DriverTraits>(0);
+            FL_WARN_ONCE("SlimBridgeController: invalid encoded frame size - dropping frame");
+            return;
+        }
+        const fl::size expectedSize = static_cast<fl::size>(pixelCount) * bytesPerPixel;
+        auto &encoded = mData->getData();
+        // Reserve the complete snapshot before clearing the old one. Byte-wise
+        // geometric growth could fail partway through encoding and enqueue a
+        // silently truncated frame; exact reservation also bounds peak heap.
+        encoded.reserve(expectedSize);
+        if (encoded.capacity() < expectedSize) {
+            detail::reject_legacy_frame<DriverTraits>(0);
+            FL_WARN_ONCE("SlimBridgeController: cannot allocate encoded frame - dropping frame");
+            return;
+        }
+
+        // Observe accepted frames only after allocation succeeds (e.g. feeding
+        // ActiveStripTracker for stub/WASM channels).
+        onBeforeEncode(pixels);
+
+        // (A3) Re-encode into the same buffer every frame -- clear() keeps
+        // capacity, so steady-state operation is allocation-free.
+        encoded.clear();
+        fl::PixelIterator iterator(&pixels, this->getRgbw(), this->getRgbww());
+        iterator.writeWS2812(&encoded);
+        if (encoded.size() != expectedSize) {
+            encoded.clear();
+            detail::reject_legacy_frame<DriverTraits>(0);
+            FL_WARN_ONCE("SlimBridgeController: incomplete encoded frame - dropping frame");
+            return;
+        }
+
+        driver.enqueue(mData);
+        Policy::afterEnqueue(driver);
+    }
+
+    /// Called once per accepted frame, after the enabled/ready gates pass and BEFORE the
+    /// frame is encoded and enqueued. Default: no-op. Used by stub/WASM to feed ActiveStripTracker.
+    virtual void onBeforeEncode(PixelController<RGB_ORDER>& pixels) FL_NO_EXCEPT { (void)pixels; }
+
+private:
+    ChannelDataPtr mData;
+};
+
+}  // namespace fl

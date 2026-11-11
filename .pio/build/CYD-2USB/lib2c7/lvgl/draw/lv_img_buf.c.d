@@ -1,0 +1,34 @@
+.pio/build/CYD-2USB/lib2c7/lvgl/draw/lv_img_buf.c.o: \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/lv_img_buf.c \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/lv_img_buf.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_color.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/lv_conf_internal.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/lv_conf_kconfig.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_attr.h \
+ F:/Willy/lv_conf.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_assert.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_log.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_types.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_mem.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_math.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_area.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/lv_draw_img.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/lv_img_decoder.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../lv_conf_internal.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_fs.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_types.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_style.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/font/lv_font.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/lv_conf_internal.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/font/lv_symbol_def.h \
+ F:/Willy/.pio/libdeps/CYD-2USB/lvgl/src/misc/lv_area.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_color.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_area.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_anim.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_txt.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_printf.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_bidi.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_style_gen.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_math.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_log.h \
+ .pio/libdeps/CYD-2USB/lvgl/src/draw/../misc/lv_mem.h

@@ -1,0 +1,1125 @@
+Processing CYD-2USB (board: CYD-2432S028; platform: https://github.com/pioarduino/platform-espressif32/releases/download/55.03.36/platform-espressif32.zip; framework: arduino)
+--------------------------------------------------------------------------------
+Tool Manager: Installing https://github.com/espressif/arduino-esp32/releases/download/3.3.6/esp32-core-3.3.6.tar.xz
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: framework-arduinoespressif32@3.3.6 has been installed!
+Tool Manager: Installing https://github.com/bmorcelli/esp32-arduino-lib-builder/releases/download/idf-release_v5.5/bruce_esp32-arduino-libs-20260123-153546.zip
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: framework-arduinoespressif32-libs@5.5.0+sha.30aaf64524 has been installed!
+Tool Manager: Installing https://github.com/pioarduino/registry/releases/download/0.0.1/xtensa-esp-elf-14.2.0_20251107.zip
+Downloading 0% 10%
+Unpacking 0% 10% 20%
+Tool Manager: toolchain-xtensa-esp-elf@14.2.0+20251107 has been installed!
+Tool Manager: Installing https://github.com/pioarduino/registry/releases/download/0.0.1/esptoolpy-v5.1.0.zip
+Downloading 0% 10%
+Unpacking 0% 10% 20%
+Tool Manager: tool-esptoolpy@5.1.0 has been installed!
+Removing unused dependencies...
+Library Manager: Removing RadioLib @ 7.7.1
+Library Manager: RadioLib@7.7.1 has been removed!
+Library Manager: Removing RF24 @ 1.6.2
+Library Manager: RF24@1.6.2 has been removed!
+Library Manager: Removing FastLED @ 3.10.3
+Library Manager: FastLED@3.10.3 has been removed!
+Library Manager: Removing ESPAsyncWebServer @ 3.12.0
+Library Manager: Removing dependencies...
+Library Manager: Removing AsyncTCP @ 3.5.0
+Library Manager: AsyncTCP@3.5.0 has been removed!
+Library Manager: ESPAsyncWebServer@3.12.0 has been removed!
+Library Manager: Removing PNGdec @ 1.1.6
+Library Manager: PNGdec@1.1.6 has been removed!
+Library Manager: Removing NimBLE-Arduino @ 2.5.1
+Library Manager: NimBLE-Arduino@2.5.1 has been removed!
+Library Manager: Removing ArduinoJson @ 7.4.3
+Library Manager: ArduinoJson@7.4.3 has been removed!
+Library Manager: Removing lvgl @ 8.4.0
+Library Manager: lvgl@8.4.0 has been removed!
+Library Manager: Installing bblanchon/ArduinoJson
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: ArduinoJson@7.4.3 has been installed!
+Library Manager: Installing h2zero/NimBLE-Arduino @ ^2.3.7
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: NimBLE-Arduino@2.5.2 has been installed!
+Library Manager: Installing nrf24/RF24 @ 1.4.11
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: RF24@1.4.11 has been installed!
+Library Manager: Installing h2zero/NimBLE-Arduino
+Library Manager: Installing whywilson/ESP-PN532-UART
+Library Manager: Installing h2zero/NimBLE-Arduino
+Library Manager: Installing ESP32Async/ESPAsyncWebServer
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: ESPAsyncWebServer@3.12.1 has been installed!
+Library Manager: Resolving dependencies...
+Library Manager: Installing ESP32Async/AsyncTCP @ ^3.5.0
+Downloading 0% 10% 20% 30%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: AsyncTCP@3.5.0 has been installed!
+Library Manager: Installing lvgl/lvgl @ 8.3.11
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: lvgl@8.3.11 has been installed!
+Library Manager: Installing h2zero/NimBLE-Arduino
+Library Manager: Installing jgromes/RadioLib @ ^7.4.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: RadioLib@7.8.1 has been installed!
+Library Manager: Installing bitbank2/PNGdec @ ^1.0.3
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: PNGdec@1.1.6 has been installed!
+Library Manager: Installing fastled/FastLED @ ^3.10.3
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: FastLED@3.10.9 has been installed!
+Tool Manager: Installing file://F:\PIO\tools\tool-esptoolpy
+Tool Manager: tool-esptoolpy@5.1.0 has been installed!
+Tool Manager: Installing file://F:\PIO\tools\toolchain-xtensa-esp-elf
+Tool Manager: toolchain-xtensa-esp-elf@14.2.0+20251107 has been installed!
+Verbose mode can be enabled via `-v, --verbose` option
+pio pkg exec -p toolchain-xtensa-esp32 -- xtensa-esp32-elf-objcopy --weaken-symbol=ieee80211_raw_frame_sanity_check F:\PIO\packages\framework-arduinoespressif32-libs\esp32\lib\libnet80211.a F:\PIO\packages\framework-arduinoespressif32-libs\esp32\lib\libnet80211.a.patched
+Using toolchain-xtensa-esp32@12.2.0+20230208 package
+<lambda>([], [])
+[GZIP & EMBED INTO HEADER] - Processing 5 files.
+[DONE] Gzipped files embedded into F:\Willy\include\webFiles.h
+1f7994c8ed5c769eed978510bc87130b8a949a2f3c2042ccddba35aa8032befc bf39f7c0618c43a1df3302036248e5aeaf9793b3be2b804519d203e164905742
+Host compiler not found; skipping mqjs_stdlib header generation.
+Set MQJS_HOST_CC or mqjs_host_cc to a GCC-compatible compiler, or use Docker.
+
+On Windows:
+- install MSYS2 https://www.msys2.org/ at default path
+- open C:\msys64\ucrt64.exe
+- run on UCRT64 terminal: pacman -S --needed mingw-w64-i686-toolchain
+- add C:\msys64\mingw32\bin to PATH, cmd: setx PATH "%PATH%;C:\msys64\mingw32\bin\"
+- close and open VSCode again
+
+On Mac:
+- run on terminal: xcode-select --install
+
+On Linux:
+- run on terminal: sudo apt-get install -y --no-install-recommends gcc-multilib libc6-dev-i386
+
+
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/CYD-2432S028.html
+PLATFORM: Espressif 32 (55.3.36) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - contrib-piohome @ 3.4.4 
+ - framework-arduinoespressif32 @ 3.3.6 
+ - framework-arduinoespressif32-libs @ 5.5.0+sha.30aaf64524 
+ - tool-esp-rom-elfs @ 2024.10.11 
+ - tool-esptoolpy @ 5.1.0 
+ - toolchain-xtensa-esp-elf @ 14.2.0+20251107
+[ComponentManager] BT/BLE protection enabled
+[ComponentManager] Processed 3 ignored libraries
+[ComponentManager] Session completed with 2 changes
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ strict
+Found 87 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- mquickjs @ 0.0.6
+|-- AnimatedGIF @ 2.2.3
+|-- Time @ 1.6.1
+|-- ArduinoJson @ 7.4.3
+|-- NimBLE-Arduino @ 2.5.2
+|-- RF24 @ 1.4.11
+|-- TinyGPSPlus @ 1.1.0
+|-- FFT @ 0.0.1
+|-- rc-switch @ 2.6.4
+|-- IRremoteESP8266 @ 2.8.6
+|-- SimpleCLI @ 1.1.4
+|-- RFID_MFRC522v2 @ 2.0.6
+|-- ESP Chameleon Ultra @ 0.0.2
+|-- ESP PN532 UART @ 0.0.2
+|-- ESP PN532Killer @ 0.0.7
+|-- ESP PN32BLE @ 0.0.2
+|-- ESPAsyncWebServer @ 3.12.1
+|-- JPEGDecoder @ 2.0.0
+|-- ESP32Time @ 2.0.6
+|-- NTPClient @ 3.2.1
+|-- Adafruit BusIO @ 1.17.2-bruce.1
+|-- Adafruit PN532 @ 1.3.3-bruce.1
+|-- lvgl @ 8.3.11
+|-- Adafruit Si4713 Library @ 1.2.3
+|-- SmartRC-CC1101-Driver-Lib @ 2.5.7
+|-- LibSSH-ESP32 @ 5.9.0
+|-- WireGuard-ESP32 @ 0.1.5
+|-- BER-TLV @ 0.0.0+20260910221551
+|-- ESP Amiibolink @ 0.0.2
+|-- RadioLib @ 7.8.1
+|-- PNGdec @ 1.1.6
+|-- OneWire @ 2.3.8
+|-- XPowersLib @ 0.3.4
+|-- ESP32-PSRamFS @ 1.0.6
+|-- CYD-touch
+|-- WiFi @ 3.3.6
+|-- BruceHAL @ 7.3.1
+|-- Wire @ 3.3.6
+|-- HTTPClient @ 3.3.6
+|-- Bad_Usb_Lib
+|-- LittleFS @ 3.3.6
+|-- Ethernet @ 3.3.6
+|-- Networking @ 3.3.6
+|-- SPI @ 3.3.6
+|-- FS @ 3.3.6
+|-- TFT_eSPI QRcode @ 1.0.0
+|-- DNSServer @ 3.3.6
+|-- WebServer @ 3.3.6
+|-- Preferences @ 3.3.6
+|-- RTC
+|-- utility
+|-- AsyncTCP @ 3.5.0
+|-- ESPmDNS @ 3.3.6
+|-- PN532_SRIX
+|-- NetworkClientSecure @ 3.3.6
+|-- SPIFFS @ 3.3.6
+Building in release mode
+Compiling .pio\build\CYD-2USB\FrameworkArduinoVariant\variant.cpp.o
+Compiling .pio\build\CYD-2USB\lib151\mquickjs\cutils.c.o
+Compiling .pio\build\CYD-2USB\lib151\mquickjs\dtoa.c.o
+Compiling .pio\build\CYD-2USB\lib151\mquickjs\libm.c.o
+Compiling .pio\build\CYD-2USB\lib151\mquickjs\mquickjs.c.o
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c: In function 'js_vprintf':
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:746:21: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  746 |                 buf = "null";
+      |                     ^
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:790:29: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  790 |                         buf = "null";
+      |                             ^
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:793:29: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  793 |                         buf = "undefined";
+      |                             ^
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:796:29: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  796 |                         buf = "uninitialized";
+      |                             ^
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:799:29: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  799 |                         buf = JS_VALUE_GET_SPECIAL_VALUE(val) ? "true" : "false";
+      |                             ^
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:805:29: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  805 |                         buf = "[tag]";
+      |                             ^
+.pio/libdeps/CYD-2USB/mquickjs/mquickjs.c:820:29: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  820 |                         buf = "[mtag]";
+      |                             ^
+Compiling .pio\build\CYD-2USB\lib874\AnimatedGIF\AnimatedGIF.cpp.o
+Compiling .pio\build\CYD-2USB\lib874\AnimatedGIF\p4_transparent.S.o
+Compiling .pio\build\CYD-2USB\lib874\AnimatedGIF\s3_transparent.S.o
+Compiling .pio\build\CYD-2USB\lib95a\Time\DateStrings.cpp.o
+Compiling .pio\build\CYD-2USB\lib95a\Time\Time.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLE2904.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEAddress.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEAdvertisedDevice.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEAdvertisementData.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEAdvertising.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEAttValue.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEBeacon.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLECharacteristic.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEClient.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEDescriptor.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEDevice.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEEddystoneTLM.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEExtAdvertising.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEHIDDevice.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEL2CAPChannel.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEL2CAPServer.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLERemoteCharacteristic.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLERemoteDescriptor.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLERemoteService.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLERemoteValueAttribute.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEScan.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEServer.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEService.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEStream.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEUUID.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\NimBLEUtils.cpp.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\esp_port\esp-hci\src\esp_nimble_hci.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\esp_port\esp-hci\src\na_hci_driver.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\esp_port\esp-hci\src\na_hci_transport.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\esp_port\port\src\exp_nimble_mem.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\aes_decrypt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\aes_encrypt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\cbc_mode.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ccm_mode.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\cmac_mode.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ctr_mode.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ctr_prng.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc_dh.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc_dsa.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc_platform_specific.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\hmac.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\hmac_prng.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\sha256.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\ext\tinycrypt\src\utils.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_adv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_conn.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_conn_hci.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_crypto.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_ctrl.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_dtm.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci_ev.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci_supp_cmd.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci_vs.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_iso.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_iso_big.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_isoal.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_pdu.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_rand.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_resolv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_rfmgmt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_scan.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_scan_aux.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_sched.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_sync.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_trace.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_utils.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_whitelist.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf51\src\ble_hw.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf51\src\ble_phy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\ble_hw.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\ble_phy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\ble_phy_trace.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\nrf52\phy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\nrf53\phy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\access.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\adv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\adv_ext.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\adv_legacy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\aes-ccm.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\app_keys.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\beacon.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\cdb.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\cfg.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\cfg_cli.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\cfg_srv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\crypto.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\friend.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\glue.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\health_cli.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\health_srv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\heartbeat.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\light_model.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\lpn.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\mesh.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\model_cli.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\model_srv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\msg.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\net.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\pb_adv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\pb_gatt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\pb_gatt_srv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\prov.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\prov_device.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\provisioner.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\proxy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\proxy_msg.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\proxy_srv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\rpl.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\settings.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\shell.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\subnet.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\testing.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\mesh\src\transport.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\services\gap\src\ble_svc_gap.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\services\gatt\src\ble_svc_gatt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_aes_ccm.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_att.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_att_clt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_att_cmd.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_att_svr.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_dtm.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_ead.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_eatt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_eddystone.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_gap.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_gattc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_gattc_cache.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_gattc_cache_conn.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_gatts.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_gatts_lcl.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_adv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_atomic.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_cfg.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_conn.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_flow.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci_cmd.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci_evt.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci_util.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_id.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_log.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_mbuf.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_misc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_mqueue.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_periodic_sync.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_pvcy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_resolv.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_shutdown.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_startup.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_stop.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_ibeacon.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap_coc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap_sig.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap_sig_cmd.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_sm.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_alg.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_cmd.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_lgcy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_sc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_store.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_store_util.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\src\ble_uuid.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\store\config\src\ble_store_config.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\store\config\src\ble_store_config_conf.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\store\config\src\ble_store_nvs.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\store\ram\src\ble_store_ram.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\host\util\src\addr.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\transport\common\hci_h4\src\hci_h4.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\transport\common\hci_ipc\src\hci_ipc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\transport\esp_ipc\src\hci_esp_ipc.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\transport\esp_ipc_legacy\src\hci_esp_ipc_legacy.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\transport\nrf5340\src\nrf5340_ble_hci.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\nimble\transport\src\transport.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\endian.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\hal_timer.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\mem.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\nimble_port.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\os_cputime.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\os_cputime_pwr2.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\os_mbuf.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\os_mempool.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\nimble\src\os_msys_init.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\npl\freertos\src\nimble_port_freertos.c.o
+Compiling .pio\build\CYD-2USB\lib65b\NimBLE-Arduino\nimble\porting\npl\freertos\src\npl_os_freertos.c.o
+Compiling .pio\build\CYD-2USB\lib0ef\SPI\SPI.cpp.o
+Compiling .pio\build\CYD-2USB\libfc9\RF24\RF24.cpp.o
+Compiling .pio\build\CYD-2USB\lib01c\TinyGPSPlus\TinyGPS++.cpp.o
+Compiling .pio\build\CYD-2USB\lib872\FFT\fft.cpp.o
+Compiling .pio\build\CYD-2USB\libc19\rc-switch\RCSwitch.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\IRac.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\IRrecv.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\IRsend.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\IRtext.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\IRtimer.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\IRutils.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Airton.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Airwell.cpp.o
+.pio/libdeps/CYD-2USB/IRremoteESP8266/src/IRrecv.cpp: In function 'void gpio_intr()':
+.pio/libdeps/CYD-2USB/IRremoteESP8266/src/IRrecv.cpp:222:10: warning: '++' expression of 'volatile'-qualified type is deprecated [-Wvolatile]
+  222 |   params.rawlen++;
+      |   ~~~~~~~^~~~~~
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Aiwa.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Amcor.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Argo.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Arris.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_BluestarHeavy.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Bosch.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Bose.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Carrier.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_ClimaButler.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Coolix.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Corona.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Daikin.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Delonghi.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Denon.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Dish.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Doshisha.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Ecoclim.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Electra.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_EliteScreens.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Epson.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Fujitsu.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_GICable.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_GlobalCache.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Goodweather.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Gorenje.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Gree.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Haier.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Hitachi.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Inax.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_JVC.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Kelon.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Kelvinator.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_LG.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Lasertag.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Lego.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Lutron.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_MWM.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Magiquest.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Metz.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Midea.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_MilesTag2.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Mirage.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Mitsubishi.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_MitsubishiHeavy.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Multibrackets.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_NEC.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Neoclima.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Nikai.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Panasonic.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Pioneer.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Pronto.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_RC5_RC6.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_RCMM.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Rhoss.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Samsung.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Sanyo.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Sharp.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Sherwood.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Sony.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Symphony.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Tcl.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Technibel.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Teco.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Teknopoint.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Toshiba.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Toto.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Transcold.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Trotec.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Truma.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Vestel.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Voltas.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Whirlpool.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Whynter.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Wowwee.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Xmp.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_York.cpp.o
+Compiling .pio\build\CYD-2USB\libb53\IRremoteESP8266\ir_Zepeal.cpp.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\Argument.cpp.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\Command.cpp.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\CommandError.cpp.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\SimpleCLI.cpp.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\c\arg.c.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\c\cmd.c.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\c\cmd_error.c.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\c\comparator.c.o
+Compiling .pio\build\CYD-2USB\lib46d\SimpleCLI\c\parser.c.o
+Compiling .pio\build\CYD-2USB\lib1ec\Wire\Wire.cpp.o
+Compiling .pio\build\CYD-2USB\lib1ec\RFID_MFRC522v2\MFRC522Debug.cpp.o
+Compiling .pio\build\CYD-2USB\lib1ec\RFID_MFRC522v2\MFRC522DriverI2C.cpp.o
+Compiling .pio\build\CYD-2USB\lib1ec\RFID_MFRC522v2\MFRC522DriverSPI.cpp.o
+Compiling .pio\build\CYD-2USB\lib1ec\RFID_MFRC522v2\MFRC522Hack.cpp.o
+Compiling .pio\build\CYD-2USB\lib1ec\RFID_MFRC522v2\MFRC522v2.cpp.o
+Compiling .pio\build\CYD-2USB\lib909\ESP Chameleon Ultra\chameleonUltra.cpp.o
+Compiling .pio\build\CYD-2USB\lib5fd\ESP PN532 UART\PN532_UART.cpp.o
+Compiling .pio\build\CYD-2USB\lib5fd\ESP PN532 UART\TagTechnology.cpp.o
+Compiling .pio\build\CYD-2USB\libf71\ESP PN532Killer\PN532Killer.cpp.o
+Compiling .pio\build\CYD-2USB\libf71\ESP PN532Killer\PN532KillerTagTechnology.cpp.o
+Compiling .pio\build\CYD-2USB\libb3c\ESP PN32BLE\pn532_ble.cpp.o
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp: In member function 'bool ChameleonUltra::cmdEnableSlot(uint8_t, TagSenseType)':
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp:446:27: warning: narrowing conversion of '(((int)slot) - 1)' from 'int' to 'uint8_t' {aka 'unsigned char'} [-Wnarrowing]
+  446 |     uint8_t cmd[3] = {slot-1, freq, 0x01};
+      |                       ~~~~^~
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp: In member function 'bool ChameleonUltra::cmdChangeActiveSlot(uint8_t)':
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp:457:27: warning: narrowing conversion of '(((int)slot) - 1)' from 'int' to 'uint8_t' {aka 'unsigned char'} [-Wnarrowing]
+  457 |     uint8_t cmd[1] = {slot-1};
+      |                       ~~~~^~
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp: In member function 'bool ChameleonUltra::cmdChangeSlotType(uint8_t, TagType)':
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp:468:27: warning: narrowing conversion of '(((int)slot) - 1)' from 'int' to 'uint8_t' {aka 'unsigned char'} [-Wnarrowing]
+  468 |     uint8_t cmd[3] = {slot-1, (tagType >> 8) & 0xFF, tagType & 0xFF};
+      |                       ~~~~^~
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp:468:46: warning: narrowing conversion of '((((int)tagType) >> 8) & 255)' from 'int' to 'uint8_t' {aka 'unsigned char'} [-Wnarrowing]
+  468 |     uint8_t cmd[3] = {slot-1, (tagType >> 8) & 0xFF, tagType & 0xFF};
+      |                               ~~~~~~~~~~~~~~~^~~~~~
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp:468:62: warning: narrowing conversion of '(((int)tagType) & 255)' from 'int' to 'uint8_t' {aka 'unsigned char'} [-Wnarrowing]
+  468 |     uint8_t cmd[3] = {slot-1, (tagType >> 8) & 0xFF, tagType & 0xFF};
+      |                                                      ~~~~~~~~^~~~~~
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp: In member function 'bool ChameleonUltra::cmdMfEconfig(byte*, size_t, byte*, byte)':
+.pio/libdeps/CYD-2USB/ESP Chameleon Ultra/src/chameleonUltra.cpp:708:32: warning: narrowing conversion of 'length' from 'size_t' {aka 'unsigned int'} to 'uint8_t' {aka 'unsigned char'} [-Wnarrowing]
+  708 |     uint8_t cmd[length + 5] = {length};
+      |                                ^~~~~~
+Compiling .pio\build\CYD-2USB\libb60\Hash\PBKDF2_HMACBuilder.cpp.o
+Compiling .pio\build\CYD-2USB\libb60\Hash\SHA1Builder.cpp.o
+Compiling .pio\build\CYD-2USB\libb60\Hash\SHA2Builder.cpp.o
+Compiling .pio\build\CYD-2USB\libb60\Hash\SHA3Builder.cpp.o
+Compiling .pio\build\CYD-2USB\libd74\Network\NetworkClient.cpp.o
+Compiling .pio\build\CYD-2USB\libd74\Network\NetworkEvents.cpp.o
+Compiling .pio\build\CYD-2USB\libd74\Network\NetworkInterface.cpp.o
+Compiling .pio\build\CYD-2USB\libd74\Network\NetworkManager.cpp.o
+Compiling .pio\build\CYD-2USB\libd74\Network\NetworkServer.cpp.o
+Compiling .pio\build\CYD-2USB\libd74\Network\NetworkUdp.cpp.o
+Compiling .pio\build\CYD-2USB\liba64\AsyncTCP\AsyncTCP.cpp.o
+Compiling .pio\build\CYD-2USB\lib174\FS\FS.cpp.o
+Compiling .pio\build\CYD-2USB\lib174\FS\vfs_api.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\AP.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\STA.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\WiFi.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\WiFiAP.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\WiFiGeneric.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\WiFiMulti.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\WiFiSTA.cpp.o
+Compiling .pio\build\CYD-2USB\lib3e9\WiFi\WiFiScan.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\AsyncEventSource.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\AsyncJson.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\AsyncWebHeader.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\AsyncWebServerRequest.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\AsyncWebSocket.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\BackPort_SHA1Builder.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\ChunkPrint.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\Middleware.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\WebAuthentication.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\WebHandlers.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\WebRequest.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\WebResponses.cpp.o
+Compiling .pio\build\CYD-2USB\libd5c\ESPAsyncWebServer\WebServer.cpp.o
+Compiling .pio\build\CYD-2USB\lib543\LittleFS\LittleFS.cpp.o
+Compiling .pio\build\CYD-2USB\lib88a\SPIFFS\SPIFFS.cpp.o
+Compiling .pio\build\CYD-2USB\lib3ad\TFT_eSPI\TFT_eSPI.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\display\ardgfx.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\display\lovyan.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\display\m5gfx.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\display\tftespi.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\io_expander\Adafruit_AW9523.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\io_expander\PCA9555.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\sd_card\SD.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\sd_card\SD_MMC.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\sd_card\sd_diskio.cpp.o
+Compiling .pio\build\CYD-2USB\lib1c8\HAL\sd_card\sd_diskio_crc.c.o
+Compiling .pio\build\CYD-2USB\lib7c7\JPEGDecoder\JPEGDecoder.cpp.o
+Compiling .pio\build\CYD-2USB\lib7c7\JPEGDecoder\picojpeg.c.o
+Compiling .pio\build\CYD-2USB\lib04f\ESP32Time\ESP32Time.cpp.o
+Compiling .pio\build\CYD-2USB\liba63\NTPClient\NTPClient.cpp.o
+Compiling .pio\build\CYD-2USB\lib7d1\Adafruit BusIO\Adafruit_BusIO_Register.cpp.o
+Compiling .pio\build\CYD-2USB\lib7d1\Adafruit BusIO\Adafruit_GenericDevice.cpp.o
+Compiling .pio\build\CYD-2USB\lib7d1\Adafruit BusIO\Adafruit_I2CDevice.cpp.o
+Compiling .pio\build\CYD-2USB\lib7d1\Adafruit BusIO\Adafruit_SPIDevice.cpp.o
+Compiling .pio\build\CYD-2USB\libc92\Adafruit PN532\Adafruit_PN532.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_disp.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_event.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_group.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_indev.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_indev_scroll.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_class.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_draw.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_pos.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_scroll.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_style.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_style_gen.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_obj_tree.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_refr.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\core\lv_theme.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\arm2d\lv_gpu_arm2d.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_arc.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_img.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_label.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_layer.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_line.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_mask.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_rect.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_transform.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_draw_triangle.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_img_buf.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_img_cache.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\lv_img_decoder.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\pxp\lv_draw_pxp.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\pxp\lv_draw_pxp_blend.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\pxp\lv_gpu_nxp_pxp.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\pxp\lv_gpu_nxp_pxp_osa.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_draw_vglite.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_draw_vglite_arc.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_draw_vglite_blend.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_draw_vglite_line.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_draw_vglite_rect.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_vglite_buf.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\nxp\vglite\lv_vglite_utils.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\renesas\lv_gpu_d2_draw_label.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\renesas\lv_gpu_d2_ra6m3.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_arc.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_bg.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_composite.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_img.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_label.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_layer.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_line.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_mask.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_polygon.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_rect.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_stack_blur.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_texture_cache.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sdl\lv_draw_sdl_utils.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\stm32_dma2d\lv_gpu_stm32_dma2d.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_arc.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_blend.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_dither.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_gradient.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_img.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_layer.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_letter.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_line.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_polygon.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_rect.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\sw\lv_draw_sw_transform.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\draw\swm341_dma2d\lv_gpu_swm341_dma2d.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\layouts\flex\lv_flex.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\layouts\grid\lv_grid.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\bmp\lv_bmp.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\ffmpeg\lv_ffmpeg.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\freetype\lv_freetype.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\fsdrv\lv_fs_fatfs.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\fsdrv\lv_fs_littlefs.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\fsdrv\lv_fs_posix.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\fsdrv\lv_fs_stdio.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\fsdrv\lv_fs_win32.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\gif\gifdec.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\gif\lv_gif.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\png\lodepng.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\png\lv_png.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\qrcode\lv_qrcode.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\qrcode\qrcodegen.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\rlottie\lv_rlottie.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\sjpg\lv_sjpg.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\sjpg\tjpgd.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\libs\tiny_ttf\lv_tiny_ttf.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\lv_extra.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\fragment\lv_fragment.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\fragment\lv_fragment_manager.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\gridnav\lv_gridnav.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\ime\lv_ime_pinyin.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\imgfont\lv_imgfont.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\monkey\lv_monkey.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\msg\lv_msg.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\others\snapshot\lv_snapshot.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\themes\basic\lv_theme_basic.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\themes\default\lv_theme_default.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\themes\mono\lv_theme_mono.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\animimg\lv_animimg.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\calendar\lv_calendar.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\calendar\lv_calendar_header_arrow.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\calendar\lv_calendar_header_dropdown.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\chart\lv_chart.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\colorwheel\lv_colorwheel.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\imgbtn\lv_imgbtn.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\keyboard\lv_keyboard.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\led\lv_led.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\list\lv_list.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\menu\lv_menu.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\meter\lv_meter.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\msgbox\lv_msgbox.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\span\lv_span.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\spinbox\lv_spinbox.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\spinner\lv_spinner.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\tabview\lv_tabview.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\tileview\lv_tileview.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\extra\widgets\win\lv_win.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_dejavu_16_persian_hebrew.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_fmt_txt.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_loader.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_10.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_12.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_12_subpx.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_14.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_16.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_18.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_20.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_22.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_24.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_26.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_28.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_28_compressed.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_30.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_32.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_34.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_36.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_38.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_40.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_42.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_44.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_46.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_48.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_montserrat_8.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_simsun_16_cjk.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_unscii_16.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\font\lv_font_unscii_8.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\hal\lv_hal_disp.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\hal\lv_hal_indev.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\hal\lv_hal_tick.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_anim.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_anim_timeline.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_area.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_async.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_bidi.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_color.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_fs.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_gc.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_ll.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_log.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_lru.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_math.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_mem.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_printf.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_style.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_style_gen.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_templ.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_timer.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_tlsf.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_txt.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_txt_ap.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\misc\lv_utils.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_arc.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_bar.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_btn.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_btnmatrix.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_canvas.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_checkbox.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_dropdown.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_img.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_label.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_line.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_objx_templ.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_roller.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_slider.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_switch.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_table.c.o
+Compiling .pio\build\CYD-2USB\lib2c7\lvgl\widgets\lv_textarea.c.o
+Compiling .pio\build\CYD-2USB\lib2cf\Adafruit Si4713 Library\Adafruit_Si4713.cpp.o
+Compiling .pio\build\CYD-2USB\liba99\SmartRC-CC1101-Driver-Lib\ELECHOUSE_CC1101_SRC_DRV.cpp.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\PNGdec.cpp.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\adler32.c.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\crc32.c.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\infback.c.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\inffast.c.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\inflate.c.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\inftrees.c.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\s3_simd_rgb565.S.o
+Compiling .pio\build\CYD-2USB\lib8b4\PNGdec\zutil.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\agent.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\auth.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\base64.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\bignum.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\bind.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\bind_config.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\buffer.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\callbacks.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\channels.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\client.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\config.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\config_parser.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\connect.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\crypto_common.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\curve25519.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\dh-gex.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\dh.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\dh_key.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\ecdh.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\ecdh_mbedcrypto.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\error.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\bcrypt_pbkdf.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\blowfish.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\curve25519_ref.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\ed25519.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\fe25519.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\ge25519.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\external\sc25519.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\getpass.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\getrandom_mbedcrypto.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\gzip.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\init.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\kdf.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\kex.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\knownhosts.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\libmbedcrypto.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\libssh_esp32.cpp.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\libssh_esp32_compat.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\log.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\match.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\mbedcrypto_missing.c.o
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:13:38: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   13 | #define LIBSSH_ESP32_COMPAT_USERNAME "root"
+      |                                      ^~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:45:5: note: in expansion of macro 'LIBSSH_ESP32_COMPAT_USERNAME'
+   45 |   { LIBSSH_ESP32_COMPAT_USERNAME, /* password: */"", LIBSSH_ESP32_COMPAT_UID,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:45:50: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   45 |   { LIBSSH_ESP32_COMPAT_USERNAME, /* password: */"", LIBSSH_ESP32_COMPAT_UID,
+      |                                                  ^~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:46:44: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   46 |     LIBSSH_ESP32_COMPAT_GID, /* comment: */"", /* gecos: */"",
+      |                                            ^~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:46:60: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   46 |     LIBSSH_ESP32_COMPAT_GID, /* comment: */"", /* gecos: */"",
+      |                                                            ^~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:22:37: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   22 | #define LIBSSH_ESP32_COMPAT_HOMEDIR "/spiffs"
+      |                                     ^~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:47:5: note: in expansion of macro 'LIBSSH_ESP32_COMPAT_HOMEDIR'
+   47 |     LIBSSH_ESP32_COMPAT_HOMEDIR, /* shell: */"" };
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh_esp32_compat.c:47:46: warning: initialization discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   47 |     LIBSSH_ESP32_COMPAT_HOMEDIR, /* shell: */"" };
+      |                                              ^~
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\md_mbedcrypto.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\messages.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\misc.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\options.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\packet.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\packet_cb.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\packet_crypt.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\pki.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\pki_container_openssh.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\pki_ed25519.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\pki_ed25519_common.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\pki_mbedcrypto.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\poll.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\scp.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\server.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\session.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\socket.c.o
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c: In function 'ssh_scp_new':
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:110:5: warning: 'ssh_scp_free' is deprecated [-Wdeprecated-declarations]
+  110 |     ssh_scp_free(scp);
+      |     ^~~~~~~~~~~~
+In file included from .pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh/priv.h:199,
+                 from .pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:30:
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/libssh/libssh.h:592:32: note: declared here
+  592 | SSH_DEPRECATED LIBSSH_API void ssh_scp_free(ssh_scp scp);
+      |                                ^~~~~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c: In function 'ssh_scp_free':
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:303:9: warning: 'ssh_scp_close' is deprecated [-Wdeprecated-declarations]
+  303 |         ssh_scp_close(scp);
+      |         ^~~~~~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:249:5: note: declared here
+  249 | int ssh_scp_close(ssh_scp scp)
+      |     ^~~~~~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c: In function 'ssh_scp_push_file':
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:577:5: warning: 'ssh_scp_push_file64' is deprecated [-Wdeprecated-declarations]
+  577 |     return ssh_scp_push_file64(scp, filename, (uint64_t) size, mode);
+      |     ^~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:472:5: note: declared here
+  472 | int ssh_scp_push_file64(ssh_scp scp, const char *filename, uint64_t size,
+      |     ^~~~~~~~~~~~~~~~~~~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c: In function 'ssh_scp_read':
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:1039:9: warning: 'ssh_scp_accept_request' is deprecated [-Wdeprecated-declarations]
+ 1039 |         rc = ssh_scp_accept_request(scp);
+      |         ^~
+.pio/libdeps/CYD-2USB/LibSSH-ESP32/src/scp.c:985:5: note: declared here
+  985 | int ssh_scp_accept_request(ssh_scp scp)
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\string.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\threads.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\threads\mbedtls.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\threads\noop.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\token.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\ttyopts.c.o
+Compiling .pio\build\CYD-2USB\libfd1\LibSSH-ESP32\wrapper.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\WireGuard.cpp.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\crypto.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\crypto\refc\blake2s.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\crypto\refc\chacha20.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\crypto\refc\chacha20poly1305.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\crypto\refc\poly1305-donna.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\crypto\refc\x25519.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\wireguard-platform.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\wireguard.c.o
+Compiling .pio\build\CYD-2USB\lib896\WireGuard-ESP32\wireguardif.c.o
+Compiling .pio\build\CYD-2USB\lib487\BER-TLV\BerTlv.cpp.o
+Compiling .pio\build\CYD-2USB\lib487\BER-TLV\tests.cpp.o
+Compiling .pio\build\CYD-2USB\lib612\ESP Amiibolink\amiibolink.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\Hal.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\Module.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\hal\Arduino\ArduinoHal.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\hal\ESP-IDF\EspHal.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\hal\RPiPico\PicoHal.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\hal\Stm32duino\Stm32wlHal.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\CC1101\CC1101.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LLCC68\LLCC68.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR1110.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR1120.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR1121.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR11x0.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR11x0_commands.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR11x0_crypto.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR11x0_gnss.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR11x0_wifi.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR11x0\LR_common.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_chip_control.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_flrc.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_gfsk.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_lora.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_misc.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_ook.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_oqpsk.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_radio.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_cmds_ranging.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\LR2021\LR2021_config.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\RF69\RF69.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX123x\SX1231.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX123x\SX1233.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\STM32WLx.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX1261.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX1262.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX1268.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX126x.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX126x_LR_FHSS.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX126x_commands.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX126x\SX126x_config.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX1272.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX1273.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX1276.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX1277.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX1278.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX1279.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX127x\SX127x.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX128x\SX1280.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX128x\SX1281.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX128x\SX1282.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\SX128x\SX128x.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\Si443x\Si4430.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\Si443x\Si4431.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\Si443x\Si4432.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\Si443x\Si443x.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\modules\nRF24\nRF24.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\ADSB\ADSB.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\AFSK\AFSK.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\APRS\APRS.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\AX25\AX25.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\BellModem\BellModem.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\ExternalRadio\ExternalRadio.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\FSK4\FSK4.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\Hellschreiber\Hellschreiber.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\LoRaWAN\LoRaWAN.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\LoRaWAN\LoRaWANBands.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\LoRaWAN\LoRaWANPacMan.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\LoRaWAN\LoRaWANPackageTS003.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\LoRaWAN\LoRaWANPackageTS009.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\Morse\Morse.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\Pager\Pager.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\PhysicalLayer\PhysicalLayer.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\Print\ITA2String.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\Print\Print.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\RTTY\RTTY.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\protocols\SSTV\SSTV.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\utils\BCH.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\utils\CRC.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\utils\ConvCode.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\utils\Cryptography.cpp.o
+Compiling .pio\build\CYD-2USB\lib2c5\RadioLib\utils\Utils.cpp.o
+Compiling .pio\build\CYD-2USB\lib16b\OneWire\OneWire.cpp.o
+Compiling .pio\build\CYD-2USB\liba61\XPowersLib\XPowersLibInterface.cpp.o
+Compiling .pio\build\CYD-2USB\lib8bd\ESP32-PSRamFS\PSRamFS.cpp.o
+Compiling .pio\build\CYD-2USB\lib8bd\ESP32-PSRamFS\pfs.c.o
+.pio/libdeps/CYD-2USB/OneWire/OneWire.cpp:599:22: warning: extra tokens at end of #undef directive
+  599 | #  undef noInterrupts() {portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;portENTER_CRITICAL(&mux)
+      |                      ^
+.pio/libdeps/CYD-2USB/OneWire/OneWire.cpp:600:20: warning: extra tokens at end of #undef directive
+  600 | #  undef interrupts() portEXIT_CRITICAL(&mux);}
+      |                    ^
+.pio/libdeps/CYD-2USB/ESP32-PSRamFS/src/pfs.c:36:4: warning: #warning "Will use PSRAM or heap" [-Wcpp]
+   36 |   #warning "Will use PSRAM or heap"
+      |    ^~~~~~~
+Compiling .pio\build\CYD-2USB\lib0de\CYD-touch\CYD28_TouchscreenC.cpp.o
+Compiling .pio\build\CYD-2USB\lib0de\CYD-touch\CYD28_TouchscreenR.cpp.o
+Compiling .pio\build\CYD-2USB\libbbc\NetworkClientSecure\NetworkClientSecure.cpp.o
+Compiling .pio\build\CYD-2USB\libbbc\NetworkClientSecure\ssl_client.cpp.o
+Compiling .pio\build\CYD-2USB\lib9d3\HTTPClient\HTTPClient.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\BleKeyboard.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\CH9329_Keyboard.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_da_DK.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_de_DE.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_en_UK.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_en_US.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_es_ES.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_fr_FR.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_hu_HU.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_it_IT.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_pt_BR.cpp.o
+lib/Bad_Usb_Lib/BleKeyboard.cpp: In member function 'void BleKeyboard::begin(const uint8_t*, uint16_t)':
+lib/Bad_Usb_Lib/BleKeyboard.cpp:181:23: warning: 'void NimBLEHIDDevice::startServices()' is deprecated: Services are now started by the server when start() is called, this function is no longer needed and will be removed in a future release. [-Wdeprecated-declarations]
+  181 |     hid->startServices();
+      |     ~~~~~~~~~~~~~~~~~~^~
+In file included from lib/Bad_Usb_Lib/BleKeyboard.h:13,
+                 from lib/Bad_Usb_Lib/BleKeyboard.cpp:1:
+.pio/libdeps/CYD-2USB/NimBLE-Arduino/src/NimBLEHIDDevice.h:52:27: note: declared here
+   52 |     void                  startServices() __attribute__((deprecated("Services are now started by the server when start() is called, "
+      |                           ^~~~~~~~~~~~~
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_pt_PT.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_si_SI.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_sv_SE.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\KeyboardLayout_tr_TR.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\USBHID.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\USBHIDKeyboard.cpp.o
+Compiling .pio\build\CYD-2USB\libf74\Bad_Usb_Lib\USBHIDMouse.cpp.o
+Compiling .pio\build\CYD-2USB\lib8a4\Ethernet\ETH.cpp.o
+Compiling .pio\build\CYD-2USB\lib558\TFT_eSPI_QRcode\frame.c.o
+Compiling .pio\build\CYD-2USB\lib558\TFT_eSPI_QRcode\qrcode.cpp.o
+Compiling .pio\build\CYD-2USB\lib558\TFT_eSPI_QRcode\qrencode.c.o
+Compiling .pio\build\CYD-2USB\lib8b7\AsyncUDP\AsyncUDP.cpp.o
+Compiling .pio\build\CYD-2USB\lib3c5\DNSServer\DNSServer.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\Parsing.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\WebServer.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\detail\mimetable.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\middleware\AuthenticationMiddleware.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\middleware\CorsMiddleware.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\middleware\LoggingMiddleware.cpp.o
+Compiling .pio\build\CYD-2USB\lib863\WebServer\middleware\MiddlewareChain.cpp.o
+Compiling .pio\build\CYD-2USB\lib79f\Preferences\Preferences.cpp.o
+Compiling .pio\build\CYD-2USB\libe1f\RTC\cplus_RTC.cpp.o
+Compiling .pio\build\CYD-2USB\libe1f\RTC\pcf85063_RTC.cpp.o
+Compiling .pio\build\CYD-2USB\lib577\utility\AXP192.cpp.o
+Compiling .pio\build\CYD-2USB\lib577\utility\Keyboard.cpp.o
+Compiling .pio\build\CYD-2USB\lib577\utility\bq27220.cpp.o
+Compiling .pio\build\CYD-2USB\lib4fd\ESPmDNS\ESPmDNS.cpp.o
+Compiling .pio\build\CYD-2USB\libd60\PN532_SRIX\pn532_srix.cpp.o
+Compiling .pio\build\CYD-2USB\boards\CYD-2432S028\interface.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\config.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\configPins.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\connect\esp_connection.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\connect\file_sharing.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\connect\serial_commands.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\display.cpp.o
+Compiling .pio\build\CYD-2USB\src\core\file_utils.cpp.o
+src/core/config.cpp: In function 'String getCryptoKey()':
+src/core/config.cpp:16:40: warning: format '%x' expects argument of type 'unsigned int', but argument 4 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+   16 |         snprintf(buf, sizeof(buf), "%04x%08x", (uint32_t)(mac >> 32), (uint32_t)mac);
+      |                                     ~~~^       ~~~~~~~~~~~~~~~~~~~~~
+      |                                        |       |
+      |                                        |       uint32_t {aka long unsigned int}
+      |                                        unsigned int
+      |                                     %04lx
+src/core/config.cpp:16:44: warning: format '%x' expects argument of type 'unsigned int', but argument 5 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+   16 |         snprintf(buf, sizeof(buf), "%04x%08x", (uint32_t)(mac >> 32), (uint32_t)mac);
+      |                                         ~~~^                          ~~~~~~~~~~~~~
+      |                                            |                          |
+      |                                            unsigned int               uint32_t {aka long unsigned int}
+      |                                         %08lx
+src/core/config.cpp: In member function 'String BruceConfig::getDefaultWifiApPwd() const':
+src/core/config.cpp:114:42: warning: format '%X' expects argument of type 'unsigned int', but argument 4 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  114 |     snprintf(buf, sizeof(buf), "Willy_%08X", (uint32_t)chipid);
+      |                                       ~~~^   ~~~~~~~~~~~~~~~~
+      |                                          |   |
+      |                                          |   uint32_t {aka long unsigned int}
+      |                                          unsigned int
+      |                                       %08lX
+src/core/config.cpp: At global scope:
+src/core/config.cpp:935:6: error: no declaration matches 'bool BruceConfig::setSetting(const String&, const String&)'
+  935 | bool BruceConfig::setSetting(const String& name, const String& value) {
+      |      ^~~~~~~~~~~
+src/core/config.cpp:935:6: note: no functions named 'bool BruceConfig::setSetting(const String&, const String&)'
+In file included from src/core/config.cpp:1:
+src/core/config.h:15:7: note: 'class BruceConfig' defined here
+   15 | class BruceConfig : public BruceTheme {
+      |       ^~~~~~~~~~~
+*** [.pio\build\CYD-2USB\src\core\config.cpp.o] Error 1
+Compiling .pio\build\CYD-2USB\src\core\i2c_finder.cpp.o
+========================= [FAILED] Took 849.89 seconds =========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+CYD-2USB       FAILED    00:14:09.886
+==================== 1 failed, 0 succeeded in 00:14:09.886 ====================

@@ -1,0 +1,708 @@
+// Tests for the .fled v1 `video.color` source-color contract.
+//
+// The normative rules live in src/fl/fled/FLED_FORMAT.md ("Source Color
+// Metadata"), which mirrors the canonical ledmapper spec. This file walks
+// every rule that document states:
+//
+//   - the default tuple {bt709, srgb, rgb, full} on absent metadata;
+//   - key inheritance, scoped to formats that define a default tuple;
+//   - rejection of linear/pq/hlg transfers on display-encoded formats;
+//   - rgb16_linear requiring transfer: linear;
+//   - reserved `limited` range and non-`rgb` matrix values;
+//   - all-or-nothing declarations for gray8/rgbw8;
+//   - custom primaries as CIE xy pairs.
+//
+// toSourceProfile() (#4460) turns a resolved declaration into the
+// SourceProfile a colour-managed channel decodes with; the cases at the end
+// check the mapping and that it changes the decode the way it should.
+
+#include "fl/fled/color.h"
+#include "fl/gfx/color_profile.h"
+#include "fl/gfx/colorimetric_response.h"
+#include "fl/gfx/pipeline.h"
+#include "fl/fled/pixel_format.h"
+#include "fl/fled/fled.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/int.h"
+#include "fl/stl/json.h"
+#include "fl/stl/move.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "test.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+using namespace fl;
+using fl::fled::ColorMatrix;
+using fl::fled::ColorPrimaries;
+using fl::fled::ColorRange;
+using fl::fled::ColorStatus;
+using fl::fled::ColorTransfer;
+using fl::fled::PixelFormat;
+using fl::fled::VideoColor;
+
+namespace {
+
+// Resolve a JSON envelope literal against a pixel format.
+ColorStatus resolve(const char* envelopeText, fl::u8 pixelFormat,
+                    VideoColor* out) {
+    fl::json env = fl::json::parse(fl::string(envelopeText));
+    return fl::fled::resolveVideoColor(env, pixelFormat, out);
+}
+
+constexpr fl::u8 kRgb8     = static_cast<fl::u8>(PixelFormat::Rgb8);
+constexpr fl::u8 kRgba8    = static_cast<fl::u8>(PixelFormat::Rgba8);
+constexpr fl::u8 kRgb565Le = static_cast<fl::u8>(PixelFormat::Rgb565Le);
+constexpr fl::u8 kGray8    = static_cast<fl::u8>(PixelFormat::Gray8);
+constexpr fl::u8 kRgbw8    = static_cast<fl::u8>(PixelFormat::Rgbw8);
+constexpr fl::u8 kRgb16Lin = static_cast<fl::u8>(PixelFormat::Rgb16Linear);
+
+// The canonical declaration a conforming rgb8 producer writes.
+const char* const kCanonical =
+    "{\"video\":{\"color\":{\"primaries\":\"bt709\",\"transfer\":\"srgb\","
+    "\"matrix\":\"rgb\",\"range\":\"full\"}}}";
+
+}  // namespace
+
+// ============================================================================
+// Pixel format: rgb16_linear joins the v1 enum
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear is 6 bytes per LED") {
+    FL_CHECK_EQ(fl::fled::bytesPerLed(kRgb16Lin), 6);
+    // 0x06 and up remain reserved / rejected.
+    FL_CHECK_EQ(fl::fled::bytesPerLed(static_cast<fl::u8>(0x06)), 0);
+    FL_CHECK_EQ(fl::fled::bytesPerLed(static_cast<fl::u8>(0xff)), 0);
+}
+
+FL_TEST_CASE("FLED_COLOR - typed resolveVideoColor accepts the public wire enum") {
+    VideoColor color;
+    fl::json envelope = fl::json::parse(fl::string("{}"));
+    FL_REQUIRE_EQ(fl::fled::resolveVideoColor(envelope, PixelFormat::Rgb16Linear,
+                                              &color),
+                  ColorStatus::Ok);
+    FL_CHECK_EQ(color.transfer, ColorTransfer::Linear);
+}
+
+// ============================================================================
+// Default tuple + absent metadata
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - absent video.color resolves to the default tuple") {
+    VideoColor c;
+    FL_CHECK(resolve("{}", kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::Bt709);
+    FL_CHECK(c.transfer  == ColorTransfer::Srgb);
+    FL_CHECK(c.matrix    == ColorMatrix::Rgb);
+    FL_CHECK(c.range     == ColorRange::Full);
+    // The default is a compatibility interpretation, not an author's claim.
+    FL_CHECK(c.declared == false);
+}
+
+FL_TEST_CASE("FLED_COLOR - a video block without color still defaults") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"fps\":30}}", kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+    FL_CHECK(c.declared == false);
+}
+
+FL_TEST_CASE("FLED_COLOR - the whole display-encoded family shares the tuple") {
+    const fl::u8 formats[3] = {kRgb8, kRgba8, kRgb565Le};
+    for (fl::size i = 0; i < 3; ++i) {
+        VideoColor c;
+        FL_CHECK(resolve("{}", formats[i], &c) == ColorStatus::Ok);
+        FL_CHECK(c.transfer == ColorTransfer::Srgb);
+        FL_CHECK(c.primaries == ColorPrimaries::Bt709);
+    }
+}
+
+FL_TEST_CASE("FLED_COLOR - canonical declaration round-trips as declared") {
+    VideoColor c;
+    FL_CHECK(resolve(kCanonical, kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::Bt709);
+    FL_CHECK(c.transfer  == ColorTransfer::Srgb);
+    FL_CHECK(c.matrix    == ColorMatrix::Rgb);
+    FL_CHECK(c.range     == ColorRange::Full);
+    FL_CHECK(c.declared == true);
+}
+
+// ============================================================================
+// Key inheritance (scoped to formats with a default tuple)
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - missing keys inherit from the default tuple") {
+    VideoColor c;
+    const char* env =
+        "{\"video\":{\"color\":{\"primaries\":\"display-p3\"}}}";
+    FL_CHECK(resolve(env, kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::DisplayP3);  // explicit
+    FL_CHECK(c.transfer  == ColorTransfer::Srgb);        // inherited
+    FL_CHECK(c.matrix    == ColorMatrix::Rgb);           // inherited
+    FL_CHECK(c.range     == ColorRange::Full);           // inherited
+    FL_CHECK(c.declared == true);
+}
+
+FL_TEST_CASE("FLED_COLOR - bt2020 primaries are recognized") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"bt2020\"}}}",
+                     kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::Bt2020);
+}
+
+FL_TEST_CASE("FLED_COLOR - bt709 transfer is distinct from srgb") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"bt709\"}}}",
+                     kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.transfer == ColorTransfer::Bt709);
+}
+
+// ============================================================================
+// Rule 2/3: transfer must agree with what the payload bytes hold
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - rgb8 rejects a linear transfer") {
+    // "A producer must not put linear-light samples in rgb8."
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"linear\"}}}",
+                     kRgb8, &c) == ColorStatus::TransferConflictsWithFormat);
+}
+
+FL_TEST_CASE("FLED_COLOR - reserved HDR transfers are rejected in v1") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"pq\"}}}",
+                     kRgb8, &c) == ColorStatus::TransferConflictsWithFormat);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"hlg\"}}}",
+                     kRgb8, &c) == ColorStatus::TransferConflictsWithFormat);
+    // ... on the linear format too - no v1 payload can carry them.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"pq\"}}}",
+                     kRgb16Lin, &c) == ColorStatus::TransferConflictsWithFormat);
+}
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear defaults to a linear transfer") {
+    VideoColor c;
+    FL_CHECK(resolve("{}", kRgb16Lin, &c) == ColorStatus::Ok);
+    FL_CHECK(c.transfer  == ColorTransfer::Linear);
+    FL_CHECK(c.primaries == ColorPrimaries::Bt709);
+    FL_CHECK(c.range     == ColorRange::Full);
+    // Inherited, not claimed. #4156 R10 read the forward-compatibility prose
+    // -- which used to call this format "meaningless without its declaration"
+    // -- as saying absence is unresolvable here. It is not: the format value
+    // has already pinned linear-light samples. What makes the two states
+    // distinguishable is this flag, so it is asserted rather than assumed.
+    FL_CHECK(c.declared == false);
+}
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear refuses rather than falls back") {
+    // The half of "mandatory" that is real. On rgb8 an unrecognized name may
+    // resolve to the default tuple with a diagnostic, because the declaration
+    // is advisory there. The identical name on rgb16_linear is a refusal --
+    // and refusing is not the same as having no default, which is what the
+    // case above pins.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"nonesuch\"}}}",
+                     kRgb16Lin, &c) != ColorStatus::Ok);
+    FL_CHECK(resolve("{}", kRgb16Lin, &c) == ColorStatus::Ok);
+}
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear accepts only a linear transfer") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"linear\"}}}",
+                     kRgb16Lin, &c) == ColorStatus::Ok);
+    FL_CHECK(c.transfer == ColorTransfer::Linear);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"srgb\"}}}",
+                     kRgb16Lin, &c) == ColorStatus::TransferConflictsWithFormat);
+}
+
+// ============================================================================
+// Rules 4/5: reserved range and matrix values
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - limited range is reserved and rejected") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"range\":\"limited\"}}}",
+                     kRgb8, &c) == ColorStatus::LimitedRangeUnsupported);
+}
+
+FL_TEST_CASE("FLED_COLOR - non-rgb matrix values are reserved and rejected") {
+    VideoColor c;
+    // A YCbCr payload needs a pixel format that does not exist yet.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":\"bt709\"}}}",
+                     kRgb8, &c) == ColorStatus::MatrixUnsupported);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":\"bt2020ncl\"}}}",
+                     kRgb8, &c) == ColorStatus::MatrixUnsupported);
+}
+
+// ============================================================================
+// Rule 1: unrecognized values are rejected, never silently defaulted
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - an explicit null color is treated as absent") {
+    // Omitting the key and setting it to null must not have opposite
+    // outcomes; many serializers emit null for an unset optional.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":null}}", kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == false);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+}
+
+FL_TEST_CASE("FLED_COLOR - a typo'd matrix reads as unknown, not reserved") {
+    VideoColor c;
+    // Reserved YCbCr coefficient names stay "reserved"...
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":\"ycbcr\"}}}",
+                     kRgb8, &c) == ColorStatus::MatrixUnsupported);
+    // ...but a typo is unrecognized, so the author is not sent to the spec.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":\"rbg\"}}}",
+                     kRgb8, &c) == ColorStatus::UnknownMatrix);
+}
+
+FL_TEST_CASE("FLED_COLOR - unknown values are rejected per field") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"rec2100\"}}}",
+                     kRgb8, &c) == ColorStatus::UnknownPrimaries);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"gamma22\"}}}",
+                     kRgb8, &c) == ColorStatus::UnknownTransfer);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"range\":\"studio\"}}}",
+                     kRgb8, &c) == ColorStatus::UnknownRange);
+}
+
+FL_TEST_CASE("FLED_COLOR - transfer \"none\" is not a valid value") {
+    // The spec forbids "none" explicitly: it is ambiguous. Linear-light
+    // producers must say "linear" and use a format that permits it.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":\"none\"}}}",
+                     kRgb8, &c) == ColorStatus::UnknownTransfer);
+}
+
+FL_TEST_CASE("FLED_COLOR - non-string scalars are rejected, not coerced") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"transfer\":42}}}",
+                     kRgb8, &c) == ColorStatus::UnknownTransfer);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"matrix\":true}}}",
+                     kRgb8, &c) == ColorStatus::UnknownMatrix);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"range\":null}}}",
+                     kRgb8, &c) == ColorStatus::UnknownRange);
+}
+
+FL_TEST_CASE("FLED_COLOR - video.color must be an object") {
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":\"bt709\"}}", kRgb8, &c) ==
+             ColorStatus::NotAnObject);
+    FL_CHECK(resolve("{\"video\":{\"color\":[1,2]}}", kRgb8, &c) ==
+             ColorStatus::NotAnObject);
+}
+
+// ============================================================================
+// Rule 6: gray8 / rgbw8 have no default tuple - all or nothing
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - gray8 and rgbw8 define no default tuple") {
+    FL_CHECK(fl::fled::pixelFormatHasDefaultTuple(kRgb8));
+    FL_CHECK(fl::fled::pixelFormatHasDefaultTuple(kRgb16Lin));
+    FL_CHECK(!fl::fled::pixelFormatHasDefaultTuple(kGray8));
+    FL_CHECK(!fl::fled::pixelFormatHasDefaultTuple(kRgbw8));
+
+    VideoColor c;
+    FL_CHECK(resolve("{}", kGray8, &c) == ColorStatus::NoDefaultTuple);
+    FL_CHECK(resolve("{}", kRgbw8, &c) == ColorStatus::NoDefaultTuple);
+}
+
+FL_TEST_CASE("FLED_COLOR - a partial declaration cannot inherit without a tuple") {
+    // This is the guard that keeps a future YCbCr format from silently
+    // inheriting matrix: rgb.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"bt709\"}}}",
+                     kRgbw8, &c) == ColorStatus::IncompleteForFormat);
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":\"bt709\","
+                     "\"transfer\":\"srgb\",\"matrix\":\"rgb\"}}}",
+                     kGray8, &c) == ColorStatus::IncompleteForFormat);
+}
+
+FL_TEST_CASE("FLED_COLOR - a complete declaration is accepted without a tuple") {
+    VideoColor c;
+    FL_CHECK(resolve(kCanonical, kRgbw8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+    FL_CHECK(c.declared == true);
+}
+
+// ============================================================================
+// Rule 7: custom primaries
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - custom primaries carry CIE xy pairs") {
+    VideoColor c;
+    const char* env =
+        "{\"video\":{\"color\":{\"primaries\":{"
+        "\"red\":[0.640,0.330],\"green\":[0.300,0.600],"
+        "\"blue\":[0.150,0.060],\"white\":[0.3127,0.3290]}}}}";
+    FL_CHECK(resolve(env, kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::Custom);
+    FL_CHECK(c.customPrimaries[0] > 0.63f);
+    FL_CHECK(c.customPrimaries[0] < 0.65f);
+    FL_CHECK(c.customPrimaries[7] > 0.32f);
+    FL_CHECK(c.customPrimaries[7] < 0.34f);
+    // Unstated keys still inherit.
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+}
+
+FL_TEST_CASE("FLED_COLOR - malformed custom primaries are rejected") {
+    VideoColor c;
+    // Missing white.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,0.33],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+    // A one-element pair is not an xy.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+    // A string where a pair belongs.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":\"0.64,0.33\",\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+    // Three components is not an xy pair - accepting it would silently drop
+    // the extra value rather than telling the producer it wrote nonsense.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,0.33,1.0],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+}
+
+FL_TEST_CASE("FLED_COLOR - a zero y is not a chromaticity") {
+    // xyY -> XYZ divides by y. At zero the primary becomes a zero column and
+    // the profile is refused later as a singular matrix -- correct, but
+    // reported far from the field that caused it (#4156 R6).
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,0.0],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+    // Negative y likewise: below the axis is not a lower luminance, it is
+    // not a chromaticity at all.
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[0.64,-0.33],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+}
+
+FL_TEST_CASE("FLED_COLOR - a non-finite coordinate is rejected") {
+    // A JSON literal well past float range parses to an infinity, and an
+    // infinite coordinate is not a chromaticity.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[1e400,0.33],\"green\":[0.3,0.6],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::MalformedCustomPrimaries);
+}
+
+FL_TEST_CASE("FLED_COLOR - primaries outside the xy simplex still resolve") {
+    // Imaginary primaries. Wide-gamut encodings legitimately use them, and
+    // #4156 R6 asks for that to be an explicit decision rather than the side
+    // effect of a range check. No decision has been made, so the checks above
+    // must not foreclose one.
+    VideoColor c;
+    FL_CHECK(resolve("{\"video\":{\"color\":{\"primaries\":{"
+                     "\"red\":[1.2,0.4],\"green\":[-0.2,1.1],"
+                     "\"blue\":[0.15,0.06],\"white\":[0.31,0.33]}}}}",
+                     kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.primaries == ColorPrimaries::Custom);
+}
+
+// ============================================================================
+// Diagnostics
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - every status has a non-empty message") {
+    const ColorStatus all[] = {
+        ColorStatus::Ok,
+        ColorStatus::NullOutput,
+        ColorStatus::NoDefaultTuple,
+        ColorStatus::NotAnObject,
+        ColorStatus::UnknownPrimaries,
+        ColorStatus::UnknownTransfer,
+        ColorStatus::UnknownMatrix,
+        ColorStatus::UnknownRange,
+        ColorStatus::TransferConflictsWithFormat,
+        ColorStatus::LimitedRangeUnsupported,
+        ColorStatus::MatrixUnsupported,
+        ColorStatus::IncompleteForFormat,
+        ColorStatus::MalformedCustomPrimaries,
+    };
+    for (fl::size i = 0; i < sizeof(all) / sizeof(all[0]); ++i) {
+        const char* msg = fl::fled::colorStatusMessage(all[i]);
+        FL_CHECK(msg != nullptr);
+        FL_CHECK(msg[0] != '\0');
+    }
+}
+
+// ============================================================================
+// Fled::videoColor() - the accessor over a real bundle
+// ============================================================================
+
+namespace {
+
+// Hand-assemble a v1 .fled bundle (see FLED_FORMAT.md layout table).
+fl::vector<fl::u8> buildBundle(fl::u8 pixelFormat, const char* envelope,
+                               fl::size envelopeLen) {
+    const fl::u32 jsonLen = static_cast<fl::u32>(envelopeLen);
+    fl::vector<fl::u8> out;
+    out.resize(12 + envelopeLen);
+    out[0] = 'F'; out[1] = 'L'; out[2] = 'E'; out[3] = 'D';
+    out[4] = 1;
+    out[5] = pixelFormat;
+    out[6] = 0; out[7] = 0;
+    out[8]  = static_cast<fl::u8>(jsonLen & 0xff);
+    out[9]  = static_cast<fl::u8>((jsonLen >> 8) & 0xff);
+    out[10] = static_cast<fl::u8>((jsonLen >> 16) & 0xff);
+    out[11] = static_cast<fl::u8>((jsonLen >> 24) & 0xff);
+    for (fl::size i = 0; i < envelopeLen; ++i) {
+        out[12 + i] = static_cast<fl::u8>(envelope[i]);
+    }
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("FLED_COLOR - videoColor reads a declared tuple off a bundle") {
+    fl::vector<fl::u8> buf = buildBundle(0x00, kCanonical,
+                                          fl::strlen(kCanonical));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+}
+
+FL_TEST_CASE("FLED_COLOR - videoColor honors the header's pixel_format") {
+    // Same envelope, different header byte: rgb16_linear rejects srgb.
+    fl::vector<fl::u8> buf = buildBundle(0x05, kCanonical,
+                                          fl::strlen(kCanonical));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    FL_CHECK_EQ(f.pixelFormat(), 0x05);
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::TransferConflictsWithFormat);
+}
+
+FL_TEST_CASE("FLED_COLOR - a legacy bundle with no color still resolves") {
+    const char env[] = "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x00, env, sizeof(env) - 1);
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == false);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+}
+
+// ============================================================================
+// Cross-repo conformance vectors
+//
+// These two envelopes are the VERBATIM output of ledmapper's producer
+// (src/moviemaker/recording.ts embedFps() -> buildVideoColor(format)), captured
+// from a real run. FastLED is the consumer half of this contract, so what the
+// producer actually emits must resolve here without complaint. If a future
+// ledmapper change alters the emitted shape, this is the test that notices.
+// ============================================================================
+
+FL_TEST_CASE("FLED_COLOR - accepts ledmapper's emitted rgb8 envelope verbatim") {
+    const char* env =
+        "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}},\"video\":{\"fps\":60,\"color\":"
+        "{\"primaries\":\"bt709\",\"transfer\":\"srgb\",\"matrix\":\"rgb\","
+        "\"range\":\"full\"}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x00, env, fl::strlen(env));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
+    FL_CHECK(c.primaries == ColorPrimaries::Bt709);
+    FL_CHECK(c.transfer  == ColorTransfer::Srgb);
+    FL_CHECK(c.matrix    == ColorMatrix::Rgb);
+    FL_CHECK(c.range     == ColorRange::Full);
+    // The rest of the envelope still parses normally alongside it.
+    FL_CHECK(f.videoFps() == 60.0f);
+}
+
+FL_TEST_CASE("FLED_COLOR - accepts ledmapper's emitted rgb16_linear envelope") {
+    const char* env =
+        "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}},\"video\":{\"fps\":60,\"color\":"
+        "{\"primaries\":\"bt709\",\"transfer\":\"linear\",\"matrix\":\"rgb\","
+        "\"range\":\"full\"}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x05, env, fl::strlen(env));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+    FL_CHECK_EQ(f.bytesPerLed(), 6);
+
+    VideoColor c;
+    FL_CHECK(f.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
+    FL_CHECK(c.transfer == ColorTransfer::Linear);
+}
+
+FL_TEST_CASE("FLED_COLOR - the serialized envelope carries the whole metadata") {
+    // The WASM platform dumps json().to_string() to console.log when a .fled
+    // is injected (platforms/wasm/fs_wasm.cpp.hpp). That diagnostic is only
+    // useful if serializing round-trips every section, not just the one the
+    // reader happens to understand - so pin it here, on the host, where it
+    // can actually be asserted.
+    const char* env =
+        "{\"map\":{\"a\":{\"x\":[0],\"y\":[0]}},\"video\":{\"fps\":60,\"color\":"
+        "{\"primaries\":\"bt709\",\"transfer\":\"srgb\",\"matrix\":\"rgb\","
+        "\"range\":\"full\"}}}";
+    fl::vector<fl::u8> buf = buildBundle(0x00, env, fl::strlen(env));
+    Fled f = Fled::loadFromVector(fl::move(buf));
+    FL_CHECK(static_cast<bool>(f));
+
+    const fl::string dumped = f.json().to_string();
+
+    // Re-parse rather than substring-match: a token appearing *somewhere* in
+    // the string would not prove it survived in the right place, which is the
+    // only thing that makes the dump worth printing.
+    fl::json round = fl::json::parse(dumped);
+    FL_CHECK(round.is_object());
+
+    // Geometry survives, nested.
+    FL_CHECK(round.contains(fl::string("map")));
+    FL_CHECK(round["map"].is_object());
+    FL_CHECK(round["map"].contains(fl::string("a")));
+    FL_CHECK(round["map"]["a"]["x"].is_array());
+    FL_CHECK(round["map"]["a"]["y"].is_array());
+
+    // Playback rate survives with its value.
+    FL_CHECK(round["video"].is_object());
+    auto fps = round["video"]["fps"].as_float();
+    FL_CHECK(static_cast<bool>(fps));
+    FL_CHECK(*fps == 60.0f);
+
+    // The color tuple survives under video.color, key by key.
+    const fl::json color = round["video"]["color"];
+    FL_CHECK(color.is_object());
+    struct { const char* key; const char* value; } expected[4] = {
+        {"primaries", "bt709"}, {"transfer", "srgb"},
+        {"matrix", "rgb"},      {"range", "full"},
+    };
+    for (fl::size i = 0; i < 4; ++i) {
+        auto got = color[fl::string(expected[i].key)].as_string();
+        FL_CHECK(static_cast<bool>(got));
+        FL_CHECK(fl::strcmp(got->c_str(), expected[i].value) == 0);
+    }
+
+    // And the round-tripped envelope still resolves to the same declaration.
+    VideoColor c;
+    FL_CHECK(fl::fled::resolveVideoColor(round, kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == true);
+}
+
+FL_TEST_CASE("FLED_COLOR - videoColor on a null Fled yields the default tuple") {
+    Fled null;
+    VideoColor c;
+    FL_CHECK(null.videoColor(&c) == ColorStatus::Ok);
+    FL_CHECK(c.declared == false);
+    FL_CHECK(c.transfer == ColorTransfer::Srgb);
+    FL_CHECK(null.videoColor(nullptr) == ColorStatus::NullOutput);
+}
+
+
+// ============================================================================
+// toSourceProfile (#4460): the declaration a colour-managed channel decodes by
+// ============================================================================
+
+namespace {
+
+bool sameChroma(Chromaticity a, Chromaticity b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+bool sameProfile(const SourceProfile& a, const SourceProfile& b) {
+    return sameChroma(a.primaries.red, b.primaries.red) &&
+           sameChroma(a.primaries.green, b.primaries.green) &&
+           sameChroma(a.primaries.blue, b.primaries.blue) &&
+           sameChroma(a.primaries.white, b.primaries.white) &&
+           a.transfer == b.transfer;
+}
+
+SourceProfile profileOf(const char* envelope, fl::u8 pixelFormat) {
+    VideoColor c;
+    FL_REQUIRE(resolve(envelope, pixelFormat, &c) == ColorStatus::Ok);
+    SourceProfile out = SourceProfile::linearSrgb();
+    FL_REQUIRE(fl::fled::toSourceProfile(c, &out));
+    return out;
+}
+
+}  // namespace
+
+FL_TEST_CASE("FLED_COLOR - the default rgb8 tuple is sRGB, not linear") {
+    // The case #4460 is about: an rgb8 file with no video.color is sRGB-
+    // encoded, and a colour-managed channel's own default is linear.
+    FL_CHECK(sameProfile(profileOf("{}", kRgb8), SourceProfile::srgbBt709()));
+    FL_CHECK(sameProfile(profileOf(kCanonical, kRgb8), SourceProfile::srgbBt709()));
+}
+
+FL_TEST_CASE("FLED_COLOR - rgb16_linear maps to linear sRGB primaries") {
+    FL_CHECK(sameProfile(profileOf("{}", kRgb16Lin), SourceProfile::linearSrgb()));
+}
+
+FL_TEST_CASE("FLED_COLOR - named primaries and transfers map through") {
+    FL_CHECK(sameProfile(
+        profileOf("{\"video\":{\"color\":{\"primaries\":\"display-p3\"}}}", kRgb8),
+        SourceProfile::displayP3()));
+    const SourceProfile bt2020 =
+        profileOf("{\"video\":{\"color\":{\"primaries\":\"bt2020\"}}}", kRgb8);
+    FL_CHECK(sameChroma(bt2020.primaries.red, SourceProfile::bt2020().primaries.red));
+    FL_CHECK(bt2020.transfer == TransferFunction::Srgb);  // inherited, not bt2020's
+    FL_CHECK(profileOf("{\"video\":{\"color\":{\"transfer\":\"bt709\"}}}", kRgb8).transfer ==
+             TransferFunction::Bt709);
+}
+
+FL_TEST_CASE("FLED_COLOR - custom primaries carry through as chromaticities") {
+    const SourceProfile p = profileOf(
+        "{\"video\":{\"color\":{\"primaries\":{"
+        "\"red\":[0.680,0.320],\"green\":[0.265,0.690],"
+        "\"blue\":[0.150,0.060],\"white\":[0.3127,0.3290]}}}}",
+        kRgb8);
+    FL_CHECK(p.primaries.red.x > 0.679f);
+    FL_CHECK(p.primaries.red.x < 0.681f);
+    FL_CHECK(p.primaries.green.y > 0.689f);
+    FL_CHECK(p.primaries.white.x > 0.312f);
+    FL_CHECK(p.primaries.white.x < 0.313f);
+    FL_CHECK(p.transfer == TransferFunction::Srgb);
+}
+
+FL_TEST_CASE("FLED_COLOR - toSourceProfile rejects a null out-pointer") {
+    VideoColor c;
+    FL_REQUIRE(resolve("{}", kRgb8, &c) == ColorStatus::Ok);
+    FL_CHECK_FALSE(fl::fled::toSourceProfile(c, nullptr));
+}
+
+FL_TEST_CASE("FLED_COLOR - binding the file's profile decodes sRGB mid-grey") {
+    // End to end through the real pipeline: the same rgb8 value 128 drives a
+    // device at ~21.6% of full with the file's profile (sRGB decode) against
+    // 50% with the channel's linear default -- the difference #4460 is about.
+    const EmitterProfile device = EmitterProfile::rgb(
+        "test/rgb", Chromaticity(.640f, .330f), Chromaticity(.300f, .600f),
+        Chromaticity(.150f, .060f), 1.0f, 1.0f, 1.0f, "test", "test");
+    auto greenRatio = [&](const SourceProfile& source) {
+        StreamingPipelineQ16 pipeline;
+        FL_REQUIRE(buildStreamingPipelineQ16(source, device, GamutPolicy::ChromaCompress,
+                                             &pipeline));
+        fl::i32 mid[3];
+        fl::i32 full[3];
+        processPixelQ16(pipeline, 128, 128, 128, mid);
+        processPixelQ16(pipeline, 255, 255, 255, full);
+        return static_cast<double>(mid[1]) / static_cast<double>(full[1]);
+    };
+    const double file = greenRatio(profileOf("{}", kRgb8));
+    const double linear = greenRatio(SourceProfile::linearSrgb());
+    FL_CHECK_GT(file, 0.20);
+    FL_CHECK_LT(file, 0.23);
+    FL_CHECK_GT(linear, 0.48);
+    FL_CHECK_LT(linear, 0.52);
+}
+}  // FL_TEST_FILE

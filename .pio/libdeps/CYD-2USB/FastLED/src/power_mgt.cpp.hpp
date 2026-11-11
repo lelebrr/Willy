@@ -1,0 +1,1023 @@
+/// @file power_mgt.cpp
+/// Functions to limit the power used by FastLED
+
+/// Disables pragma messages and warnings
+#include "led_sysdefs.h"      // Must be included first (required by lib8tion.h)
+#include "pixeltypes.h"       // CRGB
+#include "controller.h"       // CLEDController
+#include "fastpin.h"          // Pin
+#include "fl/system/sketch_macros.h"
+#include "fl/stl/compiler_control.h"  // FL_UNUSED
+#if SKETCH_HAS_LARGE_MEMORY
+#include "fl/math/math.h"  // fl::pow, fl::lround — libm-gated wrappers
+#include "fl/stl/array.h"
+#endif
+#include "fl/stl/int.h"           // fl::u32, fl::u8
+#include "fl/stl/type_traits.h"   // fl::conditional
+#include "fl/stl/static_assert.h"
+#include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
+#include "fl/channels/pipeline_binding.h"  // colorPipelineHooks (#4344)
+#include "fl/channels/power_prepass.h"
+#include "fl/system/engine_events.h"
+#include "pixel_controller.h"
+#include "fl/stl/singleton.h"    // fl::Singleton
+#include "fl/gfx/rgbw.h"     // fl::Rgbw, fl::rgb_2_rgbw
+#include "fl/stl/noexcept.h"
+// POWER MANAGEMENT
+
+/// @name Power Usage Values
+/// These power usage values are approximate, and your exact readings
+/// will be slightly (10%?) different from these.
+///
+/// They were arrived at by actually measuing the power draw of a number
+/// of different LED strips, and a bunch of closed-loop-feedback testing
+/// to make sure that if we USE these values, we stay at or under
+/// the target power consumption.
+/// Actual power consumption is much, much more complicated and has
+/// to include things like voltage drop, etc., etc.
+/// However, this is good enough for most cases, and almost certainly better
+/// than no power management at all.
+///
+/// You can now customize these values using the PowerModel API:
+/// @code
+/// FastLED.setPowerModel(PowerModelRGB(40, 40, 40, 2)); // WS2812B @ 3.3V
+/// @endcode
+/// @{
+
+static constexpr float kLinearPowerScalingExponent = 1.0f;
+static constexpr float kPowerScalingExponentEpsilon = 0.0001f;
+
+/// Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)
+static PowerModelRGB& gPowerModel() FL_NO_EXCEPT {
+    // Constant-initialized (constexpr constructor, trivial destructor), so it
+    // needs neither Singleton's lazy placement-new nor a guard: there is no
+    // initialization order to protect and nothing to destroy.
+    static PowerModelRGB model;
+    return model;
+}
+
+/// The white emitter's draw, when the caller declared one.
+///
+/// Kept beside the RGB model rather than inside it because it applies to a
+/// controller only when that controller is in RGBW mode -- the same model
+/// serves plain RGB strips on the same sketch, and they have no white diode
+/// to charge for.
+///
+/// Zero means "not declared". That reading is available because zero is not
+/// a draw any emitter has, so it cannot collide with a real declaration.
+struct WhiteEmitterPower {
+    fl::u8 mW;
+};
+
+static WhiteEmitterPower& gWhiteEmitterPower() FL_NO_EXCEPT {
+    return fl::Singleton<WhiteEmitterPower>::instance();
+}
+
+struct RgbwwEmitterPower {
+    PowerModelRGBWW model;
+    bool declared = false;
+};
+
+static RgbwwEmitterPower& gRgbwwEmitterPower() FL_NO_EXCEPT {
+    return fl::Singleton<RgbwwEmitterPower>::instance();
+}
+
+// Source order, not wire order: RGB, then W or warm-W/cool-W. An undeclared
+// white gets the maximum representable emitter draw, so a managed channel
+// cannot silently under-budget it. Legacy estimates keep their old fallback.
+static void emitter_power_weights(fl::u8 count, fl::u8 (&weights)[5]) FL_NO_EXCEPT {
+    const PowerModelRGB& rgb = gPowerModel();
+    weights[0] = rgb.red_mW;
+    weights[1] = rgb.green_mW;
+    weights[2] = rgb.blue_mW;
+    weights[3] = 0;
+    weights[4] = 0;
+    if (count == 4) {
+        const fl::u8 white = gWhiteEmitterPower().mW;
+        weights[3] = white != 0 ? white : 255;
+    } else if (count == 5) {
+        const RgbwwEmitterPower& rgbww = gRgbwwEmitterPower();
+        if (rgbww.declared) {
+            weights[0] = rgbww.model.red_mW;
+            weights[1] = rgbww.model.green_mW;
+            weights[2] = rgbww.model.blue_mW;
+            weights[3] = rgbww.model.warm_white_mW;
+            weights[4] = rgbww.model.white_mW;
+        } else {
+            weights[3] = 255;
+            weights[4] = 255;
+        }
+    }
+}
+
+#if SKETCH_HAS_LARGE_MEMORY
+static constexpr fl::size kPowerScalingTableSize = 256;
+
+/// Cached forward/reverse LUTs derived from `gPowerModel().exponent`.
+/// Authoritative exponent storage lives in the PowerModel itself; this is a
+/// pure cache rebuilt whenever the model's exponent changes.
+struct PowerScalingState {
+    fl::array<fl::u8, kPowerScalingTableSize> forward;
+    fl::array<fl::u8, kPowerScalingTableSize> reverse;
+    /// Largest `forward[i + 1] - forward[i]`: what one output code can cost
+    /// at the steepest point of the response. 1 for the identity table.
+    fl::u8 max_step = 1;
+
+    PowerScalingState() FL_NO_EXCEPT {
+        reset_identity();
+    }
+
+    void reset_identity() FL_NO_EXCEPT {
+        for (fl::size i = 0; i < kPowerScalingTableSize; ++i) {
+            forward[i] = static_cast<fl::u8>(i);
+            reverse[i] = static_cast<fl::u8>(i);
+        }
+        max_step = 1;
+    }
+};
+
+static PowerScalingState& gPowerScaling() FL_NO_EXCEPT {
+    return fl::Singleton<PowerScalingState>::instance();
+}
+
+/// Rebuild the forward/reverse LUTs from the given exponent.
+/// Non-positive or near-1.0 exponents collapse to identity tables.
+static void rebuild_power_scaling_tables(float exponent) FL_NO_EXCEPT {
+    PowerScalingState& state = gPowerScaling();
+    if (!(exponent > 0.0f) ||
+        fl::almost_equal(exponent, kLinearPowerScalingExponent, kPowerScalingExponentEpsilon)) {
+        state.reset_identity();
+        return;
+    }
+
+    // Forward LUT: source brightness -> scaled brightness via pow(x/255, exponent)
+    state.forward[0] = 0;
+    for (fl::size i = 1; i < kPowerScalingTableSize; ++i) {
+        float normalized = static_cast<float>(i) / 255.0f;
+        // Route through fl::powf / fl::lroundf (libm-gated via FL_MATH_USE_LIBM,
+        // see fl/math/math.cpp.hpp). Use the float overloads — fl::pow takes
+        // double, so passing floats would auto-promote and re-anchor the
+        // double-precision soft-FP chain that #3002 is trying to avoid.
+        int mapped = static_cast<int>(
+            fl::lroundf(fl::powf(normalized, exponent) * 255.0f));
+        state.forward[i] = static_cast<fl::u8>(fl::clamp(mapped, 0, 255));
+    }
+    state.forward[255] = 255;
+    state.max_step = 1;
+    for (fl::size i = 1; i < kPowerScalingTableSize; ++i) {
+        const int step = state.forward[i] - state.forward[i - 1];
+        if (step > state.max_step) {
+            state.max_step = static_cast<fl::u8>(step);
+        }
+    }
+
+    // Reverse LUT: scaled brightness -> largest source whose forward value is
+    // <= the scaled value. Floor-inverse, so `unmap_power_value()` never
+    // rounds a budgeted scaled brightness *up* past the power budget.
+    state.reverse[0] = 0;
+    int source = 0;
+    for (int scaled = 1; scaled < static_cast<int>(kPowerScalingTableSize); ++scaled) {
+        while (source < 255 && state.forward[source + 1] <= scaled) {
+            ++source;
+        }
+        state.reverse[scaled] = static_cast<fl::u8>(source);
+    }
+}
+#endif
+
+static fl::u8 map_power_value(fl::u8 brightness) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+    return gPowerScaling().forward[brightness];
+#else
+    return brightness;
+#endif
+}
+
+static fl::u8 unmap_power_value(fl::u8 scaled_brightness) FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+    return gPowerScaling().reverse[scaled_brightness];
+#else
+    return scaled_brightness;
+#endif
+}
+
+/// What one output code can cost at the steepest point of the response, in
+/// the 0-255 scaled units `calculate_unscaled_power_mW` multiplies by.
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+static fl::u8 max_power_step() FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+    return gPowerScaling().max_step;
+#else
+    return 1;
+#endif
+}
+#endif
+
+fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) FL_NO_EXCEPT {
+    return fl::scale32by8(total_mW, map_power_value(brightness));
+}
+
+/// @}
+
+// Alternate calibration by RAtkins via pre-PSU wattage measurments;
+// these are all probably about 20%-25% too high due to PSU heat losses,
+// but if you're measuring wattage on the PSU input side, this may
+// be a better set of calibrations.  (WS2812B)
+//  static const uint8_t gRed_mW   = 100;
+//  static const uint8_t gGreen_mW =  48;
+//  static const uint8_t gBlue_mW  = 100;
+//  static const uint8_t gDark_mW  =  12;
+
+
+/// Debug Option: Set to 1 to enable the power limiting LED
+/// @see set_max_power_indicator_LED()
+#define POWER_LED 1
+
+/// Debug Option: Set to enable Serial debug statements for power limit functions
+/// @note If you enable this, you'll need to include the appropriate headers for Serial (e.g., Arduino.h)
+#define POWER_DEBUG_PRINT 0
+
+
+// Power consumed by the MCU
+static const fl::u8 gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
+
+static fl::u8  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
+
+
+// Span-based version (primary implementation)
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds) FL_NO_EXCEPT {
+    fl::u32 red32 = 0, green32 = 0, blue32 = 0;
+
+    // Iterate using span's safe indexing
+    for(size_t i = 0; i < leds.size(); i++) {
+        red32   += map_power_value(leds[i].r);
+        green32 += map_power_value(leds[i].g);
+        blue32  += map_power_value(leds[i].b);
+    }
+
+    red32   *= gPowerModel().red_mW;
+    green32 *= gPowerModel().green_mW;
+    blue32  *= gPowerModel().blue_mW;
+
+    red32   >>= 8;
+    green32 >>= 8;
+    blue32  >>= 8;
+
+    fl::u32 total = red32 + green32 + blue32 + (gPowerModel().dark_mW * leds.size());
+
+    return total;
+}
+
+fl::u32 calculate_unscaled_emitter_power_mW(fl::span<const fl::u8> codes,
+                                            fl::u8 emitter_count) FL_NO_EXCEPT {
+    if (emitter_count < 3 || emitter_count > 5 ||
+        codes.size() % emitter_count != 0) {
+        return 0;
+    }
+    fl::u8 weights[5];
+    emitter_power_weights(emitter_count, weights);
+    fl::u32 sums[5] = {};
+    for (fl::size i = 0; i < codes.size(); i += emitter_count) {
+        for (fl::u8 channel = 0; channel < emitter_count; ++channel) {
+            sums[channel] += map_power_value(codes[i + channel]);
+        }
+    }
+    fl::u32 total = static_cast<fl::u32>(gPowerModel().dark_mW) *
+                    (codes.size() / emitter_count);
+    for (fl::u8 channel = 0; channel < emitter_count; ++channel) {
+        total += (sums[channel] * weights[channel]) >> 8;
+    }
+    return total;
+}
+
+// Pointer-based version (delegates to span version)
+fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds ) FL_NO_EXCEPT //25354
+{
+    return calculate_unscaled_power_mW(fl::span<const CRGB>(ledbuffer, numLeds));
+}
+
+// Four emitters, using the conversion the encoder will actually run.
+//
+// The three-emitter overload reads the source triple the sketch wrote. For an
+// RGBW controller that triple is an input to `rgb_2_rgbw`, not a description
+// of the drives, and the two disagree by more than rounding: at full white on
+// the shipped default model the source triple reads 249 while the strip draws
+// 348 under `kRGBWMaxBrightness` and 99 under `kRGBWExactColors`. #4156 R3.
+//
+// Scales are passed as 255 because this is the demand at full brightness --
+// the caller scales the result. That is exact for `kRGBWExactColors` and
+// `kRGBWMaxBrightness`, whose conversions commute with the scale to within
+// 0.4% over the measured cases. It is not exact for `kRGBWBoostedWhite`,
+// which reallocates between emitters as the scale drops: demand there runs up
+// to 12.1% above the linear projection at low brightness. Charging four
+// emitters instead of three is the larger correction by far, and the residual
+// is stated rather than hidden -- closing it needs demand evaluated per
+// candidate brightness, which is a pixel walk per step of the limiter's
+// search.
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw) FL_NO_EXCEPT {
+    const fl::u8 white_mW = gWhiteEmitterPower().mW;
+    // `!rgbw.active()` is a fast path, not a different answer: the only
+    // inactive mode is `kRGBWInvalid`, which `rgb_2_rgbw` dispatches to
+    // null-white -- RGB passed through with w = 0 -- so the loop below would
+    // return the same total. Removing the test changes nothing observable
+    // and costs one conversion per pixel on every plain RGB controller in
+    // the sketch, which the estimator walks once per frame.
+    //
+    // The `white_mW == 0` half *is* behavioural: with no declared white
+    // there is nothing to charge the fourth diode at.
+    if (!rgbw.active() || white_mW == 0) {
+        if (rgbw.active()) {
+            FL_WARN_ONCE("power: controller is in RGBW mode but the power model "
+                         "declares no white emitter, so the budget covers three "
+                         "of its four diodes. Call "
+                         "FastLED.setPowerModel(PowerModelRGBW(...)) to fix it.");
+        }
+        return calculate_unscaled_power_mW(leds);
+    }
+
+    fl::u32 red32 = 0, green32 = 0, blue32 = 0, white32 = 0;
+    for (fl::size i = 0; i < leds.size(); i++) {
+        fl::u8 r = 0, g = 0, b = 0, w = 0;
+        fl::rgb_2_rgbw(rgbw, leds[i].r, leds[i].g, leds[i].b, 255, 255, 255,
+                       &r, &g, &b, &w);
+        red32   += map_power_value(r);
+        green32 += map_power_value(g);
+        blue32  += map_power_value(b);
+        white32 += map_power_value(w);
+    }
+
+    red32   *= gPowerModel().red_mW;
+    green32 *= gPowerModel().green_mW;
+    blue32  *= gPowerModel().blue_mW;
+    white32 *= white_mW;
+
+    red32   >>= 8;
+    green32 >>= 8;
+    blue32  >>= 8;
+    white32 >>= 8;
+
+    return red32 + green32 + blue32 + white32 +
+           (gPowerModel().dark_mW * leds.size());
+}
+
+
+// The part of the estimate a brightness scalar cannot touch: every controller
+// IC draws its quiescent current whether or not an emitter is lit, and the MCU
+// draws its own regardless of what the strip is doing. #4156 R4:
+//
+//     Fixed idle consumption cannot be reduced by multiplying LED flux.
+//
+// Scaling that baseline along with the emitters is what let the limiter
+// under-report. At 300 WS2812s on the default model the baseline is 1500 mW,
+// and a 2000 mW budget used to be answered with a brightness that draws 3461.
+static fl::u32 fixed_power_mW(fl::u32 led_count) FL_NO_EXCEPT {
+    return static_cast<fl::u32>(gPowerModel().dark_mW) * led_count;
+}
+
+// min(255, floor(255 * num / den)) for den > 0, in 32-bit arithmetic only.
+//
+// The product needs 40 bits, and on AVR a 64-bit divide links ~600 B of
+// libgcc helpers into every sketch that limits power. A quotient of 255 or
+// more is clamped by the only caller anyway, so only num < den matters:
+// eight restoring-division steps give q = floor(256 * num / den) with
+// remainder r, and since 256 * num = q * den + r, the 255 * num answer is
+// q when r >= num and q - 1 otherwise (0 < num - r <= num < den). The
+// doubling is written as a comparison so it cannot overflow for any den.
+fl::u32 power_ratio_of_255(fl::u32 num, fl::u32 den) FL_NO_EXCEPT {
+    if (num >= den) {
+        return 255;
+    }
+    fl::u32 q = 0;
+    fl::u32 r = num;
+    for (fl::u8 bit = 0; bit < 8; ++bit) {
+        q <<= 1;
+        if (r >= den - r) {
+            r -= den - r;
+            q |= 1;
+        } else {
+            r += r;
+        }
+    }
+    return r >= num ? q : q - 1;
+}
+
+// Largest brightness whose *total* demand -- baseline included -- stays inside
+// the budget. Zero when the baseline alone is already over it: no brightness
+// meets the budget then, and answering with a lit strip would promise a bound
+// that cannot be held at any setting.
+static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW,
+                                       fl::u8 target_brightness,
+                                       fl::u32 max_power_mW) FL_NO_EXCEPT {
+    const fl::u32 requested_mW =
+        fixed_mW + scale_power_for_brightness(controllable_mW, target_brightness);
+    if (requested_mW <= max_power_mW) {
+        return target_brightness;
+    }
+    if (controllable_mW == 0 || max_power_mW <= fixed_mW) {
+        // Nothing left to scale, or the baseline alone is already over the
+        // budget. Either way no brightness meets it, and returning here is
+        // also what keeps the subtraction below from underflowing and the
+        // division from dividing by zero on an all-dark strip.
+        return 0;
+    }
+    // The ratio is taken over the whole 0-255 scaled range, because
+    // `controllable_mW` is the demand at *full* brightness. Scaling it by the
+    // requested brightness first would answer "what fraction of the request
+    // fits", which is smaller than "what brightness fits" by exactly that
+    // fraction -- and the step-down below only ever decreases, so it cannot
+    // recover it. The cap is where the request comes back in.
+    //
+    // The cap cannot actually fire from here: the caller only reaches this
+    // branch when the request is already over budget, which is the same
+    // inequality. It is kept because that argument runs through
+    // `map_power_value`'s rounding, and a helper that clamps to its own
+    // argument is cheaper than depending on that.
+    const fl::u32 headroom_mW = max_power_mW - fixed_mW;
+    const fl::u8 target_scaled = map_power_value(target_brightness);
+    fl::u32 allowed_scaled = power_ratio_of_255(headroom_mW, controllable_mW);
+    if (allowed_scaled > target_scaled) {
+        allowed_scaled = target_scaled;
+    }
+    const fl::u32 recommended_scaled = static_cast<fl::u32>(allowed_scaled);
+    fl::u8 recommended = unmap_power_value(static_cast<fl::u8>(recommended_scaled));
+
+    // Then check the answer instead of trusting the division. Inverting the
+    // ratio in scaled space is off by the rounding of whichever `scale32by8`
+    // the platform compiled -- the FASTLED_SCALE8_FIXED form computes
+    // `i * (s + 1) >> 8`, so the closed form lands about `controllable/256`
+    // over the budget, which was 176 mW of a 5000 mW budget on the default
+    // model. Demand is monotone in brightness, so stepping down until it fits
+    // is exact whatever the rounding, and terminates: 0 always fits here,
+    // because the branch above already returned for a budget under baseline.
+    while (recommended > 0 &&
+           fixed_mW + scale_power_for_brightness(controllable_mW, recommended) >
+               max_power_mW) {
+        --recommended;
+    }
+    return recommended;
+}
+
+fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA) FL_NO_EXCEPT {
+	return calculate_max_brightness_for_power_mW(ledbuffer, numLeds, target_brightness, max_power_V * max_power_mA);
+}
+
+fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW) FL_NO_EXCEPT {
+	const fl::u32 total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
+	const fl::u32 fixed_mW = fixed_power_mW(numLeds);
+	const fl::u32 controllable_mW = total_mW > fixed_mW ? total_mW - fixed_mW : 0;
+
+	return brightness_within_budget(fixed_mW, controllable_mW, target_brightness,
+	                                max_power_mW);
+}
+
+// The RGBW estimate, once something has stored an Rgbw into a controller.
+// Reached through a pointer so that the conversion (~1 KB on AVR) links only
+// into sketches that configure RGBW; until then every stored white config is
+// absent, and the RGB estimate is the answer the overload would give.
+typedef fl::u32 (*rgbw_power_fn)(fl::span<const CRGB>, const fl::Rgbw&);
+// FL_LINT_ALLOW_GLOBAL(one zero-initialized pointer in .bss; a Singleton would add its init code to every limiter sketch)
+static rgbw_power_fn gRgbwPowerEstimate = nullptr;
+
+void fl::detail::enable_rgbw_power_estimate() FL_NO_EXCEPT {
+    gRgbwPowerEstimate = static_cast<rgbw_power_fn>(&calculate_unscaled_power_mW);
+}
+
+fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) FL_NO_EXCEPT {
+    const fl::span<const CRGB> leds(controller.leds(),
+                                    static_cast<fl::size>(controller.size()));
+#if FL_COLOR_PIPELINE_SHARED
+    // Through the pipeline hook, which exists whenever a pipeline does; naming
+    // the estimator directly would link the colour pipeline into sketches that
+    // limit power but never bind a profile. `pipeline` is this estimate's own
+    // reference, so reconfiguring the controller mid-pass cannot free the
+    // pipeline it is walking (#4440).
+    const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline = fl::channelColorPipeline(controller);
+    const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
+    if (pipeline && hooks.unscaledPowerMilliwatts != nullptr) {
+        // The callback charges already-solved physical emitter bytes. In
+        // particular, the RGBW legacy estimator must not convert them again.
+        const fl::u8 emitters = controller.getRgbww().active()
+                                    ? 5 : (controller.getRgbw().active() ? 4 : 3);
+        return hooks.unscaledPowerMilliwatts(
+            *pipeline, leds, emitters, &calculate_unscaled_emitter_power_mW);
+    }
+#endif
+    // Below the large-memory tier only this is compiled: a managed channel
+    // there is charged for its source (FL_COLOR_PIPELINE_SHARED).
+    // No stored Rgbw reads as RgbwInvalid, which the overload answers with the
+    // RGB estimate; asking for it directly skips copying the Rgbw value.
+    const fl::Rgbw* rgbw = controller.rgbwConfig();
+    return rgbw && gRgbwPowerEstimate ? gRgbwPowerEstimate(leds, *rgbw)
+                                      : calculate_unscaled_power_mW(leds);
+}
+
+// Two output codes: the most one `BINARY_DITHER` offset can lift a lit channel
+// once scaled. `d <= 256/s` scales back to at most one code, and the
+// FASTLED_SCALE8_FIXED form `(x * (s + 1)) >> 8` can carry one more; an
+// exhaustive check over every source, scale and offset finds 2 as the maximum.
+static constexpr fl::u32 kDitherReserveCodes = 2;
+
+#if FL_PLATFORM_HAS_TINY_MEMORY
+// TINY tier: no reserve, and none of the 64-bit arithmetic that computes it
+// (#4478). A target with 8 KiB of flash cannot spend 468 B on a bound that
+// only matters when a sketch also limits power.
+fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
+    FL_UNUSED(leds);
+    return 0;
+}
+
+fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
+    FL_UNUSED(controller);
+    return 0;
+}
+#else
+// Wide enough for the reserve's worst case without 64-bit libgcc helpers on
+// targets where it provably fits: with a 16-bit `fl::size` at most 65535
+// pixels light a channel, each charged at most 255 mW, and below the large
+// tier `max_power_step()` is 1, so the sum is at most
+// 65535 * 3 * 255 * kDitherReserveCodes + 255 < 2^32.
+#if SKETCH_HAS_LARGE_MEMORY
+typedef fl::u64 dither_acc_t;
+#else
+typedef fl::conditional<sizeof(fl::size) <= 2, fl::u32, fl::u64>::type dither_acc_t;
+FL_STATIC_ASSERT(sizeof(fl::size) > 2 ||
+                  65535ull * 3u * 255u * kDitherReserveCodes + 255u <= 0xFFFFFFFFull,
+              "dither reserve must fit 32 bits on 16-bit-size targets");
+#endif
+
+fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) FL_NO_EXCEPT {
+    fl::u32 lit_r = 0, lit_g = 0, lit_b = 0;
+    for (fl::size i = 0; i < leds.size(); ++i) {
+        // A zero channel is never dithered: `dither()` returns 0 for it.
+        lit_r += leds[i].r != 0 ? 1u : 0u;
+        lit_g += leds[i].g != 0 ? 1u : 0u;
+        lit_b += leds[i].b != 0 ? 1u : 0u;
+    }
+    const PowerModelRGB& model = gPowerModel();
+    const dither_acc_t per_code =
+        static_cast<dither_acc_t>(lit_r) * model.red_mW +
+        static_cast<dither_acc_t>(lit_g) * model.green_mW +
+        static_cast<dither_acc_t>(lit_b) * model.blue_mW;
+    // Same >> 8 as the estimator, rounded up: this is a bound, and truncating
+    // it would hand back the under-charge it exists to remove.
+    const dither_acc_t scaled = per_code * kDitherReserveCodes * max_power_step();
+    const dither_acc_t reserve = (scaled + 255) >> 8;
+    // Saturate rather than wrap: an under-stated reserve is the failure this
+    // exists to prevent.
+    return reserve > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(reserve);
+}
+
+fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) FL_NO_EXCEPT {
+    if (controller.getDither() != BINARY_DITHER) {
+        return 0;
+    }
+#if FL_COLOR_PIPELINE_SHARED
+    // A managed channel never takes the legacy offsets (C5); with
+    // BINARY_DITHER it runs the pipeline's temporal dither instead, which
+    // emits floor(x) or floor(x) + 1 of the exact code -- at most one code
+    // above the rounded code its estimate charges. The solve can light a
+    // channel the source left dark, so every channel of every lit pixel is
+    // reserved one code.
+    if (fl::channelColorPipeline(controller)) {
+        const fl::span<const CRGB> leds(controller.leds(),
+                                        static_cast<fl::size>(controller.size()));
+        fl::u32 lit = 0;
+        for (fl::size i = 0; i < leds.size(); ++i) {
+            lit += (leds[i].r | leds[i].g | leds[i].b) != 0 ? 1u : 0u;
+        }
+        const fl::u8 emitters = controller.getRgbww().active()
+                                    ? 5 : (controller.getRgbw().active() ? 4 : 3);
+        fl::u8 weights[5];
+        emitter_power_weights(emitters, weights);
+        fl::u32 sum_weights = 0;
+        for (fl::u8 i = 0; i < emitters; ++i) {
+            sum_weights += weights[i];
+        }
+        const fl::u64 per_code = static_cast<fl::u64>(lit) * sum_weights;
+        const fl::u64 reserve = (per_code * max_power_step() + 255) >> 8;
+        return reserve > 0xFFFFFFFFu ? 0xFFFFFFFFu
+                                     : static_cast<fl::u32>(reserve);
+    }
+#endif
+#if !defined(FL_IS_AVR)
+    // Legacy RGBW and RGBWW conversions read the raw pixel, not the
+    // dithered one. Managed channels have already returned above.
+    if (controller.getRgbw().active() || controller.getRgbww().active()) {
+        return 0;
+    }
+#endif
+    return dither_reserve_mW(fl::span<const CRGB>(
+        controller.leds(), static_cast<fl::size>(controller.size())));
+}
+#endif  // FL_PLATFORM_HAS_TINY_MEMORY
+
+#if FL_COLOR_PIPELINE_SHARED
+namespace {
+
+// Candidate-specific legacy demand. Unlike the old unity-demand projection,
+// this runs the same brightness premix and white extraction as PixelController.
+// Dither can raise a lit channel by at most two codes, so charge that upward
+// choice without touching the global/frame phase.
+fl::u32 legacyFramePowerMilliwatts(fl::CLEDController& controller,
+                                    fl::u8 brightness) FL_NO_EXCEPT {
+    const fl::u32 count = static_cast<fl::u32>(controller.size());
+    const fl::u8 emitters = controller.getRgbww().active() ? 5 :
+                            (controller.getRgbw().active() ? 4 : 3);
+    fl::u8 weights[5];
+    emitter_power_weights(emitters, weights);
+    fl::u64 sums[5] = {};
+    PixelController<RGB> pixels(
+        controller.leds(), controller.size(),
+        controller.getAdjustmentData(brightness), DISABLE_DITHER);
+    for (fl::u32 i = 0; i < count; ++i) {
+        fl::u8 codes[5] = {};
+        if (emitters == 5) {
+            pixels.loadAndScaleRGBWWUnordered(controller.getRgbww(),
+                &codes[0], &codes[1], &codes[2], &codes[3], &codes[4]);
+        } else if (emitters == 4) {
+            pixels.loadAndScaleRGBWUnordered(controller.getRgbw(),
+                &codes[0], &codes[1], &codes[2], &codes[3]);
+        } else {
+            pixels.loadAndScaleRGB(&codes[0], &codes[1], &codes[2]);
+        }
+        const CRGB& source = controller.leds()[i];
+        const bool dithered = controller.getDither() == BINARY_DITHER &&
+            (source.r | source.g | source.b) != 0 && brightness != 0;
+        for (fl::u8 c = 0; c < emitters; ++c) {
+            const fl::u8 upper = dithered
+                ? static_cast<fl::u8>(codes[c] > 253 ? 255 : codes[c] + 2)
+                : codes[c];
+            sums[c] += map_power_value(upper);
+        }
+        pixels.advanceData();
+    }
+    fl::u64 total = static_cast<fl::u64>(gPowerModel().dark_mW) * count;
+    for (fl::u8 c = 0; c < emitters; ++c) {
+        total += (sums[c] * weights[c] + 255u) >> 8;
+    }
+    return total > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(total);
+}
+
+struct ManagedFramePower {
+    fl::shared_ptr<fl::StreamingPipelineQ16> pipeline;
+    fl::ManagedPowerHistogram histogram;
+    fl::PowerCodecPolicy codec;
+    fl::u8 weights[5] = {};
+};
+
+struct FramePowerSnapshot {
+    fl::vector<ManagedFramePower> managed;
+    fl::vector<fl::CLEDController*> legacy;
+};
+
+bool captureFramePowerSnapshot(FramePowerSnapshot* snapshot) FL_NO_EXCEPT {
+    const fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
+    fl::size managed_count = 0;
+    fl::size legacy_count = 0;
+    for (fl::CLEDController* controller = fl::CLEDController::head();
+         controller != nullptr; controller = controller->next()) {
+        if (!controller->getEnabled()) continue;
+        if (fl::channelColorPipeline(*controller) && hooks.buildPowerHistogram) {
+            ++managed_count;
+        } else {
+            ++legacy_count;
+        }
+    }
+    // Allocate exactly once, then construct histograms in their final slots.
+    // fl::vector silently leaves size unchanged when allocation fails.
+    snapshot->managed.resize(managed_count);
+    snapshot->legacy.resize(legacy_count);
+    if (snapshot->managed.size() != managed_count ||
+        snapshot->legacy.size() != legacy_count) return false;
+    fl::size managed_index = 0;
+    fl::size legacy_index = 0;
+    for (fl::CLEDController* controller = fl::CLEDController::head();
+         controller != nullptr; controller = controller->next()) {
+        if (!controller->getEnabled()) continue;
+        const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline =
+            fl::channelColorPipeline(*controller);
+        if (pipeline && hooks.buildPowerHistogram != nullptr) {
+            if (managed_index >= managed_count) return false;
+            ManagedFramePower& entry = snapshot->managed[managed_index++];
+            entry.pipeline = pipeline;
+            entry.codec = fl::powerChannelCodecPolicy(*controller);
+            const fl::u8 emitters = controller->getRgbww().active() ? 5 :
+                (controller->getRgbw().active() ? 4 : 3);
+            emitter_power_weights(emitters, entry.weights);
+            hooks.buildPowerHistogram(
+                *pipeline,
+                fl::span<const CRGB>(controller->leds(), controller->size()),
+                emitters, &entry.histogram);
+        } else {
+            if (legacy_index >= legacy_count) return false;
+            snapshot->legacy[legacy_index++] = controller;
+        }
+    }
+    // A binding/list mutation during capture would invalidate the model.
+    return managed_index == managed_count && legacy_index == legacy_count;
+}
+
+fl::u32 framePowerAtFluxMilliwatts(const FramePowerSnapshot& snapshot,
+                                   fl::u32 flux_q16,
+                                   fl::u8 legacy_brightness) FL_NO_EXCEPT {
+    fl::u64 total = gMCU_mW;
+    const fl::FluxScalar flux = fl::FluxScalar::fromRawQ16(
+        static_cast<fl::i32>(flux_q16));
+    const fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
+    for (fl::size i = 0; i < snapshot.managed.size(); ++i) {
+        const ManagedFramePower& entry = snapshot.managed[i];
+        const fl::u64 numerator = hooks.histogramPowerNumerator(
+            *entry.pipeline, entry.histogram, flux, entry.codec,
+            entry.weights,
+            &map_power_value);
+        total += static_cast<fl::u64>(gPowerModel().dark_mW) *
+                 entry.histogram.pixels + ((numerator + 255u) >> 8);
+    }
+    for (fl::size i = 0; i < snapshot.legacy.size(); ++i) {
+        total += legacyFramePowerMilliwatts(*snapshot.legacy[i],
+                                           legacy_brightness);
+    }
+    return total > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(total);
+}
+
+}  // namespace
+
+fl::FramePowerPlan fl::calculateFramePowerPlan(
+    fl::u8 requested_brightness, fl::u32 budget_mW) FL_NO_EXCEPT {
+    FramePowerPlan plan;
+    plan.mcu_mW = gMCU_mW;
+    FramePowerSnapshot snapshot;
+    if (!captureFramePowerSnapshot(&snapshot)) {
+        // Never solve against a partial set of enabled channels. Zero is the
+        // minimum controllable output; the unknown demand is not certified.
+        plan.flux_q16 = 0;
+        plan.legacy_brightness = 0;
+        plan.modeled_mW = 0xFFFFFFFFu;
+        plan.infeasible = true;
+        plan.limited = requested_brightness != 0;
+        return plan;
+    }
+    const fl::u32 request_flux = fl::FluxScalar::fromBrightness(
+        requested_brightness).rawQ16();
+    const fl::u32 zero_demand = framePowerAtFluxMilliwatts(snapshot, 0, 0);
+    if (zero_demand > budget_mW) {
+        plan.flux_q16 = 0;
+        plan.legacy_brightness = 0;
+        plan.modeled_mW = zero_demand;
+        plan.infeasible = true;
+        plan.limited = requested_brightness != 0;
+        return plan;
+    }
+    fl::u32 low = 0;
+    fl::u32 high = request_flux;
+    const auto legacy_at_flux = [request_flux, requested_brightness](
+        fl::u32 candidate) -> fl::u8 {
+        return candidate == request_flux ? requested_brightness
+            : static_cast<fl::u8>((static_cast<fl::u64>(candidate) * 255u) >> 16);
+    };
+    while (low < high) {
+        const fl::u32 candidate = low + (high - low + 1) / 2;
+        if (framePowerAtFluxMilliwatts(snapshot, candidate,
+                                      legacy_at_flux(candidate)) <= budget_mW) {
+            low = candidate;
+        } else {
+            high = candidate - 1;
+        }
+    }
+    plan.flux_q16 = low;
+    plan.limited = low < request_flux;
+    // Preserve the caller's exact byte when no limiting was needed. Q16's
+    // representation of b/255 is rounded, so projecting it back with a floor
+    // can otherwise turn even an unlimited b=1 into zero.
+    plan.legacy_brightness = legacy_at_flux(low);
+    plan.modeled_mW = framePowerAtFluxMilliwatts(
+        snapshot, low, plan.legacy_brightness);
+    return plan;
+}
+
+fl::u32 fl::framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT {
+    return gMCU_mW;
+}
+
+namespace {
+bool hasManagedPowerChannel() FL_NO_EXCEPT {
+    for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
+        if (p->getEnabled() && fl::channelColorPipeline(*p)) {
+            return true;
+        }
+    }
+    return false;
+}
+void beginManagedPowerFrame(fl::u8 requested_brightness, fl::u32 budget_mW,
+                            fl::u8* legacy_brightness) FL_NO_EXCEPT {
+    const fl::FramePowerPlan plan =
+        fl::calculateFramePowerPlan(requested_brightness, budget_mW);
+    *legacy_brightness = plan.legacy_brightness;
+    fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
+    hooks.frameFluxQ16 = plan.flux_q16;
+    hooks.frameFluxActive = true;
+}
+void endManagedPowerFrame() FL_NO_EXCEPT {
+    fl::PowerFrameHooks& hooks = fl::powerFrameHooks();
+    hooks.frameFluxActive = false;
+    hooks.frameFluxQ16 = 0;
+}
+
+// Registered only when setMaxPowerInMilliWatts() is used. This keeps the
+// ordinary show() body and its linked Blink image free of managed-power code.
+class FramePowerEndListener : public fl::EngineEvents::Listener {
+  public:
+    void onEndFrame() FL_NO_EXCEPT override { endManagedPowerFrame(); }
+    ~FramePowerEndListener() FL_NO_EXCEPT override {
+        fl::EngineEvents::removeListener(this);
+    }
+};
+
+FramePowerEndListener& framePowerEndListener() FL_NO_EXCEPT {
+    static FramePowerEndListener listener;
+    return listener;
+}
+
+fl::u8 managedShowBrightness(fl::u8 requested_brightness,
+                             fl::u32 budget_mW) FL_NO_EXCEPT {
+    if (!hasManagedPowerChannel()) {
+        return calculate_max_brightness_for_power_mW(requested_brightness,
+                                                      budget_mW);
+    }
+#if FASTLED_HAS_ENGINE_EVENTS
+    // addListener() may fail to grow its registry. Never leave a Q16 flux
+    // active across frames if the end-of-frame reset could not be installed.
+    if (!fl::EngineEvents::hasListener(&framePowerEndListener())) {
+        endManagedPowerFrame();
+        return 0;
+    }
+#else
+    // A managed Q16 frame requires a guaranteed reset after encode. Without
+    // frame events, fail closed rather than retaining flux into later frames.
+    return 0;
+#endif
+    fl::u8 legacy_brightness = requested_brightness;
+    beginManagedPowerFrame(requested_brightness, budget_mW,
+                           &legacy_brightness);
+    return legacy_brightness;
+}
+}  // namespace
+
+const fl::FramePowerDispatch* fl::framePowerDispatch() FL_NO_EXCEPT {
+    static const FramePowerDispatch dispatch = {
+        &calculateFramePowerPlan, &managedShowBrightness,
+        &calculate_max_brightness_for_power_mW};
+#if FASTLED_HAS_ENGINE_EVENTS
+    fl::EngineEvents::addListener(&framePowerEndListener(), 1000000);
+#endif
+    return &dispatch;
+}
+#endif  // FL_COLOR_PIPELINE_SHARED
+
+// sets brightness to
+//  - no more than target_brightness
+//  - no more than max_mW milliwatts
+fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW)
+FL_NO_EXCEPT {
+    // gMCU_mW and every controller's dark current are baseline: present at any
+    // brightness, and so kept out of the part the scalar acts on (#4156 R4).
+    fl::u32 fixed_mW = gMCU_mW;
+    fl::u32 controllable_mW = 0;
+
+    CLEDController *pCur = CLEDController::head();
+	while(pCur) {
+        const fl::u32 count = pCur->size();
+        // Through its RGBW conversion, and for a bound colour profile the
+        // solved drives rather than the source (#4344).
+        const fl::u32 unscaled_mW = controller_unscaled_power_mW(*pCur);
+        const fl::u32 dark_mW = fixed_power_mW(count);
+        // Dither's upward reserve does not scale with brightness, so it is
+        // charged with the baseline (#4342).
+        fixed_mW += dark_mW + controller_dither_reserve_mW(*pCur);
+        controllable_mW += unscaled_mW > dark_mW ? unscaled_mW - dark_mW : 0;
+		pCur = pCur->next();
+	}
+
+#if POWER_DEBUG_PRINT == 1
+    Serial.print("power demand at full brightness mW = ");
+    Serial.println( fixed_mW + controllable_mW);
+#endif
+
+    const fl::u32 requested_power_mW =
+        fixed_mW + scale_power_for_brightness(controllable_mW, target_brightness);
+#if POWER_DEBUG_PRINT == 1
+    if( target_brightness != 255 ) {
+        Serial.print("power demand at scaled brightness mW = ");
+        Serial.println( requested_power_mW);
+    }
+    Serial.print("power limit mW = ");
+    Serial.println( max_power_mW);
+#endif
+
+    if( requested_power_mW <= max_power_mW) {
+#if POWER_LED > 0
+        if( gMaxPowerIndicatorLEDPinNumber ) {
+            Pin(gMaxPowerIndicatorLEDPinNumber).lo(); // turn the LED off
+        }
+#endif
+#if POWER_DEBUG_PRINT == 1
+        Serial.print("demand is under the limit");
+#endif
+        return target_brightness;
+    }
+
+    const fl::u8 recommended_brightness = brightness_within_budget(
+        fixed_mW, controllable_mW, target_brightness, max_power_mW);
+#if POWER_DEBUG_PRINT == 1
+    Serial.print("recommended brightness # = ");
+    Serial.println( recommended_brightness);
+
+    fl::u32 resultant_power_mW =
+        fixed_mW + scale_power_for_brightness(controllable_mW, recommended_brightness);
+    Serial.print("resultant power demand mW = ");
+    Serial.println( resultant_power_mW);
+
+    Serial.println();
+#endif
+
+#if POWER_LED > 0
+    if( gMaxPowerIndicatorLEDPinNumber ) {
+        Pin(gMaxPowerIndicatorLEDPinNumber).hi(); // turn the LED on
+    }
+#endif
+
+    return recommended_brightness;
+}
+
+void set_max_power_indicator_LED( fl::u8 pinNumber)
+FL_NO_EXCEPT {
+    gMaxPowerIndicatorLEDPinNumber = pinNumber;
+}
+
+// The RGB half of installing a model. Split out because the white emitter's
+// lifetime is not the same as the RGB model's: declaring an RGB model retracts
+// a white declaration, but changing the exponent must not.
+static void apply_rgb_power_model(const PowerModelRGB& model) FL_NO_EXCEPT {
+    gPowerModel() = model;
+#if SKETCH_HAS_LARGE_MEMORY
+    rebuild_power_scaling_tables(model.exponent);
+#else
+    // Small-memory targets ignore non-linear exponent and keep linear behavior;
+    // clamp the stored field so get_power_scaling_exponent() reports the truth.
+    gPowerModel().exponent = kLinearPowerScalingExponent;
+#endif
+}
+
+void set_power_model(const PowerModelRGB& model) FL_NO_EXCEPT {
+    apply_rgb_power_model(model);
+    // An RGB model describes a strip with three emitters. Leaving a white
+    // declaration from an earlier RGBW model standing would charge this one
+    // for a diode the caller just said it does not have.
+    gWhiteEmitterPower().mW = 0;
+    gRgbwwEmitterPower().declared = false;
+}
+
+void set_power_model(const PowerModelRGBW& model) FL_NO_EXCEPT {
+    apply_rgb_power_model(model.toRGB());
+    gWhiteEmitterPower().mW = model.white_mW;
+    gRgbwwEmitterPower().declared = false;
+}
+
+void set_power_model(const PowerModelRGBWW& model) FL_NO_EXCEPT {
+    // Preserve the legacy folded-RGB estimate while retaining the physical
+    // weights for a managed five-emitter pipeline.
+    apply_rgb_power_model(model.toRGB());
+    gWhiteEmitterPower().mW = 0;
+    gRgbwwEmitterPower().model = model;
+    gRgbwwEmitterPower().declared = true;
+}
+
+fl::u8 get_white_emitter_mW() FL_NO_EXCEPT {
+    return gWhiteEmitterPower().mW;
+}
+
+void set_power_scaling_exponent(float exponent) FL_NO_EXCEPT {
+    PowerModelRGB model = gPowerModel();
+    model.exponent = exponent;
+    // Not `set_power_model`: the exponent is a property of the response
+    // curve, and changing it is not a statement about how many emitters the
+    // strip has.
+    apply_rgb_power_model(model);
+}
+
+float get_power_scaling_exponent() FL_NO_EXCEPT {
+    // Authoritative storage lives in the model; on small-memory builds the
+    // field is clamped to 1.0 by set_power_model.
+    return gPowerModel().exponent;
+}
+
+PowerModelRGB get_power_model() FL_NO_EXCEPT {
+    return gPowerModel();
+}
+
+// Note: The following deprecated wrapper functions have been moved to FastLED.cpp:
+// - set_max_power_in_volts_and_milliamps()
+// - set_max_power_in_milliwatts()
+// - show_at_max_brightness_for_power()
+// - delay_at_max_brightness_for_power()
+// These functions depend on the FastLED singleton and don't belong in this core power calculation file.

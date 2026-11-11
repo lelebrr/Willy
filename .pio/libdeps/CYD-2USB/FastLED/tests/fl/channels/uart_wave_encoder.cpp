@@ -1,0 +1,594 @@
+/// @file uart_wave_encoder.cpp
+/// @brief Unit tests for UART wave10 encoder
+///
+/// Tests the wave10 LUT generation, timing predicate, and encoding
+/// correctness for multiple chipset timings.
+
+#include "test.h"
+
+#include "fl/channels/uart_wave_encoder.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/stdint.h"
+#include "fl/stl/new.h"
+#include "fl/stl/vector.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
+
+using namespace fl;
+
+//=============================================================================
+// Helper: Simulate UART wire waveform (with TX inversion)
+//=============================================================================
+
+namespace {
+
+/// Generate 10-bit inverted UART wire pattern for a data byte
+void uartFrameToBits(uint8_t byte_val, int out_bits[10]) {
+    // Normal UART: START=0 (LOW), data LSB first, STOP=1 (HIGH)
+    int raw[10];
+    raw[0] = 0; // start bit
+    for (int i = 0; i < 8; i++) {
+        raw[1 + i] = (byte_val >> i) & 1;
+    }
+    raw[9] = 1; // stop bit
+
+    // Apply TX inversion
+    for (int i = 0; i < 10; i++) {
+        out_bits[i] = raw[i] ? 0 : 1;
+    }
+}
+
+/// Measure HIGH pulse durations in first and second 5-bit halves
+struct HalfFramePulses {
+    int high_count_a; // HIGH pulse count in positions 0-4
+    int high_count_b; // HIGH pulse count in positions 5-9
+};
+
+HalfFramePulses measureHalfFrames(uint8_t byte_val) {
+    int bits[10];
+    uartFrameToBits(byte_val, bits);
+
+    HalfFramePulses result = {0, 0};
+    // Count leading HIGH pulses in each half
+    for (int i = 0; i < 5 && bits[i] == 1; i++) result.high_count_a++;
+    for (int i = 5; i < 10 && bits[i] == 1; i++) result.high_count_b++;
+    return result;
+}
+
+/// P=4 variant: frame = [START][D0..D5][STOP] = 8 wire bits, two 4-pulse
+/// LED bit slots (wave8-frame geometry).
+HalfFramePulses measureHalfFramesP4(uint8_t byte_val) {
+    int raw[8];
+    raw[0] = 0; // start bit
+    for (int i = 0; i < 6; i++) {
+        raw[1 + i] = (byte_val >> i) & 1;
+    }
+    raw[7] = 1; // stop bit
+
+    int bits[8];
+    for (int i = 0; i < 8; i++) {
+        bits[i] = raw[i] ? 0 : 1; // TX inversion
+    }
+
+    HalfFramePulses result = {0, 0};
+    for (int i = 0; i < 4 && bits[i] == 1; i++) result.high_count_a++;
+    for (int i = 4; i < 8 && bits[i] == 1; i++) result.high_count_b++;
+    return result;
+}
+
+} // anonymous namespace
+
+//=============================================================================
+// Test Suite: Legacy 2-Bit LUT Encoding (backward compatibility)
+//=============================================================================
+
+FL_TEST_CASE("Wave8 UART Encoder - 2-bit LUT correctness (legacy)") {
+    FL_SUBCASE("LUT pattern 0x00 (0b00) -> 0xEF") {
+        uint8_t result = detail::encodeUart2Bits(0x00);
+        FL_REQUIRE_EQ(result, 0xEF);
+    }
+
+    FL_SUBCASE("LUT pattern 0x01 (0b01) -> 0x8F") {
+        uint8_t result = detail::encodeUart2Bits(0x01);
+        FL_REQUIRE_EQ(result, 0x8F);
+    }
+
+    FL_SUBCASE("LUT pattern 0x02 (0b10) -> 0xEC") {
+        uint8_t result = detail::encodeUart2Bits(0x02);
+        FL_REQUIRE_EQ(result, 0xEC);
+    }
+
+    FL_SUBCASE("LUT pattern 0x03 (0b11) -> 0x8C") {
+        uint8_t result = detail::encodeUart2Bits(0x03);
+        FL_REQUIRE_EQ(result, 0x8C);
+    }
+
+    FL_SUBCASE("LUT masking (input > 3 masked to 2 bits)") {
+        FL_REQUIRE(detail::encodeUart2Bits(0x00) == detail::encodeUart2Bits(0x00));
+        FL_REQUIRE(detail::encodeUart2Bits(0x01) == detail::encodeUart2Bits(0xFD));
+        FL_REQUIRE(detail::encodeUart2Bits(0x02) == detail::encodeUart2Bits(0xFE));
+        FL_REQUIRE(detail::encodeUart2Bits(0x03) == detail::encodeUart2Bits(0xFF));
+    }
+}
+
+//=============================================================================
+// Test Suite: Legacy Byte-Level Encoding
+//=============================================================================
+
+FL_TEST_CASE("Wave8 UART Encoder - Byte encoding (legacy)") {
+    FL_SUBCASE("Encode byte 0x00 (all bits 0)") {
+        uint8_t output[4];
+        detail::encodeUartByte(0x00, output);
+        FL_REQUIRE_EQ(output[0], 0xEF);
+        FL_REQUIRE_EQ(output[1], 0xEF);
+        FL_REQUIRE_EQ(output[2], 0xEF);
+        FL_REQUIRE_EQ(output[3], 0xEF);
+    }
+
+    FL_SUBCASE("Encode byte 0xFF (all bits 1)") {
+        uint8_t output[4];
+        detail::encodeUartByte(0xFF, output);
+        FL_REQUIRE_EQ(output[0], 0x8C);
+        FL_REQUIRE_EQ(output[1], 0x8C);
+        FL_REQUIRE_EQ(output[2], 0x8C);
+        FL_REQUIRE_EQ(output[3], 0x8C);
+    }
+
+    FL_SUBCASE("Encode byte 0xE4 (mixed pattern)") {
+        uint8_t output[4];
+        detail::encodeUartByte(0xE4, output);
+        FL_REQUIRE_EQ(output[0], 0x8C);  // Bits 7-6: 0b11
+        FL_REQUIRE_EQ(output[1], 0xEC);  // Bits 5-4: 0b10
+        FL_REQUIRE_EQ(output[2], 0x8F);  // Bits 3-2: 0b01
+        FL_REQUIRE_EQ(output[3], 0xEF);  // Bits 1-0: 0b00
+    }
+}
+
+//=============================================================================
+// Test Suite: Legacy Buffer-Level Encoding
+//=============================================================================
+
+FL_TEST_CASE("Wave8 UART Encoder - Buffer encoding (legacy)") {
+    FL_SUBCASE("Encode single byte") {
+        uint8_t input[] = { 0x42 };
+        uint8_t output[4];
+        size_t encoded = encodeLedsToUart(input, 1, output, sizeof(output));
+        FL_REQUIRE(encoded == 4);
+        FL_REQUIRE_EQ(output[0], 0x8F);  // 0b01
+        FL_REQUIRE_EQ(output[1], 0xEF);  // 0b00
+        FL_REQUIRE_EQ(output[2], 0xEF);  // 0b00
+        FL_REQUIRE_EQ(output[3], 0xEC);  // 0b10
+    }
+
+    FL_SUBCASE("Insufficient output buffer (returns 0)") {
+        uint8_t input[] = { 0xFF };
+        uint8_t output[3];
+        size_t encoded = encodeLedsToUart(input, 1, output, sizeof(output));
+        FL_REQUIRE(encoded == 0);
+    }
+}
+
+//=============================================================================
+// Test Suite: Buffer Sizing
+//=============================================================================
+
+FL_TEST_CASE("Wave8 UART Encoder - Buffer sizing") {
+    FL_SUBCASE("Calculate buffer size for raw bytes") {
+        FL_REQUIRE(calculateUartBufferSize(1) == 4);
+        FL_REQUIRE(calculateUartBufferSize(3) == 12);
+        FL_REQUIRE(calculateUartBufferSize(300) == 1200);
+    }
+
+    FL_SUBCASE("Calculate buffer size for RGB LEDs") {
+        FL_REQUIRE(calculateUartBufferSizeForLeds(1) == 12);
+        FL_REQUIRE(calculateUartBufferSizeForLeds(10) == 120);
+        FL_REQUIRE(calculateUartBufferSizeForLeds(100) == 1200);
+        FL_REQUIRE(calculateUartBufferSizeForLeds(1000) == 12000);
+    }
+}
+
+//=============================================================================
+// Test Suite: Wave10 LUT Generation
+//=============================================================================
+
+FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812") {
+    // WS2812: T1=250, T2=625, T3=375, period=1250
+    ChipsetTimingConfig timing(250, 625, 375, 280);
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("wave10 geometry selected (P=5, 8 data bits)") {
+        FL_CHECK_EQ(lut.pulses_per_bit, 5);
+        FL_CHECK_EQ(lut.dataBits(), 8);
+        FL_CHECK_EQ(lut.baudRate(timing), 4000000u);
+    }
+
+    FL_SUBCASE("LUT matches hardcoded WS2812 values") {
+        FL_CHECK_EQ(lut.lut[0], 0xEF);  // "00"
+        FL_CHECK_EQ(lut.lut[1], 0x8F);  // "01"
+        FL_CHECK_EQ(lut.lut[2], 0xEC);  // "10"
+        FL_CHECK_EQ(lut.lut[3], 0x8C);  // "11"
+    }
+
+    FL_SUBCASE("Wire waveform has correct pulse structure") {
+        // "00" pattern: both LED bits should have 1 HIGH pulse
+        auto p00 = measureHalfFrames(lut.lut[0]);
+        FL_CHECK_EQ(p00.high_count_a, 1);
+        FL_CHECK_EQ(p00.high_count_b, 1);
+
+        // "11" pattern: both LED bits should have 3 HIGH pulses
+        auto p11 = measureHalfFrames(lut.lut[3]);
+        FL_CHECK_EQ(p11.high_count_a, 3);
+        FL_CHECK_EQ(p11.high_count_b, 3);
+
+        // "01" pattern: bit A=0 (1 pulse), bit B=1 (3 pulses)
+        auto p01 = measureHalfFrames(lut.lut[1]);
+        FL_CHECK_EQ(p01.high_count_a, 1);
+        FL_CHECK_EQ(p01.high_count_b, 3);
+
+        // "10" pattern: bit A=1 (3 pulses), bit B=0 (1 pulse)
+        auto p10 = measureHalfFrames(lut.lut[2]);
+        FL_CHECK_EQ(p10.high_count_a, 3);
+        FL_CHECK_EQ(p10.high_count_b, 1);
+    }
+
+    FL_SUBCASE("Baud rate is 4.0 Mbps") {
+        u32 baud = Wave10Lut::computeBaudRate(timing);
+        FL_CHECK_EQ(baud, 4000000u);
+    }
+}
+
+FL_TEST_CASE("Wave10 - buildWave10Lut for WS2812B-V5 enforces symbol separation") {
+    // WS2812B-V5: T1=225, T2=355, T3=645, period=1225 — the AutoResearch
+    // bench default. pulse_width = 1225/5 = 245ns.
+    // T0H = 225 → 1 pulse (245ns). T1H = 580 → best-fit rounds to 2
+    // (490ns), only 245ns above the 0-symbol — under the 400ns minimum
+    // wire separation (real LEDs' 0/1 sampling threshold sits near
+    // 550-625ns; the bench RX decoder's 500ns threshold flapped —
+    // FastLED#3569 WROOM bench). The separation rule must widen it to
+    // 3 pulses (735ns).
+    ChipsetTimingConfig timing(225, 355, 645, 280);
+    FL_REQUIRE(canRepresentTiming(timing));
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("stays on wave10 geometry (P=4 error is worse after its own bump)") {
+        FL_CHECK_EQ(lut.pulses_per_bit, 5);
+    }
+
+    FL_SUBCASE("1-symbol gets >=2 pulses of separation") {
+        auto p00 = measureHalfFrames(lut.lut[0]);
+        FL_CHECK_EQ(p00.high_count_a, 1);
+        FL_CHECK_EQ(p00.high_count_b, 1);
+
+        auto p11 = measureHalfFrames(lut.lut[3]);
+        FL_CHECK_EQ(p11.high_count_a, 3);
+        FL_CHECK_EQ(p11.high_count_b, 3);
+    }
+
+    FL_SUBCASE("LUT matches the proven legacy WS2812 shape") {
+        FL_CHECK_EQ(lut.lut[0], 0xEF);  // "00"
+        FL_CHECK_EQ(lut.lut[1], 0x8F);  // "01"
+        FL_CHECK_EQ(lut.lut[2], 0xEC);  // "10"
+        FL_CHECK_EQ(lut.lut[3], 0x8C);  // "11"
+    }
+}
+
+FL_TEST_CASE("Wave10 - buildWave10Lut for SK6812 selects wave4 geometry") {
+    // SK6812: T1=300, T2=600, T3=300, period=1200
+    // P=5 grid (240ns pulses): T0H 300→1 (err 60), T1H 900→4 (err 60);
+    // total error 120ns. P=4 grid (300ns pulses): T0H 300→1 EXACT,
+    // T1H 900→3 EXACT; total error 0. The geometry selector picks P=4
+    // (6 data bits @ 3.33 Mbps) — SK6812's timing is an exact multiple
+    // of period/4.
+    ChipsetTimingConfig timing(300, 600, 300, 80);
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("wave4 geometry selected") {
+        FL_CHECK_EQ(lut.pulses_per_bit, 4);
+        FL_CHECK_EQ(lut.dataBits(), 6);
+        // baud = 4 / 1200ns = 3.333 MHz
+        FL_CHECK_EQ(lut.baudRate(timing), 3333333u);
+    }
+
+    FL_SUBCASE("Pulse counts are correct (exact fit)") {
+        auto p00 = measureHalfFramesP4(lut.lut[0]);
+        FL_CHECK_EQ(p00.high_count_a, 1);
+        FL_CHECK_EQ(p00.high_count_b, 1);
+
+        auto p11 = measureHalfFramesP4(lut.lut[3]);
+        FL_CHECK_EQ(p11.high_count_a, 3);
+        FL_CHECK_EQ(p11.high_count_b, 3);
+    }
+
+    FL_SUBCASE("All 4 LUT entries are distinct") {
+        FL_CHECK_NE(lut.lut[0], lut.lut[1]);
+        FL_CHECK_NE(lut.lut[0], lut.lut[2]);
+        FL_CHECK_NE(lut.lut[0], lut.lut[3]);
+        FL_CHECK_NE(lut.lut[1], lut.lut[2]);
+        FL_CHECK_NE(lut.lut[1], lut.lut[3]);
+        FL_CHECK_NE(lut.lut[2], lut.lut[3]);
+    }
+
+    FL_SUBCASE("Legacy static baud formula still reports the P=5 rate") {
+        u32 baud = Wave10Lut::computeBaudRate(timing);
+        // 5e9 / 1200 = 4166666 (fixed-wave10 formula — the selected
+        // geometry's actual rate comes from lut.baudRate(), tested above)
+        FL_CHECK_EQ(baud, 4166666u);
+    }
+}
+
+FL_TEST_CASE("Wave10 - buildWave10Lut for WS2811-400") {
+    // WS2811-400: T1=500, T2=700, T3=1300, period=2500
+    ChipsetTimingConfig timing(500, 700, 1300, 280);
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("Pulse counts are correct") {
+        // pulse_width = 2500/5 = 500ns
+        // T0H = 500ns → 500/500 = 1.0 → 1 pulse
+        // T1H = 1200ns → 1200/500 = 2.4 → rounds to 2
+        auto p00 = measureHalfFrames(lut.lut[0]);
+        FL_CHECK_EQ(p00.high_count_a, 1);
+
+        auto p11 = measureHalfFrames(lut.lut[3]);
+        FL_CHECK_EQ(p11.high_count_a, 2);
+    }
+
+    FL_SUBCASE("Baud rate is 2.0 Mbps") {
+        u32 baud = Wave10Lut::computeBaudRate(timing);
+        FL_CHECK_EQ(baud, 2000000u);
+    }
+}
+
+//=============================================================================
+// Test Suite: Wave10 Encoding Round-Trip
+//=============================================================================
+
+FL_TEST_CASE("Wave10 - Encoding with dynamic LUT matches legacy for WS2812") {
+    ChipsetTimingConfig timing(250, 625, 375, 280);
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("Single byte encoding matches legacy") {
+        for (int val = 0; val < 256; val++) {
+            uint8_t input = static_cast<uint8_t>(val);
+            uint8_t output_legacy[4];
+            uint8_t output_wave10[4];
+
+            encodeLedsToUart(&input, 1, output_legacy, 4);
+            encodeLedsToUart(&input, 1, output_wave10, 4, lut);
+
+            for (int i = 0; i < 4; i++) {
+                FL_CHECK_EQ(output_legacy[i], output_wave10[i]);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("Wave10 - Encoding with SK6812 LUT") {
+    ChipsetTimingConfig timing(300, 600, 300, 80);
+    Wave10Lut lut = buildWave10Lut(timing);
+
+    FL_SUBCASE("Encode 0x00 and 0xFF") {
+        uint8_t input_zero = 0x00;
+        uint8_t input_ones = 0xFF;
+        uint8_t output_zero[4];
+        uint8_t output_ones[4];
+
+        encodeLedsToUart(&input_zero, 1, output_zero, 4, lut);
+        encodeLedsToUart(&input_ones, 1, output_ones, 4, lut);
+
+        // All bytes in output_zero should be the same (lut[0])
+        for (int i = 0; i < 4; i++) {
+            FL_CHECK_EQ(output_zero[i], lut.lut[0]);
+        }
+        // All bytes in output_ones should be the same (lut[3])
+        for (int i = 0; i < 4; i++) {
+            FL_CHECK_EQ(output_ones[i], lut.lut[3]);
+        }
+    }
+}
+
+//=============================================================================
+// Test Suite: canRepresentTiming Predicate
+//=============================================================================
+
+FL_TEST_CASE("Wave10 - canRepresentTiming accepts valid chipsets") {
+    FL_SUBCASE("WS2812 (800kHz)") {
+        ChipsetTimingConfig timing(250, 625, 375, 280);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("SK6812") {
+        ChipsetTimingConfig timing(300, 600, 300, 80);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("WS2811-400 (400kHz)") {
+        ChipsetTimingConfig timing(500, 700, 1300, 280);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("WS2815") {
+        ChipsetTimingConfig timing(250, 1090, 550, 0);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("TM1809-800") {
+        ChipsetTimingConfig timing(350, 350, 450, 0);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("GE8822") {
+        ChipsetTimingConfig timing(350, 660, 350, 0);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("LPD1886-1250kHz (wave10 infeasible at 6.25 Mbps; wave4 fits at 5.0 Mbps)") {
+        // period 800ns: P=4 grid = 200ns pulses — T0H 200→1 exact,
+        // T1H 600→3 exact, separation 400ns exactly at the floor.
+        // New coverage unlocked by the wave8-frame geometry.
+        ChipsetTimingConfig timing(200, 400, 200, 0);
+        FL_CHECK(canRepresentTiming(timing));
+        Wave10Lut lut = buildWave10Lut(timing);
+        FL_CHECK_EQ(lut.pulses_per_bit, 4);
+        FL_CHECK_EQ(lut.baudRate(timing), 5000000u);
+    }
+}
+
+FL_TEST_CASE("Wave10 - canRepresentTiming rejects infeasible chipsets") {
+    FL_SUBCASE("TM1829-1600kHz (baud too high: 8.3 Mbps)") {
+        ChipsetTimingConfig timing(100, 300, 200, 500);
+        FL_CHECK_FALSE(canRepresentTiming(timing));
+    }
+
+    FL_SUBCASE("Zero period") {
+        ChipsetTimingConfig timing(0, 0, 0, 0);
+        FL_CHECK_FALSE(canRepresentTiming(timing));
+    }
+}
+
+FL_TEST_CASE("Wave10 - canRepresentTiming baud rate boundary") {
+    FL_SUBCASE("Exactly at 5.0 Mbps limit") {
+        // period = 5e9 / 5e6 = 1000ns → baud = 5,000,000
+        ChipsetTimingConfig timing(200, 400, 400, 0);
+        u32 baud = Wave10Lut::computeBaudRate(timing);
+        FL_CHECK_EQ(baud, 5000000u);
+        FL_CHECK(canRepresentTiming(timing));
+    }
+}
+
+//=============================================================================
+// Test Suite: Wave10Lut::computeBaudRate
+//=============================================================================
+
+FL_TEST_CASE("Wave10 - computeBaudRate") {
+    FL_SUBCASE("WS2812: 4.0 Mbps") {
+        ChipsetTimingConfig timing(250, 625, 375, 280);
+        FL_CHECK_EQ(Wave10Lut::computeBaudRate(timing), 4000000u);
+    }
+
+    FL_SUBCASE("WS2811-400: 2.0 Mbps") {
+        ChipsetTimingConfig timing(500, 700, 1300, 280);
+        FL_CHECK_EQ(Wave10Lut::computeBaudRate(timing), 2000000u);
+    }
+
+    FL_SUBCASE("Zero period returns 0") {
+        ChipsetTimingConfig timing(0, 0, 0, 0);
+        FL_CHECK_EQ(Wave10Lut::computeBaudRate(timing), 0u);
+    }
+}
+
+FL_TEST_CASE("uartWireTiming reproduces the timing actually put on the wire") {
+    // WS2812B-V5 is T1=225, T2=355, T3=645 -- a 1225 ns period, not the round
+    // 1250 ns the AutoResearch decoder's hardcoded {250, 500, 500} assumes.
+    // Deriving therefore yields {245, 490, 490}: within 10 ns of the constants,
+    // and far inside the +/-250 ns classification tolerance, but NOT identical.
+    // Asserted exactly so a future timing change cannot silently drift.
+    const auto ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+    const fl::ChipsetTiming ws2812_wire =
+        fl::uartWireTiming(ws2812, fl::kMaxUartBaudRate);
+    FL_CHECK_EQ(ws2812_wire.T1, 245u);
+    FL_CHECK_EQ(ws2812_wire.T2, 490u);
+    FL_CHECK_EQ(ws2812_wire.T3, 490u);
+    // The property that makes replacing the constants safe: every symbol stays
+    // well inside the decoder's tolerance of the value it replaces.
+    FL_CHECK(ws2812_wire.T1 + 250u > 250u && ws2812_wire.T1 < 250u + 250u);
+    FL_CHECK(ws2812_wire.T2 + 250u > 500u && ws2812_wire.T2 < 500u + 250u);
+
+    // WS2811 at 400 kHz: the quantised wire timing differs sharply from the
+    // datasheet values (T0H 500, T1H 1200), which is why decoding a 400 kHz
+    // frame against the WS2812 constants classifies every symbol wrongly.
+    const auto ws2811 = fl::makeTimingConfig<fl::TIMING_WS2811_400KHZ>();
+    const fl::ChipsetTiming ws2811_wire =
+        fl::uartWireTiming(ws2811, fl::kMaxUartBaudRate);
+    FL_CHECK_NE(ws2811_wire.T1, ws2812_wire.T1);
+    // T0H and T1H must land on the pulse grid: period 2500 / P.
+    const u32 period = ws2811.total_period_ns();
+    const u32 t1h = ws2811_wire.T1 + ws2811_wire.T2;
+    FL_CHECK_EQ(ws2811_wire.T1 + ws2811_wire.T2 + ws2811_wire.T3, period);
+    FL_CHECK((t1h % (period / 5u) == 0u) || (t1h % (period / 4u) == 0u));
+}
+
+// Nominal-vs-wire distance for one symbol, the quantity a receiver's
+// tolerance is stated in.
+u32 symbolError(u32 wire_ns, u32 nominal_ns) {
+    return wire_ns > nominal_ns ? wire_ns - nominal_ns : nominal_ns - wire_ns;
+}
+
+FL_TEST_CASE("400 kHz UART geometry keeps both symbols classifiable") {
+    // FastLED#4379. P=5 fits T0H exactly (500 ns on a 500 ns pulse grid) and
+    // rounds T1H 1200 -> 2 pulses = 1000 ns, 200 ns low. That is outside the
+    // part's ~+/-150 ns spec and 30 ns outside the +/-170 window AutoResearch
+    // decodes with, so every '1' bit in the frame classified as neither
+    // symbol and UART0 failed the RP2350 loopback at every length while PIO0
+    // passed on the same wire.
+    //
+    // P=5 totals 200 ns of error and P=4 totals 175, so the summed-error rule
+    // kept P=5 (the difference is inside its 50 ns hysteresis). Summed error
+    // cannot see that all 200 sits on one symbol.
+    const auto ws2811 = fl::makeTimingConfig<fl::TIMING_WS2811_400KHZ>();
+    const fl::ChipsetTiming wire =
+        fl::uartWireTiming(ws2811, fl::kMaxUartBaudRate);
+    const u32 t0h = wire.T1;
+    const u32 t1h = wire.T1 + wire.T2;
+    FL_CHECK_EQ(t0h, 625u);   // P=4: 2500 / 4 = 625 ns pulses
+    FL_CHECK_EQ(t1h, 1250u);
+
+    // The property that matters, stated the way the decoder states it.
+    constexpr u32 kDecodeToleranceNs = 170;
+    FL_CHECK(symbolError(t0h, ws2811.t1_ns) <= kDecodeToleranceNs);
+    FL_CHECK(symbolError(t1h, ws2811.t1_ns + ws2811.t2_ns) <=
+             kDecodeToleranceNs);
+
+    // 1.6 Mbaud, which the RP PL011 reaches (clk_peri/16 = 3.0 Mbaud) where
+    // P=5's 2.0 Mbaud also fits -- so this is a choice, not a fallback.
+    const fl::Wave10Lut lut = fl::buildWave10Lut(ws2811);
+    FL_CHECK_EQ(static_cast<u32>(lut.pulses_per_bit), 4u);
+    FL_CHECK_EQ(fl::uartWireTiming(ws2811, 3000000u).T1, 625u);
+}
+
+FL_TEST_CASE("in-tolerance preference leaves settled geometries alone") {
+    // The criterion only intervenes when exactly one geometry keeps every
+    // symbol inside the receiver bound. Audited across all 37 chipset
+    // timings, WS2811-400KHZ is the only selection it moves; these are the
+    // ones most likely to drift if that ever stopped being true.
+    struct Expected {
+        fl::ChipsetTimingConfig timing;
+        u32 t0h;
+        u32 t1h;
+    };
+    const Expected cases[] = {
+        // P=5 stays: its worst symbol is inside the bound.
+        {fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>(), 250u, 750u},
+        {fl::makeTimingConfig<fl::TIMING_WS2811_800KHZ_LEGACY>(), 250u, 750u},
+        // P=5 stays because neither geometry qualifies, so the summed-error
+        // rule still decides -- the separation bump is not charged as error.
+        {fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(), 245u, 735u},
+        {fl::makeTimingConfig<fl::TIMING_WS2814>(), 256u, 768u},
+        {fl::makeTimingConfig<fl::TIMING_GW6205_800KHZ>(), 480u, 960u},
+        {fl::makeTimingConfig<fl::TIMING_WS2815>(), 378u, 1512u},
+        // Both geometries agree; nothing to choose.
+        {fl::makeTimingConfig<fl::TIMING_SK6812>(), 300u, 900u},
+        {fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>(), 312u, 936u},
+        // A 400 kHz part that was already exact stays exact.
+        {fl::makeTimingConfig<fl::TIMING_UCS1903_400KHZ>(), 500u, 2000u},
+        {fl::makeTimingConfig<fl::TIMING_DP1903_400KHZ>(), 800u, 2400u},
+    };
+    for (const Expected& c : cases) {
+        const fl::ChipsetTiming w =
+            fl::uartWireTiming(c.timing, fl::kMaxUartBaudRate);
+        FL_CHECK_EQ(w.T1, c.t0h);
+        FL_CHECK_EQ(w.T1 + w.T2, c.t1h);
+    }
+}
+
+FL_TEST_CASE("uartWireTiming reports infeasible timing rather than guessing") {
+    // A baud ceiling below anything the chipset needs leaves no geometry.
+    const auto ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+    const fl::ChipsetTiming wire = fl::uartWireTiming(ws2812, 1000u);
+    FL_CHECK_EQ(wire.T1, 0u);
+    FL_CHECK_EQ(wire.T2, 0u);
+    FL_CHECK_EQ(wire.T3, 0u);
+}
+
+} // FL_TEST_FILE

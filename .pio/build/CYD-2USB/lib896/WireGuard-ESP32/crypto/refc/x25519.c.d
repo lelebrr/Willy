@@ -1,0 +1,3 @@
+.pio/build/CYD-2USB/lib896/WireGuard-ESP32/crypto/refc/x25519.c.o: \
+ .pio/libdeps/CYD-2USB/WireGuard-ESP32/src/crypto/refc/x25519.c \
+ .pio/libdeps/CYD-2USB/WireGuard-ESP32/src/crypto/refc/x25519.h

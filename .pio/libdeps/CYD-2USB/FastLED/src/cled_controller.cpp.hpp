@@ -1,0 +1,138 @@
+/// @file cled_controller.cpp
+/// base definitions used by led controllers for writing out led data
+
+#define FASTLED_INTERNAL
+#include "fl/system/fastled.h"
+
+#include "cled_controller.h"
+
+#include "fl/stl/cstring.h"
+#include "fl/system/sketch_macros.h"
+
+
+CLEDController::~CLEDController() FL_NO_EXCEPT {
+#if SKETCH_HAS_LARGE_MEMORY
+    // Remove from draw list on destruction to prevent dangling pointers
+    // Note: Not enabled on memory-constrained platforms (AVR, ESP8266, etc.)
+    // because the virtual destructor adds ~600 bytes on AVR and pulling in
+    // removeFromDrawList() adds additional overhead
+    removeFromDrawList();
+#endif
+}
+
+/// Create an led controller object, add it to the chain of controllers
+CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mLegacySettings(),
+      mEnabled(true), mFixedWhiteChannel(false) {
+    addToList();
+}
+
+CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mLegacySettings(),
+      mEnabled(true), mFixedWhiteChannel(false) {
+    if (mode == RegistrationMode::AutoRegister) {
+        addToList();
+    }
+}
+
+void CLEDController::addToList() FL_NO_EXCEPT {
+    // Don't add if already in list
+    #if SKETCH_HAS_LARGE_MEMORY // Mostly for AVR, the isInList() check adds memory overhead on these tight platforms.
+    if (isInList()) {
+        return;
+    }
+    #endif
+
+    // Append by walking from the head: registration is rare and lists are
+    // short, so no tail pointer is stored (#4788).
+    if (mPHead == nullptr) {
+        mPHead = this;
+        return;
+    }
+    // The walk also catches a repeat registration, which would otherwise
+    // create a cycle (AVR skips the isInList() check above).
+    CLEDController* last = mPHead;
+    while (true) {
+        if (last == this) {
+            return;
+        }
+        if (last->mPNext == nullptr) {
+            break;
+        }
+        last = last->mPNext;
+    }
+    last->mPNext = this;
+}
+
+bool CLEDController::isInList() const FL_NO_EXCEPT {
+    CLEDController* curr = mPHead;
+    while (curr != nullptr) {
+        if (curr == this) {
+            return true;
+        }
+        curr = curr->mPNext;
+    }
+    return false;
+}
+
+void CLEDController::clearLedDataInternal(int nLeds) FL_NO_EXCEPT {
+    // On common code that runs on avr, every byte counts.
+    //
+    // mLeds spans one lane, not the whole buffer. A parallel controller is
+    // registered with the PER-LANE count -- addLeds<NUM_LANES, ...>(data,
+    // nLeds) forwards nLeds -- while the caller's array is NUM_LANES * nLeds.
+    // Clearing mLeds.size() therefore blanked only the first strip and left
+    // the rest lit, which is FastLED#1017.
+    //
+    // lanes() is 1 for every ordinary controller, so this is a no-op there. It
+    // reports the template lane count on parallel controllers, which is what
+    // the caller allocated, so this cannot run past the end of their array
+    // even when fewer lanes were actually claimed.
+    fl::u16 n = nLeds >= 0 ? static_cast<fl::u16>(nLeds)
+                           : static_cast<fl::u16>(mLeds.size() * lanes());
+    if (mLeds.data()) {
+        fl::memset((void*)mLeds.data(), 0, sizeof(CRGB) * n);
+    }
+
+}
+
+void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
+    if (controller == nullptr) {
+        return;
+    }
+
+    // Remove the specified controller from the linked list
+    CLEDController* prev = nullptr;
+    CLEDController* curr = mPHead;
+
+    // Find the controller in the linked list
+    while (curr != nullptr) {
+        if (curr == controller) {
+            // Found it - remove from list
+            if (prev == nullptr) {
+                // Removing head
+                mPHead = controller->mPNext;
+            } else {
+                // Removing from middle or end
+                prev->mPNext = controller->mPNext;
+            }
+
+            // Clear the controller's next pointer
+            controller->mPNext = nullptr;
+            break;
+        }
+        prev = curr;
+        curr = curr->mPNext;
+    }
+}
+
+ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
+    // *premixed = getAdjustment(brightness);
+    // if (color_correction) {
+    //     *color_correction = getAdjustment(255);
+    // }
+    #if FASTLED_HD_COLOR_MIXING
+    ColorAdjustment out = {this->getAdjustment(brightness), this->getAdjustment(255), brightness};
+    #else
+    ColorAdjustment out = {getAdjustment(brightness)};
+    #endif
+    return out;
+}

@@ -1,0 +1,154 @@
+#pragma once
+
+// The streaming pipeline core (P6, #4040).
+//
+// P6's stages have existed as separate modules for a while -- decode,
+// primaries->XYZ, chromatic adaptation, the device solve, the gamut mapper,
+// the flux scalar -- with nothing composing them. This is the composition:
+// one bind-time build, and one per-pixel call that runs the whole chain.
+//
+// The chain, and why it is in this order:
+//
+//   1. `decodeTransferU16` turns each RGB8 code into u16 linear light. One
+//      semantic conversion, per B3: there is no intermediate RGB8 linear
+//      buffer and no RGB8->RGB8 correction anywhere in it.
+//   2. `linearRgbToXyzQ16` takes those to s16.16 XYZ. Chromatic adaptation
+//      is folded into that matrix at bind time, so it costs nothing here.
+//   3. The gamut mapper maps the target onto the device hull and solves for
+//      drives -- clamping belongs to it, not to the stages before.
+//   4. `applyFluxScalar` scales linear emitter light. C4's single insertion point:
+//      brightness and the power limiter compose into one scalar before they
+//      get here. Inverse physical response then produces drive coordinates;
+//      native encoding performs the final quantization.
+//
+// Streaming, per C2: the per-pixel call carries no state and allocates
+// nothing, so it runs inside `PixelController` iteration without an RGB16
+// framebuffer.
+
+#include "fl/gfx/color_profile.h"
+#include "fl/gfx/colorimetric_response.h"
+#include "fl/gfx/flux_scalar.h"
+#include "fl/gfx/gamut_map.h"
+#include "fl/gfx/source_xyz.h"
+#include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/vector.h"
+
+namespace fl {
+
+/// Owned code-to-light samples for the three physical emitters. Pipeline
+/// copies share this immutable table, including frame-local and power-pass
+/// copies, so a caller may rebind or destroy the input profile safely.
+struct ResponseLutsQ16 {
+    vector<u16> red;
+    vector<u16> green;
+    vector<u16> blue;
+};
+
+/// Allocated only for a bound four- or five-emitter profile. Plain RGB
+/// pipelines retain their historical storage and per-pixel path.
+struct WidePipelineQ16 {
+    colorimetric_response::EmitterTopology topology;
+    GamutMapRgbwQ16 rgbw;
+    GamutMapRgbwwQ16 rgbww;
+    vector<u16> white1_response;
+    vector<u16> white2_response;
+};
+
+/// Everything the per-pixel path needs, derived once when a profile binds.
+///
+/// Deliberately a plain carrier of the stages' own bind-time state rather
+/// than a rebuilt copy of it: the matrices here are the ones those modules
+/// produce, so there is no second place for them to drift.
+///
+/// Not aggregate-initializable, and not by accident. `FluxScalar` has no
+/// default constructor -- there is no sensible "unset" amplitude -- so the
+/// member below carries an initializer, and in C++11, which this project
+/// builds as, a class with one is not an aggregate. `StreamingPipelineQ16 p
+/// = {transfer, source, gamut, flux};` does not compile and never has.
+/// Members are therefore free to be grouped by meaning rather than pinned by
+/// position, and `buildStreamingPipelineQ16` is the only thing that should
+/// be filling one in.
+struct StreamingPipelineQ16 {
+    /// The source's transfer function, applied per code.
+    TransferFunction transfer;
+
+    /// Source primaries to XYZ, with adaptation to D65 already folded in.
+    SourceMatrixQ16 source;
+
+    /// The device hull, its solve, and the lightness bound.
+    GamutMapQ16 gamut;
+
+    /// What to do with a target the device cannot reproduce.
+    ///
+    /// `ChromaCompress` is the default and the one the P7 study selected;
+    /// `Clamp` is the caller saying they would rather have the cheap answer.
+    /// The study measured what that costs: clipping drives into range lands
+    /// about 20 dE2000 from the reference against a budget of 0.5, because
+    /// no amount of clamping substitutes for the objective. It is offered
+    /// because `ColorProfileBinding` offers it, not because it is close.
+    GamutPolicy gamut_policy = GamutPolicy::ChromaCompress;
+
+    /// Brightness times power limiting, as one scalar (C4).
+    ///
+    /// Initialized here because `FluxScalar` has no default constructor --
+    /// there is no sensible "unset" amplitude, and unity is what a pipeline
+    /// that has never been told a brightness should do.
+    FluxScalar flux = FluxScalar::unity();
+
+    /// Absent means linear code-to-light response. With a table, the inverse
+    /// is applied after `flux` and before the final wire quantization.
+    shared_ptr<const ResponseLutsQ16> response;
+
+    shared_ptr<const WidePipelineQ16> wide;
+};
+
+/// Bind a source declaration and a device profile into a pipeline.
+///
+/// False when either half is degenerate -- collinear primaries, a white with
+/// no cone response, a device that cannot make a neutral. The individual
+/// stages decide that; this reports it.
+///
+/// The flux scalar starts at unity. `setPipelineFluxQ16` is how brightness
+/// and the power limiter reach it, because they change between frames while
+/// everything else here does not.
+/// With `target_white`, D65 working XYZ is adapted to the selected physical
+/// neutral at bind time. A white outside the emitter gamut rejects the build;
+/// nullptr preserves the historical D65 output byte-for-byte.
+bool buildStreamingPipelineQ16(const SourceProfile& source,
+                               const colorimetric_response::EmitterProfile& device,
+                               GamutPolicy policy,
+                               StreamingPipelineQ16* out,
+                               const Chromaticity* target_white = nullptr) FL_NO_EXCEPT;
+
+/// Set the composed brightness-and-power scalar for the frames that follow.
+void setPipelineFluxQ16(StreamingPipelineQ16* pipeline, FluxScalar flux) FL_NO_EXCEPT;
+
+/// One pixel: an RGB8 code triple to three physical emitter drives in s16.16.
+///
+/// Drives always come back inside [0, 1]. No allocation, no state carried
+/// between calls, no RGB8 intermediate.
+void processPixelQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g, u8 b,
+                     i32 (&drives)[3]) FL_NO_EXCEPT;
+
+/// Pre-response linear emitter light for a power prepass. Source decoding,
+/// gamut mapping and the physical solve are exactly the encoder's stages;
+/// brightness/response inversion intentionally follow this boundary.
+void processPixelLinearQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
+                           u8 b, i32 (&light)[3]) FL_NO_EXCEPT;
+
+/// Like processPixelQ16, but solves the physical 4/5-emitter hull. The
+/// first three drives are RGB, followed by W or warm/cool W. Unused slots
+/// are zero; call only when `wide` is present.
+void processPixelWideQ16(const StreamingPipelineQ16& pipeline, u8 r, u8 g,
+                         u8 b, i32 (&drives)[5]) FL_NO_EXCEPT;
+void processPixelWideLinearQ16(const StreamingPipelineQ16& pipeline, u8 r,
+                               u8 g, u8 b, i32 (&light)[5]) FL_NO_EXCEPT;
+
+/// Scale one linear emitter and invert its physical response, using the
+/// identical final stage as processPixel[Wide]Q16.
+i32 encodeLinearEmitterQ16(const StreamingPipelineQ16& pipeline, u8 emitter,
+                            i32 light, FluxScalar flux) FL_NO_EXCEPT;
+
+}  // namespace fl

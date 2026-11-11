@@ -1,0 +1,43 @@
+# Smoke sketches: the reduced example set pull requests compile
+# (FastLED/FastLED#4415, refs #2411).
+#
+# Pull requests build `<board> smoke` instead of `<board> all`: these sketches
+# plus every example the PR changes (ci/compiler/smoke_examples.py). Master
+# still builds `all`, so anything this set misses is caught after merge.
+#
+# Every example compiles the whole FastLED library, so any of them catches a
+# library compile error. The set below adds the sketches that, in 90 days of
+# CI failures (June to September 2026), were the ONLY ones to catch a real
+# defect. Each entry names what it uniquely caught; remove one only with
+# evidence that another entry covers it.
+#
+#   Blink             - basic clockless sanity; the fastest possible build.
+#   Apa102HD          - clocked SPI chipsets; caught the channel_typed
+#                       DefaultBus<SpiChipsetConfig> instantiation error that
+#                       only the Apa102 family hit.
+#   AutoResearch      - largest multi-file sketch; caught the idf5_clockless
+#                       invalid-pin static assert and the parlio enum error.
+#   Audio             - audio stack; caught the Teensy set_audioClock link
+#                       error.
+#   Fx/FxSdCard       - SD/SPI filesystem; caught the Teensy SPIClass::begin
+#                       link error.
+#   SpecialDrivers/Adafruit/AdafruitBridge
+#                     - Adafruit_NeoPixel bridge; caught its link errors.
+#   RGBWColorimetric  - sets FASTLED_RGBW_COLORIMETRIC in the sketch; caught
+#                       the "Not enough cycles" static assert on ATtiny.
+#   RX                - ESP32 RMT receive; caught the l32r relocation link
+#                       error in the RX channel.
+#
+# Format: one example name per line, relative to examples/. Lines starting with
+# '#' and blank lines are ignored. Per-board skipping is governed by the
+# @filter directive inside each .ino, so this list stays board-agnostic.
+#
+# Consumed by: ci/standardized_smoke_sketches.py, ci/compiler/smoke_examples.py
+Blink
+Apa102HD
+AutoResearch
+Audio
+Fx/FxSdCard
+SpecialDrivers/Adafruit/AdafruitBridge
+RGBWColorimetric
+RX

@@ -1,0 +1,124 @@
+
+
+
+
+#include "platforms/is_platform.h"
+#include "fl/system/sketch_macros.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/shared_ptr.h"  // For shared_ptr
+#include "fl/stl/string.h"
+#include "fl/stl/has_include.h"
+#include "fl/stl/noexcept.h"
+#include "platforms/audio_input_null.hpp"
+
+
+// Auto-determine platform audio input support
+
+// First check for Teensy (before Arduino, since Teensy is Arduino-compatible)
+// IWYU pragma: begin_keep
+#include "platforms/arm/teensy/audio_input_teensy_config.h" // ok platform headers
+// IWYU pragma: end_keep
+
+#ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
+  // ESP32 (excluding ESP8266) has a dedicated native engine below. ESP8266 has
+  // no dedicated engine and deliberately falls through to the shared Arduino-I2S
+  // backend (`platforms/arduino/audio_input.hpp`) when <I2S.h> is present — see
+  // issue #4948 and `platforms/esp/8266/README.md`.
+  #if defined(FL_IS_ESP32) && !defined(FL_IS_ESP8266)
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
+  #elif defined(FL_IS_WASM)
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
+  #elif defined(FL_IS_TEENSY)
+    // Teensy uses the PJRC Audio backend when enabled, never generic Arduino I2S.
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
+  #elif FL_HAS_INCLUDE(<Arduino.h>)
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 1
+  #else
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
+  #endif
+#endif
+
+#if !FASTLED_USES_ARDUINO_AUDIO_INPUT
+#if defined(FL_IS_ESP32) && !defined(FL_IS_ESP8266)
+#define FASTLED_USES_ESP32_AUDIO_INPUT 1
+#else
+#define FASTLED_USES_ESP32_AUDIO_INPUT 0
+#endif
+#else
+#define FASTLED_USES_ESP32_AUDIO_INPUT 0
+#endif
+
+// Determine WASM audio input support
+#if !FASTLED_USES_ARDUINO_AUDIO_INPUT && !FASTLED_USES_ESP32_AUDIO_INPUT
+#if defined(FL_IS_WASM)
+#define FASTLED_USES_WASM_AUDIO_INPUT 1
+#else
+#define FASTLED_USES_WASM_AUDIO_INPUT 0
+#endif
+#else
+#define FASTLED_USES_WASM_AUDIO_INPUT 0
+#endif
+
+// Include platform-specific audio input implementation
+// IWYU pragma: begin_keep
+#if FASTLED_USES_TEENSY_AUDIO_INPUT
+#define FASTLED_TEENSY_AUDIO_INPUT_HEADER                                    \
+    "platforms/arm/teensy/audio_input_teensy.h"
+#include FASTLED_TEENSY_AUDIO_INPUT_HEADER
+#undef FASTLED_TEENSY_AUDIO_INPUT_HEADER
+#elif FASTLED_USES_ARDUINO_AUDIO_INPUT
+#include "platforms/arduino/audio_input.hpp" // ok platform headers
+#elif FASTLED_USES_ESP32_AUDIO_INPUT
+#include "platforms/esp/32/audio/audio_impl.hpp" // ok platform headers
+#elif FASTLED_USES_WASM_AUDIO_INPUT
+#include "platforms/wasm/audio_input_wasm.hpp" // ok platform headers
+#endif
+// IWYU pragma: end_keep
+
+namespace fl {
+namespace audio {
+
+#if FASTLED_USES_TEENSY_AUDIO_INPUT
+// Use Teensy audio implementation
+fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
+    return teensy_create_audio_input(config, error_message);
+}
+#elif FASTLED_USES_ARDUINO_AUDIO_INPUT
+// Use Arduino audio implementation
+fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
+    return arduino_create_audio_input(config, error_message);
+}
+#elif FASTLED_USES_ESP32_AUDIO_INPUT
+// ESP32 native implementation
+fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
+    return esp32_create_audio_input(config, error_message);
+}
+#elif FASTLED_USES_WASM_AUDIO_INPUT
+// WASM implementation - audio comes from JavaScript
+fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
+    return wasm_create_audio_input(config, error_message);
+}
+#else
+// Weak default implementation - no audio support
+FL_LINK_WEAK
+fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
+    FL_UNUSED(config);  // no audio input here to configure
+    if (error_message) {
+        *error_message = "AudioInput not supported on this platform.";
+    }
+    return fl::make_shared<fl::Null_Audio>();
+}
+#endif
+
+// Static method delegates to free function
+fl::shared_ptr<IInput>
+IInput::create(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
+    auto input = platform_create_audio_input(config, error_message);
+    if (input) {
+        input->setGain(config.getGain());
+    }
+    return input;
+}
+
+} // namespace audio
+}  // namespace fl

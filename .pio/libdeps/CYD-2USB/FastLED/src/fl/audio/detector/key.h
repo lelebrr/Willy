@@ -1,0 +1,153 @@
+// KeyDetector - Musical key detection using chroma features and key profiles
+//
+// Detects the musical key (tonal center) of the audio using Krumhansl-Schmuckler
+// key-finding algorithm. Analyzes pitch class profiles (chroma) and correlates
+// them with theoretical key profiles for major and minor keys.
+//
+// Features:
+// - Detects 24 possible keys (12 major + 12 minor)
+// - Uses chroma features from FFT analysis
+// - Krumhansl-Schmuckler key profiles for accurate detection
+// - Temporal averaging for stable key estimation
+// - Confidence scoring based on correlation strength
+// - Event callbacks for key changes
+//
+// Usage:
+//   KeyDetector detector;
+//   detector.onKeyChange([](const Key& key) {
+//       Serial.print("Key: ");
+//       Serial.print(key.getKeyName());
+//       Serial.print(" (confidence: ");
+//       Serial.print(key.confidence);
+//       Serial.println(")");
+//   });
+//
+//   void loop() {
+//       Sample sample = audio.next();
+//       shared_ptr<Context> context = make_shared<Context>(sample);
+//       detector.update(context);
+//   }
+
+#pragma once
+
+#include "fl/audio/audio_detector.h"
+#include "fl/stl/function.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
+
+namespace fl {
+namespace audio {
+namespace detector {
+
+// Forward declaration
+
+// Key structure representing detected musical key
+struct Key {
+    u8 rootNote;             // 0-11 (C=0, C#=1, D=2, ..., B=11)
+    bool isMinor;            // true = minor key, false = major key
+    float confidence;        // 0.0-1.0 correlation with key profile
+    u32 timestamp;           // Detection timestamp (ms)
+    u32 duration;            // How long this key has been active (ms)
+
+    Key() FL_NO_EXCEPT : rootNote(0), isMinor(false), confidence(0.0f), timestamp(0), duration(0) {}
+
+    Key(u8 root, bool minor, float conf, u32 time)
+        FL_NO_EXCEPT : rootNote(root), isMinor(minor), confidence(conf), timestamp(time), duration(0) {}
+
+    // Get key name (e.g., "C", "F#", "Bb")
+    const char* getRootName() const FL_NO_EXCEPT;
+
+    // Get quality name ("maj" or "min")
+    const char* getQuality() const FL_NO_EXCEPT { return isMinor ? "min" : "maj"; }
+
+    // Get full key name (e.g., "C maj", "F# min")
+    void getKeyName(char* buffer, size_t bufferSize) const FL_NO_EXCEPT;
+
+    // Check if key is valid
+    bool isValid() const FL_NO_EXCEPT { return confidence > 0.0f; }
+
+    // Compare keys
+    bool operator==(const Key& other) const FL_NO_EXCEPT {
+        return rootNote == other.rootNote && isMinor == other.isMinor;
+    }
+
+    bool operator!=(const Key& other) const FL_NO_EXCEPT {
+        return !(*this == other);
+    }
+};
+
+// KeyDetector - Detects musical key using chroma analysis
+class KeyDetector : public Detector {
+public:
+    KeyDetector() FL_NO_EXCEPT;
+    ~KeyDetector() FL_NO_EXCEPT override;
+
+    // Detector interface
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "KeyDetector"; }
+    void reset() FL_NO_EXCEPT override;
+
+    // Event callbacks (multiple listeners supported)
+    function_list<void(const Key& key)> onKey;           // Every frame with current key
+    function_list<void(const Key& key)> onKeyChange;     // When key changes
+    function_list<void()> onKeyEnd;                  // When key ends (confidence drops)
+
+    // State access
+    const Key& getCurrentKey() const FL_NO_EXCEPT { return mCurrentKey; }
+    bool hasKey() const FL_NO_EXCEPT { return mCurrentKey.isValid(); }
+
+    // Configuration
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
+    void setMinDuration(u32 ms) FL_NO_EXCEPT { mMinKeyDuration = ms; }
+    void setAveragingFrames(int frames) FL_NO_EXCEPT { mAveragingFrames = frames; }
+
+private:
+    // Current state
+    Key mCurrentKey;
+    Key mPreviousKey;
+    u32 mKeyStartTime;
+    bool mKeyActive;
+
+    // Configuration
+    float mConfidenceThreshold;    // Minimum confidence to detect key (default: 0.65)
+    u32 mMinKeyDuration;           // Minimum duration for stable key (default: 2000ms)
+    int mAveragingFrames;          // Number of frames to average (default: 8)
+
+    // Chroma history for temporal averaging
+    vector<float> mChromaHistory[12];  // History for each pitch class
+    int mHistoryIndex;
+    int mHistorySize;
+
+    // Key profiles (Krumhansl-Schmuckler)
+    static const float MAJOR_PROFILE[12];
+    static const float MINOR_PROFILE[12];
+
+    // Pre-computed profile statistics (computed once at init, reused 24x per frame)
+    float mMajorProfileMean = 0.0f;
+    float mMajorProfileStdDev = 0.0f;
+    float mMinorProfileMean = 0.0f;
+    float mMinorProfileStdDev = 0.0f;
+
+    shared_ptr<const fft::Bins> mRetainedFFT;
+
+    // Helper methods
+    void initializeProfileStats() FL_NO_EXCEPT;  // Pre-compute profile statistics once
+    void extractChroma(const fft::Bins& fft, float* chroma) FL_NO_EXCEPT;
+    void normalizeChroma(float* chroma) FL_NO_EXCEPT;
+    void updateChromaHistory(const float* chroma) FL_NO_EXCEPT;
+    void getAveragedChroma(float* chroma) FL_NO_EXCEPT;
+    Key detectKey(const float* chroma, u32 timestamp) FL_NO_EXCEPT;
+    float correlateWithProfile(const float* chroma, const float* profile, int rootNote) FL_NO_EXCEPT;
+
+    // Pending callback flags
+    bool mFireKeyChange = false;
+    bool mFireKeyEnd = false;
+    bool mFireKey = false;
+};
+
+} // namespace detector
+} // namespace audio
+} // namespace fl

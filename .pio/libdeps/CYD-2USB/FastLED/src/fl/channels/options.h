@@ -1,0 +1,362 @@
+#pragma once
+
+#include "led_sysdefs.h"  // IWYU pragma: keep
+#include "pixeltypes.h"  // IWYU pragma: keep
+#include "color.h"
+#include "dither_mode.h"
+#include "fl/channels/bus.h"
+#include "rgbw.h"  // IWYU pragma: keep
+#include "fl/gfx/rgbww.h"  // IWYU pragma: keep
+#include "fl/stl/optional.h"
+#include "fl/stl/variant.h"
+#include "fl/channels/color_profile.h"
+#include "fl/channels/channel_events.h"
+#include "fl/log/log.h"
+#include "fl/stl/compiler_control.h"  // FL_DEPRECATED
+
+namespace fl {
+
+// Declared rather than included. Every path that binds a profile has to
+// install these -- there are three, and two of them do not go through
+// setColorProfile: Channel::create<Profile>,
+// ChannelOptions::withColorProfile<Profile> both set mStaticProfile directly.
+// Missing one leaves that channel silently on the legacy path, which is the
+// exact bug this whole change exists to fix.
+//
+// Declared rather than included. `pipeline_binding.h` pulls the whole gfx
+// pipeline in behind it, and reaching those headers from here puts them
+// ahead of whatever brings `EmitterProfile` into scope unqualified --
+// `device_solve.h`, `gamut_map.h` and `white_allocation.h` all stop
+// compiling. One declaration is all this file needs, and keeping it to one
+// also keeps `options.h` cheap for every translation unit that includes it.
+void installColorPipelineHooks() FL_NO_EXCEPT;
+
+// Emits the ProfileClearedByLegacy warning event through the pipeline hooks,
+// so a sketch that never binds a profile does not link the event machinery.
+void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT;
+
+
+#ifndef FL_COLOR_PROFILE_RUNTIME
+#if defined(FL_IS_AVR)
+#define FL_COLOR_PROFILE_RUNTIME 0
+#else
+#define FL_COLOR_PROFILE_RUNTIME (!FL_PLATFORM_HAS_TINY_MEMORY)
+#endif
+#endif
+
+#if defined(FL_IS_AVR) && FL_COLOR_PROFILE_RUNTIME
+#error "Runtime color profiles are unsupported on AVR"
+#endif
+
+/// Shared ownership of a channel's colour pipeline, the controller accessor
+/// that hands it out, and the power limiter's managed-channel estimate
+/// (#4344, #4440). Large-memory tiers only: on the tiny and low tiers (AVR
+/// Uno/Nano, ESP8266, Teensy LC/3.x, STM32F1, ...) all of it compiles out --
+/// no vtable slot, no estimator, no control block -- and a managed channel
+/// there is charged for its source pixels, as before #4344. Those tiers have
+/// no asynchronous show, so the pipeline is only ever read synchronously,
+/// where a raw pointer is provably safe.
+#ifndef FL_COLOR_PIPELINE_SHARED
+#define FL_COLOR_PIPELINE_SHARED (FL_COLOR_PROFILE_RUNTIME && FL_PLATFORM_HAS_LARGE_MEMORY)
+#endif
+
+/// Optional channel configuration parameters
+/// All fields have sensible defaults and can be overridden as needed.
+///
+/// **Driver selection** (#2459). `mBus` is the single typed selector:
+///
+///   - `Bus::AUTO` (default) — let `ChannelManager` pick by priority dispatch.
+///   - Any other value — pin this channel to the named driver via
+///     `ChannelManager::findDriverByName(busName(mBus))`. If the named driver
+///     isn't registered, `Channel::showPixels` emits a one-shot `FL_ERROR`
+///     with the resolution hint (`fl::enableDrivers<fl::Bus::X>()` or
+///     `FastLED.enableAllDrivers()`) and falls back to AUTO/priority.
+///
+/// **White-channel configuration** (#2558). `mWhiteCfg` is a 3-way variant:
+///
+///   - `fl::Empty` (default) — plain 3-channel RGB output, no white extraction.
+///     Replaces the legacy `Rgbw{rgbw_mode=kRGBWInvalid}` sentinel.
+///   - `Rgbw` — 4-channel RGBW output. Mode + CCT + optional shared
+///     colorimetric profile handle inside the Rgbw value.
+///   - `Rgbww` — 5-channel RGB + warm-W + cool-W output. Mode + two CCTs +
+///     optional profile pointer inside the Rgbww value.
+///
+/// `setRgbw()` / `getRgbw()` on CLEDController remain backward-compatible —
+/// they wrap the variant. New 5-channel callers use `setRgbww()`/`getRgbww()`.
+///
+/// **Custom / third-party / mock drivers** whose names aren't in the
+/// `fl::Bus` enum should be bound either by priority (clear competing
+/// drivers via `clearAllDrivers()` and let the mock win priority dispatch)
+/// or via `ChannelManager::setExclusiveDriverByName(name)` for process-wide
+/// binding. There is no string-typed affinity field on `ChannelOptions`.
+struct ChannelOptions {
+    CRGB mCorrection = UncorrectedColor;
+    CRGB mTemperature = UncorrectedTemperature;
+    fl::u8 mDitherMode = BINARY_DITHER;
+    Bus mBus = Bus::AUTO;              // Typed driver selection
+    /// White-channel selection (variant): Empty = plain RGB, Rgbw = 4-channel,
+    /// Rgbww = 5-channel. Default-constructed = Empty.
+    fl::variant<fl::Empty, Rgbw, Rgbww> mWhiteCfg;
+    fl::optional<float> mGamma;        // Gamma correction (nullopt = use default 2.8)
+#if FL_COLOR_PROFILE_RUNTIME
+    ColorProfileBinding mColorProfile;
+#endif
+    fl::u8 mBusWhich = 0;              // Instance selector for portable buses
+
+    bool setColorProfile(const EmitterProfile& profile) FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return setColorProfile(profile, SourceProfile::linearSrgb(), true);
+#else
+        FL_UNUSED(profile);
+        return false;
+#endif
+    }
+    bool setColorProfile(const EmitterProfile& profile,
+                         SourceProfile source,
+                         GamutPolicy gamut = GamutPolicy::ChromaCompress) FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return setColorProfile(profile, source, false, gamut);
+#else
+        FL_UNUSED(profile); FL_UNUSED(source); FL_UNUSED(gamut);
+        return false;
+#endif
+    }
+    bool setColorProfile(const EmitterProfile& profile, SourceProfile source,
+                         bool global_source, GamutPolicy gamut = GamutPolicy::ChromaCompress) FL_NO_EXCEPT {
+#if !FL_COLOR_PROFILE_RUNTIME
+        FL_UNUSED(profile); FL_UNUSED(source); FL_UNUSED(global_source); FL_UNUSED(gamut);
+        return false;
+#else
+        // Captured before mStaticProfile is cleared below, so the warning
+        // condition still sees whether a profile was bound on entry.
+        const bool had_profile = hasColorProfile();
+        mColorProfile.mStaticProfile = nullptr;
+        if (profile.native_code_depth == 0 || profile.native_code_depth > 16 ||
+            !validChromaticity(profile.xy_r) || !validChromaticity(profile.xy_g) ||
+            !validChromaticity(profile.xy_b) || !validPrimaries(source.primaries) ||
+            !finitePositive(profile.lum_r) || !finitePositive(profile.lum_g) || !finitePositive(profile.lum_b) ||
+            (profile.topology != colorimetric_response::EmitterTopology::RGB &&
+             profile.topology != colorimetric_response::EmitterTopology::RGBW &&
+             profile.topology != colorimetric_response::EmitterTopology::RGBWW) ||
+            (profile.topology != colorimetric_response::EmitterTopology::RGB &&
+             (!validChromaticity(profile.xy_white1) ||
+              !finitePositive(profile.lum_white1) ||
+              (profile.response_lut_size != 0 &&
+               profile.response_lut_white1 == nullptr))) ||
+            (profile.topology == colorimetric_response::EmitterTopology::RGBWW &&
+             (!validChromaticity(profile.xy_white2) ||
+              !finitePositive(profile.lum_white2) ||
+              (profile.response_lut_size != 0 &&
+               profile.response_lut_white2 == nullptr))) ||
+            (profile.response_lut_size != 0 &&
+             (profile.response_lut_r == nullptr || profile.response_lut_g == nullptr || profile.response_lut_b == nullptr))) {
+            clearColorProfile();
+            return false;
+        }
+        if (!validResponseLut(profile.response_lut_r, profile.response_lut_size) ||
+            !validResponseLut(profile.response_lut_g, profile.response_lut_size) ||
+            !validResponseLut(profile.response_lut_b, profile.response_lut_size)) {
+            clearColorProfile();
+            return false;
+        }
+        if (profile.topology != colorimetric_response::EmitterTopology::RGB &&
+            !validResponseLut(profile.response_lut_white1,
+                              profile.response_lut_size)) {
+            clearColorProfile();
+            return false;
+        }
+        if (profile.topology == colorimetric_response::EmitterTopology::RGBWW &&
+            !validResponseLut(profile.response_lut_white2,
+                              profile.response_lut_size)) {
+            clearColorProfile();
+            return false;
+        }
+        // Warn only once validation has passed. Warning earlier consumed
+        // mWarnedLegacyCleared on a profile that was then rejected, and
+        // clearColorProfile() leaves mCorrection/mTemperature alone -- so the
+        // next *valid* profile cleared the caller's legacy settings silently.
+        // Every field cleared below whose loss is detectable has to be
+        // represented here, or the caller loses it in silence. This used to
+        // name mCorrection and mTemperature only, while the clear also resets
+        // mGamma -- so a caller who set just a gamma had it discarded with no
+        // warning, which is exactly what the note above is about (#4331).
+        //
+        // mDitherMode is deliberately absent, and cannot be added by
+        // comparison. Its default is BINARY_DITHER and the clear sets
+        // DISABLE_DITHER, so `mDitherMode != BINARY_DITHER` is true precisely
+        // when the caller already chose DISABLE_DITHER and nothing is being
+        // taken away, and false in the case that loses dithering. Detecting
+        // that needs a "the caller set this" flag, which mGamma gets for free
+        // by being an optional. Until then, binding a profile turns dithering
+        // off quietly (#4331).
+        const bool clearing_legacy =
+            mCorrection != UncorrectedColor ||
+            mTemperature != UncorrectedTemperature ||
+            mGamma.has_value();
+        if (!had_profile && clearing_legacy && !mWarnedLegacyCleared) {
+            FL_WARN("Color profile clears legacy correction/temperature/gamma");
+            ChannelEvents::instance().onColorProfileWarning(
+                ColorProfileEvent{-1, {}, ColorProfileWarning::LegacyClearedByProfile});
+            mWarnedLegacyCleared = true;
+        }
+        // The one call that makes the colour pipeline reachable. Everything
+        // downstream goes through function pointers these install, so a
+        // program that never gets here never references the pipeline and the
+        // linker drops it -- about 3.5 KB of flash for sketches that do not
+        // ask for colour management.
+        installColorPipelineHooks();
+        mColorProfile.mStorage = fl::make_shared<ColorProfileStorage>(profile);
+        mColorProfile.mSource = source;
+        mColorProfile.mGamut = gamut;
+        mColorProfile.mRequested = true;
+        mColorProfile.mUseGlobalSourceDefault = global_source;
+        mCorrection = UncorrectedColor;
+        mTemperature = UncorrectedTemperature;
+        mGamma.reset();
+        mDitherMode = DISABLE_DITHER;
+        return true;
+#endif
+    }
+    void requestColorManagement(SourceProfile source = SourceProfile::linearSrgb()) FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        clearColorProfile();
+        mColorProfile.mSource = source;
+        mColorProfile.mRequested = true;
+#else
+        FL_UNUSED(source);
+#endif
+    }
+    void clearColorProfile() FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        mColorProfile.mStorage.reset();
+        mColorProfile.mStaticProfile = nullptr;
+        mColorProfile.mRequested = false;
+        // Also drop the global-source opt-in. Without this, a profile bound
+        // by setColorProfile() leaves the flag set, and a following
+        // requestColorManagement(explicitSource) has its source silently
+        // replaced by defaultSourceProfile() in Channel::create().
+        // setColorProfile() re-establishes the flag itself when it succeeds.
+        mColorProfile.mUseGlobalSourceDefault = false;
+#endif
+    }
+    bool hasColorProfile() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mColorProfile.active();
+#else
+        return false;
+#endif
+    }
+    /// @deprecated Ask the channel, not the request.
+    ///
+    /// Options carry the *request*; the transform is built by
+    /// `Channel::reconcileColorProfile` and can fail for a binding these
+    /// options accepted -- which is exactly the case
+    /// `Channel::isColorManaged()` distinguishes. A request object asked
+    /// whether rendering is installed can only return a guess, and this one
+    /// returned a hardcoded `false` (#4328).
+    ///
+    /// Kept, returning that same legacy value, so no downstream call stops
+    /// compiling; the attribute is what moves callers along. No in-tree
+    /// caller exists.
+    FL_DEPRECATED("Ask the channel: Channel::isColorManaged()")
+    bool isColorManaged() const FL_NO_EXCEPT { return false; }
+    const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        return mColorProfile.profile();
+#else
+        return nullptr;
+#endif
+    }
+    bool setTargetWhite(Chromaticity white) FL_NO_EXCEPT;
+    Chromaticity targetWhite() const FL_NO_EXCEPT;
+    bool hasTargetWhite() const FL_NO_EXCEPT;
+
+    template<const EmitterProfile& Profile>
+    static ChannelOptions withColorProfile() FL_NO_EXCEPT {
+#ifdef FL_IS_AVR
+        FL_STATIC_ASSERT(&Profile == nullptr, "Color profiles require the Channels API on a supported non-AVR platform");
+#endif
+        ChannelOptions options;
+#if FL_COLOR_PROFILE_RUNTIME
+        installColorPipelineHooks();
+        options.mColorProfile.mStaticProfile = &Profile;
+        options.mColorProfile.mRequested = true;
+#endif
+        return options;
+    }
+    void setLegacyCorrection(CRGB correction) FL_NO_EXCEPT { warnProfileCleared(); clearColorProfile(); mCorrection = correction; }
+    void setLegacyTemperature(CRGB temperature) FL_NO_EXCEPT { warnProfileCleared(); clearColorProfile(); mTemperature = temperature; }
+
+private:
+    static bool validChromaticity(const float xy[2]) FL_NO_EXCEPT {
+        return xy[0] > 0.0f && xy[0] < 1.0f && xy[1] > 0.0f && xy[1] < 1.0f &&
+               xy[0] + xy[1] <= 1.0f;
+    }
+    static bool validChromaticity(Chromaticity xy) FL_NO_EXCEPT {
+        return xy.x > 0.0f && xy.x < 1.0f && xy.y > 0.0f && xy.y < 1.0f &&
+               xy.x + xy.y <= 1.0f;
+    }
+    static bool validPrimaries(const RgbPrimaries& primaries) FL_NO_EXCEPT {
+        return validChromaticity(primaries.red) && validChromaticity(primaries.green) &&
+               validChromaticity(primaries.blue) && validChromaticity(primaries.white);
+    }
+    static bool validResponseLut(const u16* values, u16 size) FL_NO_EXCEPT {
+        if (size == 0) return true;
+        if (values == nullptr || size < 2 || values[0] != 0 ||
+            values[size - 1] != 65535) return false;
+        for (u16 i = 1; i < size; ++i) {
+            if (values[i] < values[i - 1]) return false;
+        }
+        return true;
+    }
+    static bool finitePositive(float value) FL_NO_EXCEPT {
+        return value > 0.0f && value < 3.4028234e38f;
+    }
+    void warnProfileCleared() FL_NO_EXCEPT {
+#if FL_COLOR_PROFILE_RUNTIME
+        if (hasColorProfile() && !mWarnedProfileCleared) {
+            FL_WARN("Legacy correction/temperature clears color profile");
+            notifyColorProfileClearedByLegacy();
+            mWarnedProfileCleared = true;
+        }
+#endif
+    }
+
+public:
+
+    /// @return The active Rgbw if mWhiteCfg holds one, else RgbwInvalid::value().
+    /// Backward-compat shim for code paths that pre-date the variant migration.
+    Rgbw rgbw() const FL_NO_EXCEPT {
+        if (auto* p = mWhiteCfg.ptr<Rgbw>()) return *p;
+        return RgbwInvalid::value();
+    }
+
+    /// @return The active Rgbww if mWhiteCfg holds one, else RgbwwInvalid::value().
+    Rgbww rgbww() const FL_NO_EXCEPT {
+        if (auto* p = mWhiteCfg.ptr<Rgbww>()) return *p;
+        return RgbwwInvalid::value();
+    }
+
+    /// True if this channel emits 4-channel RGBW. Requires both the Rgbw
+    /// variant alternative AND an active mode — a stored
+    /// `RgbwInvalid::value()` does not count, mirroring the legacy
+    /// `Rgbw::active()` semantics.
+    bool isRgbw() const FL_NO_EXCEPT {
+        auto* p = mWhiteCfg.ptr<Rgbw>();
+        return p != nullptr && p->active();
+    }
+    /// True if this channel emits 5-channel RGBWW. Same active-flag check as
+    /// isRgbw() — a stored `RgbwwInvalid::value()` does not count.
+    bool isRgbww() const FL_NO_EXCEPT {
+        auto* p = mWhiteCfg.ptr<Rgbww>();
+        return p != nullptr && p->active();
+    }
+
+private:
+#if FL_COLOR_PROFILE_RUNTIME
+    bool mWarnedProfileCleared = false;
+    bool mWarnedLegacyCleared = false;
+#endif
+};
+
+} // namespace fl

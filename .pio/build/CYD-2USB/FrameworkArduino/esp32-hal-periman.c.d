@@ -1,0 +1,30 @@
+.pio/build/CYD-2USB/FrameworkArduino/esp32-hal-periman.c.o: \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-periman.c \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-log.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/dio_qspi/include/sdkconfig.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_timer/include/esp_timer.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/newlib/platform_include/stdio.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_err.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_compiler.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_hw_support/include/esp_etm.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_rom/esp32/include/esp32/rom/ets_sys.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_rom/include/esp_rom_sys.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/soc/esp32/include/soc/reset_reasons.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/soc/esp32/include/soc/soc_caps.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_config.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_level.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_assert.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_color.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_buffer.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_timestamp.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_write.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_format.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_args.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_macros.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_assert.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_log_attr.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_attr.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/log/include/esp_private/log_attr.h \
+ F:/PIO/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-periman.h \
+ F:/PIO/packages/framework-arduinoespressif32-libs/esp32/include/esp_common/include/esp_bit_defs.h

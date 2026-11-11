@@ -1,0 +1,384 @@
+# fbuild 2.5.49 / UART console out of output-only builds (#4990): CI run
+# 41310165483 on master 5a8ae7d24 measures image_flash 320439, down 4636 B
+# from 325075 (EspIO and the SDK UART driver no longer link into Blink).
+# Claim the measured saving.
+
+# Stock console integration atop #4873: FBuild 2.5.43 / Arduino3.3.11 /
+# IDF5.5.5 stock packages, local image_flash325075 (down13668 vs338743).
+# Hosted exact-head validation must confirm this ratchet.
+
+# PR #4873 refreshed against master 6e6ae47606 with published fbuild 2.5.43:
+# local clean image_flash 338743 B, down 2312 B from 341055. The previous
+# hosted PR image was 338735; revalidate the final head in hosted CI.
+
+# #4827 follow-up: force-inline the fl:: libc wrapper templates. Local
+# image 341039 (-76 B). Pinned to the expected CI image; re-pinned to the
+# measured CI value below if it differs.
+
+# CORRECTION to the #4827 / PR #4830 note this replaces: master was NOT
+# over budget. CI measured 341027 on a branch off master f09d68cc5; the
+# 341283 figure was a local build, which does not match CI. PR #4830 itself
+# added ~104 B: GCC emitted out-of-line clones of the fl::memcpy/memset/
+# memmove<void> wrappers (+42 +42 +14 B). CI run 38469509794 measured 341131.
+
+# #4795 / RGBW type-erased + link-on-use: local image 341031 (down 1052 B
+# from 342083 local); CI has measured +16 B vs local on this board (342099
+# vs 342083), so the CI baseline is 341047. Claim the measured saving.
+
+# #4813 / PR #4814: fbuild 2.5.37 -> 2.5.39 measures the same firmware at
+# image 342099 (+16 B vs 342083 on 2.5.37; toolchain/accounting, no source
+# change). CI run 37896461345. Re-based with the RAM budget.
+
+# #4801 pass (#4802 #4803 #4804 #4806 #4807 #4808 #4810 #4812): CI run
+# 37880186726 measured image 343039 on master 50c99f0210, and #4812
+# (IChannelDriver::canMatch non-virtual) removes 956 B more: 342083,
+# down 8068 B from 350151. Claim the measured saving.
+
+# #4784 / PR #4785: CI run37742672330 measures image350151, down232 B
+# from350383 after separating legacy settings from Channels profile state.
+# Attributed RAM stays38323 B. Claim the measured saving.
+
+# #4773 / PR #4774: CI run37699074987 measures image350383, down16220 B
+# from366603. ESP release staging disables FastLED exception generation;
+# unity builds remain intact. Local clean image350367 is within64 B tolerance.
+# Attributed RAM remains38323 B. Claim the saving so later growth cannot hide.
+
+# #4741: local fbuild2.5.37 default image367407 ->366603. Matched original
+# master0c2e9f7300 image367279 ->366603 after shared RMT/HTTP/SPI and
+# configuration reductions; board407716/78216 ->407068/78008. Scoped
+# attributed RAM budget38323 is enforced by the existing regression gate.
+
+# 2026-10-06, PR for issue #4726: -252 B, 367659 -> 367407. The ESP32
+# fl::net::wifi and OTA backends moved out of the always-linked platforms+
+# unity object into their own build units, so Blink no longer links
+# esp_wifi_init / s_wifi_nvs / net80211 (Blink firmware 408200 -> 407844 B,
+# RAM 79544 -> 78216 B). Measured locally with `bash bloat esp32s3 --build`
+# (image_flash=367407 B), not by CI.
+
+# 2026-10-06, PR #4727: -80 B, 367739 -> 367659. fl::cin's istream buffer is
+# constant-initialized (no dynamic initializer) and the PWM lookup paths no
+# longer touch the PwmStateData singleton, so --gc-sections drops both from
+# Blink. Measured by CI run 37562913106 (bloat regression job).
+
+# 2026-10-06, PR #4719: +4 B, 367735 -> 367739. Link-layout drift only:
+# Blink does not install the boot guard (FL_WATCHDOG_BOOT_GUARD is opt-in and
+# a no-op off Teensy 4.x); the change is from the fl/wdt translation unit
+# gaining Watchdog::bootGuardCount()/markBootHealthy(). Measured by CI run
+# 37502121083 (bloat regression job).
+
+# 2026-10-06, PR #4717 (issue #4712): -24,284 B, 392019 -> 367735. Default
+# log level on non-NDEBUG builds is 1 (FL_ERROR only): FL_WARN / FL_INFO /
+# FL_DBG compile out. Measured by CI run 37427203380 (bloat regression job);
+# the local before/after delta was -24,572 B, the usual few-hundred-byte
+# local/CI difference.
+
+# 2026-10-06, PR #4710 (meta #4709): -6,780 B, 398799 -> 392019, claiming
+# the saving from making printf-form logging a compile error. All 959 log
+# sites became stream form, so the fl::printf engine (parse_format_spec,
+# apply_width, format_integral, ...) no longer links into Blink; the ESP32
+# RMT driver's logs were its last users. Measured by CI run 37421506562
+# (bloat regression job) on this PR.
+
+# 2026-10-03: pin ESP32-S3 to pioarduino 55.03.311 explicitly. fbuild 2.5.28
+# silently substituted that platform for the requested 54.03.20 release, so
+# the 401971 B baseline was never measured against the declared platform.
+# fbuild 2.5.33 honors the pin. CI run 37156587071 measures
+# image_flash=398799 B with Arduino 3.3.11, ESP-IDF 5.5.5 and the 20260121
+# Xtensa toolchain. The same source measures 398863 B locally (64 B higher).
+# Re-pin the ratchet to the CI build rather than the misleading old pin.
+#
+# 2026-09-26, PR #4655 (issue #4468, FastLED/fbuild#1456): metric change,
+# 349854 -> 401971. The gate now compares report.json `image_flash` (the
+# allocated, file-backed ELF section bytes fbuild 2.5.28 reads from section
+# headers) instead of `total_flash` (the attributed-symbol sum). It is not code
+# growth: the same CI run (36235931865) measured total_flash=349,825 B, within
+# 29 B of the old pin. `total_flash` put a local build ~4 KB over CI because
+# host `nm` gave zero-sized labels such as `_stext` a size. With fbuild 2.5.28
+# the local build of this commit measures image_flash=401,823 B and
+# total_flash=349,658 B, so local and CI now differ by ~150 B. That remainder
+# is locally cached framework objects, not attribution. CI stays the
+# authority for this pin.
+
+# 2026-09-25, PR #4632 (after merging master fd9ffbbeea): +19 B,
+# 349835 -> 349854. Layout drift from master commits merged into the branch
+# after the -17,270 B claim above was measured (CI run 36104596347). #4632
+# itself changes only host-native (reld) linking and cannot reach ESP32-S3
+# firmware, which fbuild links.
+
+# 2026-09-25, PR #4632: -17,270 B, 367105 -> 349835, claiming savings that
+# merged to master without re-pinning -- chiefly #4630 (stop linking every
+# platform driver from opt-in registration) and the SlimBridgeController
+# refactors (#4603-#4605). Measured by CI run 36100731467 (bloat regression
+# job) on #4632, whose own change (host-native reld linking) cannot reach
+# ESP32-S3 firmware: board images are linked by fbuild, not reld.
+
+# 2026-09-24, PR #4579 (meta #4572): -2,948 B, 370053 -> 367105, claiming
+# the savings of #4574 (#4566, Channel::showPixels split, -170 B attributed on
+# host) and #4577 (#4565, shared format_scalar, -2,820 B attributed on host),
+# which merged without re-pinning. Measured by production CI run 36057035491
+# (bloat regression job) on this PR; #4579 itself is tooling/docs only.
+
+# 2026-09-24 (FastLED #2856 measurement prerequisite): re-pin -13,087 B,
+# 383140 -> 370053, from production fbuild CI run 35981051441 on master SHA
+# 8f02b1e7aa3c9e92ecb664e8f6a7a9408fbfd43a (fbuild 2.5.27). The prior ratchet
+# had accumulated unclaimed headroom; this records the measured current size,
+# not a saving introduced by this baseline-only change.
+
+# 2026-09-14, PR #4418 (issue #4415): +53,979 B, 336474 -> 390453.
+#
+# A measurement change, not code growth. This gate builds Blink through
+# `bash bloat esp32s3 --build`. Until #4412 that command forced the legacy
+# build backend; #4412 removed that backend, so the gate now builds with
+# fbuild, the backend every other board and CI job already uses. The same
+# source measures 336,465 B through the legacy backend and 390,453 B through
+# fbuild 2.5.23 (xtensa-esp-elf-gcc 14.2.0, arduino-esp32 3.3.11). CI measured
+# 390,453 B on all four runs since #4412 (27dac2b9, 1b2585e4, da8dc224,
+# b2a89dbe) and 336,465 B on every legacy-backend run before it, so the step
+# is exactly the backend switch. The 54 KB difference between the two backends' Blink
+# images is worth chasing in fbuild, but it is not a FastLED regression.
+#
+# 2026-09-13, PR #4411 (issue #4288): +10 B, 336464 -> 336474.
+#
+# fl::exp is now a range-reduced polynomial on every target instead of a
+# clamped Taylor series. Blink does not call exp, so the 10 B is layout
+# drift from the changed fl::math translation unit, not a new symbol; the
+# analysis-side callers (constant-Q kernel, Gaussian windows) get the
+# corrected values. Measured with `bash bloat esp32s3 --build` on top of
+# #4409 (the same +10 B was measured against the previous baseline).
+#
+# 2026-09-12, PR #4409 (issue #4402 follow-up): -6245 B, 342709 -> 336464.
+#
+# A reduction, locked in by the ratchet. `PixelIteratorAny` held a variant of
+# six `PixelController<EOrder>` instantiations and visited it, so every
+# sketch linked six full type-erasure vtable sets -- loadAndScaleRGBW 300 B,
+# loadAndScaleRGBWW 227 B, loadAndScaleRGB 116 B, ctor 60 B, dither/advance/
+# has/size ~100 B -- plus a 127 B visit thunk each, of which the sketch used
+# one order. It now holds one `PixelController<RGB>` and `PixelIterator`
+# applies the colour order as a three-byte permutation. A colour order is a
+# pure permutation: `loadByte`, `dither` and `scale` all index by source
+# channel, and the RGBW/RGBWW loads reorder after computing in source order.
+#
+# Proven against the legacy path, still in the tree: byte-for-byte across all
+# six orders for RGB, RGBW at every W placement, RGBWW and the HD per-slot
+# scale, with binary dither on and lopsided per-channel scales. Templated
+# drivers wrapping their own `PixelController<ORDER>` keep identity and the
+# thunks they always had; their bytes are untouched.
+#
+# esp32dev Blink measured the same way: 339,955 -> 334,147 B (-5,808).
+#
+# 2026-09-12, PR #4407 (issue #4402): -182 B, 342891 -> 342709.
+#
+# A reduction, locked in by the ratchet. `writeHD108` was two complete loops
+# -- the managed path written by hand, the 8-bit path routed through
+# `encodeHD108` -- each with its own copy of the start frame, per-LED emit and
+# latch. On esp32dev it was the largest encoder body in a Blink build (481 B,
+# ahead of `writeWS2812`, the only encoder Blink runs). One loop now, the
+# source being the only branch: 481 -> 280 B there, esp32dev Blink
+# 340,183 -> 339,955 B, back under its 340,000 B ceiling.
+#
+# Byte-identical to the iterator path by construction and by test: a case
+# drives both through a real PixelIterator with binary dither on and a GRB
+# order and holds them to the same bytes.
+#
+# 2026-09-12, PR #4403 (issue #4402): -66 B, 342957 -> 342891.
+#
+# A reduction, so the ratchet asks for it to be locked in rather than left as
+# headroom. The HD108 encoder stopped doing work to feed a function that throws
+# its argument away: `hd108BrightnessHeader` is `(void)brightness_8bit` followed
+# by three constexpr gains of 31, so it returns 0xFF 0xFF for every input, and
+# both encode paths were computing a brightness to hand it.
+#
+# `encodeHD108_HD` cached that constant per LED and read `*brightness_first`
+# once per LED to feed the cache -- through `ScaledPixelIteratorBrightness`,
+# whose `load()` is out of line, so a call per LED for a number that reached
+# nothing. `writeHD108`'s managed path built the whole adapter for the same
+# purpose. With both gone the two encoders are the same function, so the call
+# site collapsed to one.
+#
+# Output is unchanged by construction rather than by measurement: every removed
+# value fed only an argument that is cast to void. Two tests pin that -- HD108
+# output is byte-identical across brightness 0, 255 and a ramp, and the two
+# encoders agree byte for byte.
+#
+# Measured the same direction on esp32dev: 340,235 -> 340,183 B (-52).
+#
+# 2026-09-12, PR #4398 (issue #1114): +3 B, 342954 -> 342957.
+#
+# The one-dimensional Perlin gradient now has a gradient in every hash bucket.
+# `grad8(hash, x)` and `grad16(hash, x)` were the 2-D/3-D gradient with the
+# second coordinate missing; feeding x to both terms and flipping their signs
+# independently gave `avg7(x, -x)`, zero for every x, so a quarter of the hash
+# table had no gradient and 21 of the 256 lattice cubes were flat across every
+# one of their inputs -- 1063 consecutive samples of inoise8 at a constant 128,
+# at worst.
+#
+# 3 B is below the resolution at which a symbol diff says anything: alignment
+# padding alone moves by up to 4. Stated plainly rather than attributed, because
+# I did not run a local platform build to attribute it -- what is measured is
+# that the total is deterministic: two CI builds of this branch, one with the
+# gradient written as `avg7(u, v)` and one as a ternary, both produced exactly
+# 342,957. `src/noise.cpp.hpp` is the only file in the PR that compiles into
+# this image at all -- the other two are a test and a comment block in
+# fastled_config.h.
+#
+# Accepted because 3 B is 0.0009% of the image and buys a noise function that
+# is not flat across 8% of its input domain.
+#
+# 2026-09-12, PR #4387 (issue #4326, colour pipeline P8): +240 B,
+# 342714 -> 342954.
+#
+# HD108 joins UCS7604-16 in consuming the device drive rather than an 8-bit
+# copy of it widened by a gamma curve. #4326 called HD108 "the same shape and
+# worse": `hd108GammaCorrect` is a hardcoded 2.8 inside the encoder, so unlike
+# UCS7604's `mGamma.value_or(2.8f)` no caller could ever have chosen
+# otherwise. Measured on a managed channel it put the same 849 on the wire
+# where the solve asked for 13933; it now puts 13935.
+#
+# Where the 240 B is, from a symbol diff against master (`fbuild symbols` on
+# the ELF the build produced -- `bash bloat --build` used to analyse a
+# different one, fixed in #4386):
+#
+#   +255  PixelIterator::writeHD108<vector_psram<u8>>
+#    +72  PixelIterator::loadAndScaleRGB16
+#         (minus ~87 B recovered elsewhere)
+#
+# `loadAndScaleRGB16` was inlined into its single caller before; with a second
+# one it is emitted once and called twice, which is the cheaper of the two.
+#
+# The wide loop is inline in `writeHD108` rather than a function in hd108.h
+# because that header is included *by* pixel_iterator.h, before the class
+# exists, and a concrete `PixelIterator&` parameter is not a dependent type --
+# its body would be checked there and fail.
+#
+# A tiny-memory target pays 0 B: the branch sits behind
+# !FL_PLATFORM_HAS_TINY_MEMORY, verified by compiling the header with
+# FL_PLATFORM_HAS_TINY_MEMORY=1.
+#
+# 2026-09-12, PR #4368 (issue #4326, colour pipeline P8): +231 B,
+# 342483 -> 342714.
+#
+# The 16-bit encoders now consume the device drive instead of an 8-bit copy
+# of it widened by a gamma LUT. A managed UCS7604-16 channel was putting 849
+# on the wire where the solve asked for 13933; it now puts 13935.
+#
+# What the 231 B is, from a symbol diff against master (`fbuild symbols` on
+# the ELF the build actually produced -- `bash bloat --build` analyses a
+# different one, FastLED#4384):
+#
+#   +157  encodeUCS7604_16bit_RGB_wide<back_insert_iterator<vector_psram<u8>>>
+#    +63  fl::Channel::showPixels(PixelController<(EOrder)10, 1, ...>&)
+#     +17  fl::PixelIterator::has(int)
+#
+# Statically reachable rather than elidable, and for a documented reason:
+# `fl::Channel::showPixels` keeps every `writeUCS7604(...)` reference live so
+# the encoder bodies link, which the switch in that function says in as many
+# words. `-DFASTLED_DISABLE_UCS7604=1` drops this along with the rest of that
+# chipset.
+#
+# What it is NOT: the first three attempts at this cost 1,120 B, 988 B and
+# 940 B. A symbol diff found 750 B of that in six copies of one vtable thunk
+# -- `PixelControllerVtable<...>::loadAndScaleRGB16`, once per colour order,
+# each widening an 8-bit pixel identically. Binding that thunk only for
+# sources that declare a wide load removed all six. The 231 B here is what
+# remains after that, not what the naive version cost.
+#
+# A tiny-memory target pays 0 B: the wide path sits behind
+# !FL_PLATFORM_HAS_TINY_MEMORY, the condition FL_COLOR_PROFILE_RUNTIME
+# expands to.
+#
+# 2026-09-10, PR #4200 (issue #4040, colour pipeline P6): +305 B,
+# 342178 -> 342483.
+#
+# This is the cost of being able to reach the colour pipeline at runtime.
+# The pipeline math itself is NOT in here: not one gamut, OKLab, transfer,
+# white-allocation or device-solve symbol appears anywhere in the run's
+# top-25 table, so --gc-sections still takes the ~3.5 KB of it out of a
+# Blink build that binds no profile. What is left is the dispatch code in
+# fl::Channel -- the reconcileColorProfile build block, the showPixels flux
+# call, and the iterator's branches. It cannot be elided, because it is the
+# code that decides whether to elide.
+#
+# The cost was 429 B when this PR was last measured. Holding the pipeline
+# behind a pointer instead of inline in every Channel took it to 305 B, and
+# took the per-channel RAM from 88 B to 16 B at the same time.
+#
+# Why this is accepted rather than refused: FL_COLOR_PROFILE_RUNTIME is
+# !FL_PLATFORM_HAS_TINY_MEMORY, and every use of the pipeline sits inside
+# that guard -- the member, the whole of reconcileColorProfile, and the
+# showPixels block. A tiny-memory target pays 0 B of this, so the 305 B is
+# only ever spent where flash is not the binding constraint. On a target
+# that does compile it in, 305 B is 0.089% of the image.
+#
+# +14 B (390453 -> 390467), FastLED#1567: CFastLED::show() and showColor()
+# now record the requested and applied brightness around the power limiter
+# (two byte stores each), so getLastShowBrightness() / isPowerLimited() can
+# tell a headless sketch that the limit bound. That is the entire change.
+#
+# +5 B (390467 -> 390472): ColorPipelineHooks gains one function pointer,
+# notifyProfileClearedByLegacy, so setCorrection()/setTemperature() stop
+# referencing the colour-profile event list directly. Blink pays the pointer;
+# a sketch that calls setCorrection()/setTemperature() WITHOUT binding a colour
+# profile saves ~8.3 KB on AVR (uno ColorPalette 14.80 KB -> 6.47 KB). A sketch
+# that binds a profile installs the hook and still links the event machinery,
+# so it sees no reduction.
+#
+# -7,706 B (390472 -> 382766): fbuild 2.5.24 (FastLED/fbuild#1434) links the
+# Arduino core as libFrameworkArduino.a instead of loose objects (so unused core
+# files and their constructors are no longer linked whole), drops
+# -fno-omit-frame-pointer on Xtensa, and maps the framework root out of
+# __FILE__. No FastLED code changed; claimed so the slack cannot hide the next
+# regression.
+#
+# +40 B (382766 -> 382806), #4432: PixelController gained an explicit copy
+# assignment through the same copy() as its copy constructor (the implicit one
+# copied mLenRemaining while the copy constructor rewinds it to mLen, and the
+# pair tripped -Wdeprecated-copy-with-user-provided-copy under the new
+# -Werror). Measured by symbol diff of esp32s3 Blink before/after: the whole
+# +40 B is in fl::Channel::showPixels, where ReorderingPixelIteratorAny copies
+# the controller. Behaviour there is unchanged (a fresh controller has
+# mLenRemaining == mLen); the bytes are copy()'s field-by-field code.
+#
+# +23 B (382806 -> 382829), #4438: the power limiter charges a colour-managed
+# channel for its solved drives (#4344). CLEDController gains one virtual,
+# colorPipeline() (a vtable slot per controller class plus a null-returning
+# base), and the limiter's per-controller estimate becomes a call through
+# controller_unscaled_power_mW(). The estimator itself is reached through
+# ColorPipelineHooks, so it does not link into a sketch that binds no profile.
+#
+# +116 B (382829 -> 382945), #4440 in the same PR: a channel's colour
+# pipeline is held by fl::shared_ptr instead of unique_ptr so a reader cannot
+# have it freed underneath it -- make_shared's control block, the reference
+# showPixels takes for each frame's encode, and the one the power estimate
+# takes for its pass. Large-memory tiers only (FL_COLOR_PIPELINE_SHARED);
+# uno Blink is byte-identical to master.
+#
+# +2 B (382945 -> 382947), #4440 review follow-up: showPixels copies the
+# shared pipeline and sets flux on the frame-local copy, so the shared object
+# is never written after it is built.
+#
+# +53 B (382947 -> 383000), #4453: the colour-managed APA102-HD joint
+# code/field solve (P8 B1). The solve, the per-chip semantics table and the
+# profile read all sit behind ColorPipelineHooks::encodeHdWide, so a sketch
+# that binds no profile links none of them; what remains in every Channel
+# sketch is Channel::showPixels's managed check and the indirect call (+36 B by
+# symbol diff) and the hook table's extra pointer (+4 B), plus alignment.
+#
+# +158 B (383000 -> 383158), #4452: a fl::Channel's dither phase advances on
+# presentation, not attempt (#4347, R8). By symbol diff the whole cost is in
+# Channel::showPixels (+136 B): reseeding the controller's offsets from the
+# channel's own phase, advancing it after an accepted enqueue, and handing it
+# to the managed source. PixelController's constructor path is unchanged, so
+# legacy addLeds<> on AVR is byte-identical (uno Blink 5170/633).
+#
+# +56 B (383158 -> 383214), #4474 / FastLED/fbuild#1450: fbuild 2.5.25 stops
+# Blink from linking Arduino Matter and its networking stack. The corrected
+# CI image is 1,073,049 B smaller than the rejected 1.6 MB build; the remaining
+# 56 B is the deterministic link-layout change from the repaired framework
+# library selection and is not a new FastLED feature cost.
+# -74 B (383214 -> 383140), #4497: the managed pixel source now owns its
+# frame-local pipeline copy and applies flux during iterator construction.
+# This removes the copy/destructor scaffolding from unbound Channel::showPixels;
+# the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
+# symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
+# so this ratchet uses the CI measurement from PR #4511.
+320439

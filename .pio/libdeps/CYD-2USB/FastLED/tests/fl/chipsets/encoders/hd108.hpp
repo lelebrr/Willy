@@ -1,0 +1,742 @@
+/// @file test_hd108.cpp
+/// @brief Unit tests for HD108 encoder functions
+///
+/// HD108 Protocol:
+/// - Start frame: 8 bytes of 0x00
+/// - LED data: [Header:2B][R:16b][G:16b][B:16b] (8 bytes per LED)
+/// - End frame: (num_leds / 2) + 4 bytes of 0xFF
+///
+/// Header encoding (dual-byte brightness):
+/// - Byte 0: 0x80 | ((brightness_5bit & 0x1F) << 2)
+/// - Byte 1: ((brightness_5bit & 0x07) << 5) | (brightness_5bit & 0x1F)
+///
+/// Tests cover:
+/// - encodeHD108() - Global brightness variant
+/// - encodeHD108_HD() - Per-LED brightness variant
+
+#include "test.h"
+#include "fl/chipsets/encoders/hd108.h"
+#include "fl/chipsets/encoders/encoder_utils.h"
+#include "fl/stl/array.h"
+#include "fl/stl/iterator.h"
+#include "fl/stl/cstddef.h"
+#include "fl/stl/new.h"
+#include "fl/math/ease.h"
+#include "fl/stl/int.h"
+#include "fl/stl/allocator.h"
+#include "fl/stl/vector.h"
+#include "fl/gfx/pixel_iterator_any.h"
+#include "pixel_controller.h"
+
+namespace test_hd108 {
+
+using namespace fl;
+
+/// Helper to extract 16-bit big-endian value from byte vector
+static u16 getBigEndian16(const fl::vector<u8>& data, size_t offset) {
+    return (u16(data[offset]) << 8) | u16(data[offset + 1]);
+}
+
+/// Helper to verify start frame (8 bytes of 0x00)
+static void verifyStartFrame(const fl::vector<u8>& data) {
+    FL_REQUIRE(data.size() >= 8);
+    for (int i = 0; i < 8; i++) {
+        FL_CHECK_EQ(data[i], 0x00);
+    }
+}
+
+/// Helper to verify end frame (all bytes should be 0xFF)
+static void verifyEndFrame(const fl::vector<u8>& data, size_t expected_size) {
+    size_t start_offset = data.size() - expected_size;
+    for (size_t i = start_offset; i < data.size(); i++) {
+        FL_CHECK_EQ(data[i], 0xFF);
+    }
+}
+
+/// Verify the header pins all three gains at maximum (31).
+///
+/// It takes no expected value on purpose. It used to accept one and open with
+/// `(void)expected_bri5;`, so a caller could pass any number and still pass --
+/// which is what let the case below carry a twelve-row table of expected 5-bit
+/// gains that nothing compared against.
+static void verifyHeaderBytes(const fl::vector<u8>& data, size_t offset) {
+    u8 f0 = data[offset];
+    u8 f1 = data[offset + 1];
+
+    // Per-channel encoding: f0=[1][RRRRR][GG], f1=[GGG][BBBBB]
+    // All channels use maximum gain: R=G=B=31
+    u8 expected_f0 = 0xFF;  // [1][11111][11]
+    u8 expected_f1 = 0xFF;  // [111][11111]
+
+    FL_CHECK_EQ(f0, expected_f0);
+    FL_CHECK_EQ(f1, expected_f1);
+}
+
+/// Helper to verify LED RGB16 values with gamma correction
+static void verifyLEDData(const fl::vector<u8>& data, size_t offset, u8 r8, u8 g8, u8 b8) {
+    // HD108 uses RGB order: R, G, B
+    u16 expected_r16 = Gamma28LUT16::read(r8);
+    u16 expected_g16 = Gamma28LUT16::read(g8);
+    u16 expected_b16 = Gamma28LUT16::read(b8);
+
+    FL_CHECK_EQ(getBigEndian16(data, offset), expected_r16);
+    FL_CHECK_EQ(getBigEndian16(data, offset + 2), expected_g16);
+    FL_CHECK_EQ(getBigEndian16(data, offset + 4), expected_b16);
+}
+
+//-----------------------------------------------------------------------------
+// encodeHD108() - Global brightness tests
+//-----------------------------------------------------------------------------
+
+FL_TEST_CASE("encodeHD108() - empty range") {
+    fl::vector<fl::array<u8, 3>> leds;
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
+
+    // Start frame (8) + End frame (0/2 + 4 = 4) = 12 bytes
+    FL_REQUIRE_EQ(output.size(), 12);
+
+    verifyStartFrame(output);
+    verifyEndFrame(output, 4);
+}
+
+FL_TEST_CASE("encodeHD108() - single LED, max brightness") {
+    fl::vector<fl::array<u8, 3>> leds = {{{255, 128, 64}}};
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
+
+    // Start frame (8) + LED (8) + End frame (1/2 + 4 = 4) = 20 bytes
+    FL_REQUIRE_EQ(output.size(), 20);
+
+    verifyStartFrame(output);
+
+    // Header is 0xFF/0xFF whatever brightness is passed: HD108 gains are
+    // pinned at 31 and the argument is ignored.
+    verifyHeaderBytes(output, 8);
+
+    // Verify RGB data with gamma correction
+    verifyLEDData(output, 10, 255, 128, 64);
+
+    verifyEndFrame(output, 4);
+}
+
+FL_TEST_CASE("encodeHD108() - single LED, mid brightness") {
+    fl::vector<fl::array<u8, 3>> leds = {{{200, 100, 50}}};
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 128);
+
+    FL_REQUIRE_EQ(output.size(), 20);
+
+    // Header unchanged at mid brightness -- the argument reaches nothing.
+    verifyHeaderBytes(output, 8);
+
+    verifyLEDData(output, 10, 200, 100, 50);
+}
+
+FL_TEST_CASE("encodeHD108() - single LED, min brightness") {
+    fl::vector<fl::array<u8, 3>> leds = {{{100, 50, 25}}};
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 1);
+
+    FL_REQUIRE_EQ(output.size(), 20);
+
+    // Header unchanged at minimum brightness too.
+    verifyHeaderBytes(output, 8);
+
+    verifyLEDData(output, 10, 100, 50, 25);
+}
+
+FL_TEST_CASE("encodeHD108() - two LEDs, end frame boundary") {
+    fl::vector<fl::array<u8, 3>> leds = {{{255, 0, 0}}, {{0, 255, 0}}};
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
+
+    // Start frame (8) + LEDs (16) + End frame (2/2 + 4 = 5) = 29 bytes
+    FL_REQUIRE_EQ(output.size(), 29);
+
+    verifyStartFrame(output);
+
+    // LED 1
+    verifyHeaderBytes(output, 8);
+    verifyLEDData(output, 10, 255, 0, 0);
+
+    // LED 2
+    verifyHeaderBytes(output, 16);
+    verifyLEDData(output, 18, 0, 255, 0);
+
+    verifyEndFrame(output, 5);
+}
+
+FL_TEST_CASE("encodeHD108() - three LEDs, end frame size") {
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{255, 0, 0}},
+        {{0, 255, 0}},
+        {{0, 0, 255}}
+    };
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 200);
+
+    // Start frame (8) + LEDs (24) + End frame (3/2 + 4 = 5) = 37 bytes
+    FL_REQUIRE_EQ(output.size(), 37);
+
+    verifyStartFrame(output);
+
+    // Header unchanged; brightness 200 is passed and discarded.
+    verifyHeaderBytes(output, 8);
+
+    verifyEndFrame(output, 5);
+}
+
+FL_TEST_CASE("encodeHD108() - four LEDs, end frame boundary") {
+    fl::vector<fl::array<u8, 3>> leds(4, {{128, 64, 32}});
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 100);
+
+    // Start frame (8) + LEDs (32) + End frame (4/2 + 4 = 6) = 46 bytes
+    FL_REQUIRE_EQ(output.size(), 46);
+
+    verifyEndFrame(output, 6);
+}
+
+FL_TEST_CASE("encodeHD108() - eight LEDs, end frame size") {
+    fl::vector<fl::array<u8, 3>> leds(8, {{200, 150, 100}});
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 150);
+
+    // Start frame (8) + LEDs (64) + End frame (8/2 + 4 = 8) = 80 bytes
+    FL_REQUIRE_EQ(output.size(), 80);
+
+    verifyEndFrame(output, 8);
+}
+
+FL_TEST_CASE("encodeHD108() - the gain header ignores global_brightness, by design") {
+    // HD108 carries a 5-bit gain per channel. FastLED pins all three at 31 and
+    // does brightness in the 16-bit values instead, which is what
+    // hd108BrightnessHeader() means by ignoring its argument.
+    //
+    // This case used to be called "brightness mapping 8-bit to 5-bit" and
+    // carried a twelve-row table mapping inputs to expected 5-bit gains --
+    // {0,0}, {128,16}, {255,31} and so on. None of it was compared: the helper
+    // discarded the expectation and asserted the constant. Every row asserted
+    // the same thing, so the case would not have failed if a mapping had been
+    // introduced, or if an existing one had broken.
+    //
+    // Stated as what actually holds: across the full 8-bit range the header is
+    // invariant, and it is 0xFF/0xFF.
+    const u8 brightnesses[] = {0, 1, 8, 16, 64, 127, 128, 191, 192, 200, 254, 255};
+
+    for (const u8 brightness : brightnesses) {
+        fl::vector<fl::array<u8, 3>> leds = {{{50, 50, 50}}};
+        fl::vector<u8> output;
+
+        encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), brightness);
+
+        verifyHeaderBytes(output, 8);
+    }
+}
+
+FL_TEST_CASE("encodeHD108() - brightness does not reach the payload either") {
+    // The other half of the contract, and the guard that keeps the case above
+    // from being satisfiable by an encoder that ignores brightness everywhere:
+    // the 16-bit values are the gamma-corrected input, unscaled. So
+    // global_brightness reaches neither the header nor the payload -- it is
+    // accepted and discarded, which is worth pinning because the public
+    // signature still advertises it.
+    fl::vector<u8> dim;
+    fl::vector<u8> bright;
+    fl::vector<fl::array<u8, 3>> leds = {{{200, 100, 50}}};
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(dim), 1);
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(bright), 255);
+
+    FL_REQUIRE_EQ(dim.size(), bright.size());
+    FL_CHECK_EQ(dim, bright);
+
+    // And the payload is the gamma of the input, so "unscaled" is a claim
+    // about a known value rather than about two things merely matching.
+    FL_CHECK_EQ(getBigEndian16(dim, 10), Gamma28LUT16::read(200));
+}
+
+FL_TEST_CASE("encodeHD108() - gamma correction verification") {
+    // Verify gamma 2.8 correction is applied to all channels
+    fl::vector<fl::array<u8, 3>> leds = {{{255, 128, 64}}};
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
+
+    // Check gamma-corrected 16-bit values
+    u16 r16 = getBigEndian16(output, 10);
+    u16 g16 = getBigEndian16(output, 12);
+    u16 b16 = getBigEndian16(output, 14);
+
+    // Verify they match gamma_2_8 output
+    FL_CHECK_EQ(r16, Gamma28LUT16::read(255));
+    FL_CHECK_EQ(g16, Gamma28LUT16::read(128));
+    FL_CHECK_EQ(b16, Gamma28LUT16::read(64));
+
+    // Gamma 2.8 should produce non-linear values
+    FL_CHECK_GT(r16, g16 * 2);  // 255 gamma'd should be > 2x 128 gamma'd
+}
+
+FL_TEST_CASE("encodeHD108() - RGB color order") {
+    // Verify RGB wire order (not BGR or GRB)
+    fl::vector<fl::array<u8, 3>> leds = {{{200, 100, 50}}};
+    fl::vector<u8> output;
+
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(output), 255);
+
+    // RGB order: R first (offset 10), G second (12), B third (14)
+    FL_CHECK_EQ(getBigEndian16(output, 10), Gamma28LUT16::read(200));  // Red
+    FL_CHECK_EQ(getBigEndian16(output, 12), Gamma28LUT16::read(100));  // Green
+    FL_CHECK_EQ(getBigEndian16(output, 14), Gamma28LUT16::read(50));   // Blue
+}
+
+//-----------------------------------------------------------------------------
+// encodeHD108_HD() - Per-LED brightness tests
+//-----------------------------------------------------------------------------
+
+FL_TEST_CASE("encodeHD108_HD() - empty range") {
+    fl::vector<fl::array<u8, 3>> leds;
+    fl::vector<u8> brightness;
+    fl::vector<u8> output;
+
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+
+    // Start frame (8) + End frame (4) = 12 bytes
+    FL_REQUIRE_EQ(output.size(), 12);
+
+    verifyStartFrame(output);
+    verifyEndFrame(output, 4);
+}
+
+FL_TEST_CASE("encodeHD108_HD() - single LED with per-LED brightness") {
+    fl::vector<fl::array<u8, 3>> leds = {{{255, 128, 64}}};
+    fl::vector<u8> brightness = {200};
+    fl::vector<u8> output;
+
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+
+    // Start frame (8) + LED (8) + End frame (4) = 20 bytes
+    FL_REQUIRE_EQ(output.size(), 20);
+
+    verifyStartFrame(output);
+
+    // Per-LED brightness is read and discarded; the header stays 0xFF/0xFF.
+    verifyHeaderBytes(output, 8);
+
+    verifyLEDData(output, 10, 255, 128, 64);
+
+    verifyEndFrame(output, 4);
+}
+
+FL_TEST_CASE("encodeHD108_HD() - multiple LEDs with varying brightness") {
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{255, 0, 0}},
+        {{0, 255, 0}},
+        {{0, 0, 255}}
+    };
+    fl::vector<u8> brightness = {255, 128, 64};
+    fl::vector<u8> output;
+
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+
+    // Start frame (8) + LEDs (24) + End frame (5) = 37 bytes
+    FL_REQUIRE_EQ(output.size(), 37);
+
+    verifyStartFrame(output);
+
+    // LED 1: header pinned regardless of its brightness
+    verifyHeaderBytes(output, 8);
+    verifyLEDData(output, 10, 255, 0, 0);
+
+    // LED 2: same header, different brightness
+    verifyHeaderBytes(output, 16);
+    verifyLEDData(output, 18, 0, 255, 0);
+
+    // LED 3: same header again
+    verifyHeaderBytes(output, 24);
+    verifyLEDData(output, 26, 0, 0, 255);
+
+    verifyEndFrame(output, 5);
+}
+
+FL_TEST_CASE("encodeHD108_HD() - one header for the whole strip") {
+    // Was "brightness caching optimization", back when a per-LED cache guarded
+    // against recomputing the header. It never could change, so the cache was
+    // removed in FastLED#4402 and this verifies what it always verified: every
+    // LED carries the same header bytes.
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{100, 0, 0}},
+        {{0, 100, 0}},
+        {{0, 0, 100}}
+    };
+    fl::vector<u8> brightness = {200, 200, 200};  // Same brightness
+    fl::vector<u8> output;
+
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+
+    FL_REQUIRE_EQ(output.size(), 37);
+
+    // All LEDs share the same header -- as they would for any brightness.
+    verifyHeaderBytes(output, 8);
+    verifyHeaderBytes(output, 16);
+    verifyHeaderBytes(output, 24);
+
+    // Verify colors differ despite same brightness
+    verifyLEDData(output, 10, 100, 0, 0);
+    verifyLEDData(output, 18, 0, 100, 0);
+    verifyLEDData(output, 26, 0, 0, 100);
+}
+
+FL_TEST_CASE("[#4402] HD108 output does not depend on brightness at all") {
+    // The premise that lets the encoder drop its per-LED brightness read:
+    // `hd108BrightnessHeader` discards its argument and pins every gain at 31,
+    // so nothing downstream of brightness can move a single output byte. If
+    // that ever stops being true -- a real per-channel gain, say -- this fails
+    // here rather than silently emitting a strip at one thirty-first of the
+    // intended level.
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{200, 100, 50}},
+        {{10, 250, 3}},
+    };
+
+    fl::vector<u8> dark_out;
+    fl::vector<u8> bright_out;
+    fl::vector<u8> ramped_out;
+    fl::vector<u8> all_dark = {0, 0};
+    fl::vector<u8> all_bright = {255, 255};
+    fl::vector<u8> ramped = {0, 255};
+
+    encodeHD108_HD(leds.begin(), leds.end(), all_dark.begin(),
+                   fl::back_inserter(dark_out));
+    encodeHD108_HD(leds.begin(), leds.end(), all_bright.begin(),
+                   fl::back_inserter(bright_out));
+    encodeHD108_HD(leds.begin(), leds.end(), ramped.begin(),
+                   fl::back_inserter(ramped_out));
+
+    FL_REQUIRE_EQ(dark_out.size(), bright_out.size());
+    FL_REQUIRE_EQ(dark_out.size(), ramped_out.size());
+    for (fl::size i = 0; i < dark_out.size(); ++i) {
+        FL_CHECK_EQ(dark_out[i], bright_out[i]);
+        FL_CHECK_EQ(dark_out[i], ramped_out[i]);
+    }
+
+    // And the header really is the pinned-maximum pair, not merely constant.
+    FL_CHECK_EQ(dark_out[8], 0xFF);
+    FL_CHECK_EQ(dark_out[9], 0xFF);
+}
+
+FL_TEST_CASE("[#4402] encodeHD108 and encodeHD108_HD agree byte for byte") {
+    // `writeHD108` calls only `encodeHD108` now, on the strength of this. The
+    // two differed by a per-LED brightness read and a cache around a header
+    // that `hd108BrightnessHeader` pins regardless; once those went, the HD
+    // variant was the plain one with an extra argument. If a real per-LED
+    // brightness ever lands, this fails and says the collapse has to be undone.
+    fl::vector<fl::array<u8, 3>> leds = {
+        {{0, 0, 0}}, {{255, 255, 255}}, {{200, 100, 50}}, {{1, 2, 3}}, {{9, 9, 9}},
+    };
+    fl::vector<u8> brightness = {0, 64, 128, 200, 255};
+
+    fl::vector<u8> plain;
+    fl::vector<u8> hd;
+    encodeHD108(leds.begin(), leds.end(), fl::back_inserter(plain), 255);
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(),
+                   fl::back_inserter(hd));
+
+    FL_REQUIRE_EQ(plain.size(), hd.size());
+    for (fl::size i = 0; i < plain.size(); ++i) {
+        FL_CHECK_EQ(plain[i], hd[i]);
+    }
+}
+
+FL_TEST_CASE("encodeHD108_HD() - end frame calculation") {
+    // Test end frame size: (num_leds / 2) + 4
+
+    // 1 LED: 1/2 + 4 = 4 bytes
+    {
+        fl::vector<fl::array<u8, 3>> leds(1, {{50, 50, 50}});
+        fl::vector<u8> brightness(1, 100);
+        fl::vector<u8> output;
+
+        encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+        FL_REQUIRE_EQ(output.size(), 8 + 8 + 4);
+        verifyEndFrame(output, 4);
+    }
+
+    // 2 LEDs: 2/2 + 4 = 5 bytes
+    {
+        fl::vector<fl::array<u8, 3>> leds(2, {{50, 50, 50}});
+        fl::vector<u8> brightness(2, 100);
+        fl::vector<u8> output;
+
+        encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+        FL_REQUIRE_EQ(output.size(), 8 + 16 + 5);
+        verifyEndFrame(output, 5);
+    }
+
+    // 10 LEDs: 10/2 + 4 = 9 bytes
+    {
+        fl::vector<fl::array<u8, 3>> leds(10, {{50, 50, 50}});
+        fl::vector<u8> brightness(10, 100);
+        fl::vector<u8> output;
+
+        encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+        FL_REQUIRE_EQ(output.size(), 8 + 80 + 9);
+        verifyEndFrame(output, 9);
+    }
+}
+
+FL_TEST_CASE("encodeHD108_HD() - min/max brightness values") {
+    fl::vector<fl::array<u8, 3>> leds = {{{100, 100, 100}}, {{150, 150, 150}}};
+    fl::vector<u8> brightness = {0, 255};
+    fl::vector<u8> output;
+
+    encodeHD108_HD(leds.begin(), leds.end(), brightness.begin(), fl::back_inserter(output));
+
+    // LED 1: brightness 0 still yields the pinned header
+    verifyHeaderBytes(output, 8);
+
+    // LED 2: and so does brightness 255
+    verifyHeaderBytes(output, 16);
+}
+
+//-----------------------------------------------------------------------------
+// Helper function tests
+//-----------------------------------------------------------------------------
+
+FL_TEST_CASE("hd108BrightnessHeader() - max gain encoding") {
+    // Test the per-channel gain header generation function
+    // All channels use maximum gain (31) regardless of brightness input
+    // Brightness control is handled via 16-bit PWM values, not gain
+
+    struct HeaderTest {
+        u8 brightness_8bit;  // Input brightness (now ignored)
+        u8 expected_gain;    // Expected gain for all channels
+        u8 expected_f0;      // Expected header byte 0
+        u8 expected_f1;      // Expected header byte 1
+    };
+
+    // All brightness inputs produce the same output: R=G=B=31 (max gain)
+    // f0: [1][11111][11] = 0xFF, f1: [111][11111] = 0xFF
+    HeaderTest tests[] = {
+        {0,   31, 0xFF, 0xFF},  // brightness=0   → gain=31 (max)
+        {1,   31, 0xFF, 0xFF},  // brightness=1   → gain=31 (max)
+        {64,  31, 0xFF, 0xFF},  // brightness=64  → gain=31 (max)
+        {128, 31, 0xFF, 0xFF},  // brightness=128 → gain=31 (max)
+        {200, 31, 0xFF, 0xFF},  // brightness=200 → gain=31 (max)
+        {255, 31, 0xFF, 0xFF}   // brightness=255 → gain=31 (max)
+    };
+
+    for (const auto& test : tests) {
+        u8 f0, f1;
+        hd108BrightnessHeader(test.brightness_8bit, &f0, &f1);
+
+        FL_CHECK_EQ(f0, test.expected_f0);
+        FL_CHECK_EQ(f1, test.expected_f1);
+
+        // Verify all channels use maximum gain (31)
+        u8 extracted_r = (f0 >> 2) & 0x1F;            // Extract R gain (bits 6-2 of f0)
+        u8 extracted_g_hi = f0 & 0x03;                // Extract G gain high bits (bits 1-0 of f0)
+        u8 extracted_g_lo = (f1 >> 5) & 0x07;         // Extract G gain low bits (bits 7-5 of f1)
+        u8 extracted_g = (extracted_g_hi << 3) | extracted_g_lo;  // Reconstruct G gain
+        u8 extracted_b = f1 & 0x1F;                   // Extract B gain (bits 4-0 of f1)
+
+        FL_CHECK_EQ(extracted_r, test.expected_gain);
+        FL_CHECK_EQ(extracted_g, test.expected_gain);
+        FL_CHECK_EQ(extracted_b, test.expected_gain);
+    }
+}
+
+FL_TEST_CASE("hd108GammaCorrect() - gamma 2.8 correction") {
+    // Test gamma correction function directly
+
+    FL_CHECK_EQ(hd108GammaCorrect(0), Gamma28LUT16::read(0));
+    FL_CHECK_EQ(hd108GammaCorrect(64), Gamma28LUT16::read(64));
+    FL_CHECK_EQ(hd108GammaCorrect(128), Gamma28LUT16::read(128));
+    FL_CHECK_EQ(hd108GammaCorrect(192), Gamma28LUT16::read(192));
+    FL_CHECK_EQ(hd108GammaCorrect(255), Gamma28LUT16::read(255));
+
+    // Verify non-linearity (gamma > 1.0 means output grows faster than input)
+    u16 v64 = hd108GammaCorrect(64);
+    u16 v128 = hd108GammaCorrect(128);
+    u16 v255 = hd108GammaCorrect(255);
+
+    // Gamma 2.8: 128 should be < 255/2 (non-linear curve)
+    FL_CHECK_LT(v128, v255 / 2);
+
+    // 64 should be much less than 128/2
+    FL_CHECK_LT(v64, v128 / 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// #4321: the HD paths must consume every source pixel
+//
+// writeHD108/writeAPA102(hd)/writeSK9822(hd) each build a ScaledPixelIteratorRGB
+// and a ScaledPixelIteratorBrightness over the SAME PixelIterator. Both used to
+// end advance() with stepDithering()+advanceData(), and the encoders step them
+// in lockstep, so two source pixels were eaten per emitted LED: a four-pixel
+// strip came out as two LEDs showing pixels 0 and 2.
+//
+// These go through PixelIterator on purpose. The existing cases in this file
+// call the encoders directly with fl::vector iterators, where there is no
+// shared cursor to double-advance, which is why they all passed throughout.
+//-----------------------------------------------------------------------------
+
+FL_TEST_CASE("[#4321] writeHD108 emits one LED per source pixel") {
+    fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                        fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+    PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+    fl::vector<fl::u8> out;
+    adapter.get().writeHD108(&out);
+
+    // 8 start + 8 per LED + (N/2 + 4) end.  N=4 -> 8 + 32 + 6.
+    FL_CHECK_EQ((int)out.size(), 46);
+
+    // Each LED carries its own pixel, in order -- not every other one. The
+    // halving bug left LED 1 showing pixel 2, so checking the red channel of
+    // every LED is what separates "all four present" from "two, doubled".
+    // Guarded rather than REQUIRE'd so a short buffer reports every case in
+    // this file instead of aborting the run at the first one.
+    const fl::u8 expected[4] = {10, 20, 30, 40};
+    for (int led = 0; led < 4 && out.size() >= 46u; ++led) {
+        const fl::size at = 8 + (fl::size)led * 8 + 2;  // past the 2 header bytes
+        const int r16 = (out[at] << 8) | out[at + 1];
+        FL_CHECK_EQ(r16, (int)fl::Gamma28LUT16::read(expected[led]));
+    }
+}
+
+FL_TEST_CASE("[#4402] writeHD108 through a real PixelIterator equals encodeHD108 byte for byte") {
+    // `writeHD108` no longer routes the 8-bit path through `encodeHD108`; it
+    // walks the source itself in one loop shared with the managed path. This
+    // holds the two to the same bytes on the real adapter, with binary dither
+    // ON and a non-trivial colour order, so the dither-step and wire-order
+    // bookkeeping the iterator used to do is proven, not assumed.
+    fl::CRGB leds[5] = {fl::CRGB(10, 200, 33), fl::CRGB(0, 0, 0),
+                        fl::CRGB(255, 255, 255), fl::CRGB(7, 8, 9),
+                        fl::CRGB(128, 64, 32)};
+
+    PixelController<GRB> via_writer(leds, 5, ColorAdjustment::noAdjustment(),
+                                    BINARY_DITHER);
+    fl::PixelIteratorAny writer_adapter(via_writer, GRB, fl::Rgbw());
+    fl::vector<fl::u8> from_writer;
+    writer_adapter.get().writeHD108(&from_writer);
+
+    PixelController<GRB> via_encoder(leds, 5, ColorAdjustment::noAdjustment(),
+                                     BINARY_DITHER);
+    fl::PixelIteratorAny encoder_adapter(via_encoder, GRB, fl::Rgbw());
+    auto range = fl::makeScaledPixelRangeRGB(&encoder_adapter.get());
+    fl::vector<fl::u8> from_encoder;
+    fl::encodeHD108(range.first, range.second, fl::back_inserter(from_encoder), 255);
+
+    FL_REQUIRE_EQ(from_writer.size(), from_encoder.size());
+    FL_REQUIRE_EQ((int)from_writer.size(), 8 + 5 * 8 + (5 / 2 + 4));
+    for (fl::size i = 0; i < from_writer.size(); ++i) {
+        FL_CHECK_EQ(from_writer[i], from_encoder[i]);
+    }
+}
+
+FL_TEST_CASE("[#4321] writeAPA102 and writeSK9822 emit one LED per source pixel in HD mode") {
+    // 4 start bytes + 4 per LED + ((N/32)+1)*4 end.  N=4 -> 4 + 16 + 4.
+    FL_SUBCASE("APA102") {
+        fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                            fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        fl::vector<fl::u8> out;
+        adapter.get().writeAPA102(&out, true);
+        FL_CHECK_EQ((int)out.size(), 24);
+    }
+
+    FL_SUBCASE("SK9822") {
+        fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                            fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        fl::vector<fl::u8> out;
+        adapter.get().writeSK9822(&out, true);
+        FL_CHECK_EQ((int)out.size(), 24);
+    }
+}
+
+FL_TEST_CASE("[#4321] the length check is not vacuous -- an odd count cannot be halved cleanly") {
+    // A five-pixel strip is the guard: halving gives 3 LEDs (ceil), so a
+    // length assertion alone could be satisfied by an off-by-one fix that
+    // still dropped pixels. Checking the last LED carries the last pixel is
+    // what pins "every source pixel reached the wire".
+    fl::CRGB leds[5] = {fl::CRGB(11, 0, 0), fl::CRGB(22, 0, 0), fl::CRGB(33, 0, 0),
+                        fl::CRGB(44, 0, 0), fl::CRGB(55, 0, 0)};
+    PixelController<RGB> source(leds, 5, ColorAdjustment::noAdjustment(),
+                                DISABLE_DITHER);
+    fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+    fl::vector<fl::u8> out;
+    adapter.get().writeHD108(&out);
+
+    // 8 + 5*8 + (5/2 + 4) = 8 + 40 + 6 = 54
+    FL_CHECK_EQ((int)out.size(), 54);
+    const fl::size last = 8 + 4 * 8 + 2;
+    if (last + 1 < out.size()) {
+        const int r16 = (out[last] << 8) | out[last + 1];
+        FL_CHECK_EQ(r16, (int)fl::Gamma28LUT16::read(55));
+    }
+}
+
+#if FASTLED_HD_COLOR_MIXING
+// makeScaledBrightness() only exists under HD colour mixing -- every
+// caller of it is inside that guard, so the adapter is compiled only there.
+// encoders.cpp includes this header unguarded, so this case has to carry the
+// same condition or a FASTLED_HD_COLOR_MIXING=0 test build stops compiling.
+// The cases above need no guard: their HD branches are selected at compile
+// time and the non-HD paths they fall back to still emit one LED per pixel.
+FL_TEST_CASE("[#4321] the brightness adapter does not move the shared cursor") {
+    // Directly: draining the RGB adapter alone and with a brightness adapter
+    // alive alongside must yield the same bytes. This is the property the
+    // encoders rely on, stated without going through one.
+    fl::CRGB leds[4] = {fl::CRGB(10, 0, 0), fl::CRGB(20, 0, 0),
+                        fl::CRGB(30, 0, 0), fl::CRGB(40, 0, 0)};
+
+    fl::vector<fl::u8> alone;
+    {
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        auto range = fl::makeScaledPixelRangeRGB(&adapter.get());
+        for (auto it = range.first; it != range.second; ++it) {
+            alone.push_back((*it)[0]);
+        }
+    }
+
+    fl::vector<fl::u8> paired;
+    {
+        PixelController<RGB> source(leds, 4, ColorAdjustment::noAdjustment(),
+                                    DISABLE_DITHER);
+        fl::PixelIteratorAny adapter(source, RGB, fl::Rgbw());
+        auto range = fl::makeScaledPixelRangeRGB(&adapter.get());
+        auto b = fl::makeScaledBrightness(&adapter.get());
+        for (auto it = range.first; it != range.second; ++it, ++b) {
+            paired.push_back((*it)[0]);
+            (void)*b;
+        }
+    }
+
+    FL_CHECK_EQ((int)alone.size(), 4);
+    FL_CHECK_EQ((int)paired.size(), (int)alone.size());
+    for (fl::size i = 0; i < alone.size() && i < paired.size(); ++i) {
+        FL_CHECK_EQ((int)paired[i], (int)alone[i]);
+    }
+}
+#endif  // FASTLED_HD_COLOR_MIXING
+
+} // namespace test_hd108

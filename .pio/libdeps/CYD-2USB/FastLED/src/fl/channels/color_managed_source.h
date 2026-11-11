@@ -1,0 +1,150 @@
+#pragma once
+
+// Streaming colour-managed pixel source (P6, #4040).
+//
+// The last stage of the wiring: something a `PixelIterator` can be built
+// over that runs the pipeline per pixel instead of the legacy scale.
+//
+// It is a source, not a buffer, and that is the point. C2 asks for the
+// per-pixel work to happen inside the existing iteration with no RGB16
+// framebuffer, and B3 forbids an intermediate RGB8 one. `showPixels`
+// already has a place that rewrites pixels -- the XYMap path materializes a
+// thread-local `CRGB` vector -- and putting the pipeline there would break
+// both rules at once. This reads one pixel, transforms it, and yields the
+// bytes; nothing is held between pixels.
+//
+// `PixelIterator`'s constructor is templated over its source, so this only
+// has to provide the same members `PixelController` does. It is not itself
+// templated on colour order: the order is applied to the three outputs at
+// the end, which avoids six near-identical instantiations for something
+// decided at bind time.
+
+#include "fl/gfx/pipeline.h"
+#include "fl/channels/options.h"  // FL_COLOR_PIPELINE_SHARED
+#include "fl/channels/color_profile.h"  // IWYU pragma: keep  (EmitterProfile)
+#include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
+#include "fl/gfx/eorder.h"
+#include "fl/gfx/rgbw.h"
+#include "fl/gfx/rgbww.h"
+#include "pixel_controller.h"
+
+namespace fl {
+
+#if FL_COLOR_PIPELINE_SHARED
+using ColorPipelineFrameRef = const StreamingPipelineQ16&;
+#else
+using ColorPipelineFrameRef = StreamingPipelineQ16&;
+#endif
+
+/// Runs `processPixelQ16` over a `PixelController`'s pixels as they are read.
+///
+/// RGB, RGBW and RGBWW use the physical profile matching their topology.
+/// Without a wide profile the white-channel methods retain the wrapped
+/// controller's legacy conversion and wire bytes.
+class ColorManagedPixelSource {
+  public:
+    /// `dither_phase` is where this frame sits in the temporal-dither cycle.
+    /// `fl::Channel` passes its own phase, advanced only when its driver
+    /// accepts a frame (#4347); the three-argument form uses the shared
+    /// per-frame counter.
+    ColorManagedPixelSource(PixelController<RGB>& controller, EOrder order,
+                            ColorPipelineFrameRef pipeline,
+                            u8 dither_phase) FL_NO_EXCEPT;
+    ColorManagedPixelSource(PixelController<RGB>& controller, EOrder order,
+                            ColorPipelineFrameRef pipeline) FL_NO_EXCEPT;
+
+    /// Frame-local brightness is applied to the source's owned pipeline on
+    /// shared tiers; only managed iterator construction calls this.
+    void setFlux(u8 brightness) FL_NO_EXCEPT;
+    void setFlux(FluxScalar flux) FL_NO_EXCEPT;
+
+    /// The colour-managed path.
+    ///
+    /// Reads the *raw* pixel rather than `loadAndScale0/1/2`, deliberately.
+    /// Those fold in `mColorAdjustment`, whose `premixed` carries brightness
+    /// -- and the pipeline carries brightness too, as C4's flux scalar, so
+    /// going through them would apply it twice. Legacy correction and
+    /// temperature are not a concern here: binding a profile clears them,
+    /// which is what the `LegacyClearedByProfile` warning is for.
+    void loadAndScaleRGB(u8* b0_out, u8* b1_out, u8* b2_out) FL_NO_EXCEPT;
+
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// The same pixel, quantized once to 16 bits instead of to 8 (P8, #4042).
+    ///
+    /// B3 asks for a single final quantization. The 8-bit entry point above is
+    /// that, for an 8-bit wire. A 16-bit encoder fed from it gets the drive
+    /// narrowed to 256 levels and then widened again, which is a quantization
+    /// the wire never asked for -- measured on UCS7604-16 in #4326 as 252 of
+    /// 65536 reachable levels.
+    void loadAndScaleRGB16(u16* b0_out, u16* b1_out, u16* b2_out) FL_NO_EXCEPT;
+#endif
+
+    /// Physical RGBW solve when a matching profile is bound; otherwise the
+    /// legacy RGB-to-RGBW conversion. White insertion follows EOrderW.
+    void loadAndScaleRGBW(const Rgbw& rgbw, u8* b0_out, u8* b1_out, u8* b2_out,
+                          u8* b3_out) FL_NO_EXCEPT;
+
+    /// Physical two-white solve when a matching RGBWW profile is bound;
+    /// otherwise the legacy conversion. Placement follows EOrderWW.
+    void loadAndScaleRGBWW(Rgbww rgbww, u8* b0_out, u8* b1_out, u8* b2_out,
+                           u8* b3_out, u8* b4_out) FL_NO_EXCEPT;
+
+#if FASTLED_HD_COLOR_MIXING
+    /// Full scale, always: the HD encoders' 5-bit field is held fixed on a
+    /// managed channel, because the drives already carry brightness (C4) and
+    /// the field would apply it again. This is B1's conservative treatment
+    /// (SK9822 and unknown chips). An APA102 joint code/field solve, which
+    /// would use the field for low-light resolution, needs B1's flicker floor
+    /// and is not implemented.
+    void loadRGBScaleAndBrightness(u8* c0, u8* c1, u8* c2,
+                                   u8* brightness) FL_NO_EXCEPT;
+#endif
+
+    /// The legacy offsets are the wrapped controller's to toggle; this source
+    /// never reads them (C5). Its own dither is temporal, below.
+    void stepDithering() FL_NO_EXCEPT { mController.stepDithering(); }
+
+    void advanceData() FL_NO_EXCEPT { mController.advanceData(); }
+    int size() const FL_NO_EXCEPT { return mController.size(); }
+    bool has(int n) FL_NO_EXCEPT { return mController.has(n); }
+
+  private:
+    /// s16.16 drive to an 8-bit code, rounding to nearest.
+    ///
+    /// This is the single final quantization B3 asks for: nothing upstream
+    /// of it is 8-bit, and nothing downstream re-quantizes.
+    static u8 quantize(i32 drive) FL_NO_EXCEPT;
+
+    /// `quantize` with the pipeline's temporal dither (P8, C5): `floor(x)` or
+    /// `floor(x) + 1` of the exact code `x`, chosen so an eight-frame cycle
+    /// averages to `x` within 1/16 of a code. `threshold` is this frame's
+    /// point in the cycle, from `kTemporalDitherThresholds`.
+    static u8 quantizeDithered(i32 drive, u8 threshold) FL_NO_EXCEPT;
+
+    /// True when the channel asked for dither this frame. `BINARY_DITHER` on
+    /// a managed channel selects this temporal form instead of the legacy
+    /// offsets -- one dither per channel, which is C5's exclusion -- and the
+    /// same gates apply: the wrapped controller's offsets are non-zero only
+    /// for `BINARY_DITHER`, a lit scale, and a refresh rate `show()` allows.
+    bool temporalDitherEnabled() const FL_NO_EXCEPT;
+
+#if !FL_PLATFORM_HAS_TINY_MEMORY
+    /// `quantize` onto the 16-bit wire. Same clamps, same rounding, 65535
+    /// full scale rather than 255.
+    static u16 quantize16(i32 drive) FL_NO_EXCEPT;
+#endif
+
+    PixelController<RGB>& mController;
+#if FL_COLOR_PIPELINE_SHARED
+    StreamingPipelineQ16 mPipeline;
+#else
+    StreamingPipelineQ16& mPipeline;
+#endif
+    int mSlot0;
+    int mSlot1;
+    int mSlot2;
+    u8 mDitherPhase;
+};
+
+}  // namespace fl

@@ -1,0 +1,33 @@
+# Meson build options for FastLED
+
+# Build mode: Controls optimization level and debug information
+# - quick:   Fast compilation, no debug info (-O0 -g0) [DEFAULT]
+# - debug:   Full debug symbols and sanitizers (-Og -g3 -fsanitize=address,undefined)
+# - debug-thin: Linux-only core ASan+UBSan, lean symbols, unsanitized consumers
+# - release: Maximum optimization, no debug info (-O3 -DNDEBUG)
+# - profile: Size-optimized with debug symbols for callgrind profiling
+# Usage: meson setup -Dbuild_mode=debug build
+option('build_mode', type: 'combo', choices: ['quick', 'debug', 'debug-thin', 'release', 'profile'], value: 'quick',
+       description: 'Build mode: quick, debug (full sanitizers), debug-thin (Linux core-only sanitizers), release, or profile')
+
+option('native_linker', type: 'string', value: '',
+       description: 'Absolute path to reld, the native linker (set by setup_meson_build)')
+
+# Test wrapper: Enable deadlock detection with stack traces for hung tests
+# When enabled, tests that exceed timeout (20s) will have their thread stacks dumped via lldb/gdb
+# Usage: meson setup -Dtest_wrapper=false build (to disable)
+option('test_wrapper', type: 'boolean', value: true,
+       description: 'Enable test wrapper with deadlock detection and stack dumping for hung tests (enabled by default)')
+
+# Examples compilation: Set to false to skip example processing during Meson setup
+# This significantly speeds up Meson configuration when only running unit tests
+# Usage: meson setup -Denable_examples=false build (to disable)
+option('enable_examples', type: 'boolean', value: true,
+       description: 'Enable example compilation targets (set to false to speed up Meson setup for unit tests only)')
+
+# The live compile gate does not need to discover/configure every sketch.
+option('enable_full_examples', type: 'boolean', value: true,
+       description: 'Discover all sketch targets (disable for the small live compile gate)')
+
+option('enable_unit_tests', type: 'boolean', value: true,
+       description: 'Enable unit test compilation targets (set to false to speed up Meson setup for examples only)')
