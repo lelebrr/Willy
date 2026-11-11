@@ -46,7 +46,7 @@ bool auto_hopping = true; // Enable/disable flag
 unsigned long hop_interval = DEFAULT_HOP_INTERVAL;
 
 File _probe_file;
-std::set<String> uniqueProbes; // Stores unique probe requests (MAC+SSID)
+std::set<std::pair<String, String>> uniqueProbes; // Stores unique probe requests (MAC, SSID)
 std::vector<String> probeList; // Stores all probes in order
 String filen = "";
 
@@ -104,9 +104,11 @@ String extractSSID(const wifi_promiscuous_pkt_t *packet) {
                 if (!isPrintable(c)) return ""; // discard SSID if it has any non-printable char
             }
 
-            char ssid[len + 1];
-            memcpy(ssid, &frame[pos + 2], len);
-            ssid[len] = '\0';
+            // SSID 802.11 tem no maximo 32 bytes: buffer fixo em vez de VLA.
+            char ssid[33];
+            size_t copyLen = (len < 32) ? (size_t)len : 32;
+            memcpy(ssid, &frame[pos + 2], copyLen);
+            ssid[copyLen] = '\0';
             return String(ssid);
         }
 
@@ -168,9 +170,10 @@ void probe_sniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
         String ssid = extractSSID(pkt);
         if (ssid.length() == 0) return;
 
-        String key = mac + ssid;
-        if (uniqueProbes.find(key) == uniqueProbes.end()) {
-            uniqueProbes.insert(key);
+        // A chave era "mac + ssid": a concatenacao aloca uma String por pacote.
+        // Busca primeiro o par (mac, ssid) sem concatenar.
+        if (uniqueProbes.find(std::make_pair(mac, ssid)) == uniqueProbes.end()) {
+            uniqueProbes.insert(std::make_pair(mac, ssid));
 
             ProbeRequest probe;
             probe.mac = mac;
@@ -181,7 +184,9 @@ void probe_sniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
 
             probeRequests.push_back(probe);
 
-            // Limit memory usage
+            // Limit memory usage.
+            // Mantido como erase(begin()): um buffer circular mudaria a ordem
+            // cronologica, da qual getUniqueProbes() depende.
             if (probeRequests.size() > 1000) {
                 probeRequests.erase(probeRequests.begin());
             }

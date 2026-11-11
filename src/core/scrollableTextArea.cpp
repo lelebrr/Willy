@@ -142,26 +142,46 @@ void ScrollableTextArea::addLine(const String &text) {
         return;
     }
 
-    String buff;
+    // Buffer de pilha: evita criar 2 objetos String (substring + concate-
+    // nacao) por linha quebrada.
+    char buff[256];
     size_t start = 0;
     bool firstLine = true;
+    const char *src = text.c_str();
+    const size_t textLen = text.length();
 
     // Automatically split into multiple lines
-    while (start < text.length()) {
+    while (start < textLen) {
         size_t len = _maxCharactersPerLine;
+        size_t copyLen;
+        size_t outLen;
+
+        // Protege o buffer de pilha: no maximo sizeof(buff)-1 caracteres.
+        if (len > sizeof(buff) - 1) len = sizeof(buff) - 1;
+        if (len == 0) break;
 
         if (!firstLine && _indentWrappedLines) {
-            buff = " " + text.substring(start, start + len - 1); // Reduce length for space
+            copyLen = (len > 0) ? (len - 1) : 0; // Reduce length for space
+            if (copyLen > textLen - start) copyLen = textLen - start;
+            buff[0] = ' ';
+            memcpy(buff + 1, src + start, copyLen);
+            outLen = 1 + copyLen;
             start += len - 1;
         } else {
-            buff = text.substring(start, start + len);
+            copyLen = len;
+            if (copyLen > textLen - start) copyLen = textLen - start;
+            memcpy(buff, src + start, copyLen);
+            outLen = copyLen;
             start += len;
         }
-        if (buff.endsWith("\r")) buff.remove(buff.length() - 1);
 
-        char *newStr = (char *)(psramFound() ? ps_malloc(buff.length() + 1) : malloc(buff.length() + 1));
+        // Remove o '\r' final, como a versao original (buff.endsWith("\r")).
+        if (outLen > 0 && buff[outLen - 1] == '\r') outLen--;
+
+        char *newStr = (char *)(psramFound() ? ps_malloc(outLen + 1) : malloc(outLen + 1));
         if (newStr) {
-            strcpy(newStr, buff.c_str());
+            memcpy(newStr, buff, outLen);
+            newStr[outLen] = '\0';
             linesBuffer.push_back(newStr);
         }
         firstLine = false;

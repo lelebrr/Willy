@@ -43,7 +43,9 @@ void sniffer(void *buf, wifi_promiscuous_pkt_type_t type);
 
 //===== GLOBAL VARIABLES =====//
 extern std::vector<ProbeRequest> probeRequests;
-extern std::set<String> uniqueProbes;
+// Par (mac, ssid) em vez de "mac + ssid": evita uma concatenacao (e uma
+// alocacao de String) por pacote recebido no callback do driver WiFi.
+extern std::set<std::pair<String, String>> uniqueProbes;
 extern uint32_t packet_counter;
 extern uint8_t ch;
 extern bool isLittleFS;
