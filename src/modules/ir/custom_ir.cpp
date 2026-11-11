@@ -874,13 +874,16 @@ void sendRawCommand(uint16_t frequency, String rawData, bool hideDefaultUI) {
     uint16_t *dataBuffer = (uint16_t *)malloc((dataBufferSize) * sizeof(uint16_t));
 
     uint16_t count = 0;
-    // Parse raw data string
-    while (rawData.length() > 0 && count < dataBufferSize) {
-        int delimiterIndex = rawData.indexOf(' ');
+    // Parse raw data string.
+    // Percorre por indice: a versao anterior usava remove(0, ...), que
+    // deslocava e recopava toda a string a cada token (O(n^2)).
+    size_t pos = 0;
+    while (pos < rawData.length() && count < dataBufferSize) {
+        int delimiterIndex = rawData.indexOf(' ', pos);
         if (delimiterIndex == -1) { delimiterIndex = rawData.length(); }
-        String dataChunk = rawData.substring(0, delimiterIndex);
-        rawData.remove(0, delimiterIndex + 1);
-        
+        String dataChunk = rawData.substring(pos, delimiterIndex);
+        pos = delimiterIndex + 1;
+
         // Apply preamble multiplier for longer bursts
         uint16_t pulseValue = dataChunk.toInt();
         if (irConfig.mode == IR_MODE_ADVANCED && irConfig.preambleMode != IR_PREAMBLE_STANDARD) {

@@ -12,6 +12,9 @@
 #include "PN532.h"
 #include "core/display.h"
 #include "core/i2c_finder.h"
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 #include "core/sd_functions.h"
 #include "core/file_utils.h"
 #include "core/type_convertion.h"
@@ -508,10 +511,13 @@ int PN532::read_mifare_ultralight_data_blocks() {
 
         for (byte offset = 0; offset < 4; offset++) {
             strPage = "";
+            strPage.reserve(12);
             for (byte index = 0; index < 4; index++) {
                 i = 4 * offset + index;
-                strPage += buffer[i] < 0x10 ? F(" 0") : F(" ");
-                strPage += String(buffer[i], HEX);
+                uint8_t byteValue = buffer[i];
+                strPage += byteValue < 0x10 ? F(" 0") : F(" ");
+                strPage += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+                strPage += (char)HEX_UPPER[byteValue & 0x0F];
             }
             strPage.trim();
             strPage.toUpperCase();

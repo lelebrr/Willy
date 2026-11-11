@@ -8,6 +8,9 @@
  */
 
 #include "ir_read.h"
+
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
 #include "core/display.h"
 #include "willy_logger.h"
 #include "core/mykeyboard.h"
@@ -267,10 +270,13 @@ void IrRead::save_signal() {
 String IrRead::parse_state_signal() {
     String r = "";
     uint16_t state_len = (results.bits) / 8;
+    // Hex direto no acumulador: evita um String temporario por byte.
+    r.reserve((size_t)state_len * 3 + 1);
     for (uint16_t i = 0; i < state_len; i++) {
-        // r += uint64ToString(results.state[i], 16) + " ";
-        r += ((results.state[i] < 0x10) ? "0" : ""); // adds 0 padding if necessary
-        r += String(results.state[i], HEX) + " ";
+        uint8_t byteValue = results.state[i];
+        r += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+        r += (char)HEX_UPPER[byteValue & 0x0F];
+        r += ' ';
     }
     r.toUpperCase();
     return r;

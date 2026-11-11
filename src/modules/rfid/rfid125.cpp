@@ -14,6 +14,9 @@
 
 #define _HEX_DIGIT_ERROR 0xFF
 
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 static uint8_t hex2digit(char ch) {
     if (ch >= '0' && ch <= '9') return ch - '0';
     if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
@@ -204,10 +207,14 @@ bool RFID125::write_file(String filename) {
 
     if (!file) { return false; }
 
-    String file_data = "";
+    // Hex direto no acumulador: evita um String temporario por byte.
+    String file_data;
+    file_data.reserve((size_t)RFID125_PACKET_SIZE * 3);
     for (byte i = 0; i < RFID125_PACKET_SIZE; i++) {
-        file_data += _tag_data[i] < 0x10 ? " 0" : " ";
-        file_data += String(_tag_data[i], HEX);
+        uint8_t byteValue = _tag_data[i];
+        file_data += byteValue < 0x10 ? " 0" : " ";
+        file_data += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+        file_data += (char)HEX_UPPER[byteValue & 0x0F];
     }
     file_data.trim();
     file_data.toUpperCase();

@@ -7,6 +7,9 @@
  */
 
 #include "RFID2.h"
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 #include "core/display.h"
 #include "core/i2c_finder.h"
 #include "core/sd_functions.h"
@@ -339,8 +342,10 @@ int RFID2::read_mifare_classic_data_sector(byte sector) {
         if (status != MFRC522::StatusCode::STATUS_OK) { return FAILURE; }
 
         for (byte index = 0; index < 16; index++) {
-            strPage += buffer[index] < 0x10 ? F(" 0") : F(" ");
-            strPage += String(buffer[index], HEX);
+            uint8_t byteValue = buffer[index];
+            strPage += byteValue < 0x10 ? F(" 0") : F(" ");
+            strPage += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            strPage += (char)HEX_UPPER[byteValue & 0x0F];
         }
 
         strPage.trim();

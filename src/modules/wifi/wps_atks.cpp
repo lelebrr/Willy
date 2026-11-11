@@ -21,6 +21,7 @@
 #include <Arduino.h>
 #include <globals.h>
 #include <vector>
+#include <map>
 #include <SD.h>
 #include <FS.h>
 #include "esp_wps.h"
@@ -69,6 +70,11 @@ static const char* WPS_CRACKED_FILE = "/WPS/cracked.txt";
 // Define para limite de tempo de ataques
 #define MAX_ATTACK_TIME 300000 // 5 min
 
+// Cache do arquivo de redes ja quebradas.
+// A versao anterior abria e percorria o arquivo inteiro do SD uma vez por AP
+// escaneado; agora o arquivo e lido uma unica vez e consultado em memoria.
+static std::map<String, String> wpsCrackedCache;
+static bool wpsCrackedCacheLoaded = false;
 // Salva rede quebrada no SD card
 void wpsSaveCracked(const WPSNetworkInfo& net, const char* pin) {
     if (!setupSdCard()) return;
@@ -84,17 +90,21 @@ void wpsSaveCracked(const WPSNetworkInfo& net, const char* pin) {
                   String(pin) + "|" + String(net.channel) + "\n";
     f.print(line);
     f.close();
+
+    // O cache precisa ser invalidado: o arquivo mudou.
+    wpsCrackedCacheLoaded = false;
 }
 
-// Verifica se um BSSID já foi quebrado
-bool wpsIsCracked(const uint8_t* bssid, char* pin_out) {
-    if (!setupSdCard()) return false;
-    if (!SD.exists(WPS_CRACKED_FILE)) return false;
 
-    String target_mac = bssidStr(bssid);
+static void loadWpsCrackedCache() {
+    wpsCrackedCache.clear();
+    wpsCrackedCacheLoaded = true;
+
+    if (!setupSdCard()) return;
+    if (!SD.exists(WPS_CRACKED_FILE)) return;
 
     File f = SD.open(WPS_CRACKED_FILE, FILE_READ);
-    if (!f) return false;
+    if (!f) return;
 
     while (f.available()) {
         String line = f.readStringUntil('\n');
@@ -106,22 +116,34 @@ bool wpsIsCracked(const uint8_t* bssid, char* pin_out) {
         if (sep1 < 0) continue;
         String mac_str = line.substring(0, sep1);
 
-        if (mac_str.equalsIgnoreCase(target_mac)) {
-            if (pin_out) {
-                int sep2 = line.indexOf('|', sep1 + 1);
-                int sep3 = line.indexOf('|', sep2 + 1);
-                if (sep2 > 0 && sep3 > 0) {
-                    String pin = line.substring(sep2 + 1, sep3);
-                    strncpy(pin_out, pin.c_str(), 8);
-                    pin_out[8] = '\0';
-                }
-            }
-            f.close();
-            return true;
+        int sep2 = line.indexOf('|', sep1 + 1);
+        int sep3 = line.indexOf('|', sep2 + 1);
+        if (sep2 > 0 && sep3 > 0) {
+            String pin = line.substring(sep2 + 1, sep3);
+            // toUpperCase() altera a String e retorna void: usa copia local.
+            String macKey = mac_str;
+            macKey.toUpperCase();
+            wpsCrackedCache[macKey] = pin;
         }
     }
     f.close();
-    return false;
+}
+
+// Verifica se um BSSID já foi quebrado
+bool wpsIsCracked(const uint8_t* bssid, char* pin_out) {
+    if (!wpsCrackedCacheLoaded) { loadWpsCrackedCache(); }
+
+    String target_mac = bssidStr(bssid);
+    target_mac.toUpperCase();
+
+    auto it = wpsCrackedCache.find(target_mac);
+    if (it == wpsCrackedCache.end()) return false;
+
+    if (pin_out) {
+        strncpy(pin_out, it->second.c_str(), 8);
+        pin_out[8] = '\0';
+    }
+    return true;
 }
 
 // Exibe redes quebradas salvas no SD

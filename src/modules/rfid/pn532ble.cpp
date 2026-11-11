@@ -5,6 +5,9 @@
 #include "core/mykeyboard.h"
 #include "core/sd_functions.h"
 
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 Pn532ble::Pn532ble() { setup(); }
 
 Pn532ble::~Pn532ble() {}
@@ -1211,12 +1214,14 @@ void Pn532ble::ntagEmulationMode() {
         displayError("Init as target failed");
         return;
     }
+    // Hex direto no acumulador: evita um String temporario por byte.
     String respStr = "Resp: ";
+    respStr.reserve(initAsTargetResult.size() * 3 + 8);
     for (size_t i = 0; i < initAsTargetResult.size(); i++) {
-        respStr += initAsTargetResult[i] < 0x10 ? "0" : "";
-        String hexStr = String(initAsTargetResult[i], HEX);
-        hexStr.toUpperCase();
-        respStr += hexStr + " ";
+        uint8_t byteValue = initAsTargetResult[i];
+        respStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+        respStr += (char)HEX_UPPER[byteValue & 0x0F];
+        respStr += ' ';
     }
     area.addLine(respStr);
     area.scrollDown();
@@ -1248,10 +1253,14 @@ void Pn532ble::ntagEmulationMode() {
             delay(10);
             continue;
         }
+        // Hex direto no acumulador: evita um String temporario por byte.
         respStr = "<= ";
+        respStr.reserve(resp.size() * 3 + 4);
         for (size_t i = 0; i < resp.size(); i++) {
-            respStr += resp[i] < 0x10 ? "0" : "";
-            respStr += String(resp[i], HEX) + " ";
+            uint8_t byteValue = resp[i];
+            respStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            respStr += (char)HEX_UPPER[byteValue & 0x0F];
+            respStr += ' ';
         }
         area.addLine(respStr);
         area.scrollDown();
@@ -1427,12 +1436,14 @@ void Pn532ble::ntagEmulationMode() {
             wbuf = {};
         }
 
+        // Hex direto no acumulador: evita 2 objetos String temporarios por byte.
         String wbufStr = "PN532: ";
+        wbufStr.reserve(wbuf.size() * 3 + 16);
         for (size_t i = 0; i < wbuf.size(); i++) {
-            wbufStr += wbuf[i] < 0x10 ? "0" : "";
-            String hexStr = String(wbuf[i], HEX);
-            hexStr.toUpperCase();
-            wbufStr += hexStr + " ";
+            uint8_t byteValue = wbuf[i];
+            wbufStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
+            wbufStr += ' ';
         }
         wbufStr += " <= ";
         std::vector<uint8_t> setDataResult = pn532_ble.setData(wbuf);
@@ -1441,10 +1452,10 @@ void Pn532ble::ntagEmulationMode() {
             break;
         }
         for (size_t i = 0; i < setDataResult.size(); i++) {
-            wbufStr += setDataResult[i] < 0x10 ? "0" : "";
-            String hexStr = String(setDataResult[i], HEX);
-            hexStr.toUpperCase();
-            wbufStr += hexStr + " ";
+            uint8_t byteValue = setDataResult[i];
+            wbufStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
+            wbufStr += ' ';
         }
         Serial.println(wbufStr);
         area.addLine(wbufStr);
