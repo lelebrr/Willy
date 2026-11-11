@@ -638,7 +638,8 @@ void SRIXTool::save_file() {
             dumpText += (char)HEX_UPPER[byteValue & 0x0F];
         }
 
-        dumpText += '\n';
+        // CRLF: file.println() gravava terminadores CRLF.
+        dumpText += "\r\n";
     }
 
     file.print(dumpText);
@@ -1122,7 +1123,8 @@ String SRIXTool::save_file_headless(String filename) {
             dumpText += (char)HEX_UPPER[byteValue & 0x0F];
         }
 
-        dumpText += '\n';
+        // CRLF: file.println() gravava terminadores CRLF.
+        dumpText += "\r\n";
     }
 
     file.print(dumpText);

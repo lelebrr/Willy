@@ -162,6 +162,8 @@ void sendRfCommand(const struct RfCodes &rfcode, bool hideDefaultUI, bool skipIn
     const String &preset = rfcode.preset;
     const String &data = rfcode.data;
     uint64_t key = rfcode.key;
+    // Dados registrados no log (podem diferir do original apos conversao).
+    String loggedData = rfcode.data;
     byte modulation = 2; // possible values for CC1101: 0 = 2-FSK, 1 =GFSK, 2=ASK, 3 = 4-FSK, 4 = MSK
     float deviation = 1.58;
     float rxBW = 270.83; // Receive bandwidth
@@ -300,6 +302,8 @@ void sendRfCommand(const struct RfCodes &rfcode, bool hideDefaultUI, bool skipIn
         // Serial.println(rawBitCode.data);
         rawBitCode.data.trim();
         RCSwitch_RAW_Bit_send(rawBitCode);
+        // O log deve gravar o dado JA convertido, como na versao original.
+        loggedData = rawBitCode.data;
     }
 
     else if (protocol == "RcSwitch") {
@@ -333,7 +337,7 @@ void sendRfCommand(const struct RfCodes &rfcode, bool hideDefaultUI, bool skipIn
         return;
     }
 
-    willyLogger.logRF(rfcode.key, rfcode.frequency / 1000000.0, (int)rfcode.protocol.toInt(), rfcode.data.c_str());
+    willyLogger.logRF(rfcode.key, rfcode.frequency / 1000000.0, (int)rfcode.protocol.toInt(), loggedData.c_str());
 
     // digitalWrite(bruceConfigPins.rfTx, LED_OFF);
     if (!keepAlive) {

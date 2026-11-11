@@ -98,10 +98,14 @@ void wpsSaveCracked(const WPSNetworkInfo& net, const char* pin) {
 
 static void loadWpsCrackedCache() {
     wpsCrackedCache.clear();
-    wpsCrackedCacheLoaded = true;
 
+    // Só marca o cache como carregado quando a leitura realmente concluíu.
+    // Caso contrario (SD nao montado ainda), a proxima chamada tenta de novo.
     if (!setupSdCard()) return;
-    if (!SD.exists(WPS_CRACKED_FILE)) return;
+    if (!SD.exists(WPS_CRACKED_FILE)) {
+        wpsCrackedCacheLoaded = true;
+        return;
+    }
 
     File f = SD.open(WPS_CRACKED_FILE, FILE_READ);
     if (!f) return;
@@ -118,15 +122,16 @@ static void loadWpsCrackedCache() {
 
         int sep2 = line.indexOf('|', sep1 + 1);
         int sep3 = line.indexOf('|', sep2 + 1);
-        if (sep2 > 0 && sep3 > 0) {
-            String pin = line.substring(sep2 + 1, sep3);
-            // toUpperCase() altera a String e retorna void: usa copia local.
-            String macKey = mac_str;
-            macKey.toUpperCase();
-            wpsCrackedCache[macKey] = pin;
-        }
+        // toUpperCase() altera a String e retorna void: usa copia local.
+        String macKey = mac_str;
+        macKey.toUpperCase();
+        // Uma linha com BSSID correto conta como quebrada mesmo sem PIN
+        // valido, como na versao original.
+        String pin = (sep2 > 0 && sep3 > 0) ? line.substring(sep2 + 1, sep3) : String();
+        wpsCrackedCache[macKey] = pin;
     }
     f.close();
+    wpsCrackedCacheLoaded = true;
 }
 
 // Verifica se um BSSID já foi quebrado

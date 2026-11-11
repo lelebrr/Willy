@@ -803,7 +803,11 @@ Opt_Coord drawOptions(
             // Rotulo seguido dos espacos de preenchimento, como antes.
             const char *label = options[i].label.c_str();
             while (*label && len < (size_t)maxChars && len < sizeof(text) - 1) { text[len++] = *label++; }
-            while (len < (size_t)maxChars && len < sizeof(text) - 1) { text[len++] = ' '; }
+            // O original acrescentava 14 espacos ao rotulo e truncava em
+            // maxChars: o preenchimento para de onde a string terminaria.
+            size_t target = len + 14;
+            if (target > (size_t)maxChars) target = (size_t)maxChars;
+            while (len < target && len < sizeof(text) - 1) { text[len++] = ' '; }
             text[len] = '\0';
             tft.setCursor(tftWidth * 0.10 + 5, tft.getCursorY() + 4);
             tft.println(text);
@@ -1072,7 +1076,10 @@ Opt_Coord listFiles(int index, const std::vector<FileList> &fileList) {
             } else txt[len++] = ' ';
             const char *name = fileList[i].filename.c_str();
             while (*name && len < (size_t)nchars && len < sizeof(txt) - 1) { txt[len++] = *name++; }
-            while (len < (size_t)nchars && len < sizeof(txt) - 1) { txt[len++] = ' '; }
+            // O original acrescentava 17 espacos ao nome e truncava em nchars.
+            size_t target = len + 17;
+            if (target > (size_t)nchars) target = (size_t)nchars;
+            while (len < target && len < sizeof(txt) - 1) { txt[len++] = ' '; }
             txt[len] = '\0';
             tft.println(txt);
         }

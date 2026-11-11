@@ -261,16 +261,6 @@ typedef struct pcaprec_hdr_s {
     uint32_t orig_len; /* longueur réelle du paquet */
 } pcaprec_hdr_t;
 
-// Cache dos arquivos PCAP de handshake abertos (evita abrir/fechar por pacote).
-static std::map<String, File> handshakeFileCache;
-
-// Fecha e libera todos os arquivos PCAP de handshake mantidos em cache.
-static void closeHandshakeFileCache() {
-    for (auto &entry : handshakeFileCache) {
-        if (entry.second) { entry.second.close(); }
-    }
-    handshakeFileCache.clear();
-}
 void saveHandshake(const wifi_promiscuous_pkt_t *packet, bool beacon, FS &Fs, const char *ssidLabel) {
     // Construire le nom du fichier en utilisant les adresses MAC de l'AP et du client
     const uint8_t *addr1 = packet->payload + 4;  // Adresse du destinataire (Adresse 1)
@@ -293,22 +283,17 @@ void saveHandshake(const wifi_promiscuous_pkt_t *packet, bool beacon, FS &Fs, co
     // Si probe est true et que le fichier n'existe pas, ignorer l'enregistrement
     if (beacon && !fichierExiste) { return; }
 
-    // Fichiers PCAP de handshake ouverts en cache.
-    // Reouvrir/fermer le fichier a chaque paquet custava varias
-    // operacoes de FS; o handle fica aberto ate o proximo flush/limpeza.
-    File fichierPcap;
-    auto it = handshakeFileCache.find(filePath);
-    if (it != handshakeFileCache.end()) {
-        fichierPcap = it->second;
-    } else {
-        fichierPcap = Fs.open(
-            filePath, FILE_APPEND
-        ); // if the file already exists in the new session, will overwrite it
-        if (!fichierPcap) {
-            Serial.println("Fail creating the EAPOL/Handshake PCAP file");
-            return;
-        }
-        handshakeFileCache[filePath] = fichierPcap;
+    // Ouvrir le fichier en mode ajout si existant sinon en mode ecriture.
+    // Nao se mantem o handle em cache: o SD aceita apenas max_files (5)
+    // arquivos abertos ao mesmo tempo, e cada handshake usa um path distinto.
+    // Reusar o handle evitaria o open/close, porem esgotaria a tabela de
+    // arquivos e perderia handshakes silenciosamente.
+    File fichierPcap = Fs.open(
+        filePath, FILE_APPEND
+    ); // if the file already exists in the new session, will overwrite it
+    if (!fichierPcap) {
+        Serial.println("Fail creating the EAPOL/Handshake PCAP file");
+        return;
     }
 
     if (!beacon && !fichierExiste) {
@@ -321,6 +306,7 @@ void saveHandshake(const wifi_promiscuous_pkt_t *packet, bool beacon, FS &Fs, co
     if (beacon && fichierExiste) {
         uint64_t beaconKey = macToKey(apAddr);
         if (handshakeBeaconRecorded(beaconKey)) {
+            fichierPcap.close();
             return;
         }
         registerHandshakeBeacon(beaconKey);
@@ -334,6 +320,7 @@ void saveHandshake(const wifi_promiscuous_pkt_t *packet, bool beacon, FS &Fs, co
     pcap_packet_header.orig_len = packet->rx_ctrl.sig_len;
     fichierPcap.write((const byte *)&pcap_packet_header, sizeof(pcaprec_hdr_t));
     fichierPcap.write(packet->payload, packet->rx_ctrl.sig_len);
+    fichierPcap.close();
 }
 
 static String sanitizeSsid(const char *ssid) {
@@ -755,7 +742,6 @@ void sniffer_wait_for_flush(uint32_t timeoutMs) {
 
 void sniffer_reset_handshake_cache() {
     // Fecha os arquivos em cache antes de limpar o registro.
-    closeHandshakeFileCache();
     if (handshakeMutex && xSemaphoreTake(handshakeMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
         SavedHS.clear();
         xSemaphoreGive(handshakeMutex);
@@ -1366,7 +1352,6 @@ Exit:
     sniffer_wait_for_flush(1000);
     closeRawFile();
     closeDeauthFile();
-    closeHandshakeFileCache();
     WifiCommon::disconnect();
     vTaskDelay(1 / portTICK_RATE_MS);
 }

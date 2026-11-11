@@ -451,6 +451,133 @@ def test_wps_cache_lookup():
               optimized(entries, target), original(entries, target))
 
 
+def test_pn532ble_case():
+    """pn532ble: 3 locais aplicavam toUpperCase(), 1 nao aplicava.
+
+    initAsTargetResult / wbuf / setDataResult -> MAIUSCULO
+    resp -> MINUSCULO (o original nao aplicava toUpperCase nesse ponto)
+    """
+    def original(vals, upper):
+        s = ""
+        for v in vals:
+            s += "0" if v < 0x10 else ""
+            h = utoa_hex(v)
+            s += h.upper() if upper else h
+            s += " "
+        return s
+
+    def optimized(vals, upper):
+        HEX_U = "0123456789ABCDEF"
+        HEX_L = "0123456789abcdef"
+        table = HEX_U if upper else HEX_L
+        out = []
+        for v in vals:
+            out.append("0" if v < 0x10 else "")
+            if v < 0x10:
+                out.append(table[v & 0x0F])
+            else:
+                out.append(table[(v >> 4) & 0x0F])
+                out.append(table[v & 0x0F])
+            out.append(" ")
+        return "".join(out)
+
+    for vals in [bytes([0x00, 0x0A, 0x10, 0xFF]), bytes(range(16)),
+                 bytes([0xDE, 0xAD, 0xBE, 0xEF])]:
+        for upper in (True, False):
+            check(f"pn532ble hex upper={upper}",
+                  optimized(vals, upper), original(vals, upper))
+
+
+def test_srix_line_terminator():
+    """srix_tool: file.println() gravava CRLF."""
+    # o codigo otimizado deve usar "\r\n"
+    src = open("src/modules/rfid/srix_tool.cpp", encoding="utf-8", errors="replace").read()
+    check("srix usa CRLF", 'dumpText += "\\r\\n";' in src, True)
+    check("srix nao usa LF puro", "dumpText += '\\n';" not in src, True)
+
+
+def test_checkExt_public_contract():
+    """checkExt e publica: deve normalizar o pattern (minusculo) internamente."""
+    src = open("src/core/sd_functions.cpp", encoding="utf-8", errors="replace").read()
+    check("checkExt normaliza pattern",
+          "String upperPattern = pattern;" in src, True)
+
+
+def test_decrypt_odd_hex():
+    """decryptString: hex impar produz 1 byte extra (como strtol no original)."""
+    KEY = "WillyFirmwareCoreRefinement"
+
+    def original(hex_s):
+        out = []
+        i = 0
+        while i < len(hex_s):
+            chunk = hex_s[i:i + 2]      # substring CLAMPA no fim
+            c = int(chunk, 16) if chunk else 0
+            out.append(chr(c ^ ord(KEY[(i // 2) % len(KEY)])))
+            i += 2
+        return "".join(out)
+
+    def optimized(hex_s):
+        def nib(c):
+            if "0" <= c <= "9":
+                return ord(c) - 48
+            if "a" <= c <= "f":
+                return ord(c) - 87
+            if "A" <= c <= "F":
+                return ord(c) - 55
+            return 0
+        out = []
+        i = 0
+        while i < len(hex_s):
+            hi = nib(hex_s[i])
+            lo = nib(hex_s[i + 1]) if i + 1 < len(hex_s) else nib(hex_s[i])
+            c = (hi << 4) | lo
+            out.append(chr(c ^ ord(KEY[(i // 2) % len(KEY)])))
+            i += 2
+        return "".join(out)
+
+    for hex_s in ["", "61", "6162", "616263", "deadbeef", "0a0b0c"]:
+        check(f"decrypt({hex_s!r})", optimized(hex_s), original(hex_s))
+
+
+def test_chameleon_progress():
+    """chameleon: a barra de progresso deve usar o offset (pos), nao o
+    comprimento total de strAllPages (que nao e mais consumido)."""
+    src = open("src/modules/rfid/chameleon.cpp", encoding="utf-8", errors="replace").read()
+    check("chameleon progresso usa pos",
+          "totalSize - (strAllPages.length() - pos)" in src, True)
+
+
+def test_wps_cache_retry():
+    """wps: o cache so pode ser marcado como carregado apos a leitura."""
+    src = open("src/modules/wifi/wps_atks.cpp", encoding="utf-8", errors="replace").read()
+    # o 'wpsCrackedCacheLoaded = true' deve estar DEPOIS do setupSdCard
+    i_sd = src.find("if (!setupSdCard()) return;")
+    i_loaded = src.find("wpsCrackedCacheLoaded = true;")
+    check("wps cache so marca apos setupSdCard", i_loaded > i_sd, True)
+
+
+def test_sniffer_no_file_cache():
+    """sniffer: nao pode manter handles de PCAP em cache (SD aceita 5)."""
+    src = open("src/modules/wifi/sniffer.cpp", encoding="utf-8", errors="replace").read()
+    check("sniffer sem cache de handles", "handshakeFileCache" not in src, True)
+    # e deve fechar o handle no final da funcao
+    check("sniffer fecha o handle",
+          "fichierPcap.write(packet->payload, packet->rx_ctrl.sig_len);\n    fichierPcap.close();" in src, True)
+
+
+def test_web_api_logs_no_uaf():
+    """/api/logs: a resposta async guarda o ponteiro, entao nao pode liberar
+    o buffer antes do envio."""
+    src = open("src/core/willy_web.cpp", encoding="utf-8", errors="replace").read()
+    # deve construir uma String (que copia) antes de liberar o buffer
+    check("api/logs usa String payload",
+          "String payload((const char *)tail, readBytes);" in src, True)
+    # nao deve chamar send() com o ponteiro raw liberado em seguida
+    check("api/logs nao envia ponteiro raw",
+          'request->send(200, "text/plain", (const uint8_t *)tail, readBytes);' not in src, True)
+
+
 def main():
     tests = [
         test_hexToStr,
@@ -467,6 +594,14 @@ def main():
         test_ir_raw_parse,
         test_wps_cache_parse,
         test_wps_cache_lookup,
+        test_pn532ble_case,
+        test_srix_line_terminator,
+        test_checkExt_public_contract,
+        test_decrypt_odd_hex,
+        test_chameleon_progress,
+        test_wps_cache_retry,
+        test_sniffer_no_file_cache,
+        test_web_api_logs_no_uaf,
     ]
     for t in tests:
         before = len(FAILURES)

@@ -57,10 +57,13 @@ void setupWillyWeb(AsyncWebServer* server) {
         char *tail = (char *)malloc(tailLen + 1);
         if (tail) {
             size_t readBytes = file.readBytes(tail, tailLen);
-            tail[readBytes] = '\0';
             file.close();
-            request->send(200, "text/plain", (const uint8_t *)tail, readBytes);
+            // A resposta async guarda o ponteiro do conteudo e o le depois
+            // (AsyncProgmemResponse), entao o buffer precisa ter uma String
+            // propria (que copia) em vez de ser liberado aqui.
+            String payload((const char *)tail, readBytes);
             free(tail);
+            request->send(200, "text/plain", payload);
         } else {
             file.close();
             request->send(500, "text/plain", "Out of memory");

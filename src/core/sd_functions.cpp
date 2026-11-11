@@ -579,13 +579,15 @@ bool sortList(const FileList &a, const FileList &b) {
 ***************************************************************************************/
 bool checkExt(const String &ext, const String &pattern) {
     // Normaliza em maiusculas como a versao original (que usava toUpperCase).
-    // O padrao e normalizado uma unica vez no chamador (readFs).
+    // A funcao e publica, entao normaliza ambos os argumentos aqui.
     String upperExt = ext;
     upperExt.toUpperCase();
+    String upperPattern = pattern;
+    upperPattern.toUpperCase();
     const char *e = upperExt.c_str();
-    const char *p = pattern.c_str();
-    size_t eLen = ext.length();
-    size_t pLen = pattern.length();
+    const char *p = upperPattern.c_str();
+    size_t eLen = upperExt.length();
+    size_t pLen = upperPattern.length();
 
     if (eLen == pLen && strcmp(e, p) == 0) return true;
 

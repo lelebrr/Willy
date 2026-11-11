@@ -923,7 +923,8 @@ bool Chameleon::writeHFDataBlocks() {
 
         if (!blockWriteSuccess) return false;
 
-        progressHandler(totalSize - strAllPages.length(), totalSize, "Writing data blocks...");
+        // strAllPages nao e mais consumida no loop: usa-se o offset atual.
+        progressHandler(totalSize - (strAllPages.length() - pos), totalSize, "Writing data blocks...");
     }
 
     return true;

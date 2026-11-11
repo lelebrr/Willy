@@ -115,20 +115,23 @@ String listFiles(FS &fs, String folder) {
         // nameOnly.length() + 6. Antes era montada uma String completa por
         // iteracao apenas para obter o length().
         if (esp_get_free_heap_size() > (nameOnly.length() + 6) + 1024) {
-            char line[160];
             if (isDir) {
                 // Serial.printf("Directory: %s\n", fullPath.c_str());
-                snprintf(line, sizeof(line), "Fo:%s:0\n", nameOnly.c_str());
-                returnText += line;
+                // Sem buffer fixo: nomes LFN podem ter ate 255 caracteres.
+                returnText += "Fo:";
+                returnText += nameOnly;
+                returnText += ":0\n";
             } else {
                 // For files, we need to get the size, so we open the file briefly
                 // Serial.printf("Opening file for size check: %s\n", fullPath.c_str());
                 File file = fs.open(fullPath);
                 // Serial.printf("File size: %llu bytes\n", file.size());
                 if (file) {
-                    String sizeStr = humanReadableSize(file.size());
-                    snprintf(line, sizeof(line), "Fi:%s:%s\n", nameOnly.c_str(), sizeStr.c_str());
-                    returnText += line;
+                    returnText += "Fi:";
+                    returnText += nameOnly;
+                    returnText += ":";
+                    returnText += humanReadableSize(file.size());
+                    returnText += "\n";
                     file.close();
                 }
             }

@@ -480,10 +480,10 @@ bool playAudioFile(FS *fs, const String &filepath, PlaybackMode mode) {
     if (lowerPath.endsWith(".txt") || lowerPath.endsWith(".rtttl")) generator = new AudioGeneratorRTTTL();
     else if (lowerPath.endsWith(".wav")) generator = new AudioGeneratorWAV();
     else if (lowerPath.endsWith(".mod")) generator = new AudioGeneratorMOD();
-    else if (filepath.endsWith(".opus")) generator = new AudioGeneratorOpus();
-    else if (filepath.endsWith(".aac")) generator = new AudioGeneratorAAC();
-    else if (filepath.endsWith(".flac")) generator = new AudioGeneratorFLAC();
-    else if (filepath.endsWith(".mp3")) {
+    else if (lowerPath.endsWith(".opus")) generator = new AudioGeneratorOpus();
+    else if (lowerPath.endsWith(".aac")) generator = new AudioGeneratorAAC();
+    else if (lowerPath.endsWith(".flac")) generator = new AudioGeneratorFLAC();
+    else if (lowerPath.endsWith(".mp3")) {
         generator = new AudioGeneratorMP3();
         source = new AudioFileSourceID3(source);
     }
@@ -527,7 +527,8 @@ bool playAudioFile(FS *fs, const String &filepath, PlaybackMode mode) {
 
     // === ASYNC MODE ===
     Serial.println("Start audio (async)");
-    return startAsyncPlayback(generator, source, audioout, filepath);
+    // O original passava o nome em minusculas (filepath era mutado por toLowerCase).
+    return startAsyncPlayback(generator, source, audioout, lowerPath);
 }
 
 bool playAudioRTTTLString(const String &song, PlaybackMode mode) {

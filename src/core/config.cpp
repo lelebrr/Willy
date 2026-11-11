@@ -3,6 +3,7 @@
 #include "sd_functions.h"
 #include "type_convertion.h"
 #include <algorithm>
+#include <cctype>
 #include <esp_pm.h>
 
 const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
@@ -912,6 +913,18 @@ String BruceConfig::encryptString(const String &input) const {
     return output;
 }
 
+// Converte um par de digitos hex em um byte.
+// Reproduz o comportamento do strtol(.., 16) usado na versao original:
+// caracteres invalidos resultam em 0.
+static inline uint8_t hexPairToByte(const char *p, size_t remaining) {
+    int hi = hexCharToDecimal(p[0]);
+    int lo = (remaining > 1) ? hexCharToDecimal(p[1]) : hexCharToDecimal(p[0]);
+    // strtol ignora o que nao for hex: os nibbles invalidos viram 0.
+    if (!isxdigit((unsigned char)p[0])) hi = 0;
+    if (remaining > 1 && !isxdigit((unsigned char)p[1])) lo = 0;
+    return (uint8_t)((hi << 4) | lo);
+}
+
 String BruceConfig::decryptString(const String &input) const {
     if (input.startsWith(ENC_V2_PREFIX)) {
         const String &cryptoKey = getCryptoKey();
@@ -920,9 +933,9 @@ String BruceConfig::decryptString(const String &input) const {
         const size_t hexLen = input.length() - ENC_V2_PREFIX.length();
 
         String output;
-        output.reserve(hexLen / 2);
-        for (size_t i = 0; i + 1 < hexLen; i += 2) {
-            uint8_t c = (uint8_t)((hexCharToDecimal(hexData[i]) << 4) | hexCharToDecimal(hexData[i + 1]));
+        output.reserve(hexLen / 2 + 1);
+        for (size_t i = 0; i < hexLen; i += 2) {
+            uint8_t c = hexPairToByte(hexData + i, hexLen - i);
             output += (char)(c ^ cryptoKey[(i / 2) % keyLen]);
         }
         return output;
@@ -931,9 +944,9 @@ String BruceConfig::decryptString(const String &input) const {
         const size_t hexLen = input.length() - ENC_PREFIX.length();
 
         String output;
-        output.reserve(hexLen / 2);
-        for (size_t i = 0; i + 1 < hexLen; i += 2) {
-            uint8_t c = (uint8_t)((hexCharToDecimal(hexData[i]) << 4) | hexCharToDecimal(hexData[i + 1]));
+        output.reserve(hexLen / 2 + 1);
+        for (size_t i = 0; i < hexLen; i += 2) {
+            uint8_t c = hexPairToByte(hexData + i, hexLen - i);
             output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
         }
         return output;

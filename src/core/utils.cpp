@@ -244,6 +244,7 @@ void printMemoryUsage(const char *msg) {
 }
 
 String repeatString(int length, const String &character) {
+    if (length <= 0 || character.length() == 0) return String();
     String result;
     // reserve evita o realloc (e a copia) a cada iteracao do laco.
     result.reserve((size_t)length * character.length());

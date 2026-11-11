@@ -8,6 +8,9 @@
 // Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
 static const char HEX_LOWER[] = "0123456789abcdef";
 
+// Versao em maiusculas, para os pontos onde o original aplicava toUpperCase().
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 Pn532ble::Pn532ble() { setup(); }
 
 Pn532ble::~Pn532ble() {}
@@ -1221,12 +1224,12 @@ void Pn532ble::ntagEmulationMode() {
         uint8_t byteValue = initAsTargetResult[i];
         respStr += byteValue < 0x10 ? "0" : "";
         // Hex direto, sem criar um String por byte.
-        // A tabela e a do newlib (utoa): minuscula e sem padding.
+        // O original aplicava toUpperCase() neste ponto.
         if (byteValue < 0x10) {
-            respStr += (char)HEX_LOWER[byteValue & 0x0F];
+            respStr += (char)HEX_UPPER[byteValue & 0x0F];
         } else {
-            respStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
-            respStr += (char)HEX_LOWER[byteValue & 0x0F];
+            respStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            respStr += (char)HEX_UPPER[byteValue & 0x0F];
         }
         respStr += ' ';
     }
@@ -1268,6 +1271,7 @@ void Pn532ble::ntagEmulationMode() {
             respStr += byteValue < 0x10 ? "0" : "";
             // Hex direto, sem criar um String por byte.
             // A tabela e a do newlib (utoa): minuscula e sem padding.
+            // O original NAO aplicava toUpperCase() neste ponto.
             if (byteValue < 0x10) {
                 respStr += (char)HEX_LOWER[byteValue & 0x0F];
             } else {
@@ -1457,12 +1461,12 @@ void Pn532ble::ntagEmulationMode() {
             uint8_t byteValue = wbuf[i];
             wbufStr += byteValue < 0x10 ? "0" : "";
             // Hex direto, sem criar um String por byte.
-            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            // O original aplicava toUpperCase() neste ponto.
             if (byteValue < 0x10) {
-                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+                wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
             } else {
-                wbufStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
-                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+                wbufStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+                wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
             }
             wbufStr += ' ';
         }
@@ -1476,12 +1480,12 @@ void Pn532ble::ntagEmulationMode() {
             uint8_t byteValue = setDataResult[i];
             wbufStr += byteValue < 0x10 ? "0" : "";
             // Hex direto, sem criar um String por byte.
-            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            // O original aplicava toUpperCase() neste ponto.
             if (byteValue < 0x10) {
-                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+                wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
             } else {
-                wbufStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
-                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+                wbufStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+                wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
             }
             wbufStr += ' ';
         }
