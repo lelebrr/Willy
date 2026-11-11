@@ -243,18 +243,26 @@ void wifi_atk_menu() {
         ap_records.clear();
         options = {};
         for (int i = 0; i < nets; i++) {
+            // WiFi.SSID/BSSIDstr/channel devolvem String por valor: cada chamada
+            // aloca no heap. Aqui cada valor era obtido 2 a 3 vezes por AP.
+            const String ssid = WiFi.SSID(i);
+            const String bssidStr = WiFi.BSSIDstr(i);
+            const uint8_t channel = static_cast<uint8_t>(WiFi.channel(i));
+
             wifi_ap_record_t record;
             memset(&record, 0, sizeof(record));
-            // copy bssid
-            memcpy(record.bssid, WiFi.BSSID(i), 6);
+            // copy bssid (6 bytes binarios, sem o formato textual do BSSIDstr)
+            uint8_t bssidBytes[6];
+            WiFi.BSSID(i, bssidBytes);
+            memcpy(record.bssid, bssidBytes, 6);
             // copy channel/primary
-            record.primary = static_cast<uint8_t>(WiFi.channel(i));
+            record.primary = channel;
             // copy authmode
             record.authmode = static_cast<wifi_auth_mode_t>(WiFi.encryptionType(i));
             // copy ssid bytes into record.ssid (if supported by struct)
             // Ensure safe copy (wifi_ap_record_t typically has ssid[32])
-            if (strlen(WiFi.SSID(i).c_str()) > 0) {
-                strncpy((char *)record.ssid, WiFi.SSID(i).c_str(), sizeof(record.ssid) - 1);
+            if (ssid.length() > 0) {
+                strncpy((char *)record.ssid, ssid.c_str(), sizeof(record.ssid) - 1);
                 record.ssid[sizeof(record.ssid) - 1] = '\0';
             } else {
                 // empty -> leave zeroed or explicit empty string
@@ -263,10 +271,9 @@ void wifi_atk_menu() {
 
             ap_records.push_back(record);
 
-            String ssid = WiFi.SSID(i);
             int encryptionType = WiFi.encryptionType(i);
             int32_t rssi = WiFi.RSSI(i);
-            int32_t ch = WiFi.channel(i);
+            int32_t ch = channel;
             String encryptionPrefix = (encryptionType == WIFI_AUTH_OPEN) ? "" : "#";
             String encryptionTypeStr;
             switch (encryptionType) {
@@ -283,7 +290,7 @@ void wifi_atk_menu() {
             String displaySSID = ssid;
             if (displaySSID.length() == 0) {
                 // show the BSSID so user can recognize it
-                displaySSID = "<Hidden SSID> " + WiFi.BSSIDstr(i);
+                displaySSID = "<Hidden SSID> " + bssidStr;
             }
 
             String optionText = encryptionPrefix + displaySSID + " (" + String(rssi) + "|" +
@@ -292,9 +299,9 @@ void wifi_atk_menu() {
             options.push_back({optionText.c_str(), [=]() {
                                    ap_record = ap_records[i];
                                    target_atk_menu(
-                                       WiFi.SSID(i).c_str(),
-                                       WiFi.BSSIDstr(i),
-                                       static_cast<uint8_t>(WiFi.channel(i))
+                                       ssid.c_str(),
+                                       bssidStr,
+                                       channel
                                    );
                                }});
         }

@@ -1,6 +1,7 @@
 #include "config.h"
 #include "mifare_keys_manager.h"
 #include "sd_functions.h"
+#include "type_convertion.h"
 #include <algorithm>
 #include <esp_pm.h>
 
@@ -8,7 +9,7 @@ const String CRYPTO_KEY = "WillyFirmwareCoreRefinement";
 const String ENC_PREFIX = "_ENC_";
 const String ENC_V2_PREFIX = "_ENC_V2_";
 
-static String getCryptoKey() {
+static const String &getCryptoKey() {
     static String key = "";
     if (key.isEmpty()) {
         uint64_t mac = ESP.getEfuseMac();
@@ -896,34 +897,43 @@ bool BruceConfig::isValidWebUISession(const String &token) {
 
 String BruceConfig::encryptString(const String &input) const {
     if (input.isEmpty()) return "";
+    const String &cryptoKey = getCryptoKey();
+    const size_t keyLen = cryptoKey.length();
+
     String output = ENC_V2_PREFIX;
-    String cryptoKey = getCryptoKey();
+    output.reserve(ENC_V2_PREFIX.length() + input.length() * 2);
+
+    static const char HEX_DIGITS[] = "0123456789abcdef";
     for (size_t i = 0; i < input.length(); i++) {
-        char c = input[i] ^ cryptoKey[i % cryptoKey.length()];
-        char hex[3];
-        snprintf(hex, sizeof(hex), "%02x", (unsigned char)c);
-        output += hex;
+        uint8_t c = (uint8_t)(input[i] ^ cryptoKey[i % keyLen]);
+        output += HEX_DIGITS[c >> 4];
+        output += HEX_DIGITS[c & 0x0F];
     }
     return output;
 }
 
 String BruceConfig::decryptString(const String &input) const {
     if (input.startsWith(ENC_V2_PREFIX)) {
-        String hexData = input.substring(ENC_V2_PREFIX.length());
-        String output = "";
-        String cryptoKey = getCryptoKey();
-        for (size_t i = 0; i < hexData.length(); i += 2) {
-            String byteString = hexData.substring(i, i + 2);
-            char c = (char)strtol(byteString.c_str(), nullptr, 16);
-            output += (char)(c ^ cryptoKey[(i / 2) % cryptoKey.length()]);
+        const String &cryptoKey = getCryptoKey();
+        const size_t keyLen = cryptoKey.length();
+        const char *hexData = input.c_str() + ENC_V2_PREFIX.length();
+        const size_t hexLen = input.length() - ENC_V2_PREFIX.length();
+
+        String output;
+        output.reserve(hexLen / 2);
+        for (size_t i = 0; i + 1 < hexLen; i += 2) {
+            uint8_t c = (uint8_t)((hexCharToDecimal(hexData[i]) << 4) | hexCharToDecimal(hexData[i + 1]));
+            output += (char)(c ^ cryptoKey[(i / 2) % keyLen]);
         }
         return output;
     } else if (input.startsWith(ENC_PREFIX)) {
-        String hexData = input.substring(ENC_PREFIX.length());
-        String output = "";
-        for (size_t i = 0; i < hexData.length(); i += 2) {
-            String byteString = hexData.substring(i, i + 2);
-            char c = (char)strtol(byteString.c_str(), nullptr, 16);
+        const char *hexData = input.c_str() + ENC_PREFIX.length();
+        const size_t hexLen = input.length() - ENC_PREFIX.length();
+
+        String output;
+        output.reserve(hexLen / 2);
+        for (size_t i = 0; i + 1 < hexLen; i += 2) {
+            uint8_t c = (uint8_t)((hexCharToDecimal(hexData[i]) << 4) | hexCharToDecimal(hexData[i + 1]));
             output += (char)(c ^ CRYPTO_KEY[(i / 2) % CRYPTO_KEY.length()]);
         }
         return output;

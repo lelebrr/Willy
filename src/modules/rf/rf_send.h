@@ -6,7 +6,7 @@
 void sendCustomRF();
 bool txSubFile(FS *fs, String filepath, bool hideDefaultUI = false);
 
-void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI = false, bool skipInit = false, bool keepAlive = false);
+void sendRfCommand(const struct RfCodes &rfcode, bool hideDefaultUI = false, bool skipInit = false, bool keepAlive = false);
 void RCSwitch_send(uint64_t data, unsigned int bits, int pulse = 0, int protocol = 1, int repeat = 10, bool keepAlive = false);
 
 void RCSwitch_RAW_Bit_send(RfCodes data);

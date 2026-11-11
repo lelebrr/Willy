@@ -25,7 +25,7 @@ bool Wigle::_check_token() {
 
     auth_header = "Basic " + bruceConfig.wigleBasicToken;
 
-    if (!WifiState::wifiConnected) wifiConnectMenu();
+    if (!WifiState::wifiConnected) WifiCommon::connectMenu();
 
     return true;
 }

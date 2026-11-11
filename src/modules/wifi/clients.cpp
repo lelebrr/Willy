@@ -77,7 +77,7 @@ String filterAnsi(const String &input, bool &inEscape) {
 }
 
 void ssh_setup(String host) {
-    if (!WifiState::wifiConnected) wifiConnectMenu();
+    if (!WifiState::wifiConnected) WifiCommon::connectMenu();
 
     tft.fillScreen(bruceConfig.bgColor);
     tft.setCursor(0, 0);
@@ -464,7 +464,7 @@ if (buffer[0] == 0xFF) {
 }
 
 void telnet_setup() {
-    if (!WifiState::wifiConnected) wifiConnectMenu();
+    if (!WifiState::wifiConnected) WifiCommon::connectMenu();
 
     tft.fillScreen(bruceConfig.bgColor);
     tft.setCursor(0, 0);

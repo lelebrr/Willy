@@ -11,6 +11,9 @@
 #include "core/mykeyboard.h"
 #include "globals.h"
 
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 Chameleon::Chameleon() { setup(); }
 
 Chameleon::~Chameleon() {
@@ -812,9 +815,13 @@ bool Chameleon::readMifareClassicDataBlocks(uint8_t *key) {
         if (!chmUltra.cmdMfReadBlock(i, key)) return false;
 
         strPage = "";
+        strPage.reserve((size_t)chmUltra.cmdResponse.dataSize * 3);
         for (byte index = 0; index < chmUltra.cmdResponse.dataSize; index++) {
-            strPage += chmUltra.cmdResponse.data[index] < 0x10 ? F(" 0") : F(" ");
-            strPage += String(chmUltra.cmdResponse.data[index], HEX);
+            uint8_t byteValue = chmUltra.cmdResponse.data[index];
+            strPage += byteValue < 0x10 ? F(" 0") : F(" ");
+            // Escreve os dois digitos hex direto, sem criar um String por byte.
+            strPage += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            strPage += (char)HEX_UPPER[byteValue & 0x0F];
         }
         strPage.trim();
         strPage.toUpperCase();
@@ -847,9 +854,13 @@ bool Chameleon::readMifareUltralightDataBlocks() {
         if (chmUltra.cmdResponse.dataSize == 0) break;
 
         strPage = "";
+        strPage.reserve((size_t)chmUltra.cmdResponse.dataSize * 3);
         for (byte index = 0; index < chmUltra.cmdResponse.dataSize; index++) {
-            strPage += chmUltra.cmdResponse.data[index] < 0x10 ? F(" 0") : F(" ");
-            strPage += String(chmUltra.cmdResponse.data[index], HEX);
+            uint8_t byteValue = chmUltra.cmdResponse.data[index];
+            strPage += byteValue < 0x10 ? F(" 0") : F(" ");
+            // Escreve os dois digitos hex direto, sem criar um String por byte.
+            strPage += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            strPage += (char)HEX_UPPER[byteValue & 0x0F];
         }
         strPage.trim();
         strPage.toUpperCase();
@@ -864,15 +875,19 @@ bool Chameleon::readMifareUltralightDataBlocks() {
 bool Chameleon::writeHFDataBlocks() {
     String pageLine = "";
     String strBytes = "";
-    int lineBreakIndex;
     int pageIndex;
     bool blockWriteSuccess;
     int totalSize = strAllPages.length();
 
-    while (strAllPages.length() > 0) {
-        lineBreakIndex = strAllPages.indexOf("\n");
-        pageLine = strAllPages.substring(0, lineBreakIndex);
-        strAllPages = strAllPages.substring(lineBreakIndex + 1);
+    // Percorre a string por indice: a versao anterior recriava strAllPages a cada
+    // linha (substring do resto), recopiando todo o conteudo a cada iteracao.
+    size_t pos = 0;
+    while (pos < strAllPages.length()) {
+        int lineBreakIndex = strAllPages.indexOf("\n", pos);
+        if (lineBreakIndex == -1) lineBreakIndex = strAllPages.length();
+
+        pageLine = strAllPages.substring(pos, lineBreakIndex);
+        pos = lineBreakIndex + 1;
 
         pageIndex = pageLine.substring(5, pageLine.indexOf(":")).toInt();
         strBytes = pageLine.substring(pageLine.indexOf(":") + 1);

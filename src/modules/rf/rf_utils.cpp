@@ -81,72 +81,7 @@ const float subghz_frequency_list[] = {
 
 RfCodes recent_rfcodes[16];
 int recent_rfcodes_last_used = 0;
-<<<<<<< HEAD
-bool recent_rfcodes_loaded = false;
-
-void loadRecentRFCodes() {
-    if (recent_rfcodes_loaded) return;
-
-    Preferences prefs;
-    prefs.begin("rfcodes", true); // read-only
-
-    recent_rfcodes_last_used = prefs.getInt("last_used", 0);
-
-    for (int j = 0; j < 16; j++) {
-        String key_prefix = "c" + String(j);
-        recent_rfcodes[j].frequency = prefs.getFloat((key_prefix + "f").c_str(), 0.0);
-        recent_rfcodes[j].key = prefs.getULong64((key_prefix + "k").c_str(), 0);
-        recent_rfcodes[j].protocol = prefs.getString((key_prefix + "p").c_str(), "");
-        recent_rfcodes[j].preset = prefs.getString((key_prefix + "pr").c_str(), "");
-        recent_rfcodes[j].data = prefs.getString((key_prefix + "d").c_str(), "");
-        recent_rfcodes[j].te = prefs.getInt((key_prefix + "t").c_str(), 0);
-        recent_rfcodes[j].filepath = prefs.getString((key_prefix + "fp").c_str(), "");
-        recent_rfcodes[j].Bit = prefs.getInt((key_prefix + "b").c_str(), 0);
-        recent_rfcodes[j].BitRAW = prefs.getInt((key_prefix + "br").c_str(), 0);
-
-        size_t len = prefs.getBytesLength((key_prefix + "idx").c_str());
-        if (len > 0) {
-            recent_rfcodes[j].indexed_durations.resize(len / sizeof(int));
-            prefs.getBytes((key_prefix + "idx").c_str(), recent_rfcodes[j].indexed_durations.data(), (len / sizeof(int)) * sizeof(int));
-        } else {
-            recent_rfcodes[j].indexed_durations.clear();
-        }
-    }
-
-    prefs.end();
-    recent_rfcodes_loaded = true;
-}
-
-void saveLatestRecentRFCode() {
-    Preferences prefs;
-    prefs.begin("rfcodes", false); // read-write
-    prefs.putInt("last_used", recent_rfcodes_last_used);
-
-    // Only save the code that was just updated
-    int j = (recent_rfcodes_last_used == 0) ? 15 : (recent_rfcodes_last_used - 1);
-
-    String key_prefix = "c" + String(j);
-    prefs.putFloat((key_prefix + "f").c_str(), recent_rfcodes[j].frequency);
-    prefs.putULong64((key_prefix + "k").c_str(), recent_rfcodes[j].key);
-    prefs.putString((key_prefix + "p").c_str(), recent_rfcodes[j].protocol);
-    prefs.putString((key_prefix + "pr").c_str(), recent_rfcodes[j].preset);
-    prefs.putString((key_prefix + "d").c_str(), recent_rfcodes[j].data);
-    prefs.putInt((key_prefix + "t").c_str(), recent_rfcodes[j].te);
-    prefs.putString((key_prefix + "fp").c_str(), recent_rfcodes[j].filepath);
-    prefs.putInt((key_prefix + "b").c_str(), recent_rfcodes[j].Bit);
-    prefs.putInt((key_prefix + "br").c_str(), recent_rfcodes[j].BitRAW);
-
-    if (recent_rfcodes[j].indexed_durations.size() > 0) {
-        prefs.putBytes((key_prefix + "idx").c_str(), recent_rfcodes[j].indexed_durations.data(), recent_rfcodes[j].indexed_durations.size() * sizeof(int));
-    } else {
-        prefs.remove((key_prefix + "idx").c_str());
-    }
-
-    prefs.end();
-}
-=======
 static bool recent_rfcodes_loaded = false;
->>>>>>> pr-45
 bool rmtInstalled = true;
 static bool cc1101_spi_ready = false;
 
@@ -444,12 +379,8 @@ uint64_t crc64_ecma(const std::vector<int> &data) {
 }
 
 void addToRecentCodes(struct RfCodes rfcode) {
-<<<<<<< HEAD
-    loadRecentRFCodes();
-=======
     loadRecentRfCodes();
 
->>>>>>> pr-45
     // copy rfcode -> recent_rfcodes[recent_rfcodes_last_used]
     recent_rfcodes[recent_rfcodes_last_used] = rfcode;
 
@@ -480,13 +411,6 @@ void addToRecentCodes(struct RfCodes rfcode) {
 
     recent_rfcodes_last_used += 1;
     if (recent_rfcodes_last_used == 16) recent_rfcodes_last_used = 0; // cycle
-<<<<<<< HEAD
-    saveLatestRecentRFCode();
-}
-
-struct RfCodes selectRecentRfMenu() {
-    loadRecentRFCodes();
-=======
 
     prefs.putInt("last", recent_rfcodes_last_used);
     prefs.end();
@@ -494,7 +418,6 @@ struct RfCodes selectRecentRfMenu() {
 
 struct RfCodes selectRecentRfMenu() {
     loadRecentRfCodes();
->>>>>>> pr-45
     options = {};
     bool exit = false;
     struct RfCodes selected_code;

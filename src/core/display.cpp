@@ -481,15 +481,24 @@ void padprintln(const String &s, int16_t padx) {
         return;
     }
 
-    String buff;
-    size_t start = 0;
     int _maxCharsInLine = (tftWidth - (padx + 1) * BORDER_PAD_X) / (FP * LW);
+    if (_maxCharsInLine <= 0) return;
 
-    // automatically split into multiple lines
-    while (!(buff = s.substring(start, start + _maxCharsInLine)).isEmpty()) {
+    // Copia em buffer de pilha: evita um substring() (aloca) e uma copia de
+    // String por linha impressa.
+    char buff[128];
+    const char *src = s.c_str();
+    size_t len = s.length();
+    size_t start = 0;
+    while (start < len) {
+        size_t n = (size_t)_maxCharsInLine;
+        if (n > len - start) n = len - start;
+        if (n >= sizeof(buff)) n = sizeof(buff) - 1;
+        memcpy(buff, src + start, n);
+        buff[n] = '\0';
         tft.setCursor(padx * BORDER_PAD_X, tft.getCursorY());
         tft.println(buff);
-        start += buff.length();
+        start += n;
     }
 }
 void padprintln(const char str[], int16_t padx) {
@@ -499,15 +508,23 @@ void padprintln(const char str[], int16_t padx) {
         return;
     }
 
-    String buff;
-    size_t start = 0;
     int _maxCharsInLine = (tftWidth - (padx + 1) * BORDER_PAD_X) / (FP * LW);
+    if (_maxCharsInLine <= 0) return;
 
-    // automatically split into multiple lines
-    while (!(buff = String(str).substring(start, start + _maxCharsInLine)).isEmpty()) {
+    // A versao anterior reconstruia String(str) (copia integral) a cada
+    // iteracao do laco, recopiando os mesmos bytes a cada linha.
+    char buff[128];
+    size_t len = strlen(str);
+    size_t start = 0;
+    while (start < len) {
+        size_t n = (size_t)_maxCharsInLine;
+        if (n > len - start) n = len - start;
+        if (n >= sizeof(buff)) n = sizeof(buff) - 1;
+        memcpy(buff, str + start, n);
+        buff[n] = '\0';
         tft.setCursor(padx * BORDER_PAD_X, tft.getCursorY());
         tft.println(buff);
-        start += buff.length();
+        start += n;
     }
 }
 void padprintln(char c, int16_t padx) {

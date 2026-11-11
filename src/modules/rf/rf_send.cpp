@@ -156,11 +156,11 @@ bool txSubFile(FS *fs, String filepath, bool hideDefaultUI) {
     return true;
 }
 
-void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI, bool skipInit, bool keepAlive) {
+void sendRfCommand(const struct RfCodes &rfcode, bool hideDefaultUI, bool skipInit, bool keepAlive) {
     uint32_t frequency = rfcode.frequency;
-    String protocol = rfcode.protocol;
-    String preset = rfcode.preset;
-    String data = rfcode.data;
+    const String &protocol = rfcode.protocol;
+    const String &preset = rfcode.preset;
+    const String &data = rfcode.data;
     uint64_t key = rfcode.key;
     byte modulation = 2; // possible values for CC1101: 0 = 2-FSK, 1 =GFSK, 2=ASK, 3 = 4-FSK, 4 = MSK
     float deviation = 1.58;
@@ -215,12 +215,13 @@ void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI, bool skipInit, boo
         deviation = 19.042969;
         dataRate = 9.996;
     } else {
+        // O preset numerico e lido uma unica vez: o laco anterior criava 30
+        // objetos String temporarios por chamada apenas para comparar.
         bool found = false;
-        for (int p = 0; p < 30; p++) {
-            if (preset == String(p)) {
-                rcswitch_protocol_no = preset.toInt();
-                found = true;
-            }
+        int presetNumber = preset.toInt();
+        if (presetNumber >= 0 && presetNumber < 30 && preset == String(presetNumber)) {
+            rcswitch_protocol_no = presetNumber;
+            found = true;
         }
         if (!found) {
             Serial.print("unsupported preset: ");
@@ -294,14 +295,14 @@ void sendRfCommand(struct RfCodes rfcode, bool hideDefaultUI, bool skipInit, boo
         free(transmittimings);
     } else if (protocol == "BinRAW") {
         // transform from "00 01 02 ... FF" into "00000000 00000001 00000010 .... 11111111"
-        rfcode.data = hexStrToBinStr(rfcode.data);
-        // Serial.println(rfcode.data);
-        rfcode.data.trim();
-        RCSwitch_RAW_Bit_send(rfcode);
+        struct RfCodes rawBitCode = rfcode;
+        rawBitCode.data = hexStrToBinStr(rawBitCode.data);
+        // Serial.println(rawBitCode.data);
+        rawBitCode.data.trim();
+        RCSwitch_RAW_Bit_send(rawBitCode);
     }
 
     else if (protocol == "RcSwitch") {
-        data.replace(" ", ""); // remove spaces
         // uint64_t data_val = strtoul(data.c_str(), nullptr, 16);
         uint64_t data_val = rfcode.key;
         int bits = rfcode.Bit;

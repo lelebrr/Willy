@@ -9,7 +9,7 @@ bool inputMode;
 
 
 void listenTcpPort(int defaultPort) {
-    if (!wifiConnected) wifiConnectMenu();
+    if (!WifiState::wifiConnected) WifiCommon::connectMenu();
 
     WiFiClient tcpClient;
     tft.fillScreen(TFT_BLACK);
@@ -84,7 +84,7 @@ void listenTcpPort(int defaultPort) {
 }
 
 void clientTCP() {
-    if (!WifiState::wifiConnected) wifiConnectMenu();
+    if (!WifiState::wifiConnected) WifiCommon::connectMenu();
 
     String serverIP = keyboard("", 15, "Digite IP servidor");
     String portString = num_keyboard("", 5, "Digite Porta servidor");

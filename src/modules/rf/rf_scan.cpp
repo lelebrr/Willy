@@ -315,7 +315,7 @@ void RFScan::set_threshold() {
     };
     loopOptions(options);
 }
-void display_info(RfCodes received, int signals, bool ReadRAW, bool codesOnly, bool autoSave, String title) {
+void display_info(const RfCodes &received, int signals, bool ReadRAW, bool codesOnly, bool autoSave, const String &title) {
     if (title != "") drawMainBorderWithTitle(title);
     else drawMainBorder();
 
@@ -340,7 +340,7 @@ void display_info(RfCodes received, int signals, bool ReadRAW, bool codesOnly, b
     padprintln("Pressione [NEXT] para opcoes.");
 }
 
-void display_signal_data(RfCodes received) {
+void display_signal_data(const RfCodes &received) {
     std::string txt = received.data.c_str();
     std::stringstream ss(txt);
     std::string palavra;
@@ -395,7 +395,7 @@ void display_signal_data(RfCodes received) {
     padprintln("");
 }
 
-bool RCSwitch_SaveSignal(float frequency, RfCodes codes, bool raw, char *key, bool autoSave) {
+bool RCSwitch_SaveSignal(float frequency, const RfCodes &codes, bool raw, char *key, bool autoSave) {
     FS *fs;
     String filename = "";
 
@@ -421,13 +421,14 @@ bool RCSwitch_SaveSignal(float frequency, RfCodes codes, bool raw, char *key, bo
         // subfile_out += "RAW_Data: " + codes.data;
     } else {
         // save as raw
-        if (codes.preset == "1") {
-            codes.preset = "FuriHalSubGhzPresetOok270Async";
-        } else if (codes.preset == "2") {
-            codes.preset = "FuriHalSubGhzPresetOok650Async";
+        String preset = codes.preset;
+        if (preset == "1") {
+            preset = "FuriHalSubGhzPresetOok270Async";
+        } else if (preset == "2") {
+            preset = "FuriHalSubGhzPresetOok650Async";
         }
 
-        subfile_out += "Preset: " + String(codes.preset) + "\n";
+        subfile_out += "Preset: " + String(preset) + "\n";
         subfile_out += "Protocol: RAW\n";
         subfile_out += "RAW_Data: " + codes.data;
         filename = "raw.sub";

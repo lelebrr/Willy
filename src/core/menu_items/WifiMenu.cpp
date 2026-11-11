@@ -135,7 +135,7 @@ void WifiMenu::optionsMenu() {
                        }});
     options.push_back({"Escanear Hosts", [=]() {
                            bool doScan = true;
-                           if (!WifiState::wifiConnected) doScan = wifiConnectMenu();
+                           if (!WifiState::wifiConnected) doScan = WifiCommon::connectMenu();
 
                            if (doScan) {
                                esp_netif_t *esp_netinterface =

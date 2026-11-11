@@ -814,7 +814,7 @@ void setClock() {
     if (returnToMenu) return;
 
     if (bruceConfig.automaticTimeUpdateViaNTP) {
-        if (!WifiState::wifiConnected) wifiConnectMenu();
+        if (!WifiState::wifiConnected) WifiCommon::connectMenu();
 
         options.clear();
 

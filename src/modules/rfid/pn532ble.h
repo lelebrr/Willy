@@ -63,7 +63,7 @@ private:
     AppMode currentMode;
     void setMode(AppMode mode);
     uint8_t getMifareClassicSectorCount(uint8_t sak);
-    String saveHfDumpBinFile(std::vector<uint8_t> data, String uid, String prefix);
+    String saveHfDumpBinFile(const std::vector<uint8_t> &data, const String &uid, const String &prefix);
     void loadMifareClassicDumpFile();
     void loadMifareUltralightDumpFile();
     void loadIso15693DumpFile();

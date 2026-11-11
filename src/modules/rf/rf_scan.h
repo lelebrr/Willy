@@ -76,12 +76,12 @@ private:
 };
 
 void display_info(
-    RfCodes received, int signals, bool ReadRAW = false, bool codesOnly = false, bool autoSave = false,
-    String title = ""
+    const RfCodes &received, int signals, bool ReadRAW = false, bool codesOnly = false, bool autoSave = false,
+    const String &title = ""
 );
-void display_signal_data(RfCodes received);
+void display_signal_data(const RfCodes &received);
 
-bool RCSwitch_SaveSignal(float frequency, RfCodes codes, bool raw, char *key, bool autoSave = false);
+bool RCSwitch_SaveSignal(float frequency, const RfCodes &codes, bool raw, char *key, bool autoSave = false);
 
 String rf_scan(float start_freq, float stop_freq, int max_loops = -1);
 String RCSwitch_Read(float frequency = 0, int max_loops = -1, bool raw = false);

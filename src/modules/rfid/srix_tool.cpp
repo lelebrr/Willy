@@ -15,6 +15,9 @@
 #define TAG_MAX_ATTEMPTS 5
 static constexpr uint32_t SRIX_EEPROM_WRITE_DELAY_MS = 15; // Delay for write operation
 
+// Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
+static const char HEX_UPPER[] = "0123456789ABCDEF";
+
 SRIXTool::SRIXTool() {
     current_state = IDLE_MODE;
     _dump_valid_from_read = false;
@@ -460,26 +463,15 @@ void SRIXTool::read_uid() {
         return;
     }
 
-    String uid_parts[4]; // Array for 4 groups
-
-    // Build the 4 groups (2 bytes each = 4 hex characters)
-    for (uint8_t group = 0; group < 4; group++) {
-        uid_parts[group] = "";
-        for (uint8_t byte_in_group = 0; byte_in_group < 2; byte_in_group++) {
-            uint8_t idx = group * 2 + byte_in_group;
-            if (_uid[idx] < 0x10) uid_parts[group] += "0";
-            uid_parts[group] += String(_uid[idx], HEX);
-        }
-        uid_parts[group].toUpperCase();
-    }
-
     tft.setTextColor(bruceConfig.priColor, bruceConfig.bgColor);
     tft.setTextSize(FM);
     // Build and print directly
     String uid_line = "UID: ";
+    uid_line.reserve(20);
     for (uint8_t i = 0; i < 8; i++) {
-        if (_uid[i] < 0x10) uid_line += "0";
-        uid_line += String(_uid[i], HEX);
+        uint8_t byteValue = _uid[i];
+        uid_line += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+        uid_line += (char)HEX_UPPER[byteValue & 0x0F];
 
         if (i == 1 || i == 3 || i == 5) { uid_line += " "; }
     }
@@ -614,24 +606,31 @@ void SRIXTool::save_file() {
     file.println("# Data:");
 
     // Write all blocks in [XX] format YYYYYYYY
+    // O dump inteiro e montado em memoria e gravado de uma vez: a versao
+    // anterior fazia uma chamada de write() por bloco (128 no total).
+    String dumpText;
+    dumpText.reserve(128 * 13);
     for (uint8_t block = 0; block < 128; block++) {
         uint16_t offset = block * 4;
 
-        String line = "[";
+        dumpText += '[';
 
         // Block number in hex (2 sign)
-        if (block < 0x10) line += "0";
-        line += String(block, HEX);
-        line += "] ";
+        if (block < 0x10) dumpText += '0';
+        dumpText += (char)HEX_UPPER[(block >> 4) & 0x0F];
+        dumpText += (char)HEX_UPPER[block & 0x0F];
+        dumpText += "] ";
 
         for (uint8_t i = 0; i < 4; i++) {
-            if (_dump[offset + i] < 0x10) line += "0";
-            line += String(_dump[offset + i], HEX);
+            uint8_t byteValue = _dump[offset + i];
+            dumpText += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            dumpText += (char)HEX_UPPER[byteValue & 0x0F];
         }
 
-        line.toUpperCase();
-        file.println(line);
+        dumpText += '\n';
     }
+
+    file.print(dumpText);
 
     file.close();
 
@@ -1094,20 +1093,28 @@ String SRIXTool::save_file_headless(String filename) {
     file.println("# Data:");
 
     // Write blocks in format: [XX] YYYYYYYY
+    // Monta o dump inteiro e grava de uma vez (a versao anterior escrevia
+    // uma linha por bloco, com 128 chamadas de write()).
+    String dumpText;
+    dumpText.reserve(128 * 13);
     for (uint8_t block = 0; block < 128; block++) {
         uint16_t offset = block * 4;
-        String line = "[";
-        if (block < 0x10) line += "0";
-        line += String(block, HEX);
-        line += "] ";
+        dumpText += '[';
+        if (block < 0x10) dumpText += '0';
+        dumpText += (char)HEX_UPPER[(block >> 4) & 0x0F];
+        dumpText += (char)HEX_UPPER[block & 0x0F];
+        dumpText += "] ";
 
         for (uint8_t i = 0; i < 4; i++) {
-            if (_dump[offset + i] < 0x10) line += "0";
-            line += String(_dump[offset + i], HEX);
+            uint8_t byteValue = _dump[offset + i];
+            dumpText += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
+            dumpText += (char)HEX_UPPER[byteValue & 0x0F];
         }
-        line.toUpperCase();
-        file.println(line);
+
+        dumpText += '\n';
     }
+
+    file.print(dumpText);
 
     file.close();
     return filepath;

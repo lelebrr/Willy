@@ -255,8 +255,18 @@ void mic_test_one_task() {
         return;
     }
 
+    // O plano FFT (tabelas de twiddle) e o mesmo em todas as iteracoes:
+    // criar/destruir dentro do laco realoca memoria do heap a cada quadro.
+    fft_config_t *plan = fft_init(FFT_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
+    if (!plan) {
+        Serial.println("Error alloc fft plan, exiting");
+        displayError("Not Enough RAM", true);
+        free(frameBuffer);
+        free(x_to_index_mul);
+        return;
+    }
+
     while (1) {
-        fft_config_t *plan = fft_init(FFT_SIZE, FFT_REAL, FFT_FORWARD, NULL, NULL);
         size_t bytesread;
         i2s_channel_read(i2s_chan, (char *)i2s_buffer, FFT_SIZE * sizeof(int16_t), &bytesread, portMAX_DELAY);
 
@@ -276,8 +286,6 @@ void mic_test_one_task() {
         }
 
         posData = (posData + 1) % HISTORY_LEN;
-
-        fft_destroy(plan);
 
         // ===== RENDER WITH SCALING =====
         for (int x = 0; x < displayWidth; x++) {
@@ -303,6 +311,7 @@ void mic_test_one_task() {
     }
     i2s_channel_disable(i2s_chan);
 
+    fft_destroy(plan);
     free(frameBuffer);
     free(x_to_index_mul);
 }

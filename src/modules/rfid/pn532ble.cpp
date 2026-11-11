@@ -1455,7 +1455,7 @@ void Pn532ble::ntagEmulationMode() {
     pn532_ble.setNormalMode();
 }
 
-String Pn532ble::saveHfDumpBinFile(std::vector<uint8_t> data, String uid, String prefix) {
+String Pn532ble::saveHfDumpBinFile(const std::vector<uint8_t> &data, const String &uid, const String &prefix) {
     FS *fs;
     if (!getFsStorage(fs)) return "";
     if (!(*fs).exists("/rfid")) (*fs).mkdir("/rfid");
@@ -1471,7 +1471,8 @@ String Pn532ble::saveHfDumpBinFile(std::vector<uint8_t> data, String uid, String
     String filePath = "/rfid/hf/" + fileName;
     File file = (*fs).open(filePath, FILE_WRITE);
     if (!file) { return ""; }
-    for (size_t i = 0; i < data.size(); i++) { file.write(data[i]); }
+    // Escrita em bloco: a versao anterior fazia uma chamada de write() por byte.
+    if (!data.empty()) { file.write(data.data(), data.size()); }
     file.close();
     return fileName;
 }
