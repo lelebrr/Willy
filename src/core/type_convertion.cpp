@@ -110,14 +110,23 @@ char *dec2binWzerofill(uint64_t Dec, unsigned int bitLength) {
 String hexToStr(uint8_t *data, uint8_t len, char separator) {
     // Os digitos sao escritos direto no acumulador: evita criar um objeto
     // String temporario por byte e o realloc do acumulador a cada digito.
-    static const char HEX_DIGITS[] = "0123456789ABCDEF";
+    // A tabela e a mesma do newlib (utoa), ou seja, minuscula e sem padding:
+    // o "0" a esquerda e o separador sao mantidos como na versao original.
+    static const char HEX_DIGITS[] = "0123456789abcdef";
     String str;
     str.reserve((size_t)len * 3 + 2);
 
     for (size_t i = 0; i < len; i++) {
         str += separator;
-        str += HEX_DIGITS[data[i] >> 4];
-        str += HEX_DIGITS[data[i] & 0x0F];
+        // utoa() devolve 1 digito para valores < 0x10; o '0' manual
+        // completa o segundo digito, como na versao original.
+        if (data[i] < 0x10) {
+            str += '0';
+            str += HEX_DIGITS[data[i] & 0x0F];
+        } else {
+            str += HEX_DIGITS[(data[i] >> 4) & 0x0F];
+            str += HEX_DIGITS[data[i] & 0x0F];
+        }
     }
 
     str.trim();

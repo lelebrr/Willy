@@ -216,7 +216,7 @@ bool wakeUpScreen() {
 ** Function name: displayRedStripe
 ** Description:   Display Red Stripe with information
 ***************************************************************************************/
-void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
+void displayRedStripe(const String &text, uint16_t fgcolor, uint16_t bgcolor) {
     // detect if not running in interactive mode -> show nothing onscreen and return immediately
     // if (server || isSleeping || isScreenOff) return; // webui is running
 
@@ -347,7 +347,7 @@ int8_t displayMessage(
     return selected;
 }
 
-void displayError(String txt, bool waitKeyPress) {
+void displayError(const String &txt, bool waitKeyPress) {
     displayRedStripe(txt);
 #ifndef HAS_SCREEN
     Serial.println("ERR: " + txt);
@@ -357,7 +357,7 @@ void displayError(String txt, bool waitKeyPress) {
     while (waitKeyPress && !check(AnyKeyPress)) vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
-void displayWarning(String txt, bool waitKeyPress) {
+void displayWarning(const String &txt, bool waitKeyPress) {
     displayRedStripe(txt, TFT_BLACK, TFT_YELLOW);
 #ifndef HAS_SCREEN
     Serial.println("WARN: " + txt);
@@ -367,7 +367,7 @@ void displayWarning(String txt, bool waitKeyPress) {
     while (waitKeyPress && !check(AnyKeyPress)) vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
-void displayInfo(String txt, bool waitKeyPress) {
+void displayInfo(const String &txt, bool waitKeyPress) {
     // todo: add newlines to txt if too long
     displayRedStripe(txt, TFT_WHITE, TFT_BLUE);
 #ifndef HAS_SCREEN
@@ -379,7 +379,7 @@ void displayInfo(String txt, bool waitKeyPress) {
     while (waitKeyPress && !check(AnyKeyPress)) vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
-void displaySuccess(String txt, bool waitKeyPress) {
+void displaySuccess(const String &txt, bool waitKeyPress) {
     // todo: add newlines to txt if too long
     displayRedStripe(txt, TFT_WHITE, TFT_DARKGREEN);
 #ifndef HAS_SCREEN
@@ -390,7 +390,7 @@ void displaySuccess(String txt, bool waitKeyPress) {
     while (waitKeyPress && !check(AnyKeyPress)) vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
-void displayTextLine(String txt, bool waitKeyPress) {
+void displayTextLine(const String &txt, bool waitKeyPress) {
     // todo: add newlines to txt if too long
     displayRedStripe(txt, getComplementaryColor2(bruceConfig.priColor), bruceConfig.priColor);
 #ifndef HAS_SCREEN
@@ -1262,7 +1262,7 @@ void jpegRender(int xpos, int ypos) {
     tft.setSwapBytes(swapBytes);
 }
 
-bool showJpeg(FS &fs, String filename, int x, int y, bool center) {
+bool showJpeg(FS &fs, const String &filename, int x, int y, bool center) {
     // record the current time so we can measure how long it takes to draw an image
     uint32_t drawTime = millis();
     File picture;
@@ -1653,7 +1653,7 @@ uint32_t read32(fs::File &f) {
     ((uint8_t *)&result)[3] = f.read(); // MSB
     return result;
 }
-bool drawBmp(FS &fs, String filename, int x, int y, bool center) {
+bool drawBmp(FS &fs, const String &filename, int x, int y, bool center) {
     if ((x >= tft.width()) || (y >= tft.height())) return false;
     uint32_t startTime = millis();
 
@@ -1872,7 +1872,7 @@ static bool drawPngBin(FS &fs, const String &binPath, int x, int y, bool center)
     return true;
 }
 
-bool drawPNG(FS &fs, String filename, int x, int y, bool center) {
+bool drawPNG(FS &fs, const String &filename, int x, int y, bool center) {
     if ((x >= tft.width()) || (y >= tft.height())) return false;
     _fs = &fs;
     uint32_t dt = millis();
@@ -1966,7 +1966,7 @@ bool drawPNG(FS &fs, String filename, int x, int y, bool center) {
 }
 
 // Prepare (or verify) the cached BIN for a PNG without rendering it on screen
-bool preparePngBin(FS &fs, String filename) {
+bool preparePngBin(FS &fs, const String &filename) {
     bool previous = pngCacheOnly;
     pngCacheOnly = true;
     bool ok = drawPNG(fs, filename, 0, 0, false);
@@ -1974,11 +1974,11 @@ bool preparePngBin(FS &fs, String filename) {
     return ok;
 }
 #else
-bool preparePngBin(FS &fs, String filename) {
+bool preparePngBin(FS &fs, const String &filename) {
     log_w("PNG: Not supported in this version");
     return true;
 }
-bool drawPNG(FS &fs, String filename, int x, int y, bool center) {
+bool drawPNG(FS &fs, const String &filename, int x, int y, bool center) {
     log_w("PNG: Not supported in this version");
     return false;
 }

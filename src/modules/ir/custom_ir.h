@@ -39,7 +39,7 @@ struct IRCode {
 
 // Custom IR
 void sendIRCommand(IRCode *code, bool hideDefaultUI = false);
-void sendRawCommand(uint16_t frequency, String rawData, bool hideDefaultUI = false);
+void sendRawCommand(uint16_t frequency, const String &rawData, bool hideDefaultUI = false);
 void sendNECCommand(String address, String command, bool hideDefaultUI = false);
 void sendNECextCommand(String address, String command, bool hideDefaultUI = false);
 void sendRC5Command(String address, String command, bool hideDefaultUI = false);

@@ -2,11 +2,11 @@
 #include "display.h"
 #include <globals.h>
 
-String keyboard(String mytext, int maxSize = 76, String msg = "Type your message:", bool mask_input = false);
+String keyboard(const String &mytext, int maxSize = 76, const String &msg = "Type your message:", bool mask_input = false);
 String
-hex_keyboard(String mytext, int maxSize = 76, String msg = "Type you HEX value:", bool mask_input = false);
+hex_keyboard(const String &mytext, int maxSize = 76, const String &msg = "Type you HEX value:", bool mask_input = false);
 String
-num_keyboard(String mytext, int maxSize = 76, String msg = "Insert your number:", bool mask_input = false);
+num_keyboard(const String &mytext, int maxSize = 76, const String &msg = "Insert your number:", bool mask_input = false);
 
 void __attribute__((weak)) powerOff();
 void __attribute__((weak)) goToDeepSleep();

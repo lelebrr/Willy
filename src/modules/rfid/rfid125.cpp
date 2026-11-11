@@ -15,7 +15,7 @@
 #define _HEX_DIGIT_ERROR 0xFF
 
 // Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
-static const char HEX_UPPER[] = "0123456789ABCDEF";
+static const char HEX_LOWER[] = "0123456789abcdef";
 
 static uint8_t hex2digit(char ch) {
     if (ch >= '0' && ch <= '9') return ch - '0';
@@ -213,8 +213,14 @@ bool RFID125::write_file(String filename) {
     for (byte i = 0; i < RFID125_PACKET_SIZE; i++) {
         uint8_t byteValue = _tag_data[i];
         file_data += byteValue < 0x10 ? " 0" : " ";
-        file_data += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-        file_data += (char)HEX_UPPER[byteValue & 0x0F];
+        // Hex direto, sem criar um String por byte.
+        // A tabela e a do newlib (utoa): minuscula e sem padding.
+        if (byteValue < 0x10) {
+            file_data += (char)HEX_LOWER[byteValue & 0x0F];
+        } else {
+            file_data += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+            file_data += (char)HEX_LOWER[byteValue & 0x0F];
+        }
     }
     file_data.trim();
     file_data.toUpperCase();

@@ -1097,7 +1097,7 @@ String generalKeyboard(
 
 /// This calls the QWERTY keyboard. Returns the user typed strings, return the ASCII ESC character
 /// if the operation was cancelled
-String keyboard(String current_text, int max_size, String textbox_title, bool mask_input) {
+String keyboard(const String &current_text, int max_size, const String &textbox_title, bool mask_input) {
     return generalKeyboard<qwerty_keyboard_height, qwerty_keyboard_width>(
         current_text, max_size, textbox_title, qwerty_keyset, mask_input
     );
@@ -1105,7 +1105,7 @@ String keyboard(String current_text, int max_size, String textbox_title, bool ma
 
 /// This calls a keyboard with the characters useful to write hexadecimal codes.
 /// Returns the user typed strings, return the ASCII ESC character if the operation was cancelled
-String hex_keyboard(String current_text, int max_size, String textbox_title, bool mask_input) {
+String hex_keyboard(const String &current_text, int max_size, const String &textbox_title, bool mask_input) {
     return generalKeyboard<hex_keyboard_height, hex_keyboard_width>(
         current_text, max_size, textbox_title, hex_keyset, mask_input
     );
@@ -1113,7 +1113,7 @@ String hex_keyboard(String current_text, int max_size, String textbox_title, boo
 
 /// This calls a numbers only keyboard. Returns the user typed strings, return the ASCII ESC character
 /// if the operation was cancelled
-String num_keyboard(String current_text, int max_size, String textbox_title, bool mask_input) {
+String num_keyboard(const String &current_text, int max_size, const String &textbox_title, bool mask_input) {
     return generalKeyboard<numpad_keyboard_height, numpad_keyboard_width>(
         current_text, max_size, textbox_title, numpad_keyset, mask_input
     );

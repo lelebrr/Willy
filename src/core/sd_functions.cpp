@@ -557,9 +557,20 @@ bool sortList(const FileList &a, const FileList &b) {
         return a.folder > b.folder; // true if a is a folder and b is not
     }
     // Order items alphabetically.
-    // strcasecmp evita alocar duas Strings (uma por item comparado) em cada
-    // comparacao do std::sort, que sao ~N*log2(N) comparacoes.
-    return strcasecmp(a.filename.c_str(), b.filename.c_str()) < 0;
+    // Compara os nomes em maiusculas sem alocar duas Strings por comparacao
+    // (o std::sort faz ~N*log2(N) comparacoes).
+    // A comparacao e feita byte a byte, aplicando toupper() em cada caractere,
+    // exatamente como a versao anterior (toUpperCase() + operator<).
+    const char *fa = a.filename.c_str();
+    const char *fb = b.filename.c_str();
+    while (*fa && *fb) {
+        unsigned char ca = (unsigned char)toupper((unsigned char)*fa++);
+        unsigned char cb = (unsigned char)toupper((unsigned char)*fb++);
+        if (ca != cb) return ca < cb;
+    }
+    if (*fa) return false; // a ainda tem caracteres -> a > b
+    if (*fb) return true;  // b ainda tem caracteres -> a < b
+    return false;
 }
 
 /***************************************************************************************
@@ -567,9 +578,11 @@ bool sortList(const FileList &a, const FileList &b) {
 ** Description:   check file extension
 ***************************************************************************************/
 bool checkExt(const String &ext, const String &pattern) {
-    // ext e pattern ja chegam normalizados em maiusculas pelo chamador.
-    // A comparacao usa os buffers diretamente, sem criar uma String por extensao.
-    const char *e = ext.c_str();
+    // Normaliza em maiusculas como a versao original (que usava toUpperCase).
+    // O padrao e normalizado uma unica vez no chamador (readFs).
+    String upperExt = ext;
+    upperExt.toUpperCase();
+    const char *e = upperExt.c_str();
     const char *p = pattern.c_str();
     size_t eLen = ext.length();
     size_t pLen = pattern.length();
@@ -582,7 +595,7 @@ bool checkExt(const String &ext, const String &pattern) {
         size_t end = start;
         while (end < pLen && p[end] != '|') end++;
         size_t len = end - start;
-        if (eLen == len && strncasecmp(e, p + start, len) == 0) return true;
+        if (eLen == len && strncmp(e, p + start, len) == 0) return true;
         if (end >= pLen) break;
         start = end + 1;
     }

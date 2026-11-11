@@ -4,6 +4,6 @@
 #include <Arduino.h>
 #include <FS.h>
 
-File createNewFile(FS *&fs, String filepath, String filename);
+File createNewFile(FS *&fs, const String &filepath, const String &filename);
 
 #endif // FILE_UTILS_H

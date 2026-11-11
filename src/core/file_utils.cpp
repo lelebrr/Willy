@@ -5,15 +5,17 @@
 **  Function will save a file into FS. If file already exists it will
 **  append a version number to the file name.
 **********************************************************************/
-File createNewFile(FS *&fs, String filepath, String filename) {
+File createNewFile(FS *&fs, const String &filepath, const String &filename) {
     int extIndex = filename.lastIndexOf('.');
     String name = filename.substring(0, extIndex);
     String ext = filename.substring(extIndex);
 
-    if (filepath.endsWith("/")) filepath = filepath.substring(0, filepath.length() - 1);
-    if (!(*fs).exists(filepath)) (*fs).mkdir(filepath);
+    // O caminho e normalizado numa copia local (o argumento nao e alterado).
+    String dir = filepath;
+    if (dir.endsWith("/")) dir = dir.substring(0, dir.length() - 1);
+    if (!(*fs).exists(dir)) (*fs).mkdir(dir);
 
-    name = filepath + "/" + name;
+    name = dir + "/" + name;
 
     if ((*fs).exists(name + ext)) {
         int i = 1;

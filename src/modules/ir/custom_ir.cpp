@@ -843,7 +843,7 @@ bool sendDecodedCommand(String protocol, String value, uint8_t bits, bool hideDe
 #endif
 }
 
-void sendRawCommand(uint16_t frequency, String rawData, bool hideDefaultUI) {
+void sendRawCommand(uint16_t frequency, const String &rawData, bool hideDefaultUI) {
 #ifdef USE_BOOST /// ENABLE 5V OUTPUT
     // Enable boost for high power mode
     if (irConfig.mode == IR_MODE_ADVANCED && irConfig.powerMode >= IR_POWER_HIGH) {

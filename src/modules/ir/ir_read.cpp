@@ -10,7 +10,7 @@
 #include "ir_read.h"
 
 // Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
-static const char HEX_UPPER[] = "0123456789ABCDEF";
+static const char HEX_LOWER[] = "0123456789abcdef";
 #include "core/display.h"
 #include "willy_logger.h"
 #include "core/mykeyboard.h"
@@ -274,8 +274,15 @@ String IrRead::parse_state_signal() {
     r.reserve((size_t)state_len * 3 + 1);
     for (uint16_t i = 0; i < state_len; i++) {
         uint8_t byteValue = results.state[i];
-        r += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-        r += (char)HEX_UPPER[byteValue & 0x0F];
+        r += byteValue < 0x10 ? "0" : "";
+        // Hex direto, sem criar um String por byte.
+        // A tabela e a do newlib (utoa): minuscula e sem padding.
+        if (byteValue < 0x10) {
+            r += (char)HEX_LOWER[byteValue & 0x0F];
+        } else {
+            r += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+            r += (char)HEX_LOWER[byteValue & 0x0F];
+        }
         r += ' ';
     }
     r.toUpperCase();

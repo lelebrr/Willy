@@ -12,7 +12,7 @@
 #include "globals.h"
 
 // Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
-static const char HEX_UPPER[] = "0123456789ABCDEF";
+static const char HEX_LOWER[] = "0123456789abcdef";
 
 Chameleon::Chameleon() { setup(); }
 
@@ -819,9 +819,14 @@ bool Chameleon::readMifareClassicDataBlocks(uint8_t *key) {
         for (byte index = 0; index < chmUltra.cmdResponse.dataSize; index++) {
             uint8_t byteValue = chmUltra.cmdResponse.data[index];
             strPage += byteValue < 0x10 ? F(" 0") : F(" ");
-            // Escreve os dois digitos hex direto, sem criar um String por byte.
-            strPage += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-            strPage += (char)HEX_UPPER[byteValue & 0x0F];
+            // Hex direto, sem criar um String por byte.
+            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            if (byteValue < 0x10) {
+                strPage += (char)HEX_LOWER[byteValue & 0x0F];
+            } else {
+                strPage += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+                strPage += (char)HEX_LOWER[byteValue & 0x0F];
+            }
         }
         strPage.trim();
         strPage.toUpperCase();
@@ -858,9 +863,14 @@ bool Chameleon::readMifareUltralightDataBlocks() {
         for (byte index = 0; index < chmUltra.cmdResponse.dataSize; index++) {
             uint8_t byteValue = chmUltra.cmdResponse.data[index];
             strPage += byteValue < 0x10 ? F(" 0") : F(" ");
-            // Escreve os dois digitos hex direto, sem criar um String por byte.
-            strPage += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-            strPage += (char)HEX_UPPER[byteValue & 0x0F];
+            // Hex direto, sem criar um String por byte.
+            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            if (byteValue < 0x10) {
+                strPage += (char)HEX_LOWER[byteValue & 0x0F];
+            } else {
+                strPage += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+                strPage += (char)HEX_LOWER[byteValue & 0x0F];
+            }
         }
         strPage.trim();
         strPage.toUpperCase();

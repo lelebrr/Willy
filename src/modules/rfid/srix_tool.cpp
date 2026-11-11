@@ -18,6 +18,9 @@ static constexpr uint32_t SRIX_EEPROM_WRITE_DELAY_MS = 15; // Delay for write op
 // Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
 static const char HEX_UPPER[] = "0123456789ABCDEF";
 
+// Tabela do newlib (utoa): minuscula e sem zero-padding.
+static const char HEX_LOWER[] = "0123456789abcdef";
+
 SRIXTool::SRIXTool() {
     current_state = IDLE_MODE;
     _dump_valid_from_read = false;
@@ -470,8 +473,15 @@ void SRIXTool::read_uid() {
     uid_line.reserve(20);
     for (uint8_t i = 0; i < 8; i++) {
         uint8_t byteValue = _uid[i];
-        uid_line += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-        uid_line += (char)HEX_UPPER[byteValue & 0x0F];
+        uid_line += byteValue < 0x10 ? "0" : "";
+        // Hex direto, sem criar um String por byte.
+        // A tabela e a do newlib (utoa): minuscula e sem padding.
+        if (byteValue < 0x10) {
+            uid_line += (char)HEX_LOWER[byteValue & 0x0F];
+        } else {
+            uid_line += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+            uid_line += (char)HEX_LOWER[byteValue & 0x0F];
+        }
 
         if (i == 1 || i == 3 || i == 5) { uid_line += " "; }
     }
@@ -615,8 +625,9 @@ void SRIXTool::save_file() {
 
         dumpText += '[';
 
-        // Block number in hex (2 sign)
-        if (block < 0x10) dumpText += '0';
+        // Numero do bloco em hex (2 digitos).
+        // O original usava utoa (que nao faz padding) + um '0' manual;
+        // aqui os 2 digitos sao escritos direto.
         dumpText += (char)HEX_UPPER[(block >> 4) & 0x0F];
         dumpText += (char)HEX_UPPER[block & 0x0F];
         dumpText += "] ";
@@ -1100,7 +1111,7 @@ String SRIXTool::save_file_headless(String filename) {
     for (uint8_t block = 0; block < 128; block++) {
         uint16_t offset = block * 4;
         dumpText += '[';
-        if (block < 0x10) dumpText += '0';
+        // Sempre 2 digitos hex (o original usava utoa, que nao faz padding).
         dumpText += (char)HEX_UPPER[(block >> 4) & 0x0F];
         dumpText += (char)HEX_UPPER[block & 0x0F];
         dumpText += "] ";

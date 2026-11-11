@@ -6,7 +6,7 @@
 #include "core/sd_functions.h"
 
 // Digitos hexadecimais em maiusculo, para formatacao sem alocar um String por byte.
-static const char HEX_UPPER[] = "0123456789ABCDEF";
+static const char HEX_LOWER[] = "0123456789abcdef";
 
 Pn532ble::Pn532ble() { setup(); }
 
@@ -1219,8 +1219,15 @@ void Pn532ble::ntagEmulationMode() {
     respStr.reserve(initAsTargetResult.size() * 3 + 8);
     for (size_t i = 0; i < initAsTargetResult.size(); i++) {
         uint8_t byteValue = initAsTargetResult[i];
-        respStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-        respStr += (char)HEX_UPPER[byteValue & 0x0F];
+        respStr += byteValue < 0x10 ? "0" : "";
+        // Hex direto, sem criar um String por byte.
+        // A tabela e a do newlib (utoa): minuscula e sem padding.
+        if (byteValue < 0x10) {
+            respStr += (char)HEX_LOWER[byteValue & 0x0F];
+        } else {
+            respStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+            respStr += (char)HEX_LOWER[byteValue & 0x0F];
+        }
         respStr += ' ';
     }
     area.addLine(respStr);
@@ -1258,8 +1265,15 @@ void Pn532ble::ntagEmulationMode() {
         respStr.reserve(resp.size() * 3 + 4);
         for (size_t i = 0; i < resp.size(); i++) {
             uint8_t byteValue = resp[i];
-            respStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-            respStr += (char)HEX_UPPER[byteValue & 0x0F];
+            respStr += byteValue < 0x10 ? "0" : "";
+            // Hex direto, sem criar um String por byte.
+            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            if (byteValue < 0x10) {
+                respStr += (char)HEX_LOWER[byteValue & 0x0F];
+            } else {
+                respStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+                respStr += (char)HEX_LOWER[byteValue & 0x0F];
+            }
             respStr += ' ';
         }
         area.addLine(respStr);
@@ -1441,8 +1455,15 @@ void Pn532ble::ntagEmulationMode() {
         wbufStr.reserve(wbuf.size() * 3 + 16);
         for (size_t i = 0; i < wbuf.size(); i++) {
             uint8_t byteValue = wbuf[i];
-            wbufStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-            wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
+            wbufStr += byteValue < 0x10 ? "0" : "";
+            // Hex direto, sem criar um String por byte.
+            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            if (byteValue < 0x10) {
+                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+            } else {
+                wbufStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+            }
             wbufStr += ' ';
         }
         wbufStr += " <= ";
@@ -1453,8 +1474,15 @@ void Pn532ble::ntagEmulationMode() {
         }
         for (size_t i = 0; i < setDataResult.size(); i++) {
             uint8_t byteValue = setDataResult[i];
-            wbufStr += (char)HEX_UPPER[(byteValue >> 4) & 0x0F];
-            wbufStr += (char)HEX_UPPER[byteValue & 0x0F];
+            wbufStr += byteValue < 0x10 ? "0" : "";
+            // Hex direto, sem criar um String por byte.
+            // A tabela e a do newlib (utoa): minuscula e sem padding.
+            if (byteValue < 0x10) {
+                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+            } else {
+                wbufStr += (char)HEX_LOWER[(byteValue >> 4) & 0x0F];
+                wbufStr += (char)HEX_LOWER[byteValue & 0x0F];
+            }
             wbufStr += ' ';
         }
         Serial.println(wbufStr);
