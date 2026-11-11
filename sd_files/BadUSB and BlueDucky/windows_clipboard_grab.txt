@@ -1,0 +1,8 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+STRING Add-Type -AssemblyName System.Windows.Forms; $clip = [Windows.Forms.Clipboard]::GetText(); $clip | Out-File "$env:TEMP\clipboard.txt" -Encoding ASCII; notepad "$env:TEMP\clipboard.txt"
+ENTER

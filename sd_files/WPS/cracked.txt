@@ -1,0 +1,4 @@
+# WPS Cracked Networks
+# Formato: BSSID|SSID|PIN|CHANNEL
+# Este arquivo é gerado automaticamente pelo módulo WPS Attacks
+# Exemplo: AA:BB:CC:DD:EE:FF|MinhaRede|12345670|6

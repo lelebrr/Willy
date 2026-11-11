@@ -1,0 +1,21 @@
+{
+  "name": "WillyHAL",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lelebrr/Willy_ESP_s3.git"
+  },
+  "version": "7.3.1",
+  "authors": {
+    "name": "Willy Firmware",
+    "url": "https://willy.computer"
+  },
+  "export": {
+    "include": ["io_expander", "sd_card"]
+  },
+  "frameworks": "*",
+  "platforms": "*",
+  "build": {
+    "libArchive": false
+  }
+}
+

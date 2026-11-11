@@ -1,0 +1,456 @@
+/* ==========================================
+   NEON CYBER THEME - Willy Firmware
+   Tema futurista com animações
+   ========================================== */
+
+/* Variáveis de Cores */
+:root {
+    --primary: #00ffff;
+    --secondary: #ff00ff;
+    --accent: #00ff00;
+    --warning: #ffff00;
+    --danger: #ff0000;
+    --bg-dark: #0a0a0f;
+    --bg-medium: #1a1a2e;
+    --bg-light: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --glow-primary: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+    --glow-secondary: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+}
+
+/* Background Animado */
+@keyframes bgPulse {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+@keyframes glitch {
+    0%, 90%, 100% { transform: translate(0); }
+    92% { transform: translate(-2px, 2px); }
+    94% { transform: translate(2px, -2px); }
+    96% { transform: translate(-2px, -2px); }
+    98% { transform: translate(2px, 2px); }
+}
+
+@keyframes neonFlicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+    20%, 24%, 55% { opacity: 0.4; }
+}
+
+@keyframes matrixRain {
+    0% { transform: translateY(-100%); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(1000%); opacity: 0; }
+}
+
+@keyframes rotateHue {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-20px); opacity: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes borderGlow {
+    0%, 100% { border-color: var(--primary); box-shadow: var(--glow-primary); }
+    33% { border-color: var(--secondary); box-shadow: var(--glow-secondary); }
+    66% { border-color: var(--accent); box-shadow: 0 0 10px #00ff00; }
+}
+
+/* Corpo Principal */
+body {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 50%, var(--bg-light) 100%);
+    background-size: 400% 400%;
+    animation: bgPulse 15s ease infinite;
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    overflow-x: hidden;
+}
+
+/* Container Principal */
+.container {
+    background: rgba(10, 10, 15, 0.9);
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    box-shadow: var(--glow-primary);
+    animation: borderGlow 6s ease infinite;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Scanline Effect */
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(transparent, rgba(0, 255, 255, 0.2), transparent);
+    animation: scanline 4s linear infinite;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Títulos com Efeito Neon */
+h1, h2, h3 {
+    color: var(--primary);
+    text-shadow: var(--glow-primary);
+    animation: neonFlicker 3s infinite;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+h1::before {
+    content: '> ';
+    color: var(--secondary);
+}
+
+h1::after {
+    content: ' _';
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Botões Futuristas */
+button, .btn {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 12px 24px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+button:hover {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Inputs Futuristas */
+input, textarea {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--secondary);
+    color: var(--primary);
+    padding: 10px 15px;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: var(--glow-primary);
+    animation: glitch 0.3s ease;
+}
+
+input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Menu Items */
+.menu-item {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 3px solid transparent;
+    padding: 10px 15px;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-left-color: var(--primary);
+    transform: translateX(5px);
+}
+
+.menu-item::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2));
+    transition: width 0.3s ease;
+}
+
+.menu-item:hover::after {
+    width: 100%;
+}
+
+/* Status Indicators */
+.status-online {
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent);
+    animation: pulse 2s infinite;
+}
+
+.status-offline {
+    color: var(--danger);
+    text-shadow: 0 0 10px var(--danger);
+}
+
+.status-warning {
+    color: var(--warning);
+    text-shadow: 0 0 10px var(--warning);
+    animation: neonFlicker 1s infinite;
+}
+
+/* Loading Spinner */
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--bg-medium);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Progress Bar */
+.progress-bar {
+    background: var(--bg-medium);
+    border: 1px solid var(--primary);
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+    background-size: 200% 100%;
+    animation: progressGradient 2s linear infinite;
+    transition: width 0.5s ease;
+}
+
+@keyframes progressGradient {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* Cards com Efeito Glass */
+.card {
+    background: rgba(26, 26, 46, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    animation: cardShine 3s ease infinite;
+}
+
+@keyframes cardShine {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+}
+
+/* Data Grid */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.data-cell {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--secondary);
+    padding: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.data-cell:hover {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+/* Scrollbar Customizada */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+    box-shadow: var(--glow-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: var(--bg-dark);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 5px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Matrix Rain Effect (background) */
+.matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.matrix-char {
+    position: absolute;
+    color: var(--accent);
+    font-size: 14px;
+    opacity: 0.7;
+    animation: matrixRain 5s linear infinite;
+    text-shadow: 0 0 10px var(--accent);
+}
+
+/* Glitch Effect */
+.glitch {
+    position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    color: var(--secondary);
+    animation: glitchTop 2s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+}
+
+.glitch::after {
+    color: var(--accent);
+    animation: glitchBottom 2s infinite;
+    clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+}
+
+@keyframes glitchTop {
+    0%, 95%, 100% { transform: translate(0); }
+    96% { transform: translate(-2px, -2px); }
+    97% { transform: translate(2px, 2px); }
+    98% { transform: translate(-2px, 2px); }
+    99% { transform: translate(2px, -2px); }
+}
+
+@keyframes glitchBottom {
+    0%, 95%, 100% { transform: translate(0); }
+    96% { transform: translate(2px, 2px); }
+    97% { transform: translate(-2px, -2px); }
+    98% { transform: translate(2px, -2px); }
+    99% { transform: translate(-2px, 2px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    button {
+        padding: 10px 20px;
+        font-size: 12px;
+    }
+}

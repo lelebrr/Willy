@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-std=gnu++17, -Isrc, -Iinclude, -Isrc/core, -Isrc/modules, -Ilib/TFT_eSPI, -Ilib/HAL]

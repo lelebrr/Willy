@@ -1,0 +1,13 @@
+Willy Firmware - Compile Output
+===============================
+
+Projeto unificado a partir de:
+- Willy_ESP32_S3
+- Willy_work
+- Cyd_Lele
+- Esp32-S3
+- Willy_ESP_s3
+
+Plataforma: ESP32-S3
+Framework: Arduino
+Build: Release

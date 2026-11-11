@@ -1,0 +1,35 @@
+# Pwnagotchi Configuration File
+# Copy to /etc/pwnagotchi/config.toml
+
+[main]
+name = "pwnagotchi"
+lang = "en"
+autoupdate = true
+
+[ui]
+display = true
+fps = 0
+rotation = 180
+
+[ai]
+enabled = true
+path = "/root/brain.nn"
+params = { "gamma" = 0.99, "n_steps" = 1, "ent_coef" = 0.01 }
+
+[bettercap]
+handshakes_dir = "/root/handshakes"
+interface = "wlan0"
+
+[wifi]
+range = [1, 11]
+channels = [1, 6, 11]
+
+[personality]
+advertisements = true
+deauth = true
+associate = true
+channels = [1, 6, 11]
+
+[logging]
+level = "INFO"
+path = "/var/log/pwnagotchi.log"

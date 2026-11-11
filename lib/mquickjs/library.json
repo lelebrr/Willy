@@ -1,0 +1,30 @@
+{
+  "name": "mquickjs",
+  "version": "0.0.1",
+  "description": "QuickJS JavaScript engine for embedded systems",
+  "keywords": [
+    "javascript",
+    "js",
+    "interpreter"
+  ],
+  "authors": [
+    {
+      "name": "Fabrice Bellard"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bellard/mquickjs.git"
+  },
+  "build": {
+    "srcFilter": [
+      "+<*.c>",
+      "+<*.h>",
+      "-<example.c>",
+      "-<example_stdlib.c>",
+      "-<readline.c>",
+      "-<readline_tty.c>",
+      "-<mqjs_stdlib.c>"
+    ]
+  }
+}

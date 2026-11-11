@@ -1,0 +1,12 @@
+* text=auto
+*.cpp text
+*.h text
+*.ini text
+*.md text
+*.bin binary
+*.csv text
+*.py text
+*.json text
+*.html text
+*.css text
+*.js text

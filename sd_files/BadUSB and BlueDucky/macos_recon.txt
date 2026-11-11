@@ -1,0 +1,9 @@
+DELAY 1000
+GUI SPACE
+DELAY 500
+STRING Terminal
+DELAY 500
+ENTER
+DELAY 1000
+STRING whoami && hostname && ifconfig | grep "inet " && dscl . list /Users | grep -v "^_" && id
+ENTER

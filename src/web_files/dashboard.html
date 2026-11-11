@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Willy Dashboard - Interface Web Moderna</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-microchip"></i>
+                <h2>Willy</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+                <a href="/logs" class="nav-item">
+                    <i class="fas fa-list"></i>
+                    <span>Logs</span>
+                </a>
+                <a href="/system" class="nav-item">
+                    <i class="fas fa-server"></i>
+                    <span>Sistema</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="status-indicators">
+                        <div class="indicator" title="WiFi">
+                            <i class="fas fa-wifi"></i>
+                            <span id="wifi-strength">--</span>
+                        </div>
+                        <div class="indicator" title="Bateria">
+                            <i class="fas fa-battery-three-quarters"></i>
+                            <span id="battery-level">--</span>
+                        </div>
+                        <div class="indicator" title="Uptime">
+                            <i class="fas fa-clock"></i>
+                            <span id="uptime">--</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Status Cards -->
+                <div class="card status-card">
+                    <div class="card-header">
+                        <h3>Status do Sistema</h3>
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <i class="fas fa-thermometer-half"></i>
+                                <div class="status-info">
+                                    <span class="status-label">Temperatura</span>
+                                    <span class="status-value" id="temperature">--°C</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-tint"></i>
+                                <div class="status-info">
+                                    <span class="status-label">Umidade</span>
+                                    <span class="status-value" id="humidity">--%</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-signal"></i>
+                                <div class="status-info">
+                                    <span class="status-label">Sinal WiFi</span>
+                                    <span class="status-value" id="wifi-signal">-- dBm</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-battery-full"></i>
+                                <div class="status-info">
+                                    <span class="status-label">Bateria</span>
+                                    <span class="status-value" id="battery">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relay Control -->
+                <div class="card relay-card">
+                    <div class="card-header">
+                        <h3>Controle de Relés</h3>
+                        <i class="fas fa-power-off"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="relay-grid">
+                            <div class="relay-item">
+                                <div class="relay-header">
+                                    <span>Relé 1</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="relay1" onchange="toggleRelay(1, this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="relay-status">
+                                    <span id="relay1-status">OFF</span>
+                                </div>
+                            </div>
+                            <div class="relay-item">
+                                <div class="relay-header">
+                                    <span>Relé 2</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="relay2" onchange="toggleRelay(2, this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="relay-status">
+                                    <span id="relay2-status">OFF</span>
+                                </div>
+                            </div>
+                            <div class="relay-item">
+                                <div class="relay-header">
+                                    <span>Relé 3</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="relay3" onchange="toggleRelay(3, this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="relay-status">
+                                    <span id="relay3-status">OFF</span>
+                                </div>
+                            </div>
+                            <div class="relay-item">
+                                <div class="relay-header">
+                                    <span>Relé 4</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="relay4" onchange="toggleRelay(4, this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="relay-status">
+                                    <span id="relay4-status">OFF</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temperature Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3>Temperatura</h3>
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Humidity Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3>Umidade</h3>
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="humidityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="card system-card">
+                    <div class="card-header">
+                        <h3>Informações do Sistema</h3>
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="system-info">
+                            <div class="info-row">
+                                <span class="info-label">IP Address:</span>
+                                <span class="info-value" id="ip-address">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Hostname:</span>
+                                <span class="info-value" id="hostname">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Uptime:</span>
+                                <span class="info-value" id="system-uptime">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Heap Memory:</span>
+                                <span class="info-value" id="heap-memory">--</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Free Memory:</span>
+                                <span class="info-value" id="free-memory">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card actions-card">
+                    <div class="card-header">
+                        <h3>Ações Rápidas</h3>
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="action-buttons">
+                            <button class="action-btn primary" onclick="toggleAllRelays(true)">
+                                <i class="fas fa-power-off"></i>
+                                Ligar Todos
+                            </button>
+                            <button class="action-btn secondary" onclick="toggleAllRelays(false)">
+                                <i class="fas fa-power-off"></i>
+                                Desligar Todos
+                            </button>
+                            <button class="action-btn warning" onclick="restartSystem()">
+                                <i class="fas fa-redo"></i>
+                                Reiniciar
+                            </button>
+                            <button class="action-btn danger" onclick="shutdownSystem()">
+                                <i class="fas fa-power-off"></i>
+                                Desligar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>

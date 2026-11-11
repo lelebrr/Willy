@@ -1,0 +1,34 @@
+{
+    "name": "Example Plugin",
+    "version": "1.0.0",
+    "description": "Plugin de exemplo para demonstração do sistema de plugins",
+    "type": "json",
+    "auto_load": true,
+    "permissions": [
+        "serial_access",
+        "logging"
+    ],
+    "config": {
+        "message": "Olá do plugin de exemplo!",
+        "interval": 5000
+    },
+    "on_init": {
+        "action": "log",
+        "message": "Plugin de exemplo inicializado"
+    },
+    "on_process": {
+        "action": "periodic_log",
+        "interval": 5000,
+        "message": "Plugin de exemplo executando..."
+    },
+    "hooks": {
+        "pre_wifi_scan": {
+            "action": "log",
+            "message": "Hook: Iniciando scan WiFi"
+        },
+        "post_wifi_scan": {
+            "action": "log",
+            "message": "Hook: Scan WiFi concluído"
+        }
+    }
+}

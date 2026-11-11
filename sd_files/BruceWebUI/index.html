@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Willy 2.1 - Offensive Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <div class="logo">WILLY <span>2.1</span></div>
+            <div class="status-bar">
+                <span id="uptime">Uptime: 00:00</span>
+                <span id="battery">Bat: --%</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="card stats">
+                <h2>System Status</h2>
+                <div class="stat-grid">
+                    <div class="stat-item">Heap: <span id="heap">--</span> KB</div>
+                    <div class="stat-item">RSSI: <span id="rssi">--</span> dBm</div>
+                    <div class="stat-item">IP: <span id="ip">--</span></div>
+                </div>
+            </section>
+
+            <section class="card terminal">
+                <h2>Live Logs</h2>
+                <div id="log-window" class="log-area">Initializing...</div>
+            </section>
+
+            <section class="card actions">
+                <h2>Quick Actions</h2>
+                <button onclick="reboot()">Reboot Device</button>
+                <button onclick="clearLogs()">Clear Logs</button>
+            </section>
+        </main>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

