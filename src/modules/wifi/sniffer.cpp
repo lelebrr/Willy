@@ -1477,7 +1477,7 @@ void sniffer_setup() {
               &ap_record,
               registeredBeacon
                   .channel); // writes the buffer with the information
-          // XXX: ap_record reused between this and wifi_atks.h
+          // ap_record compartilhado entre sniffer e wifi_atks - cuidado com concorrência
           send_raw_frame(deauth_frame, 26);
           deauth_sent = true;
           deauth_counter++;

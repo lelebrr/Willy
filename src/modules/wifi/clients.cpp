@@ -1,7 +1,7 @@
 #ifndef LITE_VERSION
 // SSH borrowed from https://github.com/m5stack/M5Cardputer :)
 
-// TODO: Display is kinda glitchy :P figure out some way to show better outputs also
+// Exibição SSH/Telnet - saída direta via serial
 
 // SSH libs
 #include "libssh_esp32.h"

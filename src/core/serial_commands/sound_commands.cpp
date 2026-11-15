@@ -99,8 +99,6 @@ void createSoundCommands(SimpleCLI *cli) {
   Command ttsCmd = cli->addSingleArgCmd("tts,say", ttsCallback);
 #endif
 
-  // WebRadio command - placeholder for future implementation
-  // Requires ESP8266Audio library integration
   Command webradioCmd = cli->addCommand("webradio", webradioCallback);
   webradioCmd.addPosArg("url");
 }

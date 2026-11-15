@@ -1226,8 +1226,7 @@ String loopSD(fs::FS &fs, bool filePicker, String allowed_ext,
   String Folder = rootPath;
   String PreFolder = rootPath;
   tft.drawPixel(0, 0, 0);
-  tft.fillScreen(
-      willyConfig.bgColor); // TODO: Does only the T-Embed CC1101 need this?
+  tft.fillScreen(willyConfig.bgColor);
   tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5,
                     willyConfig.priColor);
 

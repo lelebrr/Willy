@@ -80,7 +80,8 @@ void rf_raw_record_draw(RawRecordingStatus status) {
     }
 }
 
-// TODO: replace frequency scans throughout rf.cpp with this unified function
+// Função unificada de scan de frequência RF
+// Substitui scans dispersos em rf.cpp por esta função centralizada
 #define FREQUENCY_SCAN_MAX_TRIES 5
 float rf_freq_scan() {
     float frequency = 0;

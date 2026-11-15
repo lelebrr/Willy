@@ -314,16 +314,99 @@ void AdvancedLogger::compressOldLogs() {
   if (!_initialized || !_config.logToSD)
     return;
 
-  // Implementar compressão de logs antigos
-  // Por enquanto, apenas placeholder
+  if (!SD.exists("/logs"))
+    return;
+
+  File root = SD.open("/logs");
+  if (!root || !root.isDirectory()) {
+    root.close();
+    return;
+  }
+
+  while (File file = root.openNextFile()) {
+    if (!file.isDirectory() && file.name()) {
+      String name = String(file.name());
+      if (name.endsWith(".log") || name.endsWith(".json")) {
+        String compressedPath = "/logs/" + name + ".gz";
+        if (!SD.exists(compressedPath)) {
+          // Ler arquivo
+          size_t fileSize = file.size();
+          uint8_t *input = new uint8_t[fileSize];
+          if (input && file.read(input, fileSize) == fileSize) {
+            size_t maxOut = fileSize + 16;
+            uint8_t *output = new uint8_t[maxOut];
+            if (output) {
+              size_t outSize = 0;
+              if (Compression::compressData(input, fileSize, output, outSize)) {
+                File outFile = SD.open(compressedPath, FILE_WRITE);
+                if (outFile) {
+                  outFile.write(output, outSize);
+                  outFile.close();
+                  info(SYSTEM, "Log comprimido: %s -> %s (%d bytes)", name.c_str(), compressedPath.c_str(), outSize);
+                }
+                delete[] output;
+              } else {
+                delete[] output;
+              }
+            }
+            delete[] input;
+          }
+        }
+      }
+    }
+    file.close();
+  }
+  root.close();
 }
 
 void AdvancedLogger::cleanupOldLogs(uint32_t maxAgeDays) {
   if (!_initialized || !_config.logToSD)
     return;
 
-  // Implementar limpeza de logs antigos
-  // Por enquanto, apenas placeholder
+  if (!SD.exists("/logs"))
+    return;
+
+  uint32_t now = rtc.getEpoch();
+  if (now == 0)
+    now = millis() / 1000;
+
+  File root = SD.open("/logs");
+  if (!root || !root.isDirectory()) {
+    root.close();
+    return;
+  }
+
+  uint32_t maxAgeSeconds = maxAgeDays * 24 * 60 * 60;
+
+  while (File file = root.openNextFile()) {
+    if (!file.isDirectory() && file.name()) {
+      String name = String(file.name());
+      // Extrair timestamp do nome do arquivo: log_YYYYMMDD_HHMMSS.json
+      int underscoreIdx = name.indexOf('_');
+      int dotIdx = name.lastIndexOf('.');
+      if (underscoreIdx > 0 && dotIdx > underscoreIdx) {
+        String dateStr = name.substring(underscoreIdx + 1, dotIdx);
+        // Tentar interpretar como timestamp YYYYMMDDHHMMSS
+        if (dateStr.length() >= 14) {
+          int year = dateStr.substring(0, 4).toInt();
+          int month = dateStr.substring(4, 6).toInt();
+          int day = dateStr.substring(6, 8).toInt();
+          // Calcular idade aproximada em dias
+          uint32_t fileTime = (year - 1970) * 365 * 24 * 60 * 60 +
+                              (month - 1) * 30 * 24 * 60 * 60 +
+                              day * 24 * 60 * 60;
+          uint32_t ageDays = (now - fileTime) / (24 * 60 * 60);
+          if (ageDays > maxAgeDays) {
+            String path = "/logs/" + name;
+            SD.remove(path);
+            info(SYSTEM, "Log antigo removido: %s (idade: %d dias)", name.c_str(), ageDays);
+          }
+        }
+      }
+    }
+    file.close();
+  }
+  root.close();
 }
 
 void AdvancedLogger::handleSerialCommand(const String &command,
@@ -487,32 +570,187 @@ void AdvancedLogger::checkRotation() {
 
 void AdvancedLogger::loadConfig() {
   // Carregar configuração do SD ou usar padrões
-  // Por enquanto, usar padrões
+  String configPath = "/logs/logger_config.json";
+  if (!SD.exists(configPath))
+    return;
+
+  File configFile = SD.open(configPath, FILE_READ);
+  if (!configFile)
+    return;
+
+  size_t size = configFile.size();
+  uint8_t *buf = new uint8_t[size + 1];
+  if (buf) {
+    size_t read = configFile.read(buf, size);
+    buf[read] = '\0';
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, (char *)buf);
+    if (!err) {
+      if (doc.containsKey("minLevel"))
+        _config.minLevel = (LogLevel)doc["minLevel"].as<int>();
+      if (doc.containsKey("logToSerial"))
+        _config.logToSerial = doc["logToSerial"].as<bool>();
+      if (doc.containsKey("logToSD"))
+        _config.logToSD = doc["logToSD"].as<bool>();
+      if (doc.containsKey("structuredJSON"))
+        _config.structuredJSON = doc["structuredJSON"].as<bool>();
+      if (doc.containsKey("maxFileSize"))
+        _config.maxFileSize = doc["maxFileSize"].as<size_t>();
+      if (doc.containsKey("rotationTimeHours"))
+        _config.rotationTimeHours = doc["rotationTimeHours"].as<uint32_t>();
+      if (doc.containsKey("compressOldLogs"))
+        _config.compressOldLogs = doc["compressOldLogs"].as<bool>();
+      info(SYSTEM, "Configuração do logger carregada do SD");
+    } else {
+      warning(SYSTEM, "Falha ao analisar config do logger: %s", err.c_str());
+    }
+    delete[] buf;
+  }
+  configFile.close();
 }
 
 void AdvancedLogger::saveConfig() {
-  // Salvar configuração
-  // Por enquanto, não implementar
+  // Salvar configuração no SD
+  String configPath = "/logs/logger_config.json";
+  File configFile = SD.open(configPath, FILE_WRITE);
+  if (!configFile)
+    return;
+
+  JsonDocument doc;
+  doc["minLevel"] = (int)_config.minLevel;
+  doc["logToSerial"] = _config.logToSerial;
+  doc["logToSD"] = _config.logToSD;
+  doc["structuredJSON"] = _config.structuredJSON;
+  doc["maxFileSize"] = _config.maxFileSize;
+  doc["rotationTimeHours"] = _config.rotationTimeHours;
+  doc["compressOldLogs"] = _config.compressOldLogs;
+
+  serializeJson(doc, configFile);
+  configFile.close();
+  info(SYSTEM, "Configuração do logger salva no SD");
 }
 
 bool AdvancedLogger::compressFile(const String &inputFile,
                                   const String &outputFile) {
-  // Compressão básica: apenas renomear arquivo (placeholder)
-  // TODO: Implementar compressão LZ4 quando biblioteca estiver disponível
-  if (SD.rename(inputFile, outputFile)) {
-    info(SYSTEM, "Arquivo 'comprimido' (renomeado): %s -> %s",
-         inputFile.c_str(), outputFile.c_str());
-    return true;
-  } else {
-    error(SYSTEM, "Erro ao renomear arquivo: %s -> %s", inputFile.c_str(),
-          outputFile.c_str());
+  if (!SD.exists(inputFile)) {
+    error(SYSTEM, "Arquivo de entrada não existe: %s", inputFile.c_str());
     return false;
   }
+
+  File inFile = SD.open(inputFile, FILE_READ);
+  if (!inFile) {
+    error(SYSTEM, "Erro ao abrir arquivo de entrada: %s", inputFile.c_str());
+    return false;
+  }
+
+  size_t fileSize = inFile.size();
+  uint8_t *input = new uint8_t[fileSize];
+  if (!input) {
+    inFile.close();
+    error(SYSTEM, "Sem memória para buffer de entrada (%d bytes)", fileSize);
+    return false;
+  }
+
+  if (inFile.read(input, fileSize) != fileSize) {
+    delete[] input;
+    inFile.close();
+    error(SYSTEM, "Erro ao ler arquivo de entrada: %s", inputFile.c_str());
+    return false;
+  }
+  inFile.close();
+
+  size_t maxOut = fileSize + 16;
+  uint8_t *output = new uint8_t[maxOut];
+  if (!output) {
+    delete[] input;
+    error(SYSTEM, "Sem memória para buffer de saída (%d bytes)", maxOut);
+    return false;
+  }
+
+  size_t outSize = 0;
+  bool success = Compression::compressData(input, fileSize, output, outSize);
+
+  if (success) {
+    File outFile = SD.open(outputFile, FILE_WRITE);
+    if (outFile) {
+      outFile.write(output, outSize);
+      outFile.close();
+      info(SYSTEM, "Arquivo comprimido: %s -> %s (%d -> %d bytes)",
+           inputFile.c_str(), outputFile.c_str(), fileSize, outSize);
+      success = true;
+    } else {
+      error(SYSTEM, "Erro ao criar arquivo de saída: %s", outputFile.c_str());
+      success = false;
+    }
+  } else {
+    error(SYSTEM, "Falha na compressão RLE de: %s", inputFile.c_str());
+    success = false;
+  }
+
+  delete[] input;
+  delete[] output;
+  return success;
 }
 
 bool AdvancedLogger::decompressFile(const String &inputFile,
                                     const String &outputFile) {
-  // LZ4 não disponível - implementação placeholder
-  error(SYSTEM, "Descompressão LZ4 não disponível (biblioteca não incluída)");
-  return false;
+  if (!SD.exists(inputFile)) {
+    error(SYSTEM, "Arquivo comprimido não existe: %s", inputFile.c_str());
+    return false;
+  }
+
+  File inFile = SD.open(inputFile, FILE_READ);
+  if (!inFile) {
+    error(SYSTEM, "Erro ao abrir arquivo comprimido: %s", inputFile.c_str());
+    return false;
+  }
+
+  size_t fileSize = inFile.size();
+  uint8_t *input = new uint8_t[fileSize];
+  if (!input) {
+    inFile.close();
+    error(SYSTEM, "Sem memória para buffer de entrada (%d bytes)", fileSize);
+    return false;
+  }
+
+  if (inFile.read(input, fileSize) != fileSize) {
+    delete[] input;
+    inFile.close();
+    error(SYSTEM, "Erro ao ler arquivo comprimido: %s", inputFile.c_str());
+    return false;
+  }
+  inFile.close();
+
+  // Para descompressão, alocar buffer generoso (2x o tamanho comprimido)
+  size_t maxOut = fileSize * 4;
+  uint8_t *output = new uint8_t[maxOut];
+  if (!output) {
+    delete[] input;
+    error(SYSTEM, "Sem memória para buffer de saída (%d bytes)", maxOut);
+    return false;
+  }
+
+  size_t outSize = 0;
+  bool success = Compression::decompressData(input, fileSize, output, outSize);
+
+  if (success) {
+    File outFile = SD.open(outputFile, FILE_WRITE);
+    if (outFile) {
+      outFile.write(output, outSize);
+      outFile.close();
+      info(SYSTEM, "Arquivo descomprimido: %s -> %s (%d -> %d bytes)",
+           inputFile.c_str(), outputFile.c_str(), fileSize, outSize);
+      success = true;
+    } else {
+      error(SYSTEM, "Erro ao criar arquivo de saída: %s", outputFile.c_str());
+      success = false;
+    }
+  } else {
+    error(SYSTEM, "Falha na descompressão RLE de: %s", inputFile.c_str());
+    success = false;
+  }
+
+  delete[] input;
+  delete[] output;
+  return success;
 }

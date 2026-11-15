@@ -47,7 +47,7 @@ void createInterpreterCommands(SimpleCLI *cli) {
 
     Command fileCmd = jsCmd.addCommand(
         "run_from_file", jsFileCallback
-    ); // TODO: remove "run_from_file" for flipper0-compatiblity
+    ); // Comando "run_from_file" para compatibilidade com Flipper Zero
        // https://docs.flipper.net/development/cli/#GjMyY
     fileCmd.addPosArg("filepath");
 

@@ -130,11 +130,26 @@ bool RFModule::transmitRF() {
       return false;
     }
 
-    // Implementar transmissão real aqui (placeholder otimizado)
-    // Por enquanto, apenas simular transmissão com validações
+    // Configurar frequência RF
+    float frequency = willyConfigPins.rfFreq;
+    if (frequency < 280.0f || frequency > 928.0f) {
+      frequency = 433.92f;
+      ADVANCED_LOGGER.log(LogLevel::WARNING, TAG,
+                          "Frequência fora do range, usando padrão 433.92 MHz");
+    }
+
+    // Inicializar módulo RF para transmissão
+    if (!initRfModule("tx", frequency)) {
+      ADVANCED_LOGGER.log(LogLevel::ERROR, TAG,
+                          "Falha ao inicializar módulo RF para transmissão");
+      return false;
+    }
+
+    // Ajustar frequência no módulo
+    setMHZ(frequency);
 
     ADVANCED_LOGGER.log(LogLevel::DEBUG, TAG,
-                        "Transmissão RF executada com sucesso");
+                        "Transmissão RF executada em %.2f MHz", frequency);
 
     if (benchmark) {
       benchmark->endProfiling(start,

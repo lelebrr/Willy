@@ -39,7 +39,7 @@ void tft_logger::addLogEntry(const uint8_t *buffer, uint8_t size) {
 
 void tft_logger::logWriteHeader(uint8_t *buffer, uint8_t &pos, tftFuncs fn) {
   buffer[pos++] = LOG_PACKET_HEADER;
-  buffer[pos++] = 0; // placeholder size
+  buffer[pos++] = 0; // Tamanho será preenchido em logWriteFooter
   buffer[pos++] = fn;
 }
 

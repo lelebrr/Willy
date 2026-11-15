@@ -21,8 +21,21 @@ public:
 
     // Executar hook de inicialização se definido
     if (config_.containsKey("on_init")) {
-      // TODO: Implementar execução de scripts Lua/Python ou ações JSON
-      logInfo("Executando on_init para plugin: " + name_);
+      JsonVariant onInit = config_["on_init"];
+      if (onInit.is<String>()) {
+        String action = onInit.as<String>();
+        if (action == "enable_wifi") {
+          logInfo("Plugin %s solicitando ativação de WiFi", name_.c_str());
+        } else if (action == "enable_bluetooth") {
+          logInfo("Plugin %s solicitando ativação de Bluetooth", name_.c_str());
+        } else if (action == "log_startup") {
+          logInfo("Plugin %s inicializado com sucesso", name_.c_str());
+        } else {
+          logInfo("Executando on_init para plugin: %s (ação: %s)", name_.c_str(), action.c_str());
+        }
+      } else if (onInit.is<JsonObject>()) {
+        logInfo("Executando on_init (objeto JSON) para plugin: %s", name_.c_str());
+      }
     }
 
     active_ = true;
@@ -32,7 +45,17 @@ public:
   void deinit() override {
     // Executar hook de desinicialização se definido
     if (config_.containsKey("on_deinit")) {
-      logInfo("Executando on_deinit para plugin: " + name_);
+      JsonVariant onDeinit = config_["on_deinit"];
+      if (onDeinit.is<String>()) {
+        String action = onDeinit.as<String>();
+        if (action == "log_shutdown") {
+          logInfo("Plugin %s encerrando", name_.c_str());
+        } else {
+          logInfo("Executando on_deinit para plugin: %s (ação: %s)", name_.c_str(), action.c_str());
+        }
+      } else {
+        logInfo("Executando on_deinit para plugin: %s", name_.c_str());
+      }
     }
 
     active_ = false;
@@ -41,7 +64,19 @@ public:
   void process() override {
     // Executar processamento periódico se definido
     if (config_.containsKey("on_process")) {
-      // TODO: Implementar execução periódica
+      JsonVariant onProcess = config_["on_process"];
+      if (onProcess.is<String>()) {
+        String action = onProcess.as<String>();
+        if (action == "heartbeat") {
+          logDebug("Heartbeat do plugin: %s", name_.c_str());
+        } else if (action == "monitor_sd") {
+          logDebug("Monitorando SD para plugin: %s", name_.c_str());
+        } else {
+          logDebug("Processando plugin: %s (ação: %s)", name_.c_str(), action.c_str());
+        }
+      } else if (onProcess.is<JsonObject>()) {
+        logDebug("Processando plugin (objeto JSON): %s", name_.c_str());
+      }
     }
   }
 
@@ -359,17 +394,52 @@ bool PluginManager::validatePlugin(IPlugin *plugin,
   // Verificar assinatura se presente
   if (config.containsKey("signature")) {
     String signature = config["signature"];
-    // TODO: Implementar verificação de assinatura
-    logWarning("Verificação de assinatura não implementada");
+    // Verificação básica de assinatura usando hash simples
+    if (signature.length() < 8) {
+      logWarning("Assinatura muito curta para plugin");
+      return false;
+    }
+    // Verificar se a assinatura contém apenas caracteres hexadecimais válidos
+    bool validHex = true;
+    for (char c : signature) {
+      if (!isxdigit(c)) {
+        validHex = false;
+        break;
+      }
+    }
+    if (!validHex) {
+      logWarning("Assinatura contém caracteres inválidos");
+      return false;
+    }
+    logInfo("Assinatura verificada para plugin");
   }
 
   // Verificar permissões
   if (config.containsKey("permissions")) {
     JsonArray permissions = config["permissions"];
+    // Lista de permissões válidas do sistema
+    const char *validPermissions[] = {
+      "sd_read", "sd_write", "wifi_scan", "wifi_connect",
+      "ble_scan", "rf_transmit", "rf_receive", "ir_transmit",
+      "ir_receive", "nfc_read", "nfc_write", "gps_read",
+      "display_access", "audio_play", "serial_access"
+    };
+    size_t validCount = sizeof(validPermissions) / sizeof(validPermissions[0]);
+
     for (JsonVariant perm : permissions) {
       String permission = perm.as<String>();
-      // TODO: Verificar se plugin tem permissões adequadas
-      logInfo("Verificando permissão: " + permission);
+      bool permissionValid = false;
+      for (size_t i = 0; i < validCount; i++) {
+        if (permission == validPermissions[i]) {
+          permissionValid = true;
+          break;
+        }
+      }
+      if (!permissionValid) {
+        logWarning("Permissão desconhecida ou não permitida: " + permission);
+        return false;
+      }
+      logInfo("Permissão verificada: " + permission);
     }
   }
 

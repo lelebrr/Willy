@@ -187,7 +187,7 @@ bool txIrFile(FS *fs, String filepath, bool hideDefaultUI) {
           } else if (line.startsWith("bits:")) {
             bits = line.substring(strlen("bits:")).toInt();
             Serial.println("bits: " + bits);
-          } else if (line.indexOf("#") != -1) { // TODO: also detect EOF
+          } else if (line.indexOf("#") != -1 || line.indexOf("EOF") != -1) {
             IRCode code(protocol, address, command, value, bits);
             sendIRCommand(&code, hideDefaultUI);
 

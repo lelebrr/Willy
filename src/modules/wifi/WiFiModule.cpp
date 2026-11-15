@@ -122,7 +122,7 @@ void WiFiModule::process() {
   }
 
   // Processamento contínuo do módulo WiFi
-  // TODO: Implementar processamento específico se necessário
+  // Monitoramento de recursos já executado acima
 }
 
 void WiFiModule::wifi_atk_menu() {
@@ -361,29 +361,30 @@ int WiFiModule::performWiFiScan() {
     return scanCache_.ssids.size();
   }
 
-  // Realizar scanning real
+  // Realizar scanning real usando API do ESP32
   logWiFiEvent("Iniciando scanning WiFi", "", LogLevel::INFO);
 
-  // Delegar para implementação existente
-  int result = ::performWiFiScan();
+  WiFi.scanDelete();
+  int result = WiFi.scanNetworks(false, true); // async = false, show_hidden = true
 
   // Atualizar cache se scanning bem-sucedido
   if (result > 0) {
     scanCache_.lastScanTime = millis();
-    // Popular cache com resultados reais
     scanCache_.ssids.clear();
     scanCache_.macs.clear();
     scanCache_.rssis.clear();
     scanCache_.channels.clear();
 
-    // Simular obtenção de resultados (implementar baseado na API real)
-    // Por enquanto, placeholder funcional
     for (int i = 0; i < result; i++) {
-      scanCache_.ssids.push_back("SSID_" + String(i));
-      scanCache_.macs.push_back("00:11:22:33:44:" + String(i, HEX));
-      scanCache_.rssis.push_back(-50 - i);
-      scanCache_.channels.push_back((i % 13) + 1);
+      scanCache_.ssids.push_back(WiFi.SSID(i));
+      scanCache_.macs.push_back(WiFi.BSSIDstr(i));
+      scanCache_.rssis.push_back(WiFi.RSSI(i));
+      scanCache_.channels.push_back(WiFi.channel(i));
     }
+    logWiFiEvent("Scanning concluído", String(result) + " redes encontradas",
+                 LogLevel::INFO);
+  } else {
+    logWiFiEvent("Scanning não encontrou redes", "", LogLevel::WARNING);
   }
 
   return result;

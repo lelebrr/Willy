@@ -126,7 +126,7 @@ void nrf_mousejack_injector() {
         }
 
         if (CHECK_NRF_UART(mode) || CHECK_NRF_BOTH(mode)) {
-            // Send placeholder command over UART if external
+            // Enviar comando de injeção via UART para módulo externo
             NRFSerial.println("MJ_INJECT");
         }
 
